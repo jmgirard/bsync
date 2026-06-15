@@ -285,6 +285,10 @@ computed using standard finite difference kinematics:
   : Calculate 3D Speed
 - [`calc_velocity_1d()`](https://jmgirard.github.io/bsync/reference/calc_velocity_1d.md)
   : Calculate 1D Velocity
+- [`diagnose_ts_gaps()`](https://jmgirard.github.io/bsync/reference/diagnose_ts_gaps.md)
+  : Diagnose Missing Data Gaps in a Time Series
+- [`impute_ts_gaps()`](https://jmgirard.github.io/bsync/reference/impute_ts_gaps.md)
+  : Impute Missing Values in Continuous Time Series with Metadata
 - [`leadership_asymmetry()`](https://jmgirard.github.io/bsync/reference/leadership_asymmetry.md)
   : Calculate Leadership Asymmetry Index
 - [`pick_optima()`](https://jmgirard.github.io/bsync/reference/pick_optima.md)
