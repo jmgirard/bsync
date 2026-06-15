@@ -2,6 +2,8 @@
 
 ### All vignettes
 
+- [Surrogate Testing for
+  Significance](https://jmgirard.github.io/bsync/articles/surrogate-testing.md):
 - [WCC
   Parameters](https://jmgirard.github.io/bsync/articles/wcc-params.md):
 - [Windowed

@@ -39,7 +39,8 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/wcc-params.html">WCC Parameters</a></li>
+<li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
+    <li><a class="dropdown-item" href="../articles/wcc-params.html">WCC Parameters</a></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
     <li><a class="dropdown-item" href="../articles/wgranger-workflow.html">Windowed Granger Causality</a></li>
@@ -292,7 +293,7 @@ a null distribution.</p>
 First, we generate a matrix of “fake” partner data using
 <code><a href="../reference/generate_surrogate_circular.html">generate_surrogate_circular()</a></code>. (For a deep dive into
 different surrogate methods like phase randomization, see
-<code>vignette("surrogate-testing")</code>). Second, we evaluate our
+<code><a href="../articles/surrogate-testing.html">vignette("surrogate-testing")</a></code>). Second, we evaluate our
 real data against this null matrix using
 <code><a href="../reference/wcc_surrogate.html">wcc_surrogate()</a></code>.</p>
 <p><strong>Accelerating Computation with Parallel Processing:</strong>

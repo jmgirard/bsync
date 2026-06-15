@@ -224,8 +224,9 @@ The **bsync** package uses a two-step pipeline for this. First, we
 generate a matrix of “fake” partner data using
 [`generate_surrogate_circular()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.md).
 (For a deep dive into different surrogate methods like phase
-randomization, see `vignette("surrogate-testing")`). Second, we evaluate
-our real data against this null matrix using
+randomization, see
+[`vignette("surrogate-testing")`](https://jmgirard.github.io/bsync/articles/surrogate-testing.md)).
+Second, we evaluate our real data against this null matrix using
 [`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md).
 
 **Accelerating Computation with Parallel Processing:** Running 1,000
