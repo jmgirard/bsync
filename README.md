@@ -220,9 +220,11 @@ practices in behavioral time series analysis. We recommend citing the
 following papers to justify the specific analytical steps used in your
 pipeline.
 
-### Windowed Cross-Correlation & Peak-Picking
+### Windowed Cross-Correlation, Peak-Picking & Leadership Asymmetry
 
-The core WCC algorithm and peak-picking logic are based on:
+The core WCC algorithm, peak-picking logic, and the theoretical
+framework for quantifying continuous leader-follower dynamics through
+lag extraction are based on:
 
 - Boker, S. M., Rotondo, J. L., Xu, M., & King, K. (2002). Windowed
   cross-correlation and peak picking for the analysis of variability in
@@ -237,6 +239,16 @@ The core DTW alignment algorithm is based on foundational work by:
   optimization for spoken word recognition. *IEEE Transactions on
   Acoustics, Speech, and Signal Processing, 26*(1), 43-49.
 
+### Windowed Granger Causality
+
+The implementation of rolling autoregressive models to statistically
+test for directed information flow is based on the foundational
+framework of Granger causality:
+
+- Granger, C. W. J. (1969). Investigating causal relations by
+  econometric models and cross-spectral methods. *Econometrica, 37*(3),
+  424-438.
+
 ### Pseudo-Synchrony & Surrogate Testing
 
 The use of circular-shifted surrogate data to establish a statistical
@@ -248,11 +260,14 @@ research by:
   and outcome. *Journal of Consulting and Clinical Psychology, 79*(3),
   284-295.
 
-### Signal Smoothing & Velocity Calculation
+### Signal Smoothing & Kinematics
 
 The preprocessing pipeline utilizes zero-phase moving averages and
-polynomial filtering techniques originally developed by:
+polynomial filtering techniques, while continuous velocity and speed are
+computed using standard finite difference kinematics:
 
 - Savitzky, A., & Golay, M. J. (1964). Smoothing and differentiation of
   data by simplified least squares procedures. *Analytical Chemistry,
   36*(8), 1627-1639.
+- Winter, D. A. (2009). *Biomechanics and motor control of human
+  movement* (4th ed.). John Wiley & Sons.
