@@ -1,8 +1,8 @@
 ---
-title: "WDTW Workflow"
+title: "Windowed Dynamic Time Warping"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{WDTW Workflow}
+  %\VignetteIndexEntry{Windowed Dynamic Time Warping}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

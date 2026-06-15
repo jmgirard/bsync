@@ -1,8 +1,8 @@
 ---
-title: "Windowed Granger Causality Workflow"
+title: "Windowed Granger Causality"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Windowed Granger Causality Workflow}
+  %\VignetteIndexEntry{Windowed Granger Causality}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
