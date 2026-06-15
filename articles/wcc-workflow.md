@@ -10,6 +10,14 @@ ebbs and flows by sliding a finite window across the time series. Within
 each window, the algorithm tests multiple temporal offsets (lags) to
 find the highest Pearson correlation.
 
+> **Note on Parameter Selection:** Selecting the right window size and
+> lag parameters is critical for a valid analysis. Before running your
+> own data, we highly recommend reading the
+> [`vignette("wcc-params")`](https://jmgirard.github.io/bsync/articles/wcc-params.md)
+> guide to learn how to use the
+> [`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)
+> helper function.
+
 ## 1. What is Windowed Cross-Correlation?
 
 At its core, WCC measures linear shape and amplitude matching. It asks:

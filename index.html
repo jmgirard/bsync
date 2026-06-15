@@ -216,9 +216,9 @@
 </h2>
 <p>This package builds upon foundational methodology and modern best practices in behavioral time series analysis. We recommend citing the following papers to justify the specific analytical steps used in your pipeline.</p>
 <div class="section level3">
-<h3 id="windowed-cross-correlation--peak-picking">Windowed Cross-Correlation &amp; Peak-Picking<a class="anchor" aria-label="anchor" href="#windowed-cross-correlation--peak-picking"></a>
+<h3 id="windowed-cross-correlation-peak-picking--leadership-asymmetry">Windowed Cross-Correlation, Peak-Picking &amp; Leadership Asymmetry<a class="anchor" aria-label="anchor" href="#windowed-cross-correlation-peak-picking--leadership-asymmetry"></a>
 </h3>
-<p>The core WCC algorithm and peak-picking logic are based on:</p>
+<p>The core WCC algorithm, peak-picking logic, and the theoretical framework for quantifying continuous leader-follower dynamics through lag extraction are based on:</p>
 <ul>
 <li>Boker, S. M., Rotondo, J. L., Xu, M., &amp; King, K. (2002). Windowed cross-correlation and peak picking for the analysis of variability in the association between behavioral time series. <em>Psychological Methods, 7</em>(3), 338.</li>
 </ul>
@@ -232,6 +232,14 @@
 </ul>
 </div>
 <div class="section level3">
+<h3 id="windowed-granger-causality">Windowed Granger Causality<a class="anchor" aria-label="anchor" href="#windowed-granger-causality"></a>
+</h3>
+<p>The implementation of rolling autoregressive models to statistically test for directed information flow is based on the foundational framework of Granger causality:</p>
+<ul>
+<li>Granger, C. W. J. (1969). Investigating causal relations by econometric models and cross-spectral methods. <em>Econometrica, 37</em>(3), 424-438.</li>
+</ul>
+</div>
+<div class="section level3">
 <h3 id="pseudo-synchrony--surrogate-testing">Pseudo-Synchrony &amp; Surrogate Testing<a class="anchor" aria-label="anchor" href="#pseudo-synchrony--surrogate-testing"></a>
 </h3>
 <p>The use of circular-shifted surrogate data to establish a statistical baseline for true interpersonal synchrony was popularized in behavioral research by:</p>
@@ -240,11 +248,12 @@
 </ul>
 </div>
 <div class="section level3">
-<h3 id="signal-smoothing--velocity-calculation">Signal Smoothing &amp; Velocity Calculation<a class="anchor" aria-label="anchor" href="#signal-smoothing--velocity-calculation"></a>
+<h3 id="signal-smoothing--kinematics">Signal Smoothing &amp; Kinematics<a class="anchor" aria-label="anchor" href="#signal-smoothing--kinematics"></a>
 </h3>
-<p>The preprocessing pipeline utilizes zero-phase moving averages and polynomial filtering techniques originally developed by:</p>
+<p>The preprocessing pipeline utilizes zero-phase moving averages and polynomial filtering techniques, while continuous velocity and speed are computed using standard finite difference kinematics:</p>
 <ul>
 <li>Savitzky, A., &amp; Golay, M. J. (1964). Smoothing and differentiation of data by simplified least squares procedures. <em>Analytical Chemistry, 36</em>(8), 1627-1639.</li>
+<li>Winter, D. A. (2009). <em>Biomechanics and motor control of human movement</em> (4th ed.). John Wiley &amp; Sons.</li>
 </ul>
 </div>
 </div>

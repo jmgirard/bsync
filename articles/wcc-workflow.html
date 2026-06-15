@@ -81,6 +81,13 @@ constant over an entire observation, WCC captures how synchronization
 ebbs and flows by sliding a finite window across the time series. Within
 each window, the algorithm tests multiple temporal offsets (lags) to
 find the highest Pearson correlation.</p>
+<blockquote>
+<p><strong>Note on Parameter Selection:</strong> Selecting the right
+window size and lag parameters is critical for a valid analysis. Before
+running your own data, we highly recommend reading the
+<code><a href="../articles/wcc-params.html">vignette("wcc-params")</a></code> guide to learn how to use the
+<code><a href="../reference/suggest_wcc_params.html">suggest_wcc_params()</a></code> helper function.</p>
+</blockquote>
 <div class="section level2">
 <h2 id="what-is-windowed-cross-correlation">1. What is Windowed Cross-Correlation?<a class="anchor" aria-label="anchor" href="#what-is-windowed-cross-correlation"></a>
 </h2>
