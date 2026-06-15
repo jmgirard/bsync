@@ -1,0 +1,73 @@
+---
+title: "Surrogate Testing for Significance"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Surrogate Testing for Significance}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In interpersonal synchrony analysis, finding a high correlation or a low alignment cost is only the first step. Because behavioral time series are inherently autocorrelated, standard statistical thresholds (like $r > 0$) are often misleading. A high correlation might occur purely by chance because both signals share the same slow-moving trends.
+
+Surrogate testing allows us to build an empirical null distribution—a "chance baseline"—to determine if our observed results are truly meaningful.
+
+## 1. Choosing a Surrogate Method
+
+The **bsync** package provides two primary methods for generating null data. Choosing the right one depends on the nature of your signal.
+
+### 1.1 Circular Shift (`generate_surrogate_circular`)
+The circular shift method takes a time series and shifts it by a random interval, wrapping the end of the series back to the beginning.
+
+* **How it works:** It destroys the temporal alignment between Person A and Person B while perfectly preserving the exact amplitude distribution and the power spectrum of the original signal.
+* **When to use it:** This is our default recommendation for most dyadic interaction data. It is computationally efficient and effectively breaks the cross-signal dependency while keeping the "rhythm" of the individual intact.
+* **Important Note:** If your data has strong global trends (e.g., a person slowly moving across the room over 60 seconds), a simple circular shift might not break that trend. Ensure you use the `lag_max` argument to ensure shifts are large enough to decouple the signals.
+
+### 1.2 Phase Randomization (`generate_surrogate_phase`)
+Phase randomization uses the Fourier Transform to decompose a signal into its frequency components, randomizes the phases, and then reconstructs the signal.
+
+* **How it works:** It creates a signal that has the exact same power spectrum (frequency content) as the original, but a totally randomized temporal structure.
+* **When to use it:** This is the "gold standard" for highly oscillatory data (e.g., rhythmic postural sway, physiological signals like heart rate or respiration).
+* **Important Note:** Because this method creates an entirely new signal from frequency components, it is statistically more conservative than circular shifting. It is significantly more computationally expensive to generate than circular shifts.
+
+## 2. Theoretical Pipeline
+
+Regardless of the generation method, the logic of the **bsync** surrogate pipeline remains consistent:
+
+1. **Decouple:** Generate a matrix of $N$ null time series that remove the synchrony while keeping the individual characteristics.
+2. **Evaluate:** Run your chosen synchrony metric (WCC, WDTW, or WGC) against every column in that matrix.
+3. **Compare:** Calculate the empirical p-value as the proportion of surrogate results that are as extreme as, or more extreme than, your observed result.
+
+```{r example, eval = FALSE}
+library(bsync)
+
+# 1. Generate 1000 surrogates using your preferred method
+null_matrix <- generate_surrogate_circular(
+  y = dyad_data$person_B,
+  n_surrogates = 1000
+)
+
+# 2. Compare observed results to the null distribution
+results <- wcc_surrogate(
+  x = dyad_data$person_A,
+  y = dyad_data$person_B,
+  y_surrogates = null_matrix,
+  window_size = 90,
+  lag_max = 45
+)
+
+# 3. Interpret the empirical p-value
+print(results)
+```
+
+## 3. Best Practices
+
+* **Permutation Count:** For a stable p-value, we recommend at least 1,000 permutations. Using fewer (e.g., 100) is fine for rapid exploratory analysis, but it will lack the granularity needed to report significance levels like $p < .001$.
+* **Power and Speed:** Surrogate analysis is "embarrassingly parallel." For heavy analyses like WDTW, always use the `future` package to distribute these 1,000+ calculations across your machine's CPU cores.
+* **Interpretation:** A significant p-value does not mean the behavior is *causal*; it only means the observed degree of synchrony is statistically unlikely to have occurred if the two participants were moving independently.
