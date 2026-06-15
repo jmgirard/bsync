@@ -274,13 +274,13 @@ alignment. For final publications, you should always run the full grid
 <span></span>
 <span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">sequential</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">surrogate_results</span><span class="op">)</span></span></code></pre></div>
-<pre class="text"><code>── WDTW Surrogate Analysis (Pseudo-Synchrony) ──────────────────────────────────────────────────────────────────
-Permutations: 1000
-Observed Mean Cost: 27.1612
-Average Null Cost: 57.2509
-Empirical p-value: &lt; 0.001
-✔ Observed cost is significantly lower than chance (stronger alignment).</code></pre>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">surrogate_results</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ── WDTW Surrogate Analysis (Pseudo-Synchrony) ──────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; Permutations: 1000</span></span>
+<span><span class="co">#&gt; Observed Mean Cost: 27.1612</span></span>
+<span><span class="co">#&gt; Average Null Cost: 57.2509</span></span>
+<span><span class="co">#&gt; Empirical p-value: &lt; 0.001</span></span>
+<span><span class="co">#&gt; ✔ Observed cost is significantly lower than chance (stronger alignment).</span></span></code></pre></div>
 <p>The output gives us an empirical p-value by calculating the
 proportion of surrogate distance costs that are less than or equal to
 our observed distance cost. Because WDTW calculates a distance metric
@@ -309,7 +309,7 @@ automatically infers that it should execute a global search across the
 window to find the absolute minimum distance
 (<code>search_method = "global"</code> and
 <code>find_min = TRUE</code>).</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Extract optimal alignment lags (valleys) using the default global search</span></span>
 <span><span class="va">wdtw_optima_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pick_optima.html">pick_optima</a></span><span class="op">(</span><span class="va">wdtw_results</span><span class="op">)</span></span>
 <span></span>
@@ -349,7 +349,7 @@ sequential viridis color palette to map the distances, while plotting
 the global minima points on top.</p>
 <p>By passing the <code>time_step</code> argument, the axes are
 automatically converted from raw frame indices to seconds.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_optima_overlay.html">plot_optima_overlay</a></span><span class="op">(</span></span>
 <span>  surface_obj <span class="op">=</span> <span class="va">wdtw_results</span>,</span>
 <span>  optima_df <span class="op">=</span> <span class="va">wdtw_optima_df</span>,</span>
@@ -375,7 +375,7 @@ entirely leads).</p>
 <p>Because <strong>bsync</strong> is designed around a consistent class
 structure, you can seamlessly chain the entire analytical process
 together using the native R pipe (<code>|&gt;</code>):</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run the complete pipeline from results to LAI visualization</span></span>
 <span><span class="va">wdtw_results</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/pick_optima.html">pick_optima</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>

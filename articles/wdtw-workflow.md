@@ -204,15 +204,12 @@ surrogate_results <- wdtw_surrogate(
 plan(sequential)
 
 print(surrogate_results)
-```
-
-``` text
-── WDTW Surrogate Analysis (Pseudo-Synchrony) ──────────────────────────────────────────────────────────────────
-Permutations: 1000
-Observed Mean Cost: 27.1612
-Average Null Cost: 57.2509
-Empirical p-value: < 0.001
-✔ Observed cost is significantly lower than chance (stronger alignment).
+#> ── WDTW Surrogate Analysis (Pseudo-Synchrony) ──────────────────────────────────────────────────────────────────
+#> Permutations: 1000
+#> Observed Mean Cost: 27.1612
+#> Average Null Cost: 57.2509
+#> Empirical p-value: < 0.001
+#> ✔ Observed cost is significantly lower than chance (stronger alignment).
 ```
 
 The output gives us an empirical p-value by calculating the proportion
