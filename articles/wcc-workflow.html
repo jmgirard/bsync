@@ -286,31 +286,65 @@ period of low correlation in the middle.</p>
 </h2>
 <p>Time series data are inherently autocorrelated. Because of this, high
 cross-correlation values can sometimes occur purely by chance. To test
-if the synchronization we observed is meaningful, we generate a null
-distribution using the circular shift method.</p>
+if the synchronization we observed is meaningful, we evaluate it against
+a null distribution.</p>
+<p>The <strong>bsync</strong> package uses a two-step pipeline for this.
+First, we generate a matrix of “fake” partner data using
+<code><a href="../reference/generate_surrogate_circular.html">generate_surrogate_circular()</a></code>. (For a deep dive into
+different surrogate methods like phase randomization, see
+<code>vignette("surrogate-testing")</code>). Second, we evaluate our
+real data against this null matrix using
+<code><a href="../reference/wcc_surrogate.html">wcc_surrogate()</a></code>.</p>
+<p><strong>Accelerating Computation with Parallel Processing:</strong>
+Running 1,000 permutations can be computationally intensive. Because
+each surrogate is evaluated independently, <strong>bsync</strong> is
+built to seamlessly support parallel processing via the
+<code>future</code> package. By simply declaring a parallel
+<code><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan()</a></code> before running your analysis, the workload is
+distributed across multiple CPU cores, drastically reducing computation
+time.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">surrogate_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wcc_surrogate.html">wcc_surrogate</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="co"># 1. Set up a parallel plan (e.g., using 4 CPU cores)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 2. Generate 1000 surrogate time series for Person B</span></span>
+<span><span class="va">surrogate_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_surrogate_circular.html">generate_surrogate_circular</a></span><span class="op">(</span></span>
+<span>  y <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_B</span>,</span>
+<span>  n_surrogates <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  lag_max <span class="op">=</span> <span class="fl">45</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 3. Evaluate the observed WCC against the null distribution</span></span>
+<span><span class="va">surrogate_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wcc_surrogate.html">wcc_surrogate</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_A</span>,</span>
 <span>  y <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_B</span>,</span>
+<span>  y_surrogates <span class="op">=</span> <span class="va">surrogate_matrix</span>,</span>
 <span>  time <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">time</span>,</span>
 <span>  window_size <span class="op">=</span> <span class="fl">90</span>,</span>
 <span>  lag_max <span class="op">=</span> <span class="fl">45</span>,</span>
 <span>  window_increment <span class="op">=</span> <span class="fl">30</span>,</span>
-<span>  lag_increment <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  n_surrogates <span class="op">=</span> <span class="fl">1000</span></span>
+<span>  lag_increment <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 4. Return to sequential processing when finished</span></span>
+<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">sequential</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">surrogate_results</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">WCC Surrogate Analysis (Pseudo-Synchrony)</span> <span style="color: #00BBBB;">───────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; Permutations: 1000</span></span>
 <span><span class="co">#&gt; Observed Fisher's Z: 0.4506</span></span>
-<span><span class="co">#&gt; Average Null Z: 0.3158</span></span>
+<span><span class="co">#&gt; Average Null Z: 0.3155</span></span>
 <span><span class="co">#&gt; Empirical p-value: &lt; 0.001</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Observed synchrony is significantly greater than chance.</span></span></code></pre></div>
-<p>The output gives us an empirical p-value by calculating the
+<p>The output provides an empirical p-value by calculating the
 proportion of surrogate Fisher’s Z scores that meet or exceed our
-observed Fisher’s Z. Because the observed value was higher than all 1000
-permutations, the empirical p-value is reported as &lt; .001.</p>
+observed Fisher’s Z. Because our observed synchrony (Z = 0.4506) was
+substantially higher than the average chance synchrony (Z = 0.3155) and
+higher than all 1,000 permutations, the empirical p-value is reported as
+&lt; .001. This statistically confirms that the coordination we observed
+between Person A and Person B is driven by genuine interactive behavior
+rather than the natural autocorrelation of the signals.</p>
 </div>
 <div class="section level2">
 <h2 id="optima-extraction">5. Optima Extraction<a class="anchor" aria-label="anchor" href="#optima-extraction"></a>

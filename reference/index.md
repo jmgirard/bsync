@@ -14,6 +14,10 @@
   : Calculate 1D Velocity
 - [`diagnose_ts_gaps()`](https://jmgirard.github.io/bsync/reference/diagnose_ts_gaps.md)
   : Diagnose Missing Data Gaps in a Time Series
+- [`generate_surrogate_circular()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.md)
+  : Generate Circular Shift Surrogates
+- [`generate_surrogate_phase()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md)
+  : Generate Phase-Randomized Surrogates (Fourier Transform)
 - [`impute_ts_gaps()`](https://jmgirard.github.io/bsync/reference/impute_ts_gaps.md)
   : Impute Missing Values in Continuous Time Series with Metadata
 - [`leadership_asymmetry()`](https://jmgirard.github.io/bsync/reference/leadership_asymmetry.md)
@@ -42,8 +46,12 @@
   : Print method for wdtw_optima objects
 - [`print(`*`<wdtw_res>`*`)`](https://jmgirard.github.io/bsync/reference/print.wdtw_res.md)
   : Print method for wdtw_res objects
+- [`print(`*`<wdtw_surr>`*`)`](https://jmgirard.github.io/bsync/reference/print.wdtw_surr.md)
+  : Print method for wdtw_surr objects
 - [`print(`*`<wgranger_res>`*`)`](https://jmgirard.github.io/bsync/reference/print.wgranger_res.md)
   : Print method for wgranger_res objects
+- [`print(`*`<wgranger_surr>`*`)`](https://jmgirard.github.io/bsync/reference/print.wgranger_surr.md)
+  : Print method for wgranger_surr objects
 - [`sim_dyad`](https://jmgirard.github.io/bsync/reference/sim_dyad.md) :
   Simulated Dyadic 3D Positional Data
 - [`smooth_signal()`](https://jmgirard.github.io/bsync/reference/smooth_signal.md)
@@ -66,5 +74,9 @@
   : Calculate Surrogate Windowed Cross-Correlations
 - [`wdtw()`](https://jmgirard.github.io/bsync/reference/wdtw.md) :
   Windowed Dynamic Time Warping
+- [`wdtw_surrogate()`](https://jmgirard.github.io/bsync/reference/wdtw_surrogate.md)
+  : Calculate Surrogate Windowed Dynamic Time Warping (WDTW)
 - [`wgranger()`](https://jmgirard.github.io/bsync/reference/wgranger.md)
   : Windowed Granger Causality
+- [`wgranger_surrogate()`](https://jmgirard.github.io/bsync/reference/wgranger_surrogate.md)
+  : Calculate Surrogate Windowed Granger Causality

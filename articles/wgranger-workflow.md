@@ -149,7 +149,74 @@ perfectly even split of leadership, the summary will show that Person A
 significantly predicted Person B roughly 50% of the time, and Person B
 significantly predicted Person A for the other 50%.
 
-## 4. Visualizing the Results
+## 4. Surrogate Testing for Significance
+
+While the
+[`wgranger()`](https://jmgirard.github.io/bsync/reference/wgranger.md)
+function provides p-values for individual windows based on the
+F-distribution, time-series data often violates the assumptions of
+parametric tests. For a more robust evaluation of the *overall*
+interaction, we can test our mean F-statistics against an empirical null
+distribution.
+
+**Accelerating Computation with Parallel Processing:** Solving thousands
+of autoregressive linear models across 1,000 permutations can be slow on
+large datasets. **bsync** natively supports parallel processing through
+the `future` ecosystem. If you are analyzing heavy data, simply running
+`future::plan(future::multisession)` before this function will instantly
+distribute the workload across your machine’s hardware. For this short
+demonstration, the standard sequential processing is fast enough.
+
+``` r
+
+# 1. Generate null data
+surrogate_matrix <- generate_surrogate_circular(
+  y = dyad_data$person_B,
+  n_surrogates = 1000
+)
+
+# 2. Evaluate the observed F-statistics
+surrogate_results <- wgranger_surrogate(
+  x = dyad_data$person_A,
+  y = dyad_data$person_B,
+  y_surrogates = surrogate_matrix,
+  time = dyad_data$time,
+  window_size = 120,
+  ar_order = 3,
+  window_increment = 15
+)
+
+print(surrogate_results)
+#> 
+#> ── Windowed Granger Surrogate Analysis ─────────────────────────────────────────
+#> 
+#> ── Direction: x -> y ──
+#> 
+#> Permutations: 1000
+#> Observed Mean F-statistic: 161.2713
+#> Average Null F-statistic: 1.8703
+#> Empirical p-value: 0.001
+#> ✔ Predictive power (x -> y) is significantly greater than chance.
+#> 
+#> ── Direction: y -> x ──
+#> 
+#> Observed Mean F-statistic: 134.8659
+#> Average Null F-statistic: 1.8723
+#> Empirical p-value: 0.003
+#> ✔ Predictive power (y -> x) is significantly greater than chance.
+```
+
+The output provides empirical p-values by calculating the proportion of
+surrogate mean F-statistics that meet or exceed our observed mean
+F-statistics. In our simulated interaction, leadership was split evenly:
+Person A led for the first half and Person B led for the second half. As
+a result, the analysis correctly identifies significant predictive power
+in both directions over the course of the overall interaction. The
+observed F-statistics (161.27 and 134.87) vastly outperform the chance
+baseline (roughly 1.87), resulting in highly significant empirical
+p-values for both the x -\> y and y -\> x directions.
+
+## 5. Visualizing the Results
 
 While the summary is helpful, visualizing the rolling statistics shows
 us *when* these shifts occurred.
@@ -159,7 +226,7 @@ WGC objects allows you to visualize either the magnitude of the
 predictive power (`metric = "F"`) or the statistical significance
 (`metric = "p"`).
 
-### 4.1 Visualizing Effect Size (F-Statistic)
+### 5.1 Visualizing Effect Size
 
 Plotting the F-statistic provides a clear view of the strength of the
 predictive relationship.
@@ -179,7 +246,7 @@ effect size for Person A during the first 30 seconds of the interaction,
 which drops to near zero as Person B takes over for the final 30
 seconds.
 
-### 4.2 Visualizing Statistical Significance (p-values)
+### 5.2 Visualizing Statistical Significance
 
 When you plot the p-values, the function automatically converts them
 using a `-log10` transformation. This makes the plot much easier to read

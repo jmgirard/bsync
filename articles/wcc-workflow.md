@@ -217,35 +217,70 @@ period of low correlation in the middle.
 
 Time series data are inherently autocorrelated. Because of this, high
 cross-correlation values can sometimes occur purely by chance. To test
-if the synchronization we observed is meaningful, we generate a null
-distribution using the circular shift method.
+if the synchronization we observed is meaningful, we evaluate it against
+a null distribution.
+
+The **bsync** package uses a two-step pipeline for this. First, we
+generate a matrix of “fake” partner data using
+[`generate_surrogate_circular()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.md).
+(For a deep dive into different surrogate methods like phase
+randomization, see `vignette("surrogate-testing")`). Second, we evaluate
+our real data against this null matrix using
+[`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md).
+
+**Accelerating Computation with Parallel Processing:** Running 1,000
+permutations can be computationally intensive. Because each surrogate is
+evaluated independently, **bsync** is built to seamlessly support
+parallel processing via the `future` package. By simply declaring a
+parallel [`plan()`](https://future.futureverse.org/reference/plan.html)
+before running your analysis, the workload is distributed across
+multiple CPU cores, drastically reducing computation time.
 
 ``` r
 
+# 1. Set up a parallel plan (e.g., using 4 CPU cores)
+library(future)
+plan(multisession, workers = 4)
+
+# 2. Generate 1000 surrogate time series for Person B
+surrogate_matrix <- generate_surrogate_circular(
+  y = dyad_data$person_B,
+  n_surrogates = 1000,
+  lag_max = 45
+)
+
+# 3. Evaluate the observed WCC against the null distribution
 surrogate_results <- wcc_surrogate(
   x = dyad_data$person_A,
   y = dyad_data$person_B,
+  y_surrogates = surrogate_matrix,
   time = dyad_data$time,
   window_size = 90,
   lag_max = 45,
   window_increment = 30,
-  lag_increment = 1,
-  n_surrogates = 1000
+  lag_increment = 1
 )
+
+# 4. Return to sequential processing when finished
+plan(sequential)
 
 print(surrogate_results)
 #> ── WCC Surrogate Analysis (Pseudo-Synchrony) ───────────────────────────────────
 #> Permutations: 1000
 #> Observed Fisher's Z: 0.4506
-#> Average Null Z: 0.3158
+#> Average Null Z: 0.3155
 #> Empirical p-value: < 0.001
 #> ✔ Observed synchrony is significantly greater than chance.
 ```
 
-The output gives us an empirical p-value by calculating the proportion
+The output provides an empirical p-value by calculating the proportion
 of surrogate Fisher’s Z scores that meet or exceed our observed Fisher’s
-Z. Because the observed value was higher than all 1000 permutations, the
-empirical p-value is reported as \< .001.
+Z. Because our observed synchrony (Z = 0.4506) was substantially higher
+than the average chance synchrony (Z = 0.3155) and higher than all 1,000
+permutations, the empirical p-value is reported as \< .001. This
+statistically confirms that the coordination we observed between Person
+A and Person B is driven by genuine interactive behavior rather than the
+natural autocorrelation of the signals.
 
 ## 5. Optima Extraction
 

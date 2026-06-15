@@ -19,6 +19,8 @@
 <url><loc>https://jmgirard.github.io/bsync/reference/calc_speed_3d.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/calc_velocity_1d.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/diagnose_ts_gaps.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/impute_ts_gaps.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/index.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/leadership_asymmetry.html</loc></url>
@@ -34,7 +36,9 @@
 <url><loc>https://jmgirard.github.io/bsync/reference/print.wcc_surr.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/print.wdtw_optima.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/print.wdtw_res.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/print.wdtw_surr.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/print.wgranger_res.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/print.wgranger_surr.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/sim_dyad.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/smooth_signal.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/suggest_wcc_params.html</loc></url>
@@ -46,6 +50,8 @@
 <url><loc>https://jmgirard.github.io/bsync/reference/wcc.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/wcc_surrogate.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/wdtw.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/wdtw_surrogate.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/wgranger.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/wgranger_surrogate.html</loc></url>
 </urlset>
 

@@ -229,7 +229,70 @@ significantly predicted Person B roughly 50% of the time, and Person B
 significantly predicted Person A for the other 50%.</p>
 </div>
 <div class="section level2">
-<h2 id="visualizing-the-results">4. Visualizing the Results<a class="anchor" aria-label="anchor" href="#visualizing-the-results"></a>
+<h2 id="surrogate-testing-for-significance">4. Surrogate Testing for Significance<a class="anchor" aria-label="anchor" href="#surrogate-testing-for-significance"></a>
+</h2>
+<p>While the <code><a href="../reference/wgranger.html">wgranger()</a></code> function provides p-values for
+individual windows based on the F-distribution, time-series data often
+violates the assumptions of parametric tests. For a more robust
+evaluation of the <em>overall</em> interaction, we can test our mean
+F-statistics against an empirical null distribution.</p>
+<p><strong>Accelerating Computation with Parallel Processing:</strong>
+Solving thousands of autoregressive linear models across 1,000
+permutations can be slow on large datasets. <strong>bsync</strong>
+natively supports parallel processing through the <code>future</code>
+ecosystem. If you are analyzing heavy data, simply running
+<code>future::plan(future::multisession)</code> before this function
+will instantly distribute the workload across your machine’s hardware.
+For this short demonstration, the standard sequential processing is fast
+enough.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># 1. Generate null data</span></span>
+<span><span class="va">surrogate_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_surrogate_circular.html">generate_surrogate_circular</a></span><span class="op">(</span></span>
+<span>  y <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_B</span>,</span>
+<span>  n_surrogates <span class="op">=</span> <span class="fl">1000</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 2. Evaluate the observed F-statistics</span></span>
+<span><span class="va">surrogate_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wgranger_surrogate.html">wgranger_surrogate</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_A</span>,</span>
+<span>  y <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_B</span>,</span>
+<span>  y_surrogates <span class="op">=</span> <span class="va">surrogate_matrix</span>,</span>
+<span>  time <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">time</span>,</span>
+<span>  window_size <span class="op">=</span> <span class="fl">120</span>,</span>
+<span>  ar_order <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  window_increment <span class="op">=</span> <span class="fl">15</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">surrogate_results</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Windowed Granger Surrogate Analysis</span> <span style="color: #00BBBB;">─────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Direction: x -&gt; y</span> ──</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Permutations: 1000</span></span>
+<span><span class="co">#&gt; Observed Mean F-statistic: 161.2713</span></span>
+<span><span class="co">#&gt; Average Null F-statistic: 1.8703</span></span>
+<span><span class="co">#&gt; Empirical p-value: 0.001</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Predictive power (x -&gt; y) is significantly greater than chance.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Direction: y -&gt; x</span> ──</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Observed Mean F-statistic: 134.8659</span></span>
+<span><span class="co">#&gt; Average Null F-statistic: 1.8723</span></span>
+<span><span class="co">#&gt; Empirical p-value: 0.003</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Predictive power (y -&gt; x) is significantly greater than chance.</span></span></code></pre></div>
+<p>The output provides empirical p-values by calculating the proportion
+of surrogate mean F-statistics that meet or exceed our observed mean
+F-statistics. In our simulated interaction, leadership was split evenly:
+Person A led for the first half and Person B led for the second half. As
+a result, the analysis correctly identifies significant predictive power
+in both directions over the course of the overall interaction. The
+observed F-statistics (161.27 and 134.87) vastly outperform the chance
+baseline (roughly 1.87), resulting in highly significant empirical
+p-values for both the x -&gt; y and y -&gt; x directions.</p>
+</div>
+<div class="section level2">
+<h2 id="visualizing-the-results">5. Visualizing the Results<a class="anchor" aria-label="anchor" href="#visualizing-the-results"></a>
 </h2>
 <p>While the summary is helpful, visualizing the rolling statistics
 shows us <em>when</em> these shifts occurred.</p>
@@ -238,11 +301,11 @@ visualize either the magnitude of the predictive power
 (<code>metric = "F"</code>) or the statistical significance
 (<code>metric = "p"</code>).</p>
 <div class="section level3">
-<h3 id="visualizing-effect-size-f-statistic">4.1 Visualizing Effect Size (F-Statistic)<a class="anchor" aria-label="anchor" href="#visualizing-effect-size-f-statistic"></a>
+<h3 id="visualizing-effect-size">5.1 Visualizing Effect Size<a class="anchor" aria-label="anchor" href="#visualizing-effect-size"></a>
 </h3>
 <p>Plotting the F-statistic provides a clear view of the strength of the
 predictive relationship.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot the F-Statistics with loess smoothing applied</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">wgc_results</span>, metric <span class="op">=</span> <span class="st">"F"</span>, smooth <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
@@ -254,7 +317,7 @@ which drops to near zero as Person B takes over for the final 30
 seconds.</p>
 </div>
 <div class="section level3">
-<h3 id="visualizing-statistical-significance-p-values">4.2 Visualizing Statistical Significance (p-values)<a class="anchor" aria-label="anchor" href="#visualizing-statistical-significance-p-values"></a>
+<h3 id="visualizing-statistical-significance">5.2 Visualizing Statistical Significance<a class="anchor" aria-label="anchor" href="#visualizing-statistical-significance"></a>
 </h3>
 <p>When you plot the p-values, the function automatically converts them
 using a <code>-log10</code> transformation. This makes the plot much
@@ -262,7 +325,7 @@ easier to read because highly significant values spike upwards rather
 than vanishing toward zero. The plot also automatically includes a
 dashed reference line at <span class="math inline">\(p =
 0.05\)</span>.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot the raw significance values</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">wgc_results</span>, metric <span class="op">=</span> <span class="st">"p"</span>, smooth <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="wgranger-workflow_files/figure-html/plot-p-val-1.png" class="r-plt" alt="" width="672"></p>

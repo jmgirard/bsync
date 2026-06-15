@@ -221,7 +221,81 @@ consider using <code>"local"</code>.</p>
 mean distance, and the input settings.</p>
 </div>
 <div class="section level2">
-<h2 id="optima-extraction-finding-the-minima">4. Optima Extraction (Finding the Minima)<a class="anchor" aria-label="anchor" href="#optima-extraction-finding-the-minima"></a>
+<h2 id="surrogate-testing-for-significance">4. Surrogate Testing for Significance<a class="anchor" aria-label="anchor" href="#surrogate-testing-for-significance"></a>
+</h2>
+<p>Because DTW is an alignment algorithm, it will almost always find
+some path to align two signals, resulting in a distance cost. To
+determine if this distance is significantly smaller (i.e., better
+aligned) than what would be expected by chance, we use surrogate
+testing.</p>
+<p>First, we generate a null matrix using phase randomization, which is
+highly recommended for continuous, oscillatory data. Then, we pass it to
+<code><a href="../reference/wdtw_surrogate.html">wdtw_surrogate()</a></code>.</p>
+<p><strong>Managing the “DTW Wall”:</strong> Windowed Dynamic Time
+Warping is notoriously computationally heavy because it calculates a
+full cost matrix for every possible alignment in every window. Running
+1,000 permutations sequentially can take a very long time.</p>
+<p>To handle this, <strong>bsync</strong> offers two solutions: 1.
+<strong>Parallel Processing:</strong> By loading the <code>future</code>
+package and setting a <code><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan()</a></code>, <strong>bsync</strong>
+automatically distributes the 1,000 permutations across your available
+CPU cores. 2. <strong>The Fast Method:</strong> For exploratory
+analysis, setting <code>fast_method = TRUE</code> evaluates the
+surrogates only at a lag of 0. This reduces computation time by roughly
+99 percent while still providing a reasonable estimate of chance
+alignment. For final publications, you should always run the full grid
+(<code>fast_method = FALSE</code>).</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># 1. Distribute the workload across 4 CPU cores</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 2. Generate null data preserving the amplitude and power spectrum</span></span>
+<span><span class="va">surrogate_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_surrogate_phase.html">generate_surrogate_phase</a></span><span class="op">(</span></span>
+<span>  y <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_B</span>,</span>
+<span>  n_surrogates <span class="op">=</span> <span class="fl">1000</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 3. Evaluate the observed distance against the null distances</span></span>
+<span><span class="va">surrogate_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wdtw_surrogate.html">wdtw_surrogate</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_A</span>,</span>
+<span>  y <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_B</span>,</span>
+<span>  y_surrogates <span class="op">=</span> <span class="va">surrogate_matrix</span>,</span>
+<span>  time <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">time</span>,</span>
+<span>  window_size <span class="op">=</span> <span class="fl">90</span>,</span>
+<span>  lag_max <span class="op">=</span> <span class="fl">45</span>,</span>
+<span>  window_increment <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>  lag_increment <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  scale_method <span class="op">=</span> <span class="st">"global"</span>,</span>
+<span>  distance_metric <span class="op">=</span> <span class="st">"L2"</span>,</span>
+<span>  fast_method <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">sequential</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">surrogate_results</span><span class="op">)</span></span></code></pre></div>
+<pre class="text"><code>── WDTW Surrogate Analysis (Pseudo-Synchrony) ──────────────────────────────────────────────────────────────────
+Permutations: 1000
+Observed Mean Cost: 27.1612
+Average Null Cost: 57.2509
+Empirical p-value: &lt; 0.001
+✔ Observed cost is significantly lower than chance (stronger alignment).</code></pre>
+<p>The output gives us an empirical p-value by calculating the
+proportion of surrogate distance costs that are less than or equal to
+our observed distance cost. Because WDTW calculates a distance metric
+rather than a correlation, lower values indicate stronger
+synchronization. Our observed cost (27.16) was less than half the
+average chance cost (57.25) and was lower than all 1,000
+phase-randomized permutations. Therefore, the empirical p-value is
+reported as &lt; 0.001. This statistically confirms that the shape
+matching we observed between Person A and Person B is driven by genuine
+interactive behavior.</p>
+<p>Notice that for WDTW, a smaller cost indicates stronger synchrony.
+The print method automatically adjusts its logic to test if your
+observed cost is significantly lower than the null distribution.</p>
+</div>
+<div class="section level2">
+<h2 id="optima-extraction">5. Optima Extraction<a class="anchor" aria-label="anchor" href="#optima-extraction"></a>
 </h2>
 <p>While the full distance matrix is informative, we often want to
 extract the precise lags where the alignment is optimal within each time
@@ -234,7 +308,7 @@ automatically infers that it should execute a global search across the
 window to find the absolute minimum distance
 (<code>search_method = "global"</code> and
 <code>find_min = TRUE</code>).</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Extract optimal alignment lags (valleys) using the default global search</span></span>
 <span><span class="va">wdtw_optima_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pick_optima.html">pick_optima</a></span><span class="op">(</span><span class="va">wdtw_results</span><span class="op">)</span></span>
 <span></span>
@@ -265,7 +339,7 @@ successfully set to “Valleys (Minima)” using a “global” search
 method.</p>
 </div>
 <div class="section level2">
-<h2 id="visualizing-the-results">5. Visualizing the Results<a class="anchor" aria-label="anchor" href="#visualizing-the-results"></a>
+<h2 id="visualizing-the-results">6. Visualizing the Results<a class="anchor" aria-label="anchor" href="#visualizing-the-results"></a>
 </h2>
 <p>We can visualize the shifting synchronization landscape. The
 <code><a href="../reference/plot_optima_overlay.html">plot_optima_overlay()</a></code> function detects that it is working
@@ -274,7 +348,7 @@ sequential viridis color palette to map the distances, while plotting
 the global minima points on top.</p>
 <p>By passing the <code>time_step</code> argument, the axes are
 automatically converted from raw frame indices to seconds.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_optima_overlay.html">plot_optima_overlay</a></span><span class="op">(</span></span>
 <span>  surface_obj <span class="op">=</span> <span class="va">wdtw_results</span>,</span>
 <span>  optima_df <span class="op">=</span> <span class="va">wdtw_optima_df</span>,</span>
@@ -289,7 +363,7 @@ exactly to the lowest alignment costs, smoothly tracing the transition
 from Person A leading to Person B leading.</p>
 </div>
 <div class="section level2">
-<h2 id="quantifying-leadership-dynamics">6. Quantifying Leadership Dynamics<a class="anchor" aria-label="anchor" href="#quantifying-leadership-dynamics"></a>
+<h2 id="quantifying-leadership-dynamics">7. Quantifying Leadership Dynamics<a class="anchor" aria-label="anchor" href="#quantifying-leadership-dynamics"></a>
 </h2>
 <p>Visualizing the optima helps to understand the general pattern, but
 researchers ultimately need a continuous, quantifiable metric of who is
@@ -300,7 +374,7 @@ entirely leads).</p>
 <p>Because <strong>bsync</strong> is designed around a consistent class
 structure, you can seamlessly chain the entire analytical process
 together using the native R pipe (<code>|&gt;</code>):</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run the complete pipeline from results to LAI visualization</span></span>
 <span><span class="va">wdtw_results</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/pick_optima.html">pick_optima</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>

@@ -147,7 +147,89 @@ The [`wdtw()`](https://jmgirard.github.io/bsync/reference/wdtw.md)
 function returns a list object of class `wdtw_res` containing the
 results data frame, the overall mean distance, and the input settings.
 
-## 4. Optima Extraction (Finding the Minima)
+## 4. Surrogate Testing for Significance
+
+Because DTW is an alignment algorithm, it will almost always find some
+path to align two signals, resulting in a distance cost. To determine if
+this distance is significantly smaller (i.e., better aligned) than what
+would be expected by chance, we use surrogate testing.
+
+First, we generate a null matrix using phase randomization, which is
+highly recommended for continuous, oscillatory data. Then, we pass it to
+[`wdtw_surrogate()`](https://jmgirard.github.io/bsync/reference/wdtw_surrogate.md).
+
+**Managing the “DTW Wall”:** Windowed Dynamic Time Warping is
+notoriously computationally heavy because it calculates a full cost
+matrix for every possible alignment in every window. Running 1,000
+permutations sequentially can take a very long time.
+
+To handle this, **bsync** offers two solutions: 1. **Parallel
+Processing:** By loading the `future` package and setting a
+[`plan()`](https://future.futureverse.org/reference/plan.html),
+**bsync** automatically distributes the 1,000 permutations across your
+available CPU cores. 2. **The Fast Method:** For exploratory analysis,
+setting `fast_method = TRUE` evaluates the surrogates only at a lag of
+0. This reduces computation time by roughly 99 percent while still
+providing a reasonable estimate of chance alignment. For final
+publications, you should always run the full grid
+(`fast_method = FALSE`).
+
+``` r
+
+# 1. Distribute the workload across 4 CPU cores
+library(future)
+plan(multisession, workers = 4)
+
+# 2. Generate null data preserving the amplitude and power spectrum
+surrogate_matrix <- generate_surrogate_phase(
+  y = dyad_data$person_B,
+  n_surrogates = 1000
+)
+
+# 3. Evaluate the observed distance against the null distances
+surrogate_results <- wdtw_surrogate(
+  x = dyad_data$person_A,
+  y = dyad_data$person_B,
+  y_surrogates = surrogate_matrix,
+  time = dyad_data$time,
+  window_size = 90,
+  lag_max = 45,
+  window_increment = 30,
+  lag_increment = 1,
+  scale_method = "global",
+  distance_metric = "L2",
+  fast_method = FALSE
+)
+
+plan(sequential)
+
+print(surrogate_results)
+```
+
+``` text
+── WDTW Surrogate Analysis (Pseudo-Synchrony) ──────────────────────────────────────────────────────────────────
+Permutations: 1000
+Observed Mean Cost: 27.1612
+Average Null Cost: 57.2509
+Empirical p-value: < 0.001
+✔ Observed cost is significantly lower than chance (stronger alignment).
+```
+
+The output gives us an empirical p-value by calculating the proportion
+of surrogate distance costs that are less than or equal to our observed
+distance cost. Because WDTW calculates a distance metric rather than a
+correlation, lower values indicate stronger synchronization. Our
+observed cost (27.16) was less than half the average chance cost (57.25)
+and was lower than all 1,000 phase-randomized permutations. Therefore,
+the empirical p-value is reported as \< 0.001. This statistically
+confirms that the shape matching we observed between Person A and Person
+B is driven by genuine interactive behavior.
+
+Notice that for WDTW, a smaller cost indicates stronger synchrony. The
+print method automatically adjusts its logic to test if your observed
+cost is significantly lower than the null distribution.
+
+## 5. Optima Extraction
 
 While the full distance matrix is informative, we often want to extract
 the precise lags where the alignment is optimal within each time window.
@@ -194,7 +276,7 @@ indices, the optimal lags, and the corresponding DTW distance values.
 The console output confirms that the search mode was successfully set to
 “Valleys (Minima)” using a “global” search method.
 
-## 5. Visualizing the Results
+## 6. Visualizing the Results
 
 We can visualize the shifting synchronization landscape. The
 [`plot_optima_overlay()`](https://jmgirard.github.io/bsync/reference/plot_optima_overlay.md)
@@ -223,7 +305,7 @@ simulated shift in the dyad’s interaction. The overlaid points map
 exactly to the lowest alignment costs, smoothly tracing the transition
 from Person A leading to Person B leading.
 
-## 6. Quantifying Leadership Dynamics
+## 7. Quantifying Leadership Dynamics
 
 Visualizing the optima helps to understand the general pattern, but
 researchers ultimately need a continuous, quantifiable metric of who is

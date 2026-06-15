@@ -1,9 +1,6 @@
 # Calculate Surrogate Windowed Cross-Correlations
 
-Generates a null distribution of Windowed Cross-Correlation (WCC) values
-using the circular shift method. This tests whether the observed
-synchronization is significantly greater than what would be expected by
-chance given the inherent autocorrelation of the individual time series.
+Calculate Surrogate Windowed Cross-Correlations
 
 ## Usage
 
@@ -11,13 +8,13 @@ chance given the inherent autocorrelation of the individual time series.
 wcc_surrogate(
   x,
   y,
+  y_surrogates,
   time = NULL,
   window_size,
   lag_max,
   window_increment = 1,
   lag_increment = 1,
-  na.rm = TRUE,
-  n_surrogates = 100
+  na.rm = TRUE
 )
 ```
 
@@ -31,10 +28,14 @@ wcc_surrogate(
 
   A numeric vector containing a time series.
 
+- y_surrogates:
+
+  A matrix of surrogate time series for \`y\` (columns are surrogates).
+
 - time:
 
   An optional numeric vector representing the timestamps for the data.
-  Must be the same length as \`x\` and \`y\`. Default is \`NULL\`.
+  Default is \`NULL\`.
 
 - window_size:
 
@@ -58,13 +59,6 @@ wcc_surrogate(
   A logical indicating whether to remove missing values. Default is
   \`TRUE\`.
 
-- n_surrogates:
-
-  An integer specifying the number of surrogate permutations to run.
-  Default is 100.
-
 ## Value
 
-A list object of class "wcc_surr" containing the observed Fisher's Z,
-the distribution of surrogate Z scores, the empirical p-value, and
-settings.
+A list object of class "wcc_surr".
