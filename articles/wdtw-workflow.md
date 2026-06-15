@@ -1,4 +1,4 @@
-# WDTW Workflow
+# Windowed Dynamic Time Warping
 
 While Windowed Cross-Correlation (WCC) is excellent for capturing linear
 relationships, it forces the data into a rigid temporal grid. If two

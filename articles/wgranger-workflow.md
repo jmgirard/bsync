@@ -1,4 +1,4 @@
-# Windowed Granger Causality Workflow
+# Windowed Granger Causality
 
 This vignette walks through a complete Windowed Granger Causality (WGC)
 analysis using the **bsync** package.

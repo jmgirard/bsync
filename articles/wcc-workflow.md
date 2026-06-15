@@ -1,4 +1,4 @@
-# WCC Workflow
+# Windowed Cross-Correlation
 
 While the **bsync** package offers multiple methods for quantifying
 interpersonal synchrony, Windowed Cross-Correlation (WCC) is often the
