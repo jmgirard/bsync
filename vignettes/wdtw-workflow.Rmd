@@ -150,15 +150,12 @@ surrogate_results <- wdtw_surrogate(
 plan(sequential)
 
 print(surrogate_results)
-```
-
-```text
-── WDTW Surrogate Analysis (Pseudo-Synchrony) ──────────────────────────────────────────────────────────────────
-Permutations: 1000
-Observed Mean Cost: 27.1612
-Average Null Cost: 57.2509
-Empirical p-value: < 0.001
-✔ Observed cost is significantly lower than chance (stronger alignment).
+#> ── WDTW Surrogate Analysis (Pseudo-Synchrony) ──────────────────────────────────────────────────────────────────
+#> Permutations: 1000
+#> Observed Mean Cost: 27.1612
+#> Average Null Cost: 57.2509
+#> Empirical p-value: < 0.001
+#> ✔ Observed cost is significantly lower than chance (stronger alignment).
 ```
 
 The output gives us an empirical p-value by calculating the proportion of surrogate distance costs that are less than or equal to our observed distance cost. Because WDTW calculates a distance metric rather than a correlation, lower values indicate stronger synchronization. Our observed cost (27.16) was less than half the average chance cost (57.25) and was lower than all 1,000 phase-randomized permutations. Therefore, the empirical p-value is reported as < 0.001. This statistically confirms that the shape matching we observed between Person A and Person B is driven by genuine interactive behavior.
