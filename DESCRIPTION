@@ -28,6 +28,7 @@ Depends:
 Imports:
     cli,
     dplyr,
+    future.apply,
     ggplot2,
     grDevices,
     Rcpp,

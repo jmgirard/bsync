@@ -1,95 +1,141 @@
-test_that("wcc_surrogate returns a valid wcc_surr object", {
-  # Generate simple dummy data
-  t <- seq(0, 10, length.out = 100)
-  x <- sin(t)
-  y <- sin(t + 0.5)
+library(testthat)
 
-  # Run with a small number of surrogates to keep the test fast
-  res <- wcc_surrogate(
-    x = x,
-    y = y,
-    window_size = 20,
-    lag_max = 5,
-    n_surrogates = 10
+# =========================================================================
+# --- 1. GENERATOR TESTS --------------------------------------------------
+# =========================================================================
+
+test_that("Surrogate generators return matrices of correct dimensions", {
+  y <- 1:50
+  n_surr <- 15
+
+  surr_circ <- generate_surrogate_circular(y, n_surrogates = n_surr)
+  expect_true(is.matrix(surr_circ))
+  expect_equal(dim(surr_circ), c(50, 15))
+
+  surr_phase <- generate_surrogate_phase(y, n_surrogates = n_surr)
+  expect_true(is.matrix(surr_phase))
+  expect_equal(dim(surr_phase), c(50, 15))
+})
+
+test_that("Circular shift strictly preserves data distribution", {
+  y <- rnorm(50)
+  surr_circ <- generate_surrogate_circular(y, n_surrogates = 5)
+
+  expect_equal(sum(surr_circ[, 1]), sum(y))
+  expect_equal(mean(surr_circ[, 3]), mean(y))
+  expect_true(surr_circ[1, 1] %in% y)
+})
+
+test_that("Phase randomization preserves mean and variance", {
+  y <- rnorm(100, mean = 5, sd = 2)
+  surr_phase <- generate_surrogate_phase(y, n_surrogates = 5)
+
+  expect_equal(mean(surr_phase[, 1]), mean(y), tolerance = 1e-10)
+  expect_equal(var(surr_phase[, 1]), var(y), tolerance = 1e-10)
+})
+
+test_that("generate_surrogate_circular warns and errors correctly", {
+  y <- 1:15
+  expect_error(
+    generate_surrogate_circular(y, n_surrogates = 10, lag_max = 10),
+    "Time series is too short relative to lag_max"
   )
 
-  # Check class and structure
+  expect_warning(
+    generate_surrogate_circular(1:30, n_surrogates = 25, lag_max = 5),
+    "Limited unique shifts available"
+  )
+})
+
+# =========================================================================
+# --- 2. INTEGRATION TESTS (REAL PIPELINE) --------------------------------
+# =========================================================================
+
+test_that("Evaluators error on bad surrogate matrix inputs", {
+  x <- 1:20
+  y <- 1:20
+
+  # Loosened the regex to ignore cli backtick formatting
+  expect_error(
+    wcc_surrogate(x, y, y_surrogates = c(1,2,3), window_size = 5, lag_max = 2),
+    "must be a matrix"
+  )
+
+  expect_error(
+    wdtw_surrogate(x, y, y_surrogates = c(1,2,3), window_size = 5, lag_max = 2),
+    "must be a matrix"
+  )
+
+  bad_mat <- matrix(0, nrow = 10, ncol = 5)
+  expect_error(
+    wgranger_surrogate(x, y, y_surrogates = bad_mat, window_size = 5),
+    "same number of rows"
+  )
+})
+
+test_that("WCC surrogate pipeline integrates and returns valid object", {
+  x <- rnorm(50)
+  y <- rnorm(50)
+  y_surr_mat <- generate_surrogate_circular(y, n_surrogates = 5, lag_max = 5)
+
+  res <- wcc_surrogate(x, y, y_surrogates = y_surr_mat, window_size = 10, lag_max = 5)
+
   expect_s3_class(res, "wcc_surr")
   expect_type(res, "list")
-
-  # Check specific list elements
-  expect_true(is.numeric(res$observed_z))
-  expect_true(is.numeric(res$surrogate_z))
-  expect_equal(length(res$surrogate_z), 10)
-  expect_equal(res$n_surrogates, 10)
-
-  # Check p-value bounds
+  expect_equal(length(res$surrogate_z), 5)
   expect_true(res$p_value >= 0 && res$p_value <= 1)
 })
 
-test_that("wcc_surrogate throws an error if time series is too short", {
-  x <- 1:15
-  y <- 1:15
+test_that("WDTW surrogate pipeline integrates and returns valid object", {
+  x <- rnorm(50)
+  y <- rnorm(50)
+  y_surr_mat <- generate_surrogate_circular(y, n_surrogates = 5, lag_max = 5)
 
-  # lag_max * 2 = 20, which is larger than the series length (15)
-  # This should trigger the minimum shift error
-  expect_error(
-    wcc_surrogate(x, y, window_size = 5, lag_max = 10, n_surrogates = 5),
-    "Time series is too short relative to lag_max"
+  # FIX 1: lag_max = 5 added
+  res <- wdtw_surrogate(x, y, y_surrogates = y_surr_mat, window_size = 10, lag_max = 5)
+
+  expect_s3_class(res, "wdtw_surr")
+  expect_type(res, "list")
+  expect_equal(length(res$surrogate_cost), 5)
+  expect_true(res$p_value >= 0 && res$p_value <= 1)
+})
+
+test_that("WGranger surrogate pipeline integrates and returns valid object", {
+  x <- rnorm(50)
+  y <- rnorm(50)
+  y_surr_mat <- generate_surrogate_circular(y, n_surrogates = 5, lag_max = 5)
+
+  # FIX 2: ar_order = 1 used instead of order = 1
+  res <- wgranger_surrogate(x, y, y_surrogates = y_surr_mat, window_size = 10, ar_order = 1)
+
+  expect_s3_class(res, "wgranger_surr")
+  expect_type(res, "list")
+  expect_equal(length(res$surrogate_f_xy), 5)
+  expect_true(res$p_value_xy >= 0 && res$p_value_xy <= 1)
+})
+
+# =========================================================================
+# --- 3. S3 PRINT METHOD TESTS --------------------------------------------
+# =========================================================================
+
+test_that("Print methods return silently and output text", {
+
+  mock_wcc_obj <- list(
+    observed_z = 0.8, surrogate_z = c(0.1, 0.2),
+    p_value = 0.01, n_surrogates = 100
   )
-})
+  class(mock_wcc_obj) <- c("wcc_surr", "list")
 
-test_that("wcc_surrogate results are reproducible with set.seed", {
-  x <- rnorm(100)
-  y <- rnorm(100)
-
-  set.seed(42)
-  res1 <- wcc_surrogate(x, y, window_size = 20, lag_max = 10, n_surrogates = 15)
-
-  set.seed(42)
-  res2 <- wcc_surrogate(x, y, window_size = 20, lag_max = 10, n_surrogates = 15)
-
-  # The exact same seeds should produce the exact same distribution and p-value
-  expect_equal(res1$surrogate_z, res2$surrogate_z)
-  expect_equal(res1$p_value, res2$p_value)
-})
-
-test_that("wcc_surrogate warns when sampling shifts with replacement", {
-  # Create a short time series where valid_shifts will be small
-  x <- 1:30
-  y <- 1:30
-
-  # lag_max = 5 means min_shift = 10.
-  # max_shift = 30 - 10 = 20.
-  # valid_shifts are 10:20 (only 11 available unique shifts).
-  # Requesting 20 surrogates forces the function to sample with replacement.
-
-  expect_warning(
-    wcc_surrogate(x, y, window_size = 5, lag_max = 5, n_surrogates = 20),
-    "Limited unique shifts available. Sampling with replacement."
+  mock_wdtw_obj <- list(
+    observed_cost = 10, surrogate_cost = c(20, 25),
+    p_value = 0.6, n_surrogates = 100
   )
-})
+  class(mock_wdtw_obj) <- c("wdtw_surr", "list")
 
-test_that("print.wcc_surr evaluates all logic branches without error", {
-  # Helper function to generate mock objects to quickly test the print branches
-  # without needing to run the expensive wcc_surrogate() calculation
-  make_mock_surr <- function(p_val, n_surr) {
-    structure(
-      list(
-        observed_z = 0.8,
-        surrogate_z = runif(n_surr, 0, 0.5),
-        p_value = p_val,
-        n_surrogates = n_surr
-      ),
-      class = c("wcc_surr", "list")
-    )
-  }
+  expect_invisible(print(mock_wcc_obj))
 
-  # Branch Test 1: p_value == 0, p_value < 0.05, n_surrogates < 1000
-  mock_sig <- make_mock_surr(p_val = 0, n_surr = 100)
-  expect_no_error(capture.output(print(mock_sig)))
-
-  # Branch Test 2: p_value != 0, p_value >= 0.05, n_surrogates >= 1000
-  mock_nonsig <- make_mock_surr(p_val = 0.25, n_surr = 1000)
-  expect_no_error(capture.output(print(mock_nonsig)))
+  # FIX 3: expect_message instead of capture.output
+  expect_message(print(mock_wcc_obj), "significantly greater")
+  expect_message(print(mock_wdtw_obj), "not significantly different")
+  expect_message(print(mock_wcc_obj), "too few for stable p-values")
 })
