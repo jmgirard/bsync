@@ -7,7 +7,7 @@
 evaluate_signal_power(x, sample_rate, threshold = 0.95, plot = TRUE)
 }
 \arguments{
-\item{x}{A numeric vector, a list of numeric vectors, or a data frame. If a 
+\item{x}{A numeric vector, a list of numeric vectors, or a data frame. If a
 data frame is provided, all numeric columns will be evaluated.}
 
 \item{sample_rate}{A single positive number indicating the sampling rate in Hertz.}
@@ -25,6 +25,6 @@ A list containing the recommended target frequency, the calculated cutoff
 \description{
 Calculates the Power Spectral Density (PSD) of continuous time series using
 Welch's method. It determines the frequency below which a specified proportion
-of the total signal power is captured. Can process a single vector or iterate 
+of the total signal power is captured. Can process a single vector or iterate
 over multiple signals to recommend a universal downsampling rate.
 }

@@ -1,13 +1,3 @@
----
-title: "Determining the Downsampling Rate"
-description: "How to use power spectral density to empirically justify your behavioral downsampling frequency."
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Determining the Downsampling Rate}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -32,25 +22,26 @@ library(ggplot2)
 
 For this tutorial, we will simulate 30Hz continuous smile intensity data (e.g., AU12 from OpenFace). Genuine facial expressions typically evolve slowly (between 0.3 Hz and 1.5 Hz). We will add a small amount of high-frequency white noise to simulate micro-jitter from the automated tracking software.
 
-Let's simulate a dataset of 10 participants.
+Because real-world interactions vary in length, we will store our simulated participants in a list rather than a data frame.
 
 ```{r sim-data}
 set.seed(42)
 fs <- 30 # 30 frames per second
-t <- seq(0, 60, by = 1/fs)
 
-# Generate a data frame with 10 simulated participant signals
-smile_data <- as.data.frame(
-  lapply(1:10, function(i) {
-    base_freq <- runif(1, 0.3, 1.2) # Genuine slow expression
+# Generate a list of 10 simulated participant signals
+smile_data <- lapply(1:10, function(i) {
+  # Randomize interaction length between 45 and 60 seconds
+  t_end <- runif(1, 45, 60)
+  t <- seq(0, t_end, by = 1/fs)
 
-    noise_level <- runif(1, 0.02, 0.08)
+  base_freq <- runif(1, 0.3, 1.2) # Genuine slow expression
+  noise_level <- runif(1, 0.02, 0.08) # Small tracking jitter
 
-    sin(2 * pi * base_freq * t) + rnorm(length(t), mean = 0, sd = noise_level)
-  })
-)
+  # Signal (slow wave) + Noise (rapid jitter)
+  sin(2 * pi * base_freq * t) + rnorm(length(t), mean = 0, sd = noise_level)
+})
 
-colnames(smile_data) <- paste0("Participant_", 1:10)
+names(smile_data) <- paste0("Participant_", 1:10)
 ```
 
 ## Evaluating a Single Time Series
@@ -79,10 +70,10 @@ cat("Recommended Target Rate:", round(single_eval$recommended_target_rate, 2), "
 
 In a real study, you should not calculate different downsampling rates for different participants. Doing so would make your subsequent Windowed Cross-Correlation (WCC) parameters represent different amounts of real time across dyads.
 
-Best practice is to calculate the cutoff frequency for all participants and choose a single, universal rate. `evaluate_signal_power()` natively accepts data frames and lists, making this process completely automated.
+Best practice is to calculate the cutoff frequency for all participants and choose a single, universal rate. `evaluate_signal_power()` natively accepts lists and data frames, making this process completely automated.
 
 ```{r eval-multi, fig.width=7, fig.height=5}
-# Pass the entire data frame of 10 participants
+# Pass the entire list of 10 participants
 multi_eval <- evaluate_signal_power(
   x = smile_data,
   sample_rate = fs,
@@ -102,9 +93,10 @@ cat("Minimum Universal Target Rate:", round(multi_eval$recommended_target_rate, 
 
 ## Applying the Downsampling
 
-If our Nyquist minimum is 2.51 Hz, we need to choose a target rate slightly higher than that which divides cleanly into our original 30Hz sample rate.
+If our Nyquist minimum is around 2.5 Hz, we need to choose a target rate slightly higher than that which divides cleanly into our original 30Hz sample rate.
 
 Valid options would be:
+
 * **3 Hz** (Downsample factor of 10)
 * **5 Hz** (Downsample factor of 6)
 
