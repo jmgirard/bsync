@@ -83,9 +83,7 @@ wcc_surrogate <- function(
         w_max = window_size
       )
 
-      wcc_vals[wcc_vals == -1] <- -0.99
-      wcc_vals[wcc_vals == 1] <- 0.99
-      z_vals <- 0.5 * base::log((1 + wcc_vals) / (1 - wcc_vals))
+      z_vals <- r_to_z(wcc_vals)
 
       base::mean(base::abs(z_vals), na.rm = TRUE)
     },
