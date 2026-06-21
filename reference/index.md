@@ -14,6 +14,10 @@
   : Calculate 1D Velocity
 - [`diagnose_ts_gaps()`](https://jmgirard.github.io/bsync/reference/diagnose_ts_gaps.md)
   : Diagnose Missing Data Gaps in a Time Series
+- [`downsample_signal()`](https://jmgirard.github.io/bsync/reference/downsample_signal.md)
+  : Downsample a Time Series Signal via Rolling Aggregation
+- [`evaluate_signal_power()`](https://jmgirard.github.io/bsync/reference/evaluate_signal_power.md)
+  : Evaluate Signal Power and Suggest Downsampling Rate
 - [`generate_surrogate_circular()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.md)
   : Generate Circular Shift Surrogates
 - [`generate_surrogate_phase()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md)

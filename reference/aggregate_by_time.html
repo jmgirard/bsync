@@ -5,13 +5,9 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Aggregate Time Series Data by Time Bins — aggregate_by_time"><meta name="description" content="Efficiently downsamples time series data by calculating the mean of values
-within specified time bins. This is highly recommended for high-resolution
-data (e.g., 30Hz OpenFace output) prior to calculating velocity or running
-windowed cross-correlation."><meta property="og:description" content="Efficiently downsamples time series data by calculating the mean of values
-within specified time bins. This is highly recommended for high-resolution
-data (e.g., 30Hz OpenFace output) prior to calculating velocity or running
-windowed cross-correlation."></head><body>
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Aggregate Time Series Data by Time Bins — aggregate_by_time"><meta name="description" content="Efficiently downsamples time series data by aggregating values within specified
+time bins. This is a high-level, data frame-based pipeline function."><meta property="og:description" content="Efficiently downsamples time series data by aggregating values within specified
+time bins. This is a high-level, data frame-based pipeline function."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -30,7 +26,8 @@ windowed cross-correlation."></head><body>
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/signal_power.html">Determining the Downsampling Rate</a></li>
+    <li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
     <li><a class="dropdown-item" href="../articles/wcc-params.html">WCC Parameters</a></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
@@ -53,15 +50,19 @@ windowed cross-correlation."></head><body>
     </div>
 
     <div class="ref-description section level2">
-    <p>Efficiently downsamples time series data by calculating the mean of values
-within specified time bins. This is highly recommended for high-resolution
-data (e.g., 30Hz OpenFace output) prior to calculating velocity or running
-windowed cross-correlation.</p>
+    <p>Efficiently downsamples time series data by aggregating values within specified
+time bins. This is a high-level, data frame-based pipeline function.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">aggregate_by_time</span><span class="op">(</span><span class="va">data</span>, <span class="va">time_var</span>, <span class="va">bin_width</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">aggregate_by_time</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">time_var</span>,</span>
+<span>  <span class="va">bin_width</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"median"</span>, <span class="st">"mean"</span><span class="op">)</span>,</span>
+<span>  na.rm <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -81,9 +82,15 @@ windowed cross-correlation.</p>
 This should be in the same units as your time variable (e.g., 0.1 for 100ms bins).</p></dd>
 
 
+<dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
+<dd><p>A character string specifying the aggregation method:
+"median" or "mean". Default is "median", which is highly robust to
+single-frame tracking glitches.</p></dd>
+
+
 <dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
 <dd><p>A logical indicating whether to remove missing values when
-calculating the mean. Default is `TRUE`.</p></dd>
+calculating the aggregate. Default is `TRUE`.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -91,6 +98,20 @@ calculating the mean. Default is `TRUE`.</p></dd>
     <p>A new data frame with the downsampled time series. The time variable
   is updated to represent the center of each bin, and all non-numeric columns
   are dropped.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>**When to use this function versus `downsample_signal()`:**</p>
+<p>* Use `aggregate_by_time()` when working with raw behavioral tracking data
+  (e.g., OpenFace output) that may contain irregular timestamps, dropped
+  frames, or missing rows. By binning based on the actual time variable,
+  this function preserves the true chronological structure of the data and
+  correctly leaves gaps where tracking was lost. It is also ideal for
+  processing multiple numeric columns simultaneously.
+* Use `downsample_signal()` when working with a single, continuous numeric
+  vector that has guaranteed regular intervals and no missing frames. That
+  function relies on matrix reshaping and vector math, making it exceptionally
+  fast for clean, pre-processed data.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

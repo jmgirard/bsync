@@ -287,6 +287,10 @@ computed using standard finite difference kinematics:
   : Calculate 1D Velocity
 - [`diagnose_ts_gaps()`](https://jmgirard.github.io/bsync/reference/diagnose_ts_gaps.md)
   : Diagnose Missing Data Gaps in a Time Series
+- [`downsample_signal()`](https://jmgirard.github.io/bsync/reference/downsample_signal.md)
+  : Downsample a Time Series Signal via Rolling Aggregation
+- [`evaluate_signal_power()`](https://jmgirard.github.io/bsync/reference/evaluate_signal_power.md)
+  : Evaluate Signal Power and Suggest Downsampling Rate
 - [`generate_surrogate_circular()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.md)
   : Generate Circular Shift Surrogates
 - [`generate_surrogate_phase()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md)
@@ -358,13 +362,23 @@ computed using standard finite difference kinematics:
 
 ### All vignettes
 
+- [Determining the Downsampling
+  Rate](https://jmgirard.github.io/bsync/articles/signal_power.md):
+
+  How to use power spectral density to empirically justify your
+  behavioral downsampling frequency.
+
 - [Surrogate Testing for
   Significance](https://jmgirard.github.io/bsync/articles/surrogate-testing.md):
+
 - [WCC
   Parameters](https://jmgirard.github.io/bsync/articles/wcc-params.md):
+
 - [Windowed
   Cross-Correlation](https://jmgirard.github.io/bsync/articles/wcc-workflow.md):
+
 - [Windowed Dynamic Time
   Warping](https://jmgirard.github.io/bsync/articles/wdtw-workflow.md):
+
 - [Windowed Granger
   Causality](https://jmgirard.github.io/bsync/articles/wgranger-workflow.md):

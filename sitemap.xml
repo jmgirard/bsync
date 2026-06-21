@@ -6,6 +6,7 @@
 <url><loc>https://jmgirard.github.io/bsync/LICENSE.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/SUPPORT.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/articles/index.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/articles/signal_power.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/articles/surrogate-testing.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/articles/wcc-params.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/articles/wcc-workflow.html</loc></url>
@@ -20,6 +21,8 @@
 <url><loc>https://jmgirard.github.io/bsync/reference/calc_speed_3d.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/calc_velocity_1d.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/diagnose_ts_gaps.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/downsample_signal.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/evaluate_signal_power.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/impute_ts_gaps.html</loc></url>
