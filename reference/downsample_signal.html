@@ -26,7 +26,7 @@ aggregation function (median or mean) across non-overlapping windows."></head><b
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/signal_power.html">Determining the Downsampling Rate</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/determine-downsampling.html">UNKNOWN TITLE</a></li>
     <li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
     <li><a class="dropdown-item" href="../articles/wcc-params.html">WCC Parameters</a></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
@@ -86,6 +86,20 @@ aggregation. Default is `TRUE`.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A numeric vector representing the downsampled time series.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>**When to use this function versus `aggregate_by_time()`:**</p>
+<p>* Use `downsample_signal()` when working with a single, continuous numeric
+  vector that has guaranteed regular intervals and no missing frames. That
+  function relies on matrix reshaping and vector math, making it exceptionally
+  fast for clean, pre-processed data.
+* Use `aggregate_by_time()` when working with raw behavioral tracking data
+  (e.g., OpenFace output) that may contain irregular timestamps, dropped
+  frames, or missing rows. By binning based on the actual time variable,
+  this function preserves the true chronological structure of the data and
+  correctly leaves gaps where tracking was lost. It is also ideal for
+  processing multiple numeric columns simultaneously.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

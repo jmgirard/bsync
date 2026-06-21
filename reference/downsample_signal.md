@@ -35,3 +35,18 @@ downsample_signal(x, factor, method = c("median", "mean"), na.rm = TRUE)
 ## Value
 
 A numeric vector representing the downsampled time series.
+
+## Details
+
+\*\*When to use this function versus \`aggregate_by_time()\`:\*\*
+
+\* Use \`downsample_signal()\` when working with a single, continuous
+numeric vector that has guaranteed regular intervals and no missing
+frames. That function relies on matrix reshaping and vector math, making
+it exceptionally fast for clean, pre-processed data. \* Use
+\`aggregate_by_time()\` when working with raw behavioral tracking data
+(e.g., OpenFace output) that may contain irregular timestamps, dropped
+frames, or missing rows. By binning based on the actual time variable,
+this function preserves the true chronological structure of the data and
+correctly leaves gaps where tracking was lost. It is also ideal for
+processing multiple numeric columns simultaneously.
