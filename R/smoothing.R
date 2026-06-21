@@ -41,14 +41,15 @@ smooth_signal <- function(x,
     return(res)
   }
 
-  if (method == "sgolay") {
+if (method == "sgolay") {
     if (!rlang::is_integerish(window, n = 1) || window %% 2 == 0) {
       cli::cli_abort("{.arg window} must be an odd integer for the Savitzky-Golay filter.")
     }
     if (!rlang::is_integerish(sg_order, n = 1) || sg_order >= window) {
       cli::cli_abort("{.arg sg_order} must be strictly less than the {.arg window} size.")
     }
-    res <- signal::sgolayfilt(x, p = sg_order, n = window)
+    # Swapped from signal::sgolayfilt to gsignal::sgolayfilt
+    res <- gsignal::sgolayfilt(x, p = sg_order, n = window)
     return(as.numeric(res))
   }
 
@@ -59,31 +60,46 @@ smooth_signal <- function(x,
     if (!rlang::is_integerish(bw_order, n = 1) || bw_order <= 0) {
       cli::cli_abort("{.arg bw_order} must be a positive integer.")
     }
-    # Uses filtfilt for zero-phase filtering to prevent phase shifts
-    bf <- signal::butter(bw_order, bw_cutoff, type = "low")
-    res <- signal::filtfilt(bf, x)
+    # Swapped from signal to gsignal
+    bf <- gsignal::butter(bw_order, bw_cutoff, type = "low")
+    res <- gsignal::filtfilt(bf, x)
     return(as.numeric(res))
   }
 }
 
 #' Aggregate Time Series Data by Time Bins
 #'
-#' Efficiently downsamples time series data by calculating the mean of values
-#' within specified time bins. This is highly recommended for high-resolution
-#' data (e.g., 30Hz OpenFace output) prior to calculating velocity or running
-#' windowed cross-correlation.
+#' Efficiently downsamples time series data by aggregating values within specified
+#' time bins. This is a high-level, data frame-based pipeline function.
+#'
+#' @details
+#' **When to use this function versus `downsample_signal()`:**
+#'
+#' * Use `aggregate_by_time()` when working with raw behavioral tracking data
+#'   (e.g., OpenFace output) that may contain irregular timestamps, dropped
+#'   frames, or missing rows. By binning based on the actual time variable,
+#'   this function preserves the true chronological structure of the data and
+#'   correctly leaves gaps where tracking was lost. It is also ideal for
+#'   processing multiple numeric columns simultaneously.
+#' * Use `downsample_signal()` when working with a single, continuous numeric
+#'   vector that has guaranteed regular intervals and no missing frames. That
+#'   function relies on matrix reshaping and vector math, making it exceptionally
+#'   fast for clean, pre-processed data.
 #'
 #' @param data A data frame containing the time series data.
 #' @param time_var The unquoted name of the column containing time values.
 #' @param bin_width A numeric value specifying the width of the time bins.
 #'   This should be in the same units as your time variable (e.g., 0.1 for 100ms bins).
+#' @param method A character string specifying the aggregation method:
+#'   "median" or "mean". Default is "median", which is highly robust to
+#'   single-frame tracking glitches.
 #' @param na.rm A logical indicating whether to remove missing values when
-#'   calculating the mean. Default is `TRUE`.
+#'   calculating the aggregate. Default is `TRUE`.
 #' @return A new data frame with the downsampled time series. The time variable
 #'   is updated to represent the center of each bin, and all non-numeric columns
 #'   are dropped.
 #' @export
-aggregate_by_time <- function(data, time_var, bin_width, na.rm = TRUE) {
+aggregate_by_time <- function(data, time_var, bin_width, method = c("median", "mean"), na.rm = TRUE) {
 
   if (!is.data.frame(data)) {
     cli::cli_abort("{.arg data} must be a data frame.")
@@ -95,12 +111,20 @@ aggregate_by_time <- function(data, time_var, bin_width, na.rm = TRUE) {
     cli::cli_abort("{.arg na.rm} must be a single logical value.")
   }
 
+  method <- match.arg(method)
+
+  if (method == "median") {
+    agg_fun <- function(x) stats::median(x, na.rm = na.rm)
+  } else {
+    agg_fun <- function(x) base::mean(x, na.rm = na.rm)
+  }
+
   data |>
     dplyr::mutate(
       .bin_center = floor({{ time_var }} / bin_width) * bin_width + (bin_width / 2)
     ) |>
     dplyr::summarise(
-      dplyr::across(dplyr::where(is.numeric), ~ mean(.x, na.rm = na.rm)),
+      dplyr::across(dplyr::where(is.numeric), agg_fun),
       .by = .bin_center
     ) |>
     dplyr::mutate({{ time_var }} := .bin_center) |>
@@ -140,4 +164,56 @@ trim_edges <- function(x, trim_length) {
   } else {
     cli::cli_abort("Input {.arg x} must be a vector, matrix, or data frame.")
   }
+}
+
+#' Downsample a Time Series Signal via Rolling Aggregation
+#'
+#' Reduces the sampling rate of a continuous time series by applying a rolling
+#' aggregation function (median or mean) across non-overlapping windows.
+#'
+#' @param x A numeric vector representing the continuous time series signal.
+#' @param factor A single positive integer indicating the downsampling factor.
+#'   For example, a factor of 6 reduces 30Hz data to 5Hz.
+#' @param method A character string specifying the aggregation method:
+#'   "median" or "mean". Default is "median", which is highly robust to
+#'   single-frame tracking glitches.
+#' @param na.rm A logical indicating whether to remove missing values during
+#'   aggregation. Default is `TRUE`.
+#' @return A numeric vector representing the downsampled time series.
+#' @export
+downsample_signal <- function(x, factor, method = c("median", "mean"), na.rm = TRUE) {
+
+  if (!is.numeric(x)) {
+    cli::cli_abort("{.arg x} must be a numeric vector.")
+  }
+  if (!rlang::is_integerish(factor, n = 1) || factor <= 1) {
+    cli::cli_abort("{.arg factor} must be a single integer greater than 1.")
+  }
+  if (!rlang::is_logical(na.rm, n = 1)) {
+    cli::cli_abort("{.arg na.rm} must be a single logical value.")
+  }
+
+  method <- match.arg(method)
+
+  # Determine the number of complete windows
+  n_windows <- floor(length(x) / factor)
+
+  if (n_windows == 0) {
+    cli::cli_abort("The length of {.arg x} is smaller than the downsampling {.arg factor}.")
+  }
+
+  # Truncate the vector to fit perfectly into the windows
+  x_truncated <- x[1:(n_windows * factor)]
+
+  # Reshape into a matrix where each column is a window
+  x_matrix <- matrix(x_truncated, nrow = factor, ncol = n_windows)
+
+  # Apply the aggregation
+  if (method == "median") {
+    res <- apply(x_matrix, 2, stats::median, na.rm = na.rm)
+  } else if (method == "mean") {
+    res <- colMeans(x_matrix, na.rm = na.rm)
+  }
+
+  return(as.numeric(res))
 }

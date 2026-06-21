@@ -31,10 +31,10 @@ Imports:
     future.apply,
     ggplot2,
     grDevices,
+    gsignal,
     Rcpp,
     RcppArmadillo,
     rlang,
-    signal,
     utils
 Suggests:
     knitr,

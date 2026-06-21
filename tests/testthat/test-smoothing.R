@@ -11,9 +11,9 @@ test_that("smooth_signal moving_average works correctly", {
   expect_equal(smoothed[3], mean(c(4, 6, 8)))
 })
 
-test_that("smooth_signal sgolay and butterworth execute if signal is installed", {
-  # Gracefully skip these tests if the user doesn't have 'signal' installed
-  skip_if_not_installed("signal")
+test_that("smooth_signal sgolay and butterworth execute if gsignal is installed", {
+  # Gracefully skip these tests if the user doesn't have 'gsignal' installed
+  skip_if_not_installed("gsignal")
 
   x <- sin(seq(0, 2 * pi, length.out = 100)) + rnorm(100, 0, 0.1)
 
@@ -47,27 +47,27 @@ test_that("smooth_signal catches invalid inputs", {
 
 # Tests for aggregate_by_time() -------------------------------------------
 
-test_that("aggregate_by_time correctly downsamples and centers time", {
+test_that("aggregate_by_time correctly downsamples using median and mean", {
   # Simulating 30Hz data (roughly 0.033s intervals)
+  # Using values where mean and median will differ
   df <- data.frame(
     time = c(0.000, 0.033, 0.066, 0.100, 0.133, 0.166),
-    au12 = c(2, 4, 6, 8, 10, 12),
+    au12 = c(2, 4, 12, 8, 10, 30),
     character_col = c("a", "b", "c", "d", "e", "f")
   )
 
-  # Aggregate to 0.1s bins
-  agg_df <- aggregate_by_time(df, time_var = time, bin_width = 0.1)
-
-  # The non-numeric column should be dropped
-  expect_false("character_col" %in% names(agg_df))
-
-  # Bin 1 (0 to <0.1): elements 1, 2, 3 (mean of 2, 4, 6 is 4)
-  # Center of Bin 1 is 0.05
-  # Bin 2 (0.1 to <0.2): elements 4, 5, 6 (mean of 8, 10, 12 is 10)
-  # Center of Bin 2 is 0.15
-  expect_equal(nrow(agg_df), 2)
-  expect_equal(agg_df$time, c(0.05, 0.15))
-  expect_equal(agg_df$au12, c(4, 10))
+  # Test median aggregation (default)
+  agg_med <- aggregate_by_time(df, time_var = time, bin_width = 0.1, method = "median")
+  expect_false("character_col" %in% names(agg_med))
+  expect_equal(nrow(agg_med), 2)
+  expect_equal(agg_med$time, c(0.05, 0.15))
+  # Median of c(2, 4, 12) is 4; Median of c(8, 10, 30) is 10
+  expect_equal(agg_med$au12, c(4, 10))
+  
+  # Test mean aggregation
+  agg_mean <- aggregate_by_time(df, time_var = time, bin_width = 0.1, method = "mean")
+  # Mean of c(2, 4, 12) is 6; Mean of c(8, 10, 30) is 16
+  expect_equal(agg_mean$au12, c(6, 16))
 })
 
 test_that("aggregate_by_time handles na.rm correctly", {
@@ -76,11 +76,11 @@ test_that("aggregate_by_time handles na.rm correctly", {
     val = c(2, NA, 6)
   )
 
-  # With na.rm = TRUE (default), the mean of 2 and 6 is 4
+  # With na.rm = TRUE (default), the median of 2 and 6 is 4
   agg_true <- aggregate_by_time(df, time_var = time, bin_width = 0.5, na.rm = TRUE)
   expect_equal(agg_true$val, 4)
 
-  # With na.rm = FALSE, the mean of 2, NA, 6 is NA
+  # With na.rm = FALSE, the median of 2, NA, 6 is NA
   agg_false <- aggregate_by_time(df, time_var = time, bin_width = 0.5, na.rm = FALSE)
   expect_true(is.na(agg_false$val))
 })
@@ -93,6 +93,7 @@ test_that("aggregate_by_time catches invalid inputs", {
   expect_error(aggregate_by_time(df, time_var = time, bin_width = -1), "single positive number")
   expect_error(aggregate_by_time(df, time_var = time, bin_width = c(1, 2)), "single positive number")
   expect_error(aggregate_by_time(df, time_var = time, bin_width = 1, na.rm = "TRUE"), "single logical value")
+  expect_error(aggregate_by_time(df, time_var = time, bin_width = 1, method = "mode"), "should be one of")
 })
 
 
@@ -127,4 +128,40 @@ test_that("trim_edges catches invalid inputs and extreme trims", {
   # Edge case where trim_length exceeds data dimensions
   expect_error(trim_edges(v, trim_length = 3), "too large; it would remove all elements")
   expect_error(trim_edges(df, trim_length = 3), "too large; it would remove all rows")
+})
+
+
+# Tests for downsample_signal() -------------------------------------------
+
+test_that("downsample_signal handles median and mean aggregation correctly", {
+  x <- c(2, 4, 12, 8, 10, 30)
+  
+  # Median of c(2,4,12) is 4; Median of c(8,10,30) is 10
+  expect_equal(downsample_signal(x, factor = 3, method = "median"), c(4, 10))
+  
+  # Mean of c(2,4,12) is 6; Mean of c(8,10,30) is 16
+  expect_equal(downsample_signal(x, factor = 3, method = "mean"), c(6, 16))
+})
+
+test_that("downsample_signal correctly truncates incomplete windows", {
+  x <- c(1, 2, 3, 4, 5) # Length 5, factor 2 means the last element is dropped
+  expect_equal(downsample_signal(x, factor = 2, method = "mean"), c(1.5, 3.5))
+})
+
+test_that("downsample_signal handles NAs correctly", {
+  x <- c(2, NA, 10, 4, 5, 6)
+  
+  # Window 1: c(2, NA, 10). Median with na.rm=TRUE is 6
+  expect_equal(downsample_signal(x, factor = 3, method = "median", na.rm = TRUE), c(6, 5))
+  expect_true(is.na(downsample_signal(x, factor = 3, method = "median", na.rm = FALSE)[1]))
+})
+
+test_that("downsample_signal catches invalid inputs", {
+  expect_error(downsample_signal(c("a", "b"), factor = 2), "must be a numeric vector")
+  expect_error(downsample_signal(1:10, factor = 0), "greater than 1")
+  expect_error(downsample_signal(1:10, factor = 1.5), "single integer")
+  expect_error(downsample_signal(1:10, factor = 2, na.rm = "TRUE"), "single logical value")
+  
+  # Removed the word "factor" from the regex to avoid backtick matching issues
+  expect_error(downsample_signal(1:2, factor = 5), "smaller than the downsampling")
 })
