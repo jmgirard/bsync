@@ -261,9 +261,9 @@ create_wcc_df <- function(x, y, time = NULL, settings) {
 
 #' @noRd
 r_to_z <- function(r) {
-  r[r == -1] <- -0.99
-  r[r == 1] <- 0.99
-  z <- 0.5 * base::log((1 + r) / (1 - r))
+  r_clamped <- pmax(pmin(r, 0.9999, na.rm = FALSE), -0.9999, na.rm = FALSE)
+  z <- base::atanh(r_clamped)
+
   z
 }
 

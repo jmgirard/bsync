@@ -4,8 +4,9 @@ test_that("r_to_z handles standard and extreme bounds", {
   # Correlation of 0 should equal a Z of 0
   expect_equal(r_to_z(0), 0)
 
-  # The function clamps 1.0 at 0.99 to prevent infinite values
-  expected_max <- 0.5 * log((1 + 0.99) / (1 - 0.99))
+  # The function clamps 1.0 at 0.9999 to prevent infinite values
+  expected_max <- base::atanh(0.9999)
+
   expect_equal(r_to_z(1), expected_max)
   expect_equal(r_to_z(-1), -expected_max)
 })
