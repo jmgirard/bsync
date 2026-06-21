@@ -1,4 +1,4 @@
-# 
+# Determining the Downsampling Rate
 
 When analyzing continuous behavioral data like facial expressions or
 kinematics, raw data is often recorded at high frequencies (e.g., 30Hz

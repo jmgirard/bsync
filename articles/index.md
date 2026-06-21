@@ -2,8 +2,8 @@
 
 ### All vignettes
 
-- [UNKNOWN
-  TITLE](https://jmgirard.github.io/bsync/articles/determine-downsampling.md):
+- [Determining the Downsampling
+  Rate](https://jmgirard.github.io/bsync/articles/determine-downsampling.md):
 - [Surrogate Testing for
   Significance](https://jmgirard.github.io/bsync/articles/surrogate-testing.md):
 - [WCC
