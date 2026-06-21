@@ -100,8 +100,6 @@ data (e.g., AU12 from OpenFace). Genuine facial expressions typically
 evolve slowly (between 0.3 Hz and 1.5 Hz). We will add a small amount of
 high-frequency white noise to simulate micro-jitter from the automated
 tracking software.</p>
-<p>Because real-world interactions vary in length, we will store our
-simulated participants in a list rather than a data frame.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">fs</span> <span class="op">&lt;-</span> <span class="fl">30</span> <span class="co"># 30 frames per second</span></span>
@@ -127,7 +125,8 @@ simulated participants in a list rather than a data frame.</p>
 <p>If you are only working with one or two individuals, you can pass a
 single numeric vector to <code><a href="../reference/evaluate_signal_power.html">evaluate_signal_power()</a></code>. The
 function calculates the threshold below which 95% of the signal’s true
-variance is captured.</p>
+variance is captured. The function outputs a conservative target
+sampling rate to prevent aliasing.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Evaluate just the first participant</span></span>
 <span><span class="va">single_eval</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_signal_power.html">evaluate_signal_power</a></span><span class="op">(</span></span>
@@ -143,11 +142,6 @@ variance is captured.</p>
 <span><span class="co"># View the diagnostic plot</span></span>
 <span><span class="va">single_eval</span><span class="op">$</span><span class="va">plot</span></span></code></pre></div>
 <p><img src="determine-downsampling_files/figure-html/eval-single-1.png" class="r-plt" alt="" width="672"></p>
-<p>The function outputs a conservative target sampling rate to prevent
-aliasing.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Recommended Target Rate:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">single_eval</span><span class="op">$</span><span class="va">recommended_target_rate</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"Hz\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Recommended Target Rate: 2.81 Hz</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="best-practice-dataset-level-evaluation">Best Practice: Dataset-Level Evaluation<a class="anchor" aria-label="anchor" href="#best-practice-dataset-level-evaluation"></a>
@@ -160,7 +154,7 @@ of real time across dyads.</p>
 participants and choose a single, universal rate.
 <code><a href="../reference/evaluate_signal_power.html">evaluate_signal_power()</a></code> natively accepts lists and data
 frames, making this process completely automated.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Pass the entire list of 10 participants</span></span>
 <span><span class="va">multi_eval</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_signal_power.html">evaluate_signal_power</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="va">smile_data</span>,</span>
@@ -181,11 +175,6 @@ cutoff for each individual and then conservatively recommends the
 <strong>95th percentile</strong> of those cutoffs. This ensures you
 capture the meaningful behavioral data even for the participants with
 the fastest expressions.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"95th Percentile Cutoff:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">multi_eval</span><span class="op">$</span><span class="va">primary_cutoff_freq</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"Hz\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 95th Percentile Cutoff: 1.41 Hz</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Minimum Universal Target Rate:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">multi_eval</span><span class="op">$</span><span class="va">recommended_target_rate</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"Hz\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Minimum Universal Target Rate: 2.81 Hz</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="applying-the-downsampling">Applying the Downsampling<a class="anchor" aria-label="anchor" href="#applying-the-downsampling"></a>

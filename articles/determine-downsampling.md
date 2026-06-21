@@ -28,9 +28,6 @@ slowly (between 0.3 Hz and 1.5 Hz). We will add a small amount of
 high-frequency white noise to simulate micro-jitter from the automated
 tracking software.
 
-Because real-world interactions vary in length, we will store our
-simulated participants in a list rather than a data frame.
-
 ``` r
 
 set.seed(42)
@@ -58,7 +55,8 @@ If you are only working with one or two individuals, you can pass a
 single numeric vector to
 [`evaluate_signal_power()`](https://jmgirard.github.io/bsync/reference/evaluate_signal_power.md).
 The function calculates the threshold below which 95% of the signal’s
-true variance is captured.
+true variance is captured. The function outputs a conservative target
+sampling rate to prevent aliasing.
 
 ``` r
 
@@ -78,15 +76,6 @@ single_eval$plot
 ```
 
 ![](determine-downsampling_files/figure-html/eval-single-1.png)
-
-The function outputs a conservative target sampling rate to prevent
-aliasing.
-
-``` r
-
-cat("Recommended Target Rate:", round(single_eval$recommended_target_rate, 2), "Hz\n")
-#> Recommended Target Rate: 2.81 Hz
-```
 
 ## Best Practice: Dataset-Level Evaluation
 
@@ -125,14 +114,6 @@ When provided with multiple signals, the function calculates the cutoff
 for each individual and then conservatively recommends the **95th
 percentile** of those cutoffs. This ensures you capture the meaningful
 behavioral data even for the participants with the fastest expressions.
-
-``` r
-
-cat("95th Percentile Cutoff:", round(multi_eval$primary_cutoff_freq, 2), "Hz\n")
-#> 95th Percentile Cutoff: 1.41 Hz
-cat("Minimum Universal Target Rate:", round(multi_eval$recommended_target_rate, 2), "Hz\n")
-#> Minimum Universal Target Rate: 2.81 Hz
-```
 
 ## Applying the Downsampling
 
