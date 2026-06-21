@@ -66,7 +66,10 @@ evaluate_signal_power <- function(
 
   # Internal helper to calculate PSD for a single vector
   calc_psd <- function(vec) {
-    vec_clean <- stats::na.omit(vec)
+    # as.numeric() strips all attributes (like imputation metadata and na.action)
+    # to prevent gsignal from misinterpreting the vector as a matrix
+    vec_clean <- as.numeric(stats::na.omit(vec))
+
     if (length(vec_clean) < sample_rate) {
       return(NULL)
     }
@@ -142,7 +145,11 @@ evaluate_signal_power <- function(
 
     p <- ggplot2::ggplot(
       plot_data,
-      ggplot2::aes(x = Frequency, y = CumulativePower, group = Signal)
+      ggplot2::aes(
+        x = .data$Frequency,
+        y = .data$CumulativePower,
+        group = .data$Signal
+      )
     ) +
       ggplot2::geom_hline(
         yintercept = threshold,
