@@ -24,7 +24,9 @@ generate_surrogate_circular <- function(y, n_surrogates = 100, lag_max = NULL) {
     min_shift <- lag_max * 2
     max_shift <- n_y - min_shift
     if (max_shift <= min_shift) {
-      stop("Time series is too short relative to lag_max to perform valid circular shifts.")
+      stop(
+        "Time series is too short relative to lag_max to perform valid circular shifts."
+      )
     }
     valid_shifts <- min_shift:max_shift
   } else {

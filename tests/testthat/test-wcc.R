@@ -65,20 +65,50 @@ test_that("wcc catches invalid inputs", {
   y <- 1:10
 
   # Type and length errors for x and y
-  expect_error(wcc(x = c("a", "b"), y = y, window_size = 2, lag_max = 1), "must be a numeric vector")
-  expect_error(wcc(x = x, y = c("a", "b"), window_size = 2, lag_max = 1), "must be a numeric vector")
-  expect_error(wcc(x = 1:5, y = 1:10, window_size = 2, lag_max = 1), "same length")
+  expect_error(
+    wcc(x = c("a", "b"), y = y, window_size = 2, lag_max = 1),
+    "must be a numeric vector"
+  )
+  expect_error(
+    wcc(x = x, y = c("a", "b"), window_size = 2, lag_max = 1),
+    "must be a numeric vector"
+  )
+  expect_error(
+    wcc(x = 1:5, y = 1:10, window_size = 2, lag_max = 1),
+    "same length"
+  )
 
   # Time vector errors
-  expect_error(wcc(x, y, time = c("a", "b"), window_size = 2, lag_max = 1), "must be a numeric vector")
-  expect_error(wcc(x, y, time = 1:5, window_size = 2, lag_max = 1), "same length as")
+  expect_error(
+    wcc(x, y, time = c("a", "b"), window_size = 2, lag_max = 1),
+    "must be a numeric vector"
+  )
+  expect_error(
+    wcc(x, y, time = 1:5, window_size = 2, lag_max = 1),
+    "same length as"
+  )
 
   # Hyperparameter errors
-  expect_error(wcc(x, y, window_size = -1, lag_max = 1), "single positive integer")
-  expect_error(wcc(x, y, window_size = 2, lag_max = -1), "single positive integer")
-  expect_error(wcc(x, y, window_size = 2, lag_max = 1, window_increment = 0), "single positive integer")
-  expect_error(wcc(x, y, window_size = 2, lag_max = 1, lag_increment = 0), "single positive integer")
-  expect_error(wcc(x, y, window_size = 2, lag_max = 1, na.rm = "TRUE"), "single logical value")
+  expect_error(
+    wcc(x, y, window_size = -1, lag_max = 1),
+    "single positive integer"
+  )
+  expect_error(
+    wcc(x, y, window_size = 2, lag_max = -1),
+    "single positive integer"
+  )
+  expect_error(
+    wcc(x, y, window_size = 2, lag_max = 1, window_increment = 0),
+    "single positive integer"
+  )
+  expect_error(
+    wcc(x, y, window_size = 2, lag_max = 1, lag_increment = 0),
+    "single positive integer"
+  )
+  expect_error(
+    wcc(x, y, window_size = 2, lag_max = 1, na.rm = "TRUE"),
+    "single logical value"
+  )
 })
 
 
@@ -88,7 +118,12 @@ test_that("suggest_wcc_params calculates values correctly and warns if lag is to
   # Standard case: 30Hz, 2s duration, 1s delay
   # Suppress messages to keep the test output clean
   params <- suppressMessages(
-    suggest_wcc_params(sample_rate = 30, event_duration_sec = 2, max_delay_sec = 1, overlap_pct = 0.5)
+    suggest_wcc_params(
+      sample_rate = 30,
+      event_duration_sec = 2,
+      max_delay_sec = 1,
+      overlap_pct = 0.5
+    )
   )
 
   expect_equal(params$window_size, 240)
@@ -97,7 +132,11 @@ test_that("suggest_wcc_params calculates values correctly and warns if lag is to
 
   # Warning case: lag exceeds half the window size
   expect_warning(
-    suppressMessages(suggest_wcc_params(sample_rate = 30, event_duration_sec = 1, max_delay_sec = 5)),
+    suppressMessages(suggest_wcc_params(
+      sample_rate = 30,
+      event_duration_sec = 1,
+      max_delay_sec = 5
+    )),
     "Capping `lag_max` at half the `window_size`"
   )
 })

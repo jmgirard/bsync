@@ -21,21 +21,37 @@
 #'   (Euclidean). (default = `"L2"`)
 #' @return A list object of class "wdtw_res".
 #' @export
-wdtw <- function(x, y, time = NULL, window_size, lag_max,
-                 window_increment = 1, lag_increment = 1,
-                 scale_method = c("global", "local", "none"),
-                 distance_metric = c("L2", "L1")) {
-
+wdtw <- function(
+  x,
+  y,
+  time = NULL,
+  window_size,
+  lag_max,
+  window_increment = 1,
+  lag_increment = 1,
+  scale_method = c("global", "local", "none"),
+  distance_metric = c("L2", "L1")
+) {
   scale_method <- match.arg(scale_method)
   distance_metric <- match.arg(distance_metric)
 
-  if (!is.numeric(x)) cli::cli_abort("{.arg x} must be a numeric vector.")
-  if (!is.numeric(y)) cli::cli_abort("{.arg y} must be a numeric vector.")
-  if (length(x) != length(y)) cli::cli_abort("{.arg x} and {.arg y} must be the same length.")
+  if (!is.numeric(x)) {
+    cli::cli_abort("{.arg x} must be a numeric vector.")
+  }
+  if (!is.numeric(y)) {
+    cli::cli_abort("{.arg y} must be a numeric vector.")
+  }
+  if (length(x) != length(y)) {
+    cli::cli_abort("{.arg x} and {.arg y} must be the same length.")
+  }
 
   if (!is.null(time)) {
-    if (!is.numeric(time)) cli::cli_abort("{.arg time} must be a numeric vector.")
-    if (length(time) != length(x)) cli::cli_abort("{.arg time} must be the same length as {.arg x}.")
+    if (!is.numeric(time)) {
+      cli::cli_abort("{.arg time} must be a numeric vector.")
+    }
+    if (length(time) != length(x)) {
+      cli::cli_abort("{.arg time} must be the same length as {.arg x}.")
+    }
   }
 
   if (scale_method == "global") {
@@ -119,7 +135,6 @@ print.wdtw_res <- function(x, ...) {
 
 #' @noRd
 create_wdtw_df <- function(x, y, time = NULL, settings) {
-
   n_x <- length(x)
   w_max <- settings$window_size
   w_inc <- settings$window_increment

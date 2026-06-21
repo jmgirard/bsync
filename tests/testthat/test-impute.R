@@ -72,8 +72,8 @@ test_that("Metadata attributes are generated correctly", {
   expect_type(summary_attr, "list")
   expect_equal(summary_attr$method, "linear")
   expect_equal(summary_attr$maxgap_used, 2)
-  expect_equal(summary_attr$values_imputed, 1)    # Only the first NA is imputed
-  expect_equal(summary_attr$values_left_na, 3)    # The run of 3 NAs is left alone
+  expect_equal(summary_attr$values_imputed, 1) # Only the first NA is imputed
+  expect_equal(summary_attr$values_left_na, 3) # The run of 3 NAs is left alone
 })
 
 test_that("Data with no missing values returns identical vector and correct metadata", {

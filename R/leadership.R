@@ -12,9 +12,10 @@
 #' @return A data frame containing the rolling asymmetry index.
 #' @export
 leadership_asymmetry <- function(optima_obj, epoch_size = 10, min_valid = 3) {
-
   if (!inherits(optima_obj, c("wcc_optima", "wdtw_optima"))) {
-    cli::cli_abort("Input {.arg optima_obj} must be a {.cls wcc_optima} or {.cls wdtw_optima} object.")
+    cli::cli_abort(
+      "Input {.arg optima_obj} must be a {.cls wcc_optima} or {.cls wdtw_optima} object."
+    )
   }
 
   if (!rlang::is_integerish(epoch_size, n = 1) || epoch_size <= 0) {
@@ -77,7 +78,6 @@ leadership_asymmetry <- function(optima_obj, epoch_size = 10, min_valid = 3) {
 #' @param ... Additional arguments (not used).
 #' @export
 print.bsync_lai <- function(x, n = 5, ...) {
-
   df <- as.data.frame(x)
   valid_idx <- !is.na(df$asymmetry_index)
   valid_n <- sum(valid_idx)
@@ -104,9 +104,10 @@ print.bsync_lai <- function(x, n = 5, ...) {
 
     cli::cli_text("Showing the first {min(n, nrow(df))} result{?s}:")
     print(utils::head(df, n), row.names = FALSE)
-
   } else {
-    cli::cli_alert_warning("No valid LAI values could be computed. Check epoch size and input optima.")
+    cli::cli_alert_warning(
+      "No valid LAI values could be computed. Check epoch size and input optima."
+    )
   }
 
   invisible(x)
@@ -120,8 +121,13 @@ print.bsync_lai <- function(x, n = 5, ...) {
 #' @param smooth Logical indicating whether to add a loess smoothing line. Default is `FALSE`.
 #' @param ... Additional arguments (not used).
 #' @export
-plot.bsync_lai <- function(x, time_step = 1, line_color = "#2166AC", smooth = FALSE, ...) {
-
+plot.bsync_lai <- function(
+  x,
+  time_step = 1,
+  line_color = "#2166AC",
+  smooth = FALSE,
+  ...
+) {
   df <- as.data.frame(x)
   has_time <- isTRUE(attr(x, "has_time"))
 
@@ -136,9 +142,22 @@ plot.bsync_lai <- function(x, time_step = 1, line_color = "#2166AC", smooth = FA
   }
 
   p <- ggplot2::ggplot(data = df, ggplot2::aes(x = i, y = asymmetry_index)) +
-    ggplot2::geom_hline(yintercept = 0, color = "black", linetype = "dashed", alpha = 0.6) +
-    ggplot2::geom_step(color = line_color, alpha = 0.8, linewidth = 0.8, na.rm = TRUE) +
-    ggplot2::scale_y_continuous(limits = c(-1, 1), breaks = c(-1, -0.5, 0, 0.5, 1)) +
+    ggplot2::geom_hline(
+      yintercept = 0,
+      color = "black",
+      linetype = "dashed",
+      alpha = 0.6
+    ) +
+    ggplot2::geom_step(
+      color = line_color,
+      alpha = 0.8,
+      linewidth = 0.8,
+      na.rm = TRUE
+    ) +
+    ggplot2::scale_y_continuous(
+      limits = c(-1, 1),
+      breaks = c(-1, -0.5, 0, 0.5, 1)
+    ) +
     ggplot2::theme_minimal() +
     ggplot2::theme(
       panel.grid.minor.y = ggplot2::element_blank()
@@ -151,13 +170,14 @@ plot.bsync_lai <- function(x, time_step = 1, line_color = "#2166AC", smooth = FA
     )
 
   if (smooth) {
-    p <- p + ggplot2::geom_smooth(
-      method = "loess",
-      se = FALSE,
-      color = "#B2182B",
-      linewidth = 1,
-      na.rm = TRUE
-    )
+    p <- p +
+      ggplot2::geom_smooth(
+        method = "loess",
+        se = FALSE,
+        color = "#B2182B",
+        linewidth = 1,
+        na.rm = TRUE
+      )
   }
 
   p

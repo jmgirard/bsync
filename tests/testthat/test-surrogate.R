@@ -57,12 +57,24 @@ test_that("Evaluators error on bad surrogate matrix inputs", {
 
   # Loosened the regex to ignore cli backtick formatting
   expect_error(
-    wcc_surrogate(x, y, y_surrogates = c(1,2,3), window_size = 5, lag_max = 2),
+    wcc_surrogate(
+      x,
+      y,
+      y_surrogates = c(1, 2, 3),
+      window_size = 5,
+      lag_max = 2
+    ),
     "must be a matrix"
   )
 
   expect_error(
-    wdtw_surrogate(x, y, y_surrogates = c(1,2,3), window_size = 5, lag_max = 2),
+    wdtw_surrogate(
+      x,
+      y,
+      y_surrogates = c(1, 2, 3),
+      window_size = 5,
+      lag_max = 2
+    ),
     "must be a matrix"
   )
 
@@ -78,7 +90,13 @@ test_that("WCC surrogate pipeline integrates and returns valid object", {
   y <- rnorm(50)
   y_surr_mat <- generate_surrogate_circular(y, n_surrogates = 5, lag_max = 5)
 
-  res <- wcc_surrogate(x, y, y_surrogates = y_surr_mat, window_size = 10, lag_max = 5)
+  res <- wcc_surrogate(
+    x,
+    y,
+    y_surrogates = y_surr_mat,
+    window_size = 10,
+    lag_max = 5
+  )
 
   expect_s3_class(res, "wcc_surr")
   expect_type(res, "list")
@@ -92,7 +110,13 @@ test_that("WDTW surrogate pipeline integrates and returns valid object", {
   y_surr_mat <- generate_surrogate_circular(y, n_surrogates = 5, lag_max = 5)
 
   # FIX 1: lag_max = 5 added
-  res <- wdtw_surrogate(x, y, y_surrogates = y_surr_mat, window_size = 10, lag_max = 5)
+  res <- wdtw_surrogate(
+    x,
+    y,
+    y_surrogates = y_surr_mat,
+    window_size = 10,
+    lag_max = 5
+  )
 
   expect_s3_class(res, "wdtw_surr")
   expect_type(res, "list")
@@ -106,7 +130,13 @@ test_that("WGranger surrogate pipeline integrates and returns valid object", {
   y_surr_mat <- generate_surrogate_circular(y, n_surrogates = 5, lag_max = 5)
 
   # FIX 2: ar_order = 1 used instead of order = 1
-  res <- wgranger_surrogate(x, y, y_surrogates = y_surr_mat, window_size = 10, ar_order = 1)
+  res <- wgranger_surrogate(
+    x,
+    y,
+    y_surrogates = y_surr_mat,
+    window_size = 10,
+    ar_order = 1
+  )
 
   expect_s3_class(res, "wgranger_surr")
   expect_type(res, "list")
@@ -119,16 +149,19 @@ test_that("WGranger surrogate pipeline integrates and returns valid object", {
 # =========================================================================
 
 test_that("Print methods return silently and output text", {
-
   mock_wcc_obj <- list(
-    observed_z = 0.8, surrogate_z = c(0.1, 0.2),
-    p_value = 0.01, n_surrogates = 100
+    observed_z = 0.8,
+    surrogate_z = c(0.1, 0.2),
+    p_value = 0.01,
+    n_surrogates = 100
   )
   class(mock_wcc_obj) <- c("wcc_surr", "list")
 
   mock_wdtw_obj <- list(
-    observed_cost = 10, surrogate_cost = c(20, 25),
-    p_value = 0.6, n_surrogates = 100
+    observed_cost = 10,
+    surrogate_cost = c(20, 25),
+    p_value = 0.6,
+    n_surrogates = 100
   )
   class(mock_wdtw_obj) <- c("wdtw_surr", "list")
 

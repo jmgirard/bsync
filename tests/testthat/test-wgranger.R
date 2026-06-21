@@ -11,11 +11,13 @@ time_vec <- seq(0, by = 0.5, length.out = n_len)
 
 # 1. X strongly predicts Y (Y is lag-1 of X with minor noise)
 sig_x <- rnorm(n_len)
-sig_y_caused_by_x <- dplyr::lag(sig_x, n = 1, default = 0) + rnorm(n_len, sd = 0.1)
+sig_y_caused_by_x <- dplyr::lag(sig_x, n = 1, default = 0) +
+  rnorm(n_len, sd = 0.1)
 
 # 2. Y strongly predicts X (X is lag-2 of Y with minor noise)
 sig_y <- rnorm(n_len)
-sig_x_caused_by_y <- dplyr::lag(sig_y, n = 2, default = 0) + rnorm(n_len, sd = 0.1)
+sig_x_caused_by_y <- dplyr::lag(sig_y, n = 2, default = 0) +
+  rnorm(n_len, sd = 0.1)
 
 
 # -------------------------------------------------------------------------
@@ -23,31 +25,62 @@ sig_x_caused_by_y <- dplyr::lag(sig_y, n = 2, default = 0) + rnorm(n_len, sd = 0
 # -------------------------------------------------------------------------
 
 test_that("wgranger input assertions trigger appropriate errors", {
-
   # Vector type and length assertions
-  expect_error(wgranger(x = c("a", "b"), y = sig_y, window_size = 20), "must be a numeric vector")
-  expect_error(wgranger(x = sig_x, y = c("a", "b"), window_size = 20), "must be a numeric vector")
-  expect_error(wgranger(x = sig_x, y = sig_y[-1], window_size = 20), "must be the same length")
+  expect_error(
+    wgranger(x = c("a", "b"), y = sig_y, window_size = 20),
+    "must be a numeric vector"
+  )
+  expect_error(
+    wgranger(x = sig_x, y = c("a", "b"), window_size = 20),
+    "must be a numeric vector"
+  )
+  expect_error(
+    wgranger(x = sig_x, y = sig_y[-1], window_size = 20),
+    "must be the same length"
+  )
 
   # Time vector assertions
-  expect_error(wgranger(sig_x, sig_y, time = c("t1", "t2"), window_size = 20), "must be a numeric vector")
-  expect_error(wgranger(sig_x, sig_y, time = 1:5, window_size = 20), "must be the same length as")
+  expect_error(
+    wgranger(sig_x, sig_y, time = c("t1", "t2"), window_size = 20),
+    "must be a numeric vector"
+  )
+  expect_error(
+    wgranger(sig_x, sig_y, time = 1:5, window_size = 20),
+    "must be the same length as"
+  )
 
   # Integer and positivity assertions
-  expect_error(wgranger(sig_x, sig_y, window_size = -5), "single positive integer")
-  expect_error(wgranger(sig_x, sig_y, window_size = 10, ar_order = 0), "single positive integer")
-  expect_error(wgranger(sig_x, sig_y, window_size = 10, window_increment = -1), "single positive integer")
+  expect_error(
+    wgranger(sig_x, sig_y, window_size = -5),
+    "single positive integer"
+  )
+  expect_error(
+    wgranger(sig_x, sig_y, window_size = 10, ar_order = 0),
+    "single positive integer"
+  )
+  expect_error(
+    wgranger(sig_x, sig_y, window_size = 10, window_increment = -1),
+    "single positive integer"
+  )
 })
 
 test_that("wgranger returns expected structure and classes", {
-  res <- wgranger(sig_x, sig_y, window_size = 20, ar_order = 1, window_increment = 5)
+  res <- wgranger(
+    sig_x,
+    sig_y,
+    window_size = 20,
+    ar_order = 1,
+    window_increment = 5
+  )
 
   expect_s3_class(res, "wgranger_res")
   expect_type(res$settings, "list")
   expect_s3_class(res$results_df, "data.frame")
 
   # Check expected columns
-  expect_true(all(c("i", "f_xy", "p_xy", "f_yx", "p_yx") %in% names(res$results_df)))
+  expect_true(all(
+    c("i", "f_xy", "p_xy", "f_yx", "p_yx") %in% names(res$results_df)
+  ))
 
   # Check that row count aligns with windowing math
   expected_rows <- floor((n_len - 20) / 5)
@@ -145,7 +178,13 @@ test_that("S3 methods for wgranger_res work without error", {
 
 test_that("plot.wgranger_res handles metrics and axis scaling correctly", {
   res_raw <- wgranger(sig_x, sig_y, window_size = 20, ar_order = 1)
-  res_time <- wgranger(sig_x, sig_y, time = time_vec, window_size = 20, ar_order = 1)
+  res_time <- wgranger(
+    sig_x,
+    sig_y,
+    time = time_vec,
+    window_size = 20,
+    ar_order = 1
+  )
 
   # 1. Default plot (F-statistic, no native time)
   p_f <- plot(res_raw)
@@ -169,5 +208,7 @@ test_that("plot.wgranger_res handles metrics and axis scaling correctly", {
 
   # 5. Smooth toggle adds a layer
   p_smooth <- plot(res_raw, smooth = TRUE)
-  expect_true(any(sapply(p_smooth$layers, function(l) inherits(l$geom, "GeomSmooth"))))
+  expect_true(any(sapply(p_smooth$layers, function(l) {
+    inherits(l$geom, "GeomSmooth")
+  })))
 })

@@ -15,13 +15,26 @@
 #'   frequencies, and optionally a `ggplot` object. If multiple signals are provided,
 #'   summary statistics of the cutoffs are also returned.
 #' @export
-evaluate_signal_power <- function(x, sample_rate, threshold = 0.95, plot = TRUE) {
-
-  if (!is.numeric(sample_rate) || length(sample_rate) != 1 || sample_rate <= 0) {
+evaluate_signal_power <- function(
+  x,
+  sample_rate,
+  threshold = 0.95,
+  plot = TRUE
+) {
+  if (
+    !is.numeric(sample_rate) || length(sample_rate) != 1 || sample_rate <= 0
+  ) {
     cli::cli_abort("{.arg sample_rate} must be a single positive number.")
   }
-  if (!is.numeric(threshold) || length(threshold) != 1 || threshold <= 0 || threshold >= 1) {
-    cli::cli_abort("{.arg threshold} must be a single numeric value between 0 and 1.")
+  if (
+    !is.numeric(threshold) ||
+      length(threshold) != 1 ||
+      threshold <= 0 ||
+      threshold >= 1
+  ) {
+    cli::cli_abort(
+      "{.arg threshold} must be a single numeric value between 0 and 1."
+    )
   }
   if (!rlang::is_logical(plot, n = 1)) {
     cli::cli_abort("{.arg plot} must be a single logical value.")
@@ -32,21 +45,31 @@ evaluate_signal_power <- function(x, sample_rate, threshold = 0.95, plot = TRUE)
     x_list <- list(Signal = x)
   } else if (is.data.frame(x)) {
     x_list <- as.list(dplyr::select(x, dplyr::where(is.numeric)))
-    if (length(x_list) == 0) cli::cli_abort("{.arg x} contains no numeric columns.")
+    if (length(x_list) == 0) {
+      cli::cli_abort("{.arg x} contains no numeric columns.")
+    }
   } else if (is.list(x)) {
     if (!all(vapply(x, is.numeric, logical(1)))) {
-      cli::cli_abort("All elements in the list {.arg x} must be numeric vectors.")
+      cli::cli_abort(
+        "All elements in the list {.arg x} must be numeric vectors."
+      )
     }
     x_list <- x
-    if (is.null(names(x_list))) names(x_list) <- paste0("Signal_", seq_along(x_list))
+    if (is.null(names(x_list))) {
+      names(x_list) <- paste0("Signal_", seq_along(x_list))
+    }
   } else {
-    cli::cli_abort("{.arg x} must be a numeric vector, a list of numeric vectors, or a data frame.")
+    cli::cli_abort(
+      "{.arg x} must be a numeric vector, a list of numeric vectors, or a data frame."
+    )
   }
 
   # Internal helper to calculate PSD for a single vector
   calc_psd <- function(vec) {
     vec_clean <- stats::na.omit(vec)
-    if (length(vec_clean) < sample_rate) return(NULL)
+    if (length(vec_clean) < sample_rate) {
+      return(NULL)
+    }
 
     psd_res <- gsignal::pwelch(vec_clean, fs = sample_rate)
     cum_power <- cumsum(psd_res$spec) / sum(psd_res$spec)
@@ -65,7 +88,9 @@ evaluate_signal_power <- function(x, sample_rate, threshold = 0.95, plot = TRUE)
   # Filter out any that failed (e.g., due to too many NAs)
   results <- results[!vapply(results, is.null, logical(1))]
   if (length(results) == 0) {
-    cli::cli_abort("No signals contained enough non-missing data to calculate PSD.")
+    cli::cli_abort(
+      "No signals contained enough non-missing data to calculate PSD."
+    )
   }
 
   # Extract cutoffs and determine the recommendation
@@ -81,11 +106,15 @@ evaluate_signal_power <- function(x, sample_rate, threshold = 0.95, plot = TRUE)
   } else {
     final_cutoff <- all_cutoffs[[1]]
     cli::cli_h1("Signal Power Evaluation")
-    cli::cli_text("{threshold * 100}% of signal power is captured below {round(final_cutoff, 2)} Hz.")
+    cli::cli_text(
+      "{threshold * 100}% of signal power is captured below {round(final_cutoff, 2)} Hz."
+    )
   }
 
   recommended_rate <- final_cutoff * 2
-  cli::cli_alert_success("To prevent aliasing, the minimum universal sampling rate is {round(recommended_rate, 2)} Hz.")
+  cli::cli_alert_success(
+    "To prevent aliasing, the minimum universal sampling rate is {round(recommended_rate, 2)} Hz."
+  )
 
   # Prepare the output object
   out <- list(
@@ -100,25 +129,46 @@ evaluate_signal_power <- function(x, sample_rate, threshold = 0.95, plot = TRUE)
 
   # Generate Plot
   if (plot) {
-    plot_data <- do.call(rbind, lapply(names(results), function(nm) {
-      data.frame(
-        Signal = nm,
-        Frequency = results[[nm]]$freqs,
-        CumulativePower = results[[nm]]$cum_power
-      )
-    }))
+    plot_data <- do.call(
+      rbind,
+      lapply(names(results), function(nm) {
+        data.frame(
+          Signal = nm,
+          Frequency = results[[nm]]$freqs,
+          CumulativePower = results[[nm]]$cum_power
+        )
+      })
+    )
 
-    p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Frequency, y = CumulativePower, group = Signal)) +
-      ggplot2::geom_hline(yintercept = threshold, color = "gray50", linetype = "dashed") +
-      ggplot2::scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +
+    p <- ggplot2::ggplot(
+      plot_data,
+      ggplot2::aes(x = Frequency, y = CumulativePower, group = Signal)
+    ) +
+      ggplot2::geom_hline(
+        yintercept = threshold,
+        color = "gray50",
+        linetype = "dashed"
+      ) +
+      ggplot2::scale_y_continuous(
+        labels = scales::percent_format(),
+        limits = c(0, 1)
+      ) +
       ggplot2::scale_x_continuous(expand = c(0, 0)) +
       ggplot2::theme_minimal() +
       ggplot2::theme(
         panel.grid.minor = ggplot2::element_blank(),
-        panel.border = ggplot2::element_rect(color = "black", fill = NA, linewidth = 0.5)
+        panel.border = ggplot2::element_rect(
+          color = "black",
+          fill = NA,
+          linewidth = 0.5
+        )
       ) +
       ggplot2::labs(
-        title = ifelse(is_multi, "Cumulative Power of Multiple Time Series", "Cumulative Power of Time Series"),
+        title = ifelse(
+          is_multi,
+          "Cumulative Power of Multiple Time Series",
+          "Cumulative Power of Time Series"
+        ),
         x = "Frequency (Hz)",
         y = "Cumulative Proportion of Power"
       )
@@ -126,13 +176,30 @@ evaluate_signal_power <- function(x, sample_rate, threshold = 0.95, plot = TRUE)
     if (is_multi) {
       p <- p +
         ggplot2::geom_line(color = "#2166AC", alpha = 0.15, linewidth = 0.5) +
-        ggplot2::geom_vline(xintercept = final_cutoff, color = "#B2182B", linetype = "dashed", linewidth = 1) +
-        ggplot2::annotate("text", x = final_cutoff + 0.2, y = 0.1, label = "95th Percentile Cutoff",
-                          color = "#B2182B", hjust = 0, size = 3.5)
+        ggplot2::geom_vline(
+          xintercept = final_cutoff,
+          color = "#B2182B",
+          linetype = "dashed",
+          linewidth = 1
+        ) +
+        ggplot2::annotate(
+          "text",
+          x = final_cutoff + 0.2,
+          y = 0.1,
+          label = "95th Percentile Cutoff",
+          color = "#B2182B",
+          hjust = 0,
+          size = 3.5
+        )
     } else {
       p <- p +
         ggplot2::geom_line(color = "#2166AC", linewidth = 1) +
-        ggplot2::geom_vline(xintercept = final_cutoff, color = "#B2182B", linetype = "dashed", linewidth = 1)
+        ggplot2::geom_vline(
+          xintercept = final_cutoff,
+          color = "#B2182B",
+          linetype = "dashed",
+          linewidth = 1
+        )
     }
 
     out$plot <- p

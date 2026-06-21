@@ -19,13 +19,22 @@ test_that("pick_optima validates inputs and handles errors properly", {
   mock_wcc <- create_mock_wcc(c(0.1, 0.5, 0.9, 0.5, 0.1), tau_max = 2)
 
   # Test class check
-  expect_error(pick_optima(list(), search_method = "global"), "<wcc_res> or <wdtw_res>")
+  expect_error(
+    pick_optima(list(), search_method = "global"),
+    "<wcc_res> or <wdtw_res>"
+  )
 
   # Test even L_size C++ exception (requires local search)
-  expect_error(pick_optima(mock_wcc, L_size = 4, search_method = "local"), "L_size must be an odd integer")
+  expect_error(
+    pick_optima(mock_wcc, L_size = 4, search_method = "local"),
+    "L_size must be an odd integer"
+  )
 
   # Test missing L_size for local search
-  expect_error(pick_optima(mock_wcc, search_method = "local"), "must be provided")
+  expect_error(
+    pick_optima(mock_wcc, search_method = "local"),
+    "must be provided"
+  )
 })
 
 test_that("pick_optima finds a perfect central peak (local search)", {
@@ -61,11 +70,21 @@ test_that("strict_monotonic toggle enforces flank constraints (local search)", {
   mock_wcc <- create_mock_wcc(c(0.7, 0.5, 0.9, 0.4, 0.1), tau_max = 2)
 
   # With strict_monotonic = FALSE (default), it should find the local max
-  res_loose <- pick_optima(mock_wcc, L_size = 5, strict_monotonic = FALSE, search_method = "local")
+  res_loose <- pick_optima(
+    mock_wcc,
+    L_size = 5,
+    strict_monotonic = FALSE,
+    search_method = "local"
+  )
   expect_equal(res_loose$optimum_lag, 0)
 
   # With strict_monotonic = TRUE, it should reject this peak and return NAs
-  res_strict <- pick_optima(mock_wcc, L_size = 5, strict_monotonic = TRUE, search_method = "local")
+  res_strict <- pick_optima(
+    mock_wcc,
+    L_size = 5,
+    strict_monotonic = TRUE,
+    search_method = "local"
+  )
   expect_true(is.na(res_strict$optimum_lag))
   expect_true(is.na(res_strict$optimum_value))
 })
@@ -109,7 +128,11 @@ test_that("print.wcc_optima produces expected console output", {
 test_that("summary.wcc_optima calculates and prints correctly", {
   # Create a scenario with one valid peak and one invalid peak
   df_valid <- data.frame(i = 100, tau = -2:2, wcc = c(0.1, 0.5, 0.9, 0.5, 0.1))
-  df_invalid <- data.frame(i = 101, tau = -2:2, wcc = c(0.9, 0.7, 0.5, 0.4, 0.1))
+  df_invalid <- data.frame(
+    i = 101,
+    tau = -2:2,
+    wcc = c(0.9, 0.7, 0.5, 0.4, 0.1)
+  )
 
   mock_wcc <- list(
     results_df = rbind(df_valid, df_invalid),
@@ -117,7 +140,12 @@ test_that("summary.wcc_optima calculates and prints correctly", {
   )
   class(mock_wcc) <- c("wcc_res", "list")
 
-  res <- pick_optima(mock_wcc, L_size = 5, strict_monotonic = TRUE, search_method = "local")
+  res <- pick_optima(
+    mock_wcc,
+    L_size = 5,
+    strict_monotonic = TRUE,
+    search_method = "local"
+  )
 
   expect_snapshot(summary(res))
 })
@@ -172,7 +200,13 @@ test_that("wdtw accurately calculates distances for identical and shifted series
   y_ident <- master[1:30]
 
   # Set scale_method = "none" to verify the absolute raw distance logic
-  res_ident <- wdtw(x_ident, y_ident, window_size = 10, lag_max = 3, scale_method = "none")
+  res_ident <- wdtw(
+    x_ident,
+    y_ident,
+    window_size = 10,
+    lag_max = 3,
+    scale_method = "none"
+  )
   df_ident <- res_ident$results_df
 
   # The distance at lag 0 should be exactly 0 for all time windows
@@ -183,7 +217,13 @@ test_that("wdtw accurately calculates distances for identical and shifted series
   x_shift <- master[2:31]
   y_shift <- master[1:30]
 
-  res_shift <- wdtw(x_shift, y_shift, window_size = 10, lag_max = 3, scale_method = "none")
+  res_shift <- wdtw(
+    x_shift,
+    y_shift,
+    window_size = 10,
+    lag_max = 3,
+    scale_method = "none"
+  )
   opt_shift <- pick_optima(res_shift, search_method = "global")
 
   # The global minimum distance should be exactly 0 at a lag of magnitude 1
@@ -250,14 +290,22 @@ test_that("summary methods gracefully handle objects with zero valid optima", {
 test_that("pick_optima respects explicit find_min overrides", {
   # WCC normally looks for peaks (FALSE). Let's force it to look for valleys (TRUE)
   mock_wcc <- create_mock_wcc(c(0.9, 0.5, 0.1, 0.5, 0.9), tau_max = 2)
-  res_wcc_min <- pick_optima(mock_wcc, search_method = "global", find_min = TRUE)
+  res_wcc_min <- pick_optima(
+    mock_wcc,
+    search_method = "global",
+    find_min = TRUE
+  )
 
   expect_equal(res_wcc_min$optimum_value, 0.1)
   expect_equal(res_wcc_min$optimum_lag, 0)
 
   # WDTW normally looks for valleys (TRUE). Let's force it to look for peaks (FALSE)
   mock_wdtw <- create_mock_wdtw(c(1.1, 5.0, 9.9, 5.0, 1.1), tau_max = 2)
-  res_wdtw_max <- pick_optima(mock_wdtw, search_method = "global", find_min = FALSE)
+  res_wdtw_max <- pick_optima(
+    mock_wdtw,
+    search_method = "global",
+    find_min = FALSE
+  )
 
   expect_equal(res_wdtw_max$optimum_value, 9.9)
   expect_equal(res_wdtw_max$optimum_lag, 0)

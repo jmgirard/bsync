@@ -20,21 +20,32 @@
 #'   optima with a distance above this threshold are set to NA. Default is `NULL`.
 #' @return A data frame of class "wcc_optima" or "wdtw_optima".
 #' @export
-pick_optima <- function(obj, L_size = NULL, strict_monotonic = FALSE,
-  find_min = NULL, search_method = NULL, threshold = NULL) {
-
+pick_optima <- function(
+  obj,
+  L_size = NULL,
+  strict_monotonic = FALSE,
+  find_min = NULL,
+  search_method = NULL,
+  threshold = NULL
+) {
   if (inherits(obj, "wcc_res")) {
     metric_col <- "wcc"
     out_class <- "wcc_optima"
-    if (is.null(find_min)) find_min <- FALSE
+    if (is.null(find_min)) {
+      find_min <- FALSE
+    }
     if (is.null(search_method)) search_method <- "local"
   } else if (inherits(obj, "wdtw_res")) {
     metric_col <- "dtw_dist"
     out_class <- "wdtw_optima"
-    if (is.null(find_min)) find_min <- TRUE
+    if (is.null(find_min)) {
+      find_min <- TRUE
+    }
     if (is.null(search_method)) search_method <- "global"
   } else {
-    cli::cli_abort("Input {.arg obj} must be a {.cls wcc_res} or {.cls wdtw_res} object.")
+    cli::cli_abort(
+      "Input {.arg obj} must be a {.cls wcc_res} or {.cls wdtw_res} object."
+    )
   }
 
   tau_max <- obj$settings$lag_max
@@ -42,9 +53,10 @@ pick_optima <- function(obj, L_size = NULL, strict_monotonic = FALSE,
   df <- df[order(df$i, df$tau), ]
 
   if (search_method == "local") {
-
     if (is.null(L_size)) {
-      cli::cli_abort("{.arg L_size} must be provided when using {.code search_method = 'local'}.")
+      cli::cli_abort(
+        "{.arg L_size} must be provided when using {.code search_method = 'local'}."
+      )
     }
 
     i_vals <- unique(df$i)
@@ -59,26 +71,39 @@ pick_optima <- function(obj, L_size = NULL, strict_monotonic = FALSE,
       strict_monotonic = strict_monotonic,
       find_min = find_min
     )
-
   } else if (search_method == "global") {
-
     out_df <- df |>
       dplyr::filter(!is.na(.data[[metric_col]]))
 
     if (find_min) {
       out_df <- out_df |>
-        dplyr::slice_min(order_by = .data[[metric_col]], n = 1, with_ties = FALSE, by = i)
+        dplyr::slice_min(
+          order_by = .data[[metric_col]],
+          n = 1,
+          with_ties = FALSE,
+          by = i
+        )
     } else {
       out_df <- out_df |>
-        dplyr::slice_max(order_by = .data[[metric_col]], n = 1, with_ties = FALSE, by = i)
+        dplyr::slice_max(
+          order_by = .data[[metric_col]],
+          n = 1,
+          with_ties = FALSE,
+          by = i
+        )
     }
 
     out_df <- out_df |>
-      dplyr::select(i, optimum_lag = tau, optimum_value = dplyr::all_of(metric_col)) |>
+      dplyr::select(
+        i,
+        optimum_lag = tau,
+        optimum_value = dplyr::all_of(metric_col)
+      ) |>
       as.data.frame()
-
   } else {
-    cli::cli_abort("{.arg search_method} must be either {.val local} or {.val global}.")
+    cli::cli_abort(
+      "{.arg search_method} must be either {.val local} or {.val global}."
+    )
   }
 
   if (!is.null(threshold)) {
@@ -179,7 +204,9 @@ print_optima <- function(x, n, title) {
 
     if (total_optima > n) {
       remaining <- total_optima - n
-      cli::cli_text("{cli::col_grey('# ... with ', remaining, ' more row', ifelse(remaining == 1, '', 's'))}")
+      cli::cli_text(
+        "{cli::col_grey('# ... with ', remaining, ' more row', ifelse(remaining == 1, '', 's'))}"
+      )
     }
   } else {
     cli::cli_alert_info("No optima found matching the criteria.")

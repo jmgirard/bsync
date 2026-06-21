@@ -38,17 +38,34 @@
 #' @return A list object of class "wcc" containing the results matrix and useful
 #'   summaries of it.
 #' @export
-wcc <- function(x, y, time = NULL, window_size, lag_max,
-                window_increment = 1, lag_increment = 1, na.rm = TRUE) {
-
+wcc <- function(
+  x,
+  y,
+  time = NULL,
+  window_size,
+  lag_max,
+  window_increment = 1,
+  lag_increment = 1,
+  na.rm = TRUE
+) {
   # Assertions
-  if (!is.numeric(x)) cli::cli_abort("{.arg x} must be a numeric vector.")
-  if (!is.numeric(y)) cli::cli_abort("{.arg y} must be a numeric vector.")
-  if (length(x) != length(y)) cli::cli_abort("{.arg x} and {.arg y} must be the same length.")
+  if (!is.numeric(x)) {
+    cli::cli_abort("{.arg x} must be a numeric vector.")
+  }
+  if (!is.numeric(y)) {
+    cli::cli_abort("{.arg y} must be a numeric vector.")
+  }
+  if (length(x) != length(y)) {
+    cli::cli_abort("{.arg x} and {.arg y} must be the same length.")
+  }
 
   if (!is.null(time)) {
-    if (!is.numeric(time)) cli::cli_abort("{.arg time} must be a numeric vector.")
-    if (length(time) != length(x)) cli::cli_abort("{.arg time} must be the same length as {.arg x}.")
+    if (!is.numeric(time)) {
+      cli::cli_abort("{.arg time} must be a numeric vector.")
+    }
+    if (length(time) != length(x)) {
+      cli::cli_abort("{.arg time} must be the same length as {.arg x}.")
+    }
   }
 
   if (!rlang::is_integerish(window_size, n = 1) || window_size <= 0) {
@@ -110,11 +127,12 @@ wcc <- function(x, y, time = NULL, window_size, lag_max,
 #'   Default is 0.5 (50 percent overlap).
 #' @return A list of recommended parameters ready to be passed to `wcc()`.
 #' @export
-suggest_wcc_params <- function(sample_rate,
-                               event_duration_sec = 2,
-                               max_delay_sec = 3,
-                               overlap_pct = 0.5) {
-
+suggest_wcc_params <- function(
+  sample_rate,
+  event_duration_sec = 2,
+  max_delay_sec = 3,
+  overlap_pct = 0.5
+) {
   suggested_window <- round((event_duration_sec * 4) * sample_rate)
   suggested_lag <- round(max_delay_sec * sample_rate)
 
@@ -190,7 +208,11 @@ summary.wcc_res <- function(object, ...) {
 
   cli::cli_h2("Cross-Correlation Value Distribution")
   wcc_vals <- object$results_df$wcc
-  q_vals <- stats::quantile(wcc_vals, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+  q_vals <- stats::quantile(
+    wcc_vals,
+    probs = c(0, 0.25, 0.5, 0.75, 1),
+    na.rm = TRUE
+  )
 
   print(round(q_vals, 4))
 
@@ -206,7 +228,6 @@ summary.wcc_res <- function(object, ...) {
 
 #' @noRd
 create_wcc_df <- function(x, y, time = NULL, settings) {
-
   n_x <- length(x)
   w_max <- settings$window_size
   w_inc <- settings$window_increment

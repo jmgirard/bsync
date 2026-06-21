@@ -7,10 +7,13 @@
 #' @param zero_line_color Character string specifying the color of the zero-lag line. Default is "black".
 #' @param ... Additional arguments (not used).
 #' @export
-plot.wdtw_res <- function(x, time_step = 1,
-                          show_zero_lag = TRUE,
-                          zero_line_color = "black", ...) {
-
+plot.wdtw_res <- function(
+  x,
+  time_step = 1,
+  show_zero_lag = TRUE,
+  zero_line_color = "black",
+  ...
+) {
   df <- x$results_df
   has_time <- isTRUE(x$settings$has_time)
 
@@ -32,7 +35,10 @@ plot.wdtw_res <- function(x, time_step = 1,
     y_label <- "Elapsed Time Window Index"
   }
 
-  p <- ggplot2::ggplot(data = df, ggplot2::aes(x = tau, y = i, fill = dtw_dist)) +
+  p <- ggplot2::ggplot(
+    data = df,
+    ggplot2::aes(x = tau, y = i, fill = dtw_dist)
+  ) +
     ggplot2::geom_tile(na.rm = TRUE) +
     ggplot2::scale_fill_gradientn(
       colors = grDevices::hcl.colors(100, "viridis", rev = TRUE),
@@ -44,7 +50,11 @@ plot.wdtw_res <- function(x, time_step = 1,
     ggplot2::theme_minimal() +
     ggplot2::theme(
       panel.grid = ggplot2::element_blank(),
-      panel.border = ggplot2::element_rect(color = "black", fill = NA, linewidth = 0.5)
+      panel.border = ggplot2::element_rect(
+        color = "black",
+        fill = NA,
+        linewidth = 0.5
+      )
     ) +
     ggplot2::labs(
       x = x_label,
@@ -53,13 +63,14 @@ plot.wdtw_res <- function(x, time_step = 1,
 
   # Add the optional zero-lag reference line
   if (show_zero_lag) {
-    p <- p + ggplot2::geom_vline(
-      xintercept = 0,
-      color = zero_line_color,
-      linetype = "dashed",
-      alpha = 0.5,
-      linewidth = 0.5
-    )
+    p <- p +
+      ggplot2::geom_vline(
+        xintercept = 0,
+        color = zero_line_color,
+        linetype = "dashed",
+        alpha = 0.5,
+        linewidth = 0.5
+      )
   }
 
   p

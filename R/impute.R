@@ -4,7 +4,9 @@
 #' @return A data frame with summary statistics about missing values.
 #' @export
 diagnose_ts_gaps <- function(x) {
-  if (!is.numeric(x)) stop("Input must be numeric.")
+  if (!is.numeric(x)) {
+    stop("Input must be numeric.")
+  }
 
   total_na <- sum(is.na(x))
   percent_na <- (total_na / length(x)) * 100
@@ -35,7 +37,9 @@ diagnose_ts_gaps <- function(x) {
 impute_ts_gaps <- function(x, method = c("linear", "spline"), maxgap = 5) {
   method <- match.arg(method)
 
-  if (!is.numeric(x)) stop("Input time series 'x' must be numeric.")
+  if (!is.numeric(x)) {
+    stop("Input time series 'x' must be numeric.")
+  }
 
   original_na <- sum(is.na(x))
 
@@ -68,11 +72,21 @@ impute_ts_gaps <- function(x, method = c("linear", "spline"), maxgap = 5) {
 
   if (method == "linear") {
     # rule = 1 ensures approx does not extrapolate
-    imp_res <- stats::approx(x = valid_idx, y = x[valid_idx], xout = seq_along(x), rule = 1)
+    imp_res <- stats::approx(
+      x = valid_idx,
+      y = x[valid_idx],
+      xout = seq_along(x),
+      rule = 1
+    )
     x_imp <- imp_res$y
   } else if (method == "spline") {
     # Spline extrapolates by default, requiring manual cleanup below
-    imp_res <- stats::spline(x = valid_idx, y = x[valid_idx], xout = seq_along(x), method = "fmm")
+    imp_res <- stats::spline(
+      x = valid_idx,
+      y = x[valid_idx],
+      xout = seq_along(x),
+      method = "fmm"
+    )
     x_imp <- imp_res$y
   }
 
@@ -99,8 +113,14 @@ impute_ts_gaps <- function(x, method = c("linear", "spline"), maxgap = 5) {
       x_imp[start_idx[i]:end_idx[i]] <- NA
     }
 
-    warning(sprintf("Found %d gap(s) exceeding maxgap (%d). These were left as NA.",
-                    length(long_gaps), maxgap), call. = FALSE)
+    warning(
+      sprintf(
+        "Found %d gap(s) exceeding maxgap (%d). These were left as NA.",
+        length(long_gaps),
+        maxgap
+      ),
+      call. = FALSE
+    )
   }
 
   # Calculate post-imputation metadata

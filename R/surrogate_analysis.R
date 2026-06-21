@@ -22,19 +22,38 @@
 #' @param na.rm A logical indicating whether to remove missing values. Default is `TRUE`.
 #' @return A list object of class "wcc_surr".
 #' @export
-wcc_surrogate <- function(x, y, y_surrogates, time = NULL, window_size, lag_max,
-                          window_increment = 1, lag_increment = 1, na.rm = TRUE) {
-
-  if (!is.matrix(y_surrogates)) cli::cli_abort("{.arg y_surrogates} must be a matrix.")
-  if (nrow(y_surrogates) != length(y)) cli::cli_abort("{.arg y_surrogates} must have the same number of rows as length of {.arg y}.")
+wcc_surrogate <- function(
+  x,
+  y,
+  y_surrogates,
+  time = NULL,
+  window_size,
+  lag_max,
+  window_increment = 1,
+  lag_increment = 1,
+  na.rm = TRUE
+) {
+  if (!is.matrix(y_surrogates)) {
+    cli::cli_abort("{.arg y_surrogates} must be a matrix.")
+  }
+  if (nrow(y_surrogates) != length(y)) {
+    cli::cli_abort(
+      "{.arg y_surrogates} must have the same number of rows as length of {.arg y}."
+    )
+  }
 
   n_surrogates <- ncol(y_surrogates)
 
   # 1. Calculate observed WCC
   obs_wcc <- wcc(
-    x = x, y = y, time = time, window_size = window_size,
-    lag_max = lag_max, window_increment = window_increment,
-    lag_increment = lag_increment, na.rm = na.rm
+    x = x,
+    y = y,
+    time = time,
+    window_size = window_size,
+    lag_max = lag_max,
+    window_increment = window_increment,
+    lag_increment = lag_increment,
+    na.rm = na.rm
   )
   obs_z <- obs_wcc$fisher_z
 
@@ -51,23 +70,28 @@ wcc_surrogate <- function(x, y, y_surrogates, time = NULL, window_size, lag_max,
   x_cpp <- as.double(x)
 
   # 3. Parallel-ready Loop using future.apply
-  surrogate_zs <- future.apply::future_vapply(seq_len(n_surrogates), function(idx) {
-    y_surr <- as.double(y_surrogates[, idx])
+  surrogate_zs <- future.apply::future_vapply(
+    seq_len(n_surrogates),
+    function(idx) {
+      y_surr <- as.double(y_surrogates[, idx])
 
-    wcc_vals <- calc_wcc_cpp(
-      x = x_cpp,
-      y = y_surr,
-      i_vals = i_vals,
-      tau_vals = tau_vals,
-      w_max = window_size
-    )
+      wcc_vals <- calc_wcc_cpp(
+        x = x_cpp,
+        y = y_surr,
+        i_vals = i_vals,
+        tau_vals = tau_vals,
+        w_max = window_size
+      )
 
-    wcc_vals[wcc_vals == -1] <- -0.99
-    wcc_vals[wcc_vals == 1] <- 0.99
-    z_vals <- 0.5 * base::log((1 + wcc_vals) / (1 - wcc_vals))
+      wcc_vals[wcc_vals == -1] <- -0.99
+      wcc_vals[wcc_vals == 1] <- 0.99
+      z_vals <- 0.5 * base::log((1 + wcc_vals) / (1 - wcc_vals))
 
-    base::mean(base::abs(z_vals), na.rm = TRUE)
-  }, FUN.VALUE = numeric(1), future.seed = TRUE)
+      base::mean(base::abs(z_vals), na.rm = TRUE)
+    },
+    FUN.VALUE = numeric(1),
+    future.seed = TRUE
+  )
 
   p_val <- sum(surrogate_zs >= obs_z) / n_surrogates
 
@@ -102,27 +126,46 @@ wcc_surrogate <- function(x, y, y_surrogates, time = NULL, window_size, lag_max,
 #'   surrogate alignments at a lag of 0. Useful for exploratory analysis. Default is `FALSE`.
 #' @return A list object of class "wdtw_surr".
 #' @export
-wdtw_surrogate <- function(x, y, y_surrogates, time = NULL, window_size, lag_max,
-                           window_increment = 1, lag_increment = 1,
-                           scale_method = c("global", "local", "none"),
-                           distance_metric = c("L2", "L1"),
-                           fast_method = FALSE) {
-
+wdtw_surrogate <- function(
+  x,
+  y,
+  y_surrogates,
+  time = NULL,
+  window_size,
+  lag_max,
+  window_increment = 1,
+  lag_increment = 1,
+  scale_method = c("global", "local", "none"),
+  distance_metric = c("L2", "L1"),
+  fast_method = FALSE
+) {
   scale_method <- match.arg(scale_method)
   distance_metric <- match.arg(distance_metric)
   use_l2 <- distance_metric == "L2"
   local_scale <- scale_method == "local"
 
-  if (!is.matrix(y_surrogates)) cli::cli_abort("{.arg y_surrogates} must be a matrix.")
-  if (nrow(y_surrogates) != length(y)) cli::cli_abort("{.arg y_surrogates} must have the same number of rows as length of {.arg y}.")
+  if (!is.matrix(y_surrogates)) {
+    cli::cli_abort("{.arg y_surrogates} must be a matrix.")
+  }
+  if (nrow(y_surrogates) != length(y)) {
+    cli::cli_abort(
+      "{.arg y_surrogates} must have the same number of rows as length of {.arg y}."
+    )
+  }
 
   n_surrogates <- ncol(y_surrogates)
 
   # 1. Calculate observed WDTW
   obs_wdtw <- wdtw(
-    x = x, y = y, time = time, window_size = window_size, lag_max = lag_max,
-    window_increment = window_increment, lag_increment = lag_increment,
-    scale_method = scale_method, distance_metric = distance_metric
+    x = x,
+    y = y,
+    time = time,
+    window_size = window_size,
+    lag_max = lag_max,
+    window_increment = window_increment,
+    lag_increment = lag_increment,
+    scale_method = scale_method,
+    distance_metric = distance_metric
   )
   obs_cost <- obs_wdtw$mean_distance
 
@@ -138,7 +181,9 @@ wdtw_surrogate <- function(x, y, y_surrogates, time = NULL, window_size, lag_max
   if (fast_method) {
     i_vals_surr <- 1 + lag_max + (0:(n_r - 1)) * window_increment
     tau_vals_surr <- rep(0, n_r)
-    cli::cli_alert_info("Running fast method: Evaluating surrogates at lag 0 only.")
+    cli::cli_alert_info(
+      "Running fast method: Evaluating surrogates at lag 0 only."
+    )
   } else {
     lags <- seq(-lag_max, lag_max, by = lag_increment)
     n_c <- length(lags)
@@ -148,27 +193,32 @@ wdtw_surrogate <- function(x, y, y_surrogates, time = NULL, window_size, lag_max
   }
 
   # 3. Parallel-ready loop using future.apply
-  surrogate_costs <- future.apply::future_vapply(seq_len(n_surrogates), function(idx) {
-    y_surr <- y_surrogates[, idx]
+  surrogate_costs <- future.apply::future_vapply(
+    seq_len(n_surrogates),
+    function(idx) {
+      y_surr <- y_surrogates[, idx]
 
-    if (scale_method == "global") {
-      y_surr <- as.numeric(base::scale(y_surr))
-    } else {
-      y_surr <- as.double(y_surr)
-    }
+      if (scale_method == "global") {
+        y_surr <- as.numeric(base::scale(y_surr))
+      } else {
+        y_surr <- as.double(y_surr)
+      }
 
-    surr_cost_vector <- calc_wdtw_cpp(
-      x = x_cpp,
-      y = y_surr,
-      i_vals = i_vals_surr,
-      tau_vals = tau_vals_surr,
-      w_max = window_size,
-      use_l2 = use_l2,
-      local_scale = local_scale
-    )
+      surr_cost_vector <- calc_wdtw_cpp(
+        x = x_cpp,
+        y = y_surr,
+        i_vals = i_vals_surr,
+        tau_vals = tau_vals_surr,
+        w_max = window_size,
+        use_l2 = use_l2,
+        local_scale = local_scale
+      )
 
-    base::mean(surr_cost_vector, na.rm = TRUE)
-  }, FUN.VALUE = numeric(1), future.seed = TRUE)
+      base::mean(surr_cost_vector, na.rm = TRUE)
+    },
+    FUN.VALUE = numeric(1),
+    future.seed = TRUE
+  )
 
   p_val <- sum(surrogate_costs <= obs_cost) / n_surrogates
 
@@ -198,17 +248,34 @@ wdtw_surrogate <- function(x, y, y_surrogates, time = NULL, window_size, lag_max
 #' @param window_increment A positive integer indicating the step size for the rolling window. Default is 1.
 #' @return A list object of class "wgranger_surr".
 #' @export
-wgranger_surrogate <- function(x, y, y_surrogates, time = NULL, window_size, ar_order = 1, window_increment = 1) {
-
-  if (!is.matrix(y_surrogates)) cli::cli_abort("{.arg y_surrogates} must be a matrix.")
-  if (nrow(y_surrogates) != length(y)) cli::cli_abort("{.arg y_surrogates} must have the same number of rows as length of {.arg y}.")
+wgranger_surrogate <- function(
+  x,
+  y,
+  y_surrogates,
+  time = NULL,
+  window_size,
+  ar_order = 1,
+  window_increment = 1
+) {
+  if (!is.matrix(y_surrogates)) {
+    cli::cli_abort("{.arg y_surrogates} must be a matrix.")
+  }
+  if (nrow(y_surrogates) != length(y)) {
+    cli::cli_abort(
+      "{.arg y_surrogates} must have the same number of rows as length of {.arg y}."
+    )
+  }
 
   n_surrogates <- ncol(y_surrogates)
 
   # 1. Calculate observed Windowed Granger
   obs_wgranger <- wgranger(
-    x = x, y = y, time = time, window_size = window_size,
-    ar_order = ar_order, window_increment = window_increment
+    x = x,
+    y = y,
+    time = time,
+    window_size = window_size,
+    ar_order = ar_order,
+    window_increment = window_increment
   )
 
   obs_f_xy <- base::mean(obs_wgranger$results_df$f_xy, na.rm = TRUE)
@@ -222,22 +289,27 @@ wgranger_surrogate <- function(x, y, y_surrogates, time = NULL, window_size, ar_
   x_cpp <- as.double(x)
 
   # 3. Parallel-ready loop using future.apply (returns 2 values per iteration)
-  surr_matrix <- future.apply::future_vapply(seq_len(n_surrogates), function(idx) {
-    y_surr <- as.double(y_surrogates[, idx])
+  surr_matrix <- future.apply::future_vapply(
+    seq_len(n_surrogates),
+    function(idx) {
+      y_surr <- as.double(y_surrogates[, idx])
 
-    surr_stats <- calc_wgranger_cpp(
-      x = x_cpp,
-      y = y_surr,
-      i_vals = i_vals,
-      w_max = window_size,
-      p = ar_order
-    )
+      surr_stats <- calc_wgranger_cpp(
+        x = x_cpp,
+        y = y_surr,
+        i_vals = i_vals,
+        w_max = window_size,
+        p = ar_order
+      )
 
-    c(
-      f_xy = base::mean(surr_stats$f_xy, na.rm = TRUE),
-      f_yx = base::mean(surr_stats$f_yx, na.rm = TRUE)
-    )
-  }, FUN.VALUE = numeric(2), future.seed = TRUE)
+      c(
+        f_xy = base::mean(surr_stats$f_xy, na.rm = TRUE),
+        f_yx = base::mean(surr_stats$f_yx, na.rm = TRUE)
+      )
+    },
+    FUN.VALUE = numeric(2),
+    future.seed = TRUE
+  )
 
   # Extract the two rows into our separate numeric vectors
   surrogate_f_xy <- surr_matrix["f_xy", ]
@@ -271,7 +343,6 @@ wgranger_surrogate <- function(x, y, y_surrogates, time = NULL, window_size, ar_
 #' @param ... Additional arguments (not used).
 #' @export
 print.wcc_surr <- function(x, ...) {
-
   cli::cli_h1("WCC Surrogate Analysis (Pseudo-Synchrony)")
 
   if (x$p_value == 0) {
@@ -288,13 +359,19 @@ print.wcc_surr <- function(x, ...) {
   ))
 
   if (x$p_value < 0.05) {
-    cli::cli_alert_success("Observed synchrony is significantly greater than chance.")
+    cli::cli_alert_success(
+      "Observed synchrony is significantly greater than chance."
+    )
   } else {
-    cli::cli_alert_warning("Observed synchrony is not significantly different from chance.")
+    cli::cli_alert_warning(
+      "Observed synchrony is not significantly different from chance."
+    )
   }
 
   if (x$n_surrogates < 1000) {
-    cli::cli_alert_info("Note: {x$n_surrogates} permutations may be too few for stable p-values.\n\tConsider setting `n_surrogates >= 1000` for final reporting.")
+    cli::cli_alert_info(
+      "Note: {x$n_surrogates} permutations may be too few for stable p-values.\n\tConsider setting `n_surrogates >= 1000` for final reporting."
+    )
   }
 
   invisible(x)
@@ -306,7 +383,6 @@ print.wcc_surr <- function(x, ...) {
 #' @param ... Additional arguments (not used).
 #' @export
 print.wdtw_surr <- function(x, ...) {
-
   cli::cli_h1("WDTW Surrogate Analysis (Pseudo-Synchrony)")
 
   if (x$p_value == 0) {
@@ -323,13 +399,19 @@ print.wdtw_surr <- function(x, ...) {
   ))
 
   if (x$p_value < 0.05) {
-    cli::cli_alert_success("Observed cost is significantly lower than chance (stronger alignment).")
+    cli::cli_alert_success(
+      "Observed cost is significantly lower than chance (stronger alignment)."
+    )
   } else {
-    cli::cli_alert_warning("Observed cost is not significantly different from chance.")
+    cli::cli_alert_warning(
+      "Observed cost is not significantly different from chance."
+    )
   }
 
   if (x$n_surrogates < 1000) {
-    cli::cli_alert_info("Note: {x$n_surrogates} permutations may be too few for stable p-values.\n\tConsider setting `n_surrogates >= 1000` for final reporting.")
+    cli::cli_alert_info(
+      "Note: {x$n_surrogates} permutations may be too few for stable p-values.\n\tConsider setting `n_surrogates >= 1000` for final reporting."
+    )
   }
 
   invisible(x)
@@ -341,11 +423,18 @@ print.wdtw_surr <- function(x, ...) {
 #' @param ... Additional arguments (not used).
 #' @export
 print.wgranger_surr <- function(x, ...) {
-
   cli::cli_h1("Windowed Granger Surrogate Analysis")
 
-  if (x$p_value_xy == 0) p_disp_xy <- paste0("< ", 1 / x$n_surrogates) else p_disp_xy <- as.character(round(x$p_value_xy, 4))
-  if (x$p_value_yx == 0) p_disp_yx <- paste0("< ", 1 / x$n_surrogates) else p_disp_yx <- as.character(round(x$p_value_yx, 4))
+  if (x$p_value_xy == 0) {
+    p_disp_xy <- paste0("< ", 1 / x$n_surrogates)
+  } else {
+    p_disp_xy <- as.character(round(x$p_value_xy, 4))
+  }
+  if (x$p_value_yx == 0) {
+    p_disp_yx <- paste0("< ", 1 / x$n_surrogates)
+  } else {
+    p_disp_yx <- as.character(round(x$p_value_yx, 4))
+  }
 
   cli::cli_h2("Direction: x -> y")
   cli::cli_dl(c(
@@ -355,7 +444,15 @@ print.wgranger_surr <- function(x, ...) {
     "Empirical p-value" = "{p_disp_xy}"
   ))
 
-  if (x$p_value_xy < 0.05) cli::cli_alert_success("Predictive power (x -> y) is significantly greater than chance.") else cli::cli_alert_warning("Predictive power (x -> y) is not significantly different from chance.")
+  if (x$p_value_xy < 0.05) {
+    cli::cli_alert_success(
+      "Predictive power (x -> y) is significantly greater than chance."
+    )
+  } else {
+    cli::cli_alert_warning(
+      "Predictive power (x -> y) is not significantly different from chance."
+    )
+  }
 
   cli::cli_h2("Direction: y -> x")
   cli::cli_dl(c(
@@ -364,10 +461,20 @@ print.wgranger_surr <- function(x, ...) {
     "Empirical p-value" = "{p_disp_yx}"
   ))
 
-  if (x$p_value_yx < 0.05) cli::cli_alert_success("Predictive power (y -> x) is significantly greater than chance.") else cli::cli_alert_warning("Predictive power (y -> x) is not significantly different from chance.")
+  if (x$p_value_yx < 0.05) {
+    cli::cli_alert_success(
+      "Predictive power (y -> x) is significantly greater than chance."
+    )
+  } else {
+    cli::cli_alert_warning(
+      "Predictive power (y -> x) is not significantly different from chance."
+    )
+  }
 
   if (x$n_surrogates < 1000) {
-    cli::cli_alert_info("Note: {x$n_surrogates} permutations may be too few for stable p-values.\n\tConsider setting `n_surrogates >= 1000` for final reporting.")
+    cli::cli_alert_info(
+      "Note: {x$n_surrogates} permutations may be too few for stable p-values.\n\tConsider setting `n_surrogates >= 1000` for final reporting."
+    )
   }
 
   invisible(x)

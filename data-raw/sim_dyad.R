@@ -31,8 +31,12 @@ z_B <- signal_B + rnorm(N, mean = 0, sd = 0.002)
 
 sim_dyad <- data.frame(
   time = t,
-  x_A = x_A, y_A = y_A, z_A = z_A,
-  x_B = x_B, y_B = y_B, z_B = z_B
+  x_A = x_A,
+  y_A = y_A,
+  z_A = z_A,
+  x_B = x_B,
+  y_B = y_B,
+  z_B = z_B
 )
 
 usethis::use_data(sim_dyad, overwrite = TRUE)

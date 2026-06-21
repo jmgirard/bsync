@@ -18,13 +18,14 @@
 #' @param bw_order An integer specifying the order of the Butterworth filter. Default is 2.
 #' @return A numeric vector containing the smoothed signal, of the same length as `x`.
 #' @export
-smooth_signal <- function(x,
-                          method = c("sgolay", "moving_average", "butterworth"),
-                          window = 5,
-                          sg_order = 3,
-                          bw_cutoff = 0.1,
-                          bw_order = 2) {
-
+smooth_signal <- function(
+  x,
+  method = c("sgolay", "moving_average", "butterworth"),
+  window = 5,
+  sg_order = 3,
+  bw_cutoff = 0.1,
+  bw_order = 2
+) {
   if (!is.numeric(x)) {
     cli::cli_abort("{.arg x} must be a numeric vector.")
   }
@@ -33,7 +34,9 @@ smooth_signal <- function(x,
 
   if (method == "moving_average") {
     if (!rlang::is_integerish(window, n = 1) || window <= 0) {
-      cli::cli_abort("{.arg window} must be a positive integer for the moving average filter.")
+      cli::cli_abort(
+        "{.arg window} must be a positive integer for the moving average filter."
+      )
     }
     # Uses a centered moving average to prevent phase shifts
     weights <- rep(1 / window, window)
@@ -41,12 +44,16 @@ smooth_signal <- function(x,
     return(res)
   }
 
-if (method == "sgolay") {
+  if (method == "sgolay") {
     if (!rlang::is_integerish(window, n = 1) || window %% 2 == 0) {
-      cli::cli_abort("{.arg window} must be an odd integer for the Savitzky-Golay filter.")
+      cli::cli_abort(
+        "{.arg window} must be an odd integer for the Savitzky-Golay filter."
+      )
     }
     if (!rlang::is_integerish(sg_order, n = 1) || sg_order >= window) {
-      cli::cli_abort("{.arg sg_order} must be strictly less than the {.arg window} size.")
+      cli::cli_abort(
+        "{.arg sg_order} must be strictly less than the {.arg window} size."
+      )
     }
     # Swapped from signal::sgolayfilt to gsignal::sgolayfilt
     res <- gsignal::sgolayfilt(x, p = sg_order, n = window)
@@ -54,8 +61,15 @@ if (method == "sgolay") {
   }
 
   if (method == "butterworth") {
-    if (!is.numeric(bw_cutoff) || length(bw_cutoff) != 1 || bw_cutoff <= 0 || bw_cutoff >= 1) {
-      cli::cli_abort("{.arg bw_cutoff} must be a single numeric value between 0 and 1.")
+    if (
+      !is.numeric(bw_cutoff) ||
+        length(bw_cutoff) != 1 ||
+        bw_cutoff <= 0 ||
+        bw_cutoff >= 1
+    ) {
+      cli::cli_abort(
+        "{.arg bw_cutoff} must be a single numeric value between 0 and 1."
+      )
     }
     if (!rlang::is_integerish(bw_order, n = 1) || bw_order <= 0) {
       cli::cli_abort("{.arg bw_order} must be a positive integer.")
@@ -99,8 +113,13 @@ if (method == "sgolay") {
 #'   is updated to represent the center of each bin, and all non-numeric columns
 #'   are dropped.
 #' @export
-aggregate_by_time <- function(data, time_var, bin_width, method = c("median", "mean"), na.rm = TRUE) {
-
+aggregate_by_time <- function(
+  data,
+  time_var,
+  bin_width,
+  method = c("median", "mean"),
+  na.rm = TRUE
+) {
   if (!is.data.frame(data)) {
     cli::cli_abort("{.arg data} must be a data frame.")
   }
@@ -121,7 +140,9 @@ aggregate_by_time <- function(data, time_var, bin_width, method = c("median", "m
 
   data |>
     dplyr::mutate(
-      .bin_center = floor({{ time_var }} / bin_width) * bin_width + (bin_width / 2)
+      .bin_center = floor({{ time_var }} / bin_width) *
+        bin_width +
+        (bin_width / 2)
     ) |>
     dplyr::summarise(
       dplyr::across(dplyr::where(is.numeric), agg_fun),
@@ -144,7 +165,6 @@ aggregate_by_time <- function(data, time_var, bin_width, method = c("median", "m
 #' @return An object of the same class as `x` with the edges removed.
 #' @export
 trim_edges <- function(x, trim_length) {
-
   if (!rlang::is_integerish(trim_length, n = 1) || trim_length <= 0) {
     cli::cli_abort("{.arg trim_length} must be a single positive integer.")
   }
@@ -152,13 +172,17 @@ trim_edges <- function(x, trim_length) {
   if (is.data.frame(x) || is.matrix(x)) {
     n_rows <- nrow(x)
     if (n_rows <= 2 * trim_length) {
-      cli::cli_abort("{.arg trim_length} is too large; it would remove all rows from the data.")
+      cli::cli_abort(
+        "{.arg trim_length} is too large; it would remove all rows from the data."
+      )
     }
     return(x[(trim_length + 1):(n_rows - trim_length), , drop = FALSE])
   } else if (is.atomic(x) && is.vector(x)) {
     n_len <- length(x)
     if (n_len <= 2 * trim_length) {
-      cli::cli_abort("{.arg trim_length} is too large; it would remove all elements from the vector.")
+      cli::cli_abort(
+        "{.arg trim_length} is too large; it would remove all elements from the vector."
+      )
     }
     return(x[(trim_length + 1):(n_len - trim_length)])
   } else {
@@ -195,8 +219,12 @@ trim_edges <- function(x, trim_length) {
 #'   aggregation. Default is `TRUE`.
 #' @return A numeric vector representing the downsampled time series.
 #' @export
-downsample_signal <- function(x, factor, method = c("median", "mean"), na.rm = TRUE) {
-
+downsample_signal <- function(
+  x,
+  factor,
+  method = c("median", "mean"),
+  na.rm = TRUE
+) {
   if (!is.numeric(x)) {
     cli::cli_abort("{.arg x} must be a numeric vector.")
   }
@@ -213,7 +241,9 @@ downsample_signal <- function(x, factor, method = c("median", "mean"), na.rm = T
   n_windows <- floor(length(x) / factor)
 
   if (n_windows == 0) {
-    cli::cli_abort("The length of {.arg x} is smaller than the downsampling {.arg factor}.")
+    cli::cli_abort(
+      "The length of {.arg x} is smaller than the downsampling {.arg factor}."
+    )
   }
 
   # Truncate the vector to fit perfectly into the windows

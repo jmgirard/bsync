@@ -31,17 +31,38 @@ test_that("smooth_signal catches invalid inputs", {
   expect_error(smooth_signal(c("a", "b", "c")), "must be a numeric vector")
 
   # Moving average validation
-  expect_error(smooth_signal(1:10, method = "moving_average", window = -1), "positive integer")
-  expect_error(smooth_signal(1:10, method = "moving_average", window = 2.5), "positive integer")
+  expect_error(
+    smooth_signal(1:10, method = "moving_average", window = -1),
+    "positive integer"
+  )
+  expect_error(
+    smooth_signal(1:10, method = "moving_average", window = 2.5),
+    "positive integer"
+  )
 
   # Savitzky-Golay validation
-  expect_error(smooth_signal(1:10, method = "sgolay", window = 4), "odd integer")
-  expect_error(smooth_signal(1:10, method = "sgolay", window = 5, sg_order = 5), "strictly less than")
+  expect_error(
+    smooth_signal(1:10, method = "sgolay", window = 4),
+    "odd integer"
+  )
+  expect_error(
+    smooth_signal(1:10, method = "sgolay", window = 5, sg_order = 5),
+    "strictly less than"
+  )
 
   # Butterworth validation
-  expect_error(smooth_signal(1:10, method = "butterworth", bw_cutoff = 1.5), "between 0 and 1")
-  expect_error(smooth_signal(1:10, method = "butterworth", bw_cutoff = c(0.1, 0.2)), "single numeric value")
-  expect_error(smooth_signal(1:10, method = "butterworth", bw_order = 0), "positive integer")
+  expect_error(
+    smooth_signal(1:10, method = "butterworth", bw_cutoff = 1.5),
+    "between 0 and 1"
+  )
+  expect_error(
+    smooth_signal(1:10, method = "butterworth", bw_cutoff = c(0.1, 0.2)),
+    "single numeric value"
+  )
+  expect_error(
+    smooth_signal(1:10, method = "butterworth", bw_order = 0),
+    "positive integer"
+  )
 })
 
 
@@ -57,15 +78,25 @@ test_that("aggregate_by_time correctly downsamples using median and mean", {
   )
 
   # Test median aggregation (default)
-  agg_med <- aggregate_by_time(df, time_var = time, bin_width = 0.1, method = "median")
+  agg_med <- aggregate_by_time(
+    df,
+    time_var = time,
+    bin_width = 0.1,
+    method = "median"
+  )
   expect_false("character_col" %in% names(agg_med))
   expect_equal(nrow(agg_med), 2)
   expect_equal(agg_med$time, c(0.05, 0.15))
   # Median of c(2, 4, 12) is 4; Median of c(8, 10, 30) is 10
   expect_equal(agg_med$au12, c(4, 10))
-  
+
   # Test mean aggregation
-  agg_mean <- aggregate_by_time(df, time_var = time, bin_width = 0.1, method = "mean")
+  agg_mean <- aggregate_by_time(
+    df,
+    time_var = time,
+    bin_width = 0.1,
+    method = "mean"
+  )
   # Mean of c(2, 4, 12) is 6; Mean of c(8, 10, 30) is 16
   expect_equal(agg_mean$au12, c(6, 16))
 })
@@ -77,11 +108,21 @@ test_that("aggregate_by_time handles na.rm correctly", {
   )
 
   # With na.rm = TRUE (default), the median of 2 and 6 is 4
-  agg_true <- aggregate_by_time(df, time_var = time, bin_width = 0.5, na.rm = TRUE)
+  agg_true <- aggregate_by_time(
+    df,
+    time_var = time,
+    bin_width = 0.5,
+    na.rm = TRUE
+  )
   expect_equal(agg_true$val, 4)
 
   # With na.rm = FALSE, the median of 2, NA, 6 is NA
-  agg_false <- aggregate_by_time(df, time_var = time, bin_width = 0.5, na.rm = FALSE)
+  agg_false <- aggregate_by_time(
+    df,
+    time_var = time,
+    bin_width = 0.5,
+    na.rm = FALSE
+  )
   expect_true(is.na(agg_false$val))
 })
 
@@ -89,11 +130,26 @@ test_that("aggregate_by_time catches invalid inputs", {
   df <- data.frame(time = 1:10, val = 1:10)
 
   # Data structure and type errors
-  expect_error(aggregate_by_time(list(a = 1), time_var = time, bin_width = 1), "must be a data frame")
-  expect_error(aggregate_by_time(df, time_var = time, bin_width = -1), "single positive number")
-  expect_error(aggregate_by_time(df, time_var = time, bin_width = c(1, 2)), "single positive number")
-  expect_error(aggregate_by_time(df, time_var = time, bin_width = 1, na.rm = "TRUE"), "single logical value")
-  expect_error(aggregate_by_time(df, time_var = time, bin_width = 1, method = "mode"), "should be one of")
+  expect_error(
+    aggregate_by_time(list(a = 1), time_var = time, bin_width = 1),
+    "must be a data frame"
+  )
+  expect_error(
+    aggregate_by_time(df, time_var = time, bin_width = -1),
+    "single positive number"
+  )
+  expect_error(
+    aggregate_by_time(df, time_var = time, bin_width = c(1, 2)),
+    "single positive number"
+  )
+  expect_error(
+    aggregate_by_time(df, time_var = time, bin_width = 1, na.rm = "TRUE"),
+    "single logical value"
+  )
+  expect_error(
+    aggregate_by_time(df, time_var = time, bin_width = 1, method = "mode"),
+    "should be one of"
+  )
 })
 
 
@@ -123,11 +179,20 @@ test_that("trim_edges catches invalid inputs and extreme trims", {
   # Invalid argument types
   expect_error(trim_edges(v, trim_length = -1), "single positive integer")
   expect_error(trim_edges(v, trim_length = 1.5), "single positive integer")
-  expect_error(trim_edges(list(a = 1:5), trim_length = 1), "vector, matrix, or data frame")
+  expect_error(
+    trim_edges(list(a = 1:5), trim_length = 1),
+    "vector, matrix, or data frame"
+  )
 
   # Edge case where trim_length exceeds data dimensions
-  expect_error(trim_edges(v, trim_length = 3), "too large; it would remove all elements")
-  expect_error(trim_edges(df, trim_length = 3), "too large; it would remove all rows")
+  expect_error(
+    trim_edges(v, trim_length = 3),
+    "too large; it would remove all elements"
+  )
+  expect_error(
+    trim_edges(df, trim_length = 3),
+    "too large; it would remove all rows"
+  )
 })
 
 
@@ -135,10 +200,10 @@ test_that("trim_edges catches invalid inputs and extreme trims", {
 
 test_that("downsample_signal handles median and mean aggregation correctly", {
   x <- c(2, 4, 12, 8, 10, 30)
-  
+
   # Median of c(2,4,12) is 4; Median of c(8,10,30) is 10
   expect_equal(downsample_signal(x, factor = 3, method = "median"), c(4, 10))
-  
+
   # Mean of c(2,4,12) is 6; Mean of c(8,10,30) is 16
   expect_equal(downsample_signal(x, factor = 3, method = "mean"), c(6, 16))
 })
@@ -150,18 +215,35 @@ test_that("downsample_signal correctly truncates incomplete windows", {
 
 test_that("downsample_signal handles NAs correctly", {
   x <- c(2, NA, 10, 4, 5, 6)
-  
+
   # Window 1: c(2, NA, 10). Median with na.rm=TRUE is 6
-  expect_equal(downsample_signal(x, factor = 3, method = "median", na.rm = TRUE), c(6, 5))
-  expect_true(is.na(downsample_signal(x, factor = 3, method = "median", na.rm = FALSE)[1]))
+  expect_equal(
+    downsample_signal(x, factor = 3, method = "median", na.rm = TRUE),
+    c(6, 5)
+  )
+  expect_true(is.na(downsample_signal(
+    x,
+    factor = 3,
+    method = "median",
+    na.rm = FALSE
+  )[1]))
 })
 
 test_that("downsample_signal catches invalid inputs", {
-  expect_error(downsample_signal(c("a", "b"), factor = 2), "must be a numeric vector")
+  expect_error(
+    downsample_signal(c("a", "b"), factor = 2),
+    "must be a numeric vector"
+  )
   expect_error(downsample_signal(1:10, factor = 0), "greater than 1")
   expect_error(downsample_signal(1:10, factor = 1.5), "single integer")
-  expect_error(downsample_signal(1:10, factor = 2, na.rm = "TRUE"), "single logical value")
-  
+  expect_error(
+    downsample_signal(1:10, factor = 2, na.rm = "TRUE"),
+    "single logical value"
+  )
+
   # Removed the word "factor" from the regex to avoid backtick matching issues
-  expect_error(downsample_signal(1:2, factor = 5), "smaller than the downsampling")
+  expect_error(
+    downsample_signal(1:2, factor = 5),
+    "smaller than the downsampling"
+  )
 })

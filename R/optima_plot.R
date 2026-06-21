@@ -10,17 +10,24 @@
 #' @param zero_line_color Character string specifying the color of the zero-lag line. Default is "black".
 #' @param ... Additional arguments passed to the underlying plot method (e.g., custom colors for WCC).
 #' @export
-plot_optima_overlay <- function(surface_obj, optima_df,
-                                time_step = 1,
-                                line_color = "black",
-                                point_fill = "black",
-                                point_stroke = "white",
-                                show_zero_lag = TRUE,
-                                zero_line_color = "black",
-                                ...) {
-
-  p_base <- plot(surface_obj, time_step = time_step,
-                 show_zero_lag = show_zero_lag, zero_line_color = zero_line_color, ...)
+plot_optima_overlay <- function(
+  surface_obj,
+  optima_df,
+  time_step = 1,
+  line_color = "black",
+  point_fill = "black",
+  point_stroke = "white",
+  show_zero_lag = TRUE,
+  zero_line_color = "black",
+  ...
+) {
+  p_base <- plot(
+    surface_obj,
+    time_step = time_step,
+    show_zero_lag = show_zero_lag,
+    zero_line_color = zero_line_color,
+    ...
+  )
 
   has_time <- isTRUE(surface_obj$settings$has_time)
 
@@ -35,9 +42,11 @@ plot_optima_overlay <- function(surface_obj, optima_df,
 
   # Set a dynamic title based on the input object class
   is_wcc <- inherits(surface_obj, "wcc_res")
-  plot_title <- ifelse(is_wcc,
-                       "Windowed Cross-Correlation with Optima Overlay",
-                       "Windowed Dynamic Time Warping with Optima Overlay")
+  plot_title <- ifelse(
+    is_wcc,
+    "Windowed Cross-Correlation with Optima Overlay",
+    "Windowed Dynamic Time Warping with Optima Overlay"
+  )
 
   p_final <- p_base +
     # The connecting line (drawn first so points sit on top)

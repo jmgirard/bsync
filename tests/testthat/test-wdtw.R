@@ -23,7 +23,9 @@ test_that("wdtw returns expected structure and classes", {
   expect_s3_class(res$results_df, "data.frame")
 
   # Check expected columns
-  expect_true(all(c("row", "col", "i", "tau", "dtw_dist") %in% names(res$results_df)))
+  expect_true(all(
+    c("row", "col", "i", "tau", "dtw_dist") %in% names(res$results_df)
+  ))
 
   # Check basic dimensions based on the parameters
   expected_lags <- length(seq(-10, 10, by = 1))
@@ -34,9 +36,27 @@ test_that("wdtw correctly scales data globally and locally", {
   # Create a drastically scaled version of sig1
   sig1_large <- sig1 * 1000
 
-  res_unscaled <- wdtw(sig1, sig1_large, window_size = 10, lag_max = 5, scale_method = "none")
-  res_global <- wdtw(sig1, sig1_large, window_size = 10, lag_max = 5, scale_method = "global")
-  res_local <- wdtw(sig1, sig1_large, window_size = 10, lag_max = 5, scale_method = "local")
+  res_unscaled <- wdtw(
+    sig1,
+    sig1_large,
+    window_size = 10,
+    lag_max = 5,
+    scale_method = "none"
+  )
+  res_global <- wdtw(
+    sig1,
+    sig1_large,
+    window_size = 10,
+    lag_max = 5,
+    scale_method = "global"
+  )
+  res_local <- wdtw(
+    sig1,
+    sig1_large,
+    window_size = 10,
+    lag_max = 5,
+    scale_method = "local"
+  )
 
   # Scaled distances should be drastically smaller than unscaled distances for these vectors
   expect_true(res_global$mean_distance < res_unscaled$mean_distance)
@@ -44,8 +64,22 @@ test_that("wdtw correctly scales data globally and locally", {
 })
 
 test_that("wdtw computes distance metrics L1 and L2 correctly", {
-  res_l2 <- wdtw(sig1, sig2, window_size = 10, lag_max = 5, scale_method = "none", distance_metric = "L2")
-  res_l1 <- wdtw(sig1, sig2, window_size = 10, lag_max = 5, scale_method = "none", distance_metric = "L1")
+  res_l2 <- wdtw(
+    sig1,
+    sig2,
+    window_size = 10,
+    lag_max = 5,
+    scale_method = "none",
+    distance_metric = "L2"
+  )
+  res_l1 <- wdtw(
+    sig1,
+    sig2,
+    window_size = 10,
+    lag_max = 5,
+    scale_method = "none",
+    distance_metric = "L1"
+  )
 
   # Squared Euclidean (L2) and Manhattan (L1) should yield different mean distances for shifted waves
   expect_false(res_l2$mean_distance == res_l1$mean_distance)
@@ -94,7 +128,12 @@ test_that("pick_optima handles wdtw_res correctly across search methods", {
   expect_true(all(optima_global$optimum_lag == 0, na.rm = TRUE))
 
   # 2. Test explicit local search with strict monotonicity
-  optima_local <- pick_optima(res, search_method = "local", L_size = 3, strict_monotonic = TRUE)
+  optima_local <- pick_optima(
+    res,
+    search_method = "local",
+    L_size = 3,
+    strict_monotonic = TRUE
+  )
 
   expect_s3_class(optima_local, "wdtw_optima")
   expect_equal(attr(optima_local, "search_method"), "local")
@@ -114,24 +153,60 @@ test_that("wdtw handles out-of-bounds cleanly by returning NA", {
 
 test_that("wdtw input assertions trigger appropriate errors", {
   # 1. Vector type and length assertions
-  expect_error(wdtw(x = c("a", "b"), y = sig2, window_size = 10, lag_max = 5), "must be a numeric vector")
-  expect_error(wdtw(x = sig1, y = c("a", "b"), window_size = 10, lag_max = 5), "must be a numeric vector")
-  expect_error(wdtw(x = sig1, y = sig2[-1], window_size = 10, lag_max = 5), "must be the same length")
+  expect_error(
+    wdtw(x = c("a", "b"), y = sig2, window_size = 10, lag_max = 5),
+    "must be a numeric vector"
+  )
+  expect_error(
+    wdtw(x = sig1, y = c("a", "b"), window_size = 10, lag_max = 5),
+    "must be a numeric vector"
+  )
+  expect_error(
+    wdtw(x = sig1, y = sig2[-1], window_size = 10, lag_max = 5),
+    "must be the same length"
+  )
 
   # 2. Time vector assertions
-  expect_error(wdtw(sig1, sig2, time = c("t1", "t2"), window_size = 10, lag_max = 5), "must be a numeric vector")
-  expect_error(wdtw(sig1, sig2, time = 1:5, window_size = 10, lag_max = 5), "must be the same length as")
+  expect_error(
+    wdtw(sig1, sig2, time = c("t1", "t2"), window_size = 10, lag_max = 5),
+    "must be a numeric vector"
+  )
+  expect_error(
+    wdtw(sig1, sig2, time = 1:5, window_size = 10, lag_max = 5),
+    "must be the same length as"
+  )
 
   # 3. Argument matching assertions for the new string parameters
-  expect_error(wdtw(sig1, sig2, window_size = 10, lag_max = 5, scale_method = "yes"), "should be one of")
-  expect_error(wdtw(sig1, sig2, window_size = 10, lag_max = 5, distance_metric = "L3"), "should be one of")
+  expect_error(
+    wdtw(sig1, sig2, window_size = 10, lag_max = 5, scale_method = "yes"),
+    "should be one of"
+  )
+  expect_error(
+    wdtw(sig1, sig2, window_size = 10, lag_max = 5, distance_metric = "L3"),
+    "should be one of"
+  )
 
   # 4. Integer and positivity assertions
-  expect_error(wdtw(sig1, sig2, window_size = -5, lag_max = 5), "single positive integer")
-  expect_error(wdtw(sig1, sig2, window_size = 10.5, lag_max = 5), "single positive integer")
-  expect_error(wdtw(sig1, sig2, window_size = 10, lag_max = 0), "single positive integer")
-  expect_error(wdtw(sig1, sig2, window_size = 10, lag_max = 5, window_increment = -1), "single positive integer")
-  expect_error(wdtw(sig1, sig2, window_size = 10, lag_max = 5, lag_increment = 0), "single positive integer")
+  expect_error(
+    wdtw(sig1, sig2, window_size = -5, lag_max = 5),
+    "single positive integer"
+  )
+  expect_error(
+    wdtw(sig1, sig2, window_size = 10.5, lag_max = 5),
+    "single positive integer"
+  )
+  expect_error(
+    wdtw(sig1, sig2, window_size = 10, lag_max = 0),
+    "single positive integer"
+  )
+  expect_error(
+    wdtw(sig1, sig2, window_size = 10, lag_max = 5, window_increment = -1),
+    "single positive integer"
+  )
+  expect_error(
+    wdtw(sig1, sig2, window_size = 10, lag_max = 5, lag_increment = 0),
+    "single positive integer"
+  )
 })
 
 test_that("wdtw correctly maps the optional time vector", {
@@ -212,18 +287,42 @@ test_that("wdtw handles NA values correctly and safely skips windows", {
   sig2_na[20] <- NA
 
   # Test NA in the 'x' vector
-  res_x_na <- wdtw(sig1_na, sig2, window_size = 10, lag_max = 5, scale_method = "none")
+  res_x_na <- wdtw(
+    sig1_na,
+    sig2,
+    window_size = 10,
+    lag_max = 5,
+    scale_method = "none"
+  )
   expect_true(any(is.na(res_x_na$results_df$dtw_dist)))
 
   # Test NA in the 'y' vector
-  res_y_na <- wdtw(sig1, sig2_na, window_size = 10, lag_max = 5, scale_method = "none")
+  res_y_na <- wdtw(
+    sig1,
+    sig2_na,
+    window_size = 10,
+    lag_max = 5,
+    scale_method = "none"
+  )
   expect_true(any(is.na(res_y_na$results_df$dtw_dist)))
 
   # Test NA in both vectors (with scale_method = "global" to ensure base::scale handles it)
-  res_both_na <- wdtw(sig1_na, sig2_na, window_size = 10, lag_max = 5, scale_method = "global")
+  res_both_na <- wdtw(
+    sig1_na,
+    sig2_na,
+    window_size = 10,
+    lag_max = 5,
+    scale_method = "global"
+  )
   expect_true(any(is.na(res_both_na$results_df$dtw_dist)))
 
   # Test NA in both vectors with local scaling
-  res_local_na <- wdtw(sig1_na, sig2_na, window_size = 10, lag_max = 5, scale_method = "local")
+  res_local_na <- wdtw(
+    sig1_na,
+    sig2_na,
+    window_size = 10,
+    lag_max = 5,
+    scale_method = "local"
+  )
   expect_true(any(is.na(res_local_na$results_df$dtw_dist)))
 })

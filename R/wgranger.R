@@ -14,15 +14,31 @@
 #' @param window_increment A positive integer indicating the window shift increment. (default = `1`)
 #' @return A list object of class "wgranger_res".
 #' @export
-wgranger <- function(x, y, time = NULL, window_size, ar_order = 1, window_increment = 1) {
-
-  if (!is.numeric(x)) cli::cli_abort("{.arg x} must be a numeric vector.")
-  if (!is.numeric(y)) cli::cli_abort("{.arg y} must be a numeric vector.")
-  if (length(x) != length(y)) cli::cli_abort("{.arg x} and {.arg y} must be the same length.")
+wgranger <- function(
+  x,
+  y,
+  time = NULL,
+  window_size,
+  ar_order = 1,
+  window_increment = 1
+) {
+  if (!is.numeric(x)) {
+    cli::cli_abort("{.arg x} must be a numeric vector.")
+  }
+  if (!is.numeric(y)) {
+    cli::cli_abort("{.arg y} must be a numeric vector.")
+  }
+  if (length(x) != length(y)) {
+    cli::cli_abort("{.arg x} and {.arg y} must be the same length.")
+  }
 
   if (!is.null(time)) {
-    if (!is.numeric(time)) cli::cli_abort("{.arg time} must be a numeric vector.")
-    if (length(time) != length(x)) cli::cli_abort("{.arg time} must be the same length as {.arg x}.")
+    if (!is.numeric(time)) {
+      cli::cli_abort("{.arg time} must be a numeric vector.")
+    }
+    if (length(time) != length(x)) {
+      cli::cli_abort("{.arg time} must be the same length as {.arg x}.")
+    }
   }
 
   x <- as.double(x)
@@ -105,7 +121,9 @@ summary.wgranger_res <- function(object, ...) {
       "*" = "'y' significantly predicts 'x' in {sig_y_to_x} windows ({round(sig_y_to_x / valid_n * 100, 1)}%)"
     ))
   } else {
-    cli::cli_alert_warning("No valid metrics computed. Check window size and degrees of freedom.")
+    cli::cli_alert_warning(
+      "No valid metrics computed. Check window size and degrees of freedom."
+    )
   }
 
   invisible(object)

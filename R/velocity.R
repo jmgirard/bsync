@@ -9,14 +9,24 @@
 #' @param fill_edges A logical indicating whether to automatically use forward and backward differences to estimate velocities at the boundaries when `method = "central"`. Default is `TRUE`.
 #' @return A numeric vector of velocities the same length as the input vectors.
 #' @export
-calc_velocity_1d <- function(t, x, n = 1, method = c("central", "forward", "backward"), fill_edges = TRUE) {
+calc_velocity_1d <- function(
+  t,
+  x,
+  n = 1,
+  method = c("central", "forward", "backward"),
+  fill_edges = TRUE
+) {
   method <- match.arg(method)
 
   calc_fwd <- function() (dplyr::lead(x, n) - x) / (dplyr::lead(t, n) - t)
   calc_bwd <- function() (x - dplyr::lag(x, n)) / (t - dplyr::lag(t, n))
 
-  if (method == "forward") return(calc_fwd())
-  if (method == "backward") return(calc_bwd())
+  if (method == "forward") {
+    return(calc_fwd())
+  }
+  if (method == "backward") {
+    return(calc_bwd())
+  }
 
   # Default to central difference
   dt <- dplyr::lead(t, n) - dplyr::lag(t, n)
@@ -41,14 +51,24 @@ calc_velocity_1d <- function(t, x, n = 1, method = c("central", "forward", "back
 #' @param fill_edges A logical indicating whether to automatically use forward and backward differences to estimate speeds at the boundaries when `method = "central"`. Default is `TRUE`.
 #' @return A numeric vector of speeds the same length as the input vectors.
 #' @export
-calc_speed_1d <- function(t, x, n = 1, method = c("central", "forward", "backward"), fill_edges = TRUE) {
+calc_speed_1d <- function(
+  t,
+  x,
+  n = 1,
+  method = c("central", "forward", "backward"),
+  fill_edges = TRUE
+) {
   method <- match.arg(method)
 
   calc_fwd <- function() abs((dplyr::lead(x, n) - x) / (dplyr::lead(t, n) - t))
   calc_bwd <- function() abs((x - dplyr::lag(x, n)) / (t - dplyr::lag(t, n)))
 
-  if (method == "forward") return(calc_fwd())
-  if (method == "backward") return(calc_bwd())
+  if (method == "forward") {
+    return(calc_fwd())
+  }
+  if (method == "backward") {
+    return(calc_bwd())
+  }
 
   # Default to central difference
   dt <- dplyr::lead(t, n) - dplyr::lag(t, n)
@@ -74,7 +94,14 @@ calc_speed_1d <- function(t, x, n = 1, method = c("central", "forward", "backwar
 #' @param fill_edges A logical indicating whether to automatically use forward and backward differences to estimate speeds at the boundaries when `method = "central"`. Default is `TRUE`.
 #' @return A numeric vector of speeds the same length as the input vectors.
 #' @export
-calc_speed_2d <- function(t, x, y, n = 1, method = c("central", "forward", "backward"), fill_edges = TRUE) {
+calc_speed_2d <- function(
+  t,
+  x,
+  y,
+  n = 1,
+  method = c("central", "forward", "backward"),
+  fill_edges = TRUE
+) {
   method <- match.arg(method)
 
   calc_fwd <- function() {
@@ -91,8 +118,12 @@ calc_speed_2d <- function(t, x, y, n = 1, method = c("central", "forward", "back
     sqrt((dx / dt)^2 + (dy / dt)^2)
   }
 
-  if (method == "forward") return(calc_fwd())
-  if (method == "backward") return(calc_bwd())
+  if (method == "forward") {
+    return(calc_fwd())
+  }
+  if (method == "backward") {
+    return(calc_bwd())
+  }
 
   # Default to central difference
   dt <- dplyr::lead(t, n) - dplyr::lag(t, n)
@@ -120,7 +151,15 @@ calc_speed_2d <- function(t, x, y, n = 1, method = c("central", "forward", "back
 #' @param fill_edges A logical indicating whether to automatically use forward and backward differences to estimate speeds at the boundaries when `method = "central"`. Default is `TRUE`.
 #' @return A numeric vector of speeds the same length as the input vectors.
 #' @export
-calc_speed_3d <- function(t, x, y, z, n = 1, method = c("central", "forward", "backward"), fill_edges = TRUE) {
+calc_speed_3d <- function(
+  t,
+  x,
+  y,
+  z,
+  n = 1,
+  method = c("central", "forward", "backward"),
+  fill_edges = TRUE
+) {
   method <- match.arg(method)
 
   calc_fwd <- function() {
@@ -139,8 +178,12 @@ calc_speed_3d <- function(t, x, y, z, n = 1, method = c("central", "forward", "b
     sqrt((dx / dt)^2 + (dy / dt)^2 + (dz / dt)^2)
   }
 
-  if (method == "forward") return(calc_fwd())
-  if (method == "backward") return(calc_bwd())
+  if (method == "forward") {
+    return(calc_fwd())
+  }
+  if (method == "backward") {
+    return(calc_bwd())
+  }
 
   # Default to central difference
   dt <- dplyr::lead(t, n) - dplyr::lag(t, n)
