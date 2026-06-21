@@ -24,8 +24,9 @@ library(ggplot2)
 
 For this tutorial, we will simulate 30Hz continuous smile intensity data
 (e.g., AU12 from OpenFace). Genuine facial expressions typically evolve
-slowly (between 0.3 Hz and 1.5 Hz), whereas automated tracking noise
-fluctuates rapidly.
+slowly (between 0.3 Hz and 1.5 Hz). We will add a small amount of
+high-frequency white noise to simulate micro-jitter from the automated
+tracking software.
 
 Let’s simulate a dataset of 10 participants.
 
@@ -38,10 +39,10 @@ t <- seq(0, 60, by = 1/fs)
 # Generate a data frame with 10 simulated participant signals
 smile_data <- as.data.frame(
   lapply(1:10, function(i) {
-    base_freq <- runif(1, 0.3, 1.2)
-    noise_level <- runif(1, 0.2, 0.6)
-    
-    # Signal (slow wave) + Noise (rapid jitter)
+    base_freq <- runif(1, 0.3, 1.2) # Genuine slow expression
+
+    noise_level <- runif(1, 0.02, 0.08)
+
     sin(2 * pi * base_freq * t) + rnorm(length(t), mean = 0, sd = noise_level)
   })
 )
@@ -61,14 +62,14 @@ true variance is captured.
 
 # Evaluate just the first participant
 single_eval <- evaluate_signal_power(
-  x = smile_data$Participant_1, 
-  sample_rate = fs, 
+  x = smile_data$Participant_1,
+  sample_rate = fs,
   threshold = 0.95
 )
 #> 
 #> ── Signal Power Evaluation ─────────────────────────────────────────────────────
-#> 95% of signal power is captured below 13.12 Hz.
-#> ✔ To prevent aliasing, the minimum universal sampling rate is 26.25 Hz.
+#> 95% of signal power is captured below 1.41 Hz.
+#> ✔ To prevent aliasing, the minimum universal sampling rate is 2.81 Hz.
 
 # View the diagnostic plot
 single_eval$plot
@@ -82,7 +83,7 @@ aliasing.
 ``` r
 
 cat("Recommended Target Rate:", round(single_eval$recommended_target_rate, 2), "Hz\n")
-#> Recommended Target Rate: 26.25 Hz
+#> Recommended Target Rate: 2.81 Hz
 ```
 
 ## Best Practice: Dataset-Level Evaluation
@@ -102,15 +103,15 @@ automated.
 
 # Pass the entire data frame of 10 participants
 multi_eval <- evaluate_signal_power(
-  x = smile_data, 
-  sample_rate = fs, 
+  x = smile_data,
+  sample_rate = fs,
   threshold = 0.95
 )
 #> 
 #> ── Dataset-Level Signal Power Evaluation ───────────────────────────────────────
 #> Evaluated 10 signals.
-#> 95th percentile of cutoffs is 12.91 Hz.
-#> ✔ To prevent aliasing, the minimum universal sampling rate is 25.83 Hz.
+#> 95th percentile of cutoffs is 1.2 Hz.
+#> ✔ To prevent aliasing, the minimum universal sampling rate is 2.39 Hz.
 
 # View the dataset-level diagnostic plot
 multi_eval$plot
@@ -126,9 +127,9 @@ behavioral data even for the participants with the fastest expressions.
 ``` r
 
 cat("95th Percentile Cutoff:", round(multi_eval$primary_cutoff_freq, 2), "Hz\n")
-#> 95th Percentile Cutoff: 12.91 Hz
+#> 95th Percentile Cutoff: 1.2 Hz
 cat("Minimum Universal Target Rate:", round(multi_eval$recommended_target_rate, 2), "Hz\n")
-#> Minimum Universal Target Rate: 25.83 Hz
+#> Minimum Universal Target Rate: 2.39 Hz
 ```
 
 ## Applying the Downsampling
