@@ -37,7 +37,7 @@ fs <- 30 # 30 frames per second
 smile_data <- lapply(1:10, function(i) {
   # Randomize interaction length between 45 and 60 seconds
   t_end <- runif(1, 45, 60)
-  t <- seq(0, t_end, by = 1/fs)
+  t <- seq(0, t_end, by = 1 / fs)
 
   base_freq <- runif(1, 0.3, 1.2) # Genuine slow expression
   noise_level <- runif(1, 0.02, 0.08) # Small tracking jitter
