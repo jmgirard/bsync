@@ -68,11 +68,11 @@ impute_ts_gaps <- function(x, method = c("linear", "spline"), maxgap = 5) {
 
   if (method == "linear") {
     # rule = 1 ensures approx does not extrapolate
-    imp_res <- approx(x = valid_idx, y = x[valid_idx], xout = seq_along(x), rule = 1)
+    imp_res <- stats::approx(x = valid_idx, y = x[valid_idx], xout = seq_along(x), rule = 1)
     x_imp <- imp_res$y
   } else if (method == "spline") {
     # Spline extrapolates by default, requiring manual cleanup below
-    imp_res <- spline(x = valid_idx, y = x[valid_idx], xout = seq_along(x), method = "fmm")
+    imp_res <- stats::spline(x = valid_idx, y = x[valid_idx], xout = seq_along(x), method = "fmm")
     x_imp <- imp_res$y
   }
 

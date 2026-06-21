@@ -33,10 +33,11 @@ Imports:
     grDevices,
     gsignal,
     Rcpp,
-    RcppArmadillo,
     rlang,
+    scales,
     utils
 Suggests:
+    future,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),

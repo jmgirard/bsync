@@ -30,7 +30,7 @@ library(ggplot2)
 
 ## Simulating Behavioral Data
 
-For this tutorial, we will simulate 30Hz continuous smile intensity data (e.g., AU12 from OpenFace). Genuine facial expressions typically evolve slowly (between 0.3 Hz and 1.5 Hz), whereas automated tracking noise fluctuates rapidly.
+For this tutorial, we will simulate 30Hz continuous smile intensity data (e.g., AU12 from OpenFace). Genuine facial expressions typically evolve slowly (between 0.3 Hz and 1.5 Hz). We will add a small amount of high-frequency white noise to simulate micro-jitter from the automated tracking software.
 
 Let's simulate a dataset of 10 participants.
 
@@ -42,10 +42,10 @@ t <- seq(0, 60, by = 1/fs)
 # Generate a data frame with 10 simulated participant signals
 smile_data <- as.data.frame(
   lapply(1:10, function(i) {
-    base_freq <- runif(1, 0.3, 1.2)
-    noise_level <- runif(1, 0.2, 0.6)
-    
-    # Signal (slow wave) + Noise (rapid jitter)
+    base_freq <- runif(1, 0.3, 1.2) # Genuine slow expression
+
+    noise_level <- runif(1, 0.02, 0.08)
+
     sin(2 * pi * base_freq * t) + rnorm(length(t), mean = 0, sd = noise_level)
   })
 )
@@ -60,8 +60,8 @@ If you are only working with one or two individuals, you can pass a single numer
 ```{r eval-single, fig.width=7, fig.height=5}
 # Evaluate just the first participant
 single_eval <- evaluate_signal_power(
-  x = smile_data$Participant_1, 
-  sample_rate = fs, 
+  x = smile_data$Participant_1,
+  sample_rate = fs,
   threshold = 0.95
 )
 
@@ -69,7 +69,7 @@ single_eval <- evaluate_signal_power(
 single_eval$plot
 ```
 
-The function outputs a conservative target sampling rate to prevent aliasing. 
+The function outputs a conservative target sampling rate to prevent aliasing.
 
 ```{r single-results}
 cat("Recommended Target Rate:", round(single_eval$recommended_target_rate, 2), "Hz\n")
@@ -77,15 +77,15 @@ cat("Recommended Target Rate:", round(single_eval$recommended_target_rate, 2), "
 
 ## Best Practice: Dataset-Level Evaluation
 
-In a real study, you should not calculate different downsampling rates for different participants. Doing so would make your subsequent Windowed Cross-Correlation (WCC) parameters represent different amounts of real time across dyads. 
+In a real study, you should not calculate different downsampling rates for different participants. Doing so would make your subsequent Windowed Cross-Correlation (WCC) parameters represent different amounts of real time across dyads.
 
 Best practice is to calculate the cutoff frequency for all participants and choose a single, universal rate. `evaluate_signal_power()` natively accepts data frames and lists, making this process completely automated.
 
 ```{r eval-multi, fig.width=7, fig.height=5}
 # Pass the entire data frame of 10 participants
 multi_eval <- evaluate_signal_power(
-  x = smile_data, 
-  sample_rate = fs, 
+  x = smile_data,
+  sample_rate = fs,
   threshold = 0.95
 )
 
@@ -102,7 +102,7 @@ cat("Minimum Universal Target Rate:", round(multi_eval$recommended_target_rate, 
 
 ## Applying the Downsampling
 
-If our Nyquist minimum is 2.51 Hz, we need to choose a target rate slightly higher than that which divides cleanly into our original 30Hz sample rate. 
+If our Nyquist minimum is 2.51 Hz, we need to choose a target rate slightly higher than that which divides cleanly into our original 30Hz sample rate.
 
 Valid options would be:
 * **3 Hz** (Downsample factor of 10)
