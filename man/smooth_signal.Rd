@@ -10,7 +10,9 @@ smooth_signal(
   window = 5,
   sg_order = 3,
   bw_cutoff = 0.1,
-  bw_order = 2
+  bw_order = 2,
+  lower_bound = NULL,
+  upper_bound = NULL
 )
 }
 \arguments{
@@ -29,6 +31,10 @@ Must be less than `window`. Default is 3.}
 frequency for the Butterworth filter. Default is 0.1.}
 
 \item{bw_order}{An integer specifying the order of the Butterworth filter. Default is 2.}
+
+\item{lower_bound}{Numeric. If provided, smoothed values below this are clamped to this value.}
+
+\item{upper_bound}{Numeric. If provided, smoothed values above this are clamped to this value.}
 }
 \value{
 A numeric vector containing the smoothed signal, of the same length as `x`.

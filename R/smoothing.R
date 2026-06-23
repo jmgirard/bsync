@@ -16,6 +16,8 @@
 #' @param bw_cutoff A numeric value between 0 and 1 specifying the normalized cutoff
 #'   frequency for the Butterworth filter. Default is 0.1.
 #' @param bw_order An integer specifying the order of the Butterworth filter. Default is 2.
+#' @param lower_bound Numeric. If provided, smoothed values below this are clamped to this value.
+#' @param upper_bound Numeric. If provided, smoothed values above this are clamped to this value.
 #' @return A numeric vector containing the smoothed signal, of the same length as `x`.
 #' @export
 smooth_signal <- function(
@@ -24,7 +26,9 @@ smooth_signal <- function(
   window = 5,
   sg_order = 3,
   bw_cutoff = 0.1,
-  bw_order = 2
+  bw_order = 2,
+  lower_bound = NULL,
+  upper_bound = NULL
 ) {
   if (!is.numeric(x)) {
     cli::cli_abort("{.arg x} must be a numeric vector.")
@@ -41,10 +45,7 @@ smooth_signal <- function(
     # Uses a centered moving average to prevent phase shifts
     weights <- rep(1 / window, window)
     res <- as.numeric(stats::filter(x, weights, sides = 2))
-    return(res)
-  }
-
-  if (method == "sgolay") {
+  } else if (method == "sgolay") {
     if (!rlang::is_integerish(window, n = 1) || window %% 2 == 0) {
       cli::cli_abort(
         "{.arg window} must be an odd integer for the Savitzky-Golay filter."
@@ -56,11 +57,8 @@ smooth_signal <- function(
       )
     }
     # Swapped from signal::sgolayfilt to gsignal::sgolayfilt
-    res <- gsignal::sgolayfilt(x, p = sg_order, n = window)
-    return(as.numeric(res))
-  }
-
-  if (method == "butterworth") {
+    res <- as.numeric(gsignal::sgolayfilt(x, p = sg_order, n = window))
+  } else if (method == "butterworth") {
     if (
       !is.numeric(bw_cutoff) ||
         length(bw_cutoff) != 1 ||
@@ -76,9 +74,19 @@ smooth_signal <- function(
     }
     # Swapped from signal to gsignal
     bf <- gsignal::butter(bw_order, bw_cutoff, type = "low")
-    res <- gsignal::filtfilt(bf, x)
-    return(as.numeric(res))
+    res <- as.numeric(gsignal::filtfilt(bf, x))
   }
+
+  # Apply optional bounds to prevent polynomial undershoot/overshoot
+  if (!is.null(lower_bound)) {
+    res <- pmax(res, lower_bound, na.rm = FALSE)
+  }
+
+  if (!is.null(upper_bound)) {
+    res <- pmin(res, upper_bound, na.rm = FALSE)
+  }
+
+  return(res)
 }
 
 #' Aggregate Time Series Data by Time Bins
