@@ -65,7 +65,9 @@ reduce high-frequency noise and prevent spurious correlations.</p>
 <span>  window <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  sg_order <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  bw_cutoff <span class="op">=</span> <span class="fl">0.1</span>,</span>
-<span>  bw_order <span class="op">=</span> <span class="fl">2</span></span>
+<span>  bw_order <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  lower_bound <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  upper_bound <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -99,6 +101,14 @@ frequency for the Butterworth filter. Default is 0.1.</p></dd>
 
 <dt id="arg-bw-order">bw_order<a class="anchor" aria-label="anchor" href="#arg-bw-order"></a></dt>
 <dd><p>An integer specifying the order of the Butterworth filter. Default is 2.</p></dd>
+
+
+<dt id="arg-lower-bound">lower_bound<a class="anchor" aria-label="anchor" href="#arg-lower-bound"></a></dt>
+<dd><p>Numeric. If provided, smoothed values below this are clamped to this value.</p></dd>
+
+
+<dt id="arg-upper-bound">upper_bound<a class="anchor" aria-label="anchor" href="#arg-upper-bound"></a></dt>
+<dd><p>Numeric. If provided, smoothed values above this are clamped to this value.</p></dd>
 
 </dl></div>
     <div class="section level2">

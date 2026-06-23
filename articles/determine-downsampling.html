@@ -137,11 +137,13 @@ sampling rate to prevent aliasing.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Signal Power Evaluation</span> <span style="color: #00BBBB;">─────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; 95% of signal power is captured below 1.41 Hz.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> To prevent aliasing, the minimum universal sampling rate is 2.81 Hz.</span></span>
-<span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> To prevent aliasing, the minimum universal sampling rate is 2.81 Hz.</span></span></code></pre></div>
+<p><img src="determine-downsampling_files/figure-html/eval-single-1.png" class="r-plt" alt="" width="672"></p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># View the diagnostic plot</span></span>
 <span><span class="va">single_eval</span><span class="op">$</span><span class="va">plot</span></span></code></pre></div>
-<p><img src="determine-downsampling_files/figure-html/eval-single-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="determine-downsampling_files/figure-html/eval-single-2.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="best-practice-dataset-level-evaluation">Best Practice: Dataset-Level Evaluation<a class="anchor" aria-label="anchor" href="#best-practice-dataset-level-evaluation"></a>
@@ -154,7 +156,7 @@ of real time across dyads.</p>
 participants and choose a single, universal rate.
 <code><a href="../reference/evaluate_signal_power.html">evaluate_signal_power()</a></code> natively accepts lists and data
 frames, making this process completely automated.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Pass the entire list of 10 participants</span></span>
 <span><span class="va">multi_eval</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_signal_power.html">evaluate_signal_power</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="va">smile_data</span>,</span>
@@ -165,11 +167,13 @@ frames, making this process completely automated.</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Dataset-Level Signal Power Evaluation</span> <span style="color: #00BBBB;">───────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; Evaluated 10 signals.</span></span>
 <span><span class="co">#&gt; 95th percentile of cutoffs is 1.41 Hz.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> To prevent aliasing, the minimum universal sampling rate is 2.81 Hz.</span></span>
-<span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> To prevent aliasing, the minimum universal sampling rate is 2.81 Hz.</span></span></code></pre></div>
+<p><img src="determine-downsampling_files/figure-html/eval-multi-1.png" class="r-plt" alt="" width="672"></p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># View the dataset-level diagnostic plot</span></span>
 <span><span class="va">multi_eval</span><span class="op">$</span><span class="va">plot</span></span></code></pre></div>
-<p><img src="determine-downsampling_files/figure-html/eval-multi-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="determine-downsampling_files/figure-html/eval-multi-2.png" class="r-plt" alt="" width="672"></p>
 <p>When provided with multiple signals, the function calculates the
 cutoff for each individual and then conservatively recommends the
 <strong>95th percentile</strong> of those cutoffs. This ensures you

@@ -14,7 +14,9 @@ smooth_signal(
   window = 5,
   sg_order = 3,
   bw_cutoff = 0.1,
-  bw_order = 2
+  bw_order = 2,
+  lower_bound = NULL,
+  upper_bound = NULL
 )
 ```
 
@@ -49,6 +51,16 @@ smooth_signal(
 
   An integer specifying the order of the Butterworth filter. Default is
   2.
+
+- lower_bound:
+
+  Numeric. If provided, smoothed values below this are clamped to this
+  value.
+
+- upper_bound:
+
+  Numeric. If provided, smoothed values above this are clamped to this
+  value.
 
 ## Value
 
