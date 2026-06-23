@@ -210,6 +210,7 @@ evaluate_signal_power <- function(
     }
 
     out$plot <- p
+    print(p)
   }
 
   invisible(out)
