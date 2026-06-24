@@ -68,7 +68,23 @@ autotune_wcc <- function(
 
   cli::cli_h1("Starting WCC Auto-Tuning")
 
-  # 1. Safely sample dyads to prevent memory bloat and long compute times
+  # 1. Analyze signal power on all the data (it is cheaper)
+  cli::cli_alert_info("Step 1: Analyzing signal power...")
+  sample_signals <- unlist(
+    lapply(dyad_list, function(df) list(df[[1]], df[[2]])),
+    recursive = FALSE
+  )
+
+  psd_res <- evaluate_signal_power(
+    x = sample_signals,
+    sample_rate = sample_rate,
+    plot = FALSE,
+    quiet = TRUE
+  )
+  baseline_cycle_sec <- 1 / psd_res$primary_cutoff_freq
+  baseline_window <- round(baseline_cycle_sec * sample_rate)
+
+  # 2. Safely sample dyads to prevent memory bloat and long compute times
   n_total <- length(dyad_list)
   if (n_tune_dyads >= n_total) {
     tune_sample <- dyad_list
@@ -92,22 +108,6 @@ autotune_wcc <- function(
       )
     }
   }
-
-  # 2. Analyze signal power on all the data (it is cheaper)
-  cli::cli_alert_info("Step 1: Analyzing signal power...")
-  sample_signals <- unlist(
-    lapply(dyad_list, function(df) list(df[[1]], df[[2]])),
-    recursive = FALSE
-  )
-
-  psd_res <- evaluate_signal_power(
-    x = sample_signals,
-    sample_rate = sample_rate,
-    plot = FALSE,
-    quiet = TRUE
-  )
-  baseline_cycle_sec <- 1 / psd_res$primary_cutoff_freq
-  baseline_window <- round(baseline_cycle_sec * sample_rate)
 
   # 3. Generate the search grid dynamically
   cli::cli_alert_info("Step 2: Generating parameter grid...")
