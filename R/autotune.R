@@ -33,6 +33,8 @@
 #'   length to generate the grid of window sizes. Default is `c(0.5, 1.0, 2.0)`.
 #' @param lag_multipliers A numeric vector. Multipliers applied to the window size
 #'   to generate the grid of maximum lags. Default is `c(0.5, 1.0, 2.0)`.
+#' @param min_window_size Integer. The absolute minimum number of observations required
+#'   in a window to calculate a stable correlation. Default is 60.
 #' @param progress Logical. If `TRUE` (default), displays a dynamic progress bar
 #'   in the console during the grid search.
 #' @return A list containing the optimal parameters and the full tuning grid results.
@@ -47,6 +49,7 @@ autotune_wcc <- function(
   increment_pct = 0.05,
   window_multipliers = c(0.5, 1.0, 2.0),
   lag_multipliers = c(0.5, 1.0, 2.0),
+  min_window_size = 60,
   progress = TRUE
 ) {
   surrogate_method <- match.arg(surrogate_method)
@@ -108,11 +111,11 @@ autotune_wcc <- function(
   # 3. Generate the search grid dynamically
   cli::cli_alert_info("Step 2: Generating parameter grid...")
   test_windows <- round(baseline_window * window_multipliers)
-  test_windows <- test_windows[test_windows >= 30]
+  test_windows <- test_windows[test_windows >= min_window_size]
 
   if (length(test_windows) == 0) {
     cli::cli_abort(
-      "Calculated window sizes are too small for reliable estimates. Minimum 30 samples required."
+      "Calculated window sizes are too small for reliable estimates. Minimum {min_window_size} samples required."
     )
   }
 
@@ -199,8 +202,8 @@ autotune_wcc <- function(
 
   cli::cli_alert_success("Optimization complete.")
   cli::cli_dl(c(
-    "Optimal Window Size" = "{optimal_params$window_size}",
-    "Optimal Max Lag" = "{optimal_params$lag_max}",
+    "Optimal Window Size" = "{optimal_params$window_size} ({optimal_params$window_size / sample_rate} sec)",
+    "Optimal Max Lag" = "{optimal_params$lag_max} ({optimal_params$lag_max / sample_rate} sec)",
     "Maximized Effect Size (Z)" = "{round(optimal_params$mean_effect_size, 4)}"
   ))
 

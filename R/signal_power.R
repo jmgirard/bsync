@@ -11,6 +11,7 @@
 #' @param threshold A single numeric value between 0 and 1 indicating the cumulative
 #'   proportion of power to capture. Default is 0.95 (95 percent).
 #' @param plot A logical indicating whether to return a cumulative power plot. Default is `TRUE`.
+#' @param quiet A logical indicating whether to suppress console output. Default is `FALSE`.
 #' @return A list containing the calculated cutoff frequencies, the recommended
 #'   integer downsampling factor, the resulting target frequency, and optionally
 #'   a `ggplot` object.
@@ -19,7 +20,8 @@ evaluate_signal_power <- function(
   x,
   sample_rate,
   threshold = 0.95,
-  plot = TRUE
+  plot = TRUE,
+  quiet = FALSE
 ) {
   if (
     !is.numeric(sample_rate) || length(sample_rate) != 1 || sample_rate <= 0
@@ -38,6 +40,9 @@ evaluate_signal_power <- function(
   }
   if (!rlang::is_logical(plot, n = 1)) {
     cli::cli_abort("{.arg plot} must be a single logical value.")
+  }
+  if (!rlang::is_logical(quiet, n = 1)) {
+    cli::cli_abort("{.arg quiet} must be a single logical value.")
   }
 
   # Standardize input into a named list of numeric vectors
@@ -97,15 +102,23 @@ evaluate_signal_power <- function(
 
   if (is_multi) {
     final_cutoff <- stats::quantile(all_cutoffs, probs = 0.95)
-    cli::cli_h1("Dataset-Level Signal Power Evaluation")
-    cli::cli_text("Evaluated {length(all_cutoffs)} signals.")
-    cli::cli_text("95th percentile of cutoffs is {round(final_cutoff, 2)} Hz.")
+
+    if (!quiet) {
+      cli::cli_h1("Dataset-Level Signal Power Evaluation")
+      cli::cli_text("Evaluated {length(all_cutoffs)} signals.")
+      cli::cli_text(
+        "95th percentile of cutoffs is {round(final_cutoff, 2)} Hz."
+      )
+    }
   } else {
     final_cutoff <- all_cutoffs[[1]]
-    cli::cli_h1("Signal Power Evaluation")
-    cli::cli_text(
-      "{threshold * 100}% of signal power is captured below {round(final_cutoff, 2)} Hz."
-    )
+
+    if (!quiet) {
+      cli::cli_h1("Signal Power Evaluation")
+      cli::cli_text(
+        "{threshold * 100}% of signal power is captured below {round(final_cutoff, 2)} Hz."
+      )
+    }
   }
 
   # Calculate safe downsampling targets
@@ -127,9 +140,11 @@ evaluate_signal_power <- function(
   }
 
   if (best_factor < 1) {
-    cli::cli_alert_warning(
-      "The signal contains high frequencies requiring a sampling rate near or above the original {sample_rate} Hz. Downsampling is not recommended."
-    )
+    if (!quiet) {
+      cli::cli_alert_warning(
+        "The signal contains high frequencies requiring a sampling rate near or above the original {sample_rate} Hz. Downsampling is not recommended."
+      )
+    }
     recommended_rate <- sample_rate
     downsample_factor <- 1
     bin_width_sec <- 1 / sample_rate
@@ -138,12 +153,14 @@ evaluate_signal_power <- function(
     downsample_factor <- best_factor
     bin_width_sec <- 1 / recommended_rate
 
-    cli::cli_alert_success(
-      "Theoretical minimum rate is {round(theoretical_min, 2)} Hz."
-    )
-    cli::cli_alert_success(
-      "Recommended downsampling factor: {downsample_factor} (Target: {recommended_rate} Hz | Bin Width: {bin_width_sec} sec)."
-    )
+    if (!quiet) {
+      cli::cli_alert_success(
+        "Theoretical minimum rate is {round(theoretical_min, 2)} Hz."
+      )
+      cli::cli_alert_success(
+        "Recommended downsampling factor: {downsample_factor} (Target: {recommended_rate} Hz | Bin Width: {bin_width_sec} sec)."
+      )
+    }
   }
 
   out <- list(

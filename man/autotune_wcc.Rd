@@ -14,6 +14,7 @@ autotune_wcc(
   increment_pct = 0.05,
   window_multipliers = c(0.5, 1, 2),
   lag_multipliers = c(0.5, 1, 2),
+  min_window_size = 60,
   progress = TRUE
 )
 }
@@ -48,6 +49,9 @@ length to generate the grid of window sizes. Default is `c(0.5, 1.0, 2.0)`.}
 
 \item{lag_multipliers}{A numeric vector. Multipliers applied to the window size
 to generate the grid of maximum lags. Default is `c(0.5, 1.0, 2.0)`.}
+
+\item{min_window_size}{Integer. The absolute minimum number of observations required
+in a window to calculate a stable correlation. Default is 60.}
 
 \item{progress}{Logical. If `TRUE` (default), displays a dynamic progress bar
 in the console during the grid search.}

@@ -4,7 +4,13 @@
 \alias{evaluate_signal_power}
 \title{Evaluate Signal Power and Suggest Downsampling Rate}
 \usage{
-evaluate_signal_power(x, sample_rate, threshold = 0.95, plot = TRUE)
+evaluate_signal_power(
+  x,
+  sample_rate,
+  threshold = 0.95,
+  plot = TRUE,
+  quiet = FALSE
+)
 }
 \arguments{
 \item{x}{A numeric vector, a list of numeric vectors, or a data frame. If a
@@ -16,6 +22,8 @@ data frame is provided, all numeric columns will be evaluated.}
 proportion of power to capture. Default is 0.95 (95 percent).}
 
 \item{plot}{A logical indicating whether to return a cumulative power plot. Default is `TRUE`.}
+
+\item{quiet}{A logical indicating whether to suppress console output. Default is `FALSE`.}
 }
 \value{
 A list containing the calculated cutoff frequencies, the recommended
