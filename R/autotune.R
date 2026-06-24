@@ -93,10 +93,10 @@ autotune_wcc <- function(
     }
   }
 
-  # 2. Analyze signal power only on the sampled data
+  # 2. Analyze signal power on all the data (it is cheaper)
   cli::cli_alert_info("Step 1: Analyzing signal power...")
   sample_signals <- unlist(
-    lapply(tune_sample, function(df) list(df[[1]], df[[2]])),
+    lapply(dyad_list, function(df) list(df[[1]], df[[2]])),
     recursive = FALSE
   )
 
@@ -123,7 +123,7 @@ autotune_wcc <- function(
       "All calculated window sizes are too small for reliable statistical estimates.",
       "x" = "The largest proposed window was {max_proposed} samples, but {.arg min_window_size} requires {min_window_size}.",
       "i" = "Your data's baseline cycle is {baseline_window} samples ({round(baseline_cycle_sec, 2)} sec).",
-      ">" = "Option 1: Increase {.arg window_multipliers} to test wider windows (e.g., {.code c(1.0, 2.0, 3.0)}).",
+      ">" = "Option 1: Increase {.arg window_multipliers} to test wider windows.",
       ">" = "Option 2: Lower {.arg min_window_size} if you specifically want to evaluate very brief interactions."
     ))
   } else if (length(dropped_windows) > 0) {
