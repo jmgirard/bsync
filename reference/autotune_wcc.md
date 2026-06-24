@@ -15,7 +15,7 @@ autotune_wcc(
   surrogate_method = c("phase", "circular"),
   trim_odd = FALSE,
   increment_pct = 0.05,
-  window_multipliers = c(0.5, 1, 2),
+  window_multipliers = c(0.5, 1, 1.5, 2),
   lag_multipliers = c(0.5, 1, 2),
   min_window_size = 60,
   progress = TRUE
@@ -67,7 +67,8 @@ autotune_wcc(
 - window_multipliers:
 
   A numeric vector. Multipliers applied to the baseline cycle length to
-  generate the grid of window sizes. Default is \`c(0.5, 1.0, 2.0)\`.
+  generate the grid of window sizes. Default is \`c(0.5, 1.0, 1.5,
+  2.0)\`.
 
 - lag_multipliers:
 

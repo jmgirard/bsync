@@ -67,7 +67,7 @@ with a surrogate-driven grid search.</p>
 <span>  surrogate_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"phase"</span>, <span class="st">"circular"</span><span class="op">)</span>,</span>
 <span>  trim_odd <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  increment_pct <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>  window_multipliers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  window_multipliers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">1.5</span>, <span class="fl">2</span><span class="op">)</span>,</span>
 <span>  lag_multipliers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
 <span>  min_window_size <span class="op">=</span> <span class="fl">60</span>,</span>
 <span>  progress <span class="op">=</span> <span class="cn">TRUE</span></span>
@@ -119,7 +119,7 @@ between successive windows as a percentage of the window size. Default is 0.05.<
 
 <dt id="arg-window-multipliers">window_multipliers<a class="anchor" aria-label="anchor" href="#arg-window-multipliers"></a></dt>
 <dd><p>A numeric vector. Multipliers applied to the baseline cycle
-length to generate the grid of window sizes. Default is `c(0.5, 1.0, 2.0)`.</p></dd>
+length to generate the grid of window sizes. Default is `c(0.5, 1.0, 1.5, 2.0)`.</p></dd>
 
 
 <dt id="arg-lag-multipliers">lag_multipliers<a class="anchor" aria-label="anchor" href="#arg-lag-multipliers"></a></dt>
