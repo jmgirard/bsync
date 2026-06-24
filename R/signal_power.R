@@ -132,15 +132,17 @@ evaluate_signal_power <- function(
     )
     recommended_rate <- sample_rate
     downsample_factor <- 1
+    bin_width_sec <- 1 / sample_rate
   } else {
     recommended_rate <- sample_rate / best_factor
     downsample_factor <- best_factor
+    bin_width_sec <- 1 / recommended_rate
 
     cli::cli_alert_success(
       "Theoretical minimum rate is {round(theoretical_min, 2)} Hz."
     )
     cli::cli_alert_success(
-      "Recommended integer downsampling factor: {downsample_factor} (Resulting Target Rate: {recommended_rate} Hz)."
+      "Recommended downsampling factor: {downsample_factor} (Target: {recommended_rate} Hz | Bin Width: {bin_width_sec} sec)."
     )
   }
 
@@ -148,7 +150,8 @@ evaluate_signal_power <- function(
     primary_cutoff_freq = unname(final_cutoff),
     theoretical_min_rate = unname(theoretical_min),
     recommended_downsample_factor = unname(downsample_factor),
-    recommended_target_rate = unname(recommended_rate)
+    recommended_target_rate = unname(recommended_rate),
+    recommended_bin_width_sec = unname(bin_width_sec)
   )
 
   if (is_multi) {
