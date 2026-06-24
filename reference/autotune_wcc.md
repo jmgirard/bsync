@@ -17,6 +17,7 @@ autotune_wcc(
   increment_pct = 0.05,
   window_multipliers = c(0.5, 1, 2),
   lag_multipliers = c(0.5, 1, 2),
+  min_window_size = 60,
   progress = TRUE
 )
 ```
@@ -72,6 +73,11 @@ autotune_wcc(
 
   A numeric vector. Multipliers applied to the window size to generate
   the grid of maximum lags. Default is \`c(0.5, 1.0, 2.0)\`.
+
+- min_window_size:
+
+  Integer. The absolute minimum number of observations required in a
+  window to calculate a stable correlation. Default is 60.
 
 - progress:
 

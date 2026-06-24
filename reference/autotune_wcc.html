@@ -69,6 +69,7 @@ with a surrogate-driven grid search.</p>
 <span>  increment_pct <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  window_multipliers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
 <span>  lag_multipliers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  min_window_size <span class="op">=</span> <span class="fl">60</span>,</span>
 <span>  progress <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -124,6 +125,11 @@ length to generate the grid of window sizes. Default is `c(0.5, 1.0, 2.0)`.</p><
 <dt id="arg-lag-multipliers">lag_multipliers<a class="anchor" aria-label="anchor" href="#arg-lag-multipliers"></a></dt>
 <dd><p>A numeric vector. Multipliers applied to the window size
 to generate the grid of maximum lags. Default is `c(0.5, 1.0, 2.0)`.</p></dd>
+
+
+<dt id="arg-min-window-size">min_window_size<a class="anchor" aria-label="anchor" href="#arg-min-window-size"></a></dt>
+<dd><p>Integer. The absolute minimum number of observations required
+in a window to calculate a stable correlation. Default is 60.</p></dd>
 
 
 <dt id="arg-progress">progress<a class="anchor" aria-label="anchor" href="#arg-progress"></a></dt>

@@ -9,7 +9,13 @@ sampling rate.
 ## Usage
 
 ``` r
-evaluate_signal_power(x, sample_rate, threshold = 0.95, plot = TRUE)
+evaluate_signal_power(
+  x,
+  sample_rate,
+  threshold = 0.95,
+  plot = TRUE,
+  quiet = FALSE
+)
 ```
 
 ## Arguments
@@ -32,6 +38,11 @@ evaluate_signal_power(x, sample_rate, threshold = 0.95, plot = TRUE)
 
   A logical indicating whether to return a cumulative power plot.
   Default is \`TRUE\`.
+
+- quiet:
+
+  A logical indicating whether to suppress console output. Default is
+  \`FALSE\`.
 
 ## Value
 
