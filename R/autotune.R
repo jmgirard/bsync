@@ -77,6 +77,19 @@ autotune_wcc <- function(
     )
   }
 
+  if (surrogate_method == "phase" && trim_odd) {
+    odd_count <- sum(vapply(
+      tune_sample,
+      function(df) nrow(df) %% 2 != 0,
+      logical(1)
+    ))
+    if (odd_count > 0) {
+      cli::cli_alert_warning(
+        "Trimming 1 observation from {odd_count} odd-length dyads to enable phase randomization."
+      )
+    }
+  }
+
   # 2. Analyze signal power only on the sampled data
   cli::cli_alert_info("Step 1: Analyzing signal power...")
   sample_signals <- unlist(
@@ -115,7 +128,6 @@ autotune_wcc <- function(
     "Step 3: Evaluating {nrow(grid)} parameter combinations via surrogates..."
   )
 
-  # Initialize the progress bar if requested
   if (progress) {
     total_iterations <- nrow(grid) * length(tune_sample)
     cli::cli_progress_bar("Running Grid Search", total = total_iterations)
@@ -133,8 +145,12 @@ autotune_wcc <- function(
       x <- tune_sample[[d]][[1]]
       y <- tune_sample[[d]][[2]]
 
+      if (surrogate_method == "phase" && trim_odd && length(y) %% 2 != 0) {
+        x <- x[-length(x)]
+        y <- y[-length(y)]
+      }
+
       if (surrogate_method == "phase") {
-        # trim_odd is passed exclusively to the phase generator
         y_surrs <- generate_surrogate_phase(
           y,
           n_surrogates = n_surrogates,
@@ -157,18 +173,15 @@ autotune_wcc <- function(
         window_increment = w_inc
       )
 
-      # Calculate Standardized Effect Size: (Observed - Mean Null) / SD Null
       null_mean <- base::mean(surr_res$surrogate_z, na.rm = TRUE)
       null_sd <- stats::sd(surr_res$surrogate_z, na.rm = TRUE)
 
-      # Protect against division by zero if surrogates are identical
       if (is.na(null_sd) || null_sd == 0) {
         dyad_effects[d] <- 0
       } else {
         dyad_effects[d] <- (surr_res$observed_z - null_mean) / null_sd
       }
 
-      # Update progress bar
       if (progress) {
         cli::cli_progress_update()
       }
