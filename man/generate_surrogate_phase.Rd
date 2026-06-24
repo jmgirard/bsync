@@ -4,12 +4,14 @@
 \alias{generate_surrogate_phase}
 \title{Generate Phase-Randomized Surrogates (Fourier Transform)}
 \usage{
-generate_surrogate_phase(y, n_surrogates = 100)
+generate_surrogate_phase(y, n_surrogates = 100, trim_odd = FALSE)
 }
 \arguments{
 \item{y}{A numeric vector containing a time series.}
 
 \item{n_surrogates}{Integer specifying the number of surrogates. Default is 100.}
+
+\item{trim_odd}{Logical. If TRUE, drops the final observation if the time series length is odd.}
 }
 \value{
 A matrix where each column is a surrogate time series.
