@@ -155,7 +155,7 @@ test_that("aggregate_by_time catches invalid inputs", {
 
 # Tests for trim_edges() --------------------------------------------------
 
-test_that("trim_edges works on vectors, data frames, and matrices", {
+test_that("trim_edges works on vectors, data frames, and matrices (pad_na = FALSE)", {
   # Vector trimming
   v <- 1:10
   expect_equal(trim_edges(v, trim_length = 2), 3:8)
@@ -172,6 +172,32 @@ test_that("trim_edges works on vectors, data frames, and matrices", {
   expect_equal(nrow(mat_trimmed), 4)
 })
 
+test_that("trim_edges replaces edges with NAs when pad_na = TRUE", {
+  # Vector padding
+  v <- 1:5
+  v_padded <- trim_edges(v, trim_length = 1, pad_na = TRUE)
+  expect_equal(length(v_padded), 5)
+  expect_equal(v_padded, c(NA, 2, 3, 4, NA))
+
+  # Data frame padding
+  df <- data.frame(a = 1:4, b = letters[1:4])
+  df_padded <- trim_edges(df, trim_length = 1, pad_na = TRUE)
+  expect_equal(nrow(df_padded), 4)
+  # Check that top and bottom rows are completely NA
+  expect_true(all(is.na(df_padded[1, ])))
+  expect_true(all(is.na(df_padded[4, ])))
+  # Check that inner rows remain intact
+  expect_equal(df_padded$a[2:3], 2:3)
+
+  # Matrix padding
+  mat <- matrix(1:8, nrow = 4)
+  mat_padded <- trim_edges(mat, trim_length = 1, pad_na = TRUE)
+  expect_equal(nrow(mat_padded), 4)
+  expect_true(all(is.na(mat_padded[1, ])))
+  expect_true(all(is.na(mat_padded[4, ])))
+  expect_equal(mat_padded[2:3, 1], c(2, 3))
+})
+
 test_that("trim_edges catches invalid inputs and extreme trims", {
   v <- 1:5
   df <- data.frame(a = 1:5)
@@ -180,6 +206,10 @@ test_that("trim_edges catches invalid inputs and extreme trims", {
   expect_error(trim_edges(v, trim_length = -1), "single positive integer")
   expect_error(trim_edges(v, trim_length = 1.5), "single positive integer")
   expect_error(
+    trim_edges(v, trim_length = 1, pad_na = "TRUE"),
+    "single logical value"
+  )
+  expect_error(
     trim_edges(list(a = 1:5), trim_length = 1),
     "vector, matrix, or data frame"
   )
@@ -187,11 +217,11 @@ test_that("trim_edges catches invalid inputs and extreme trims", {
   # Edge case where trim_length exceeds data dimensions
   expect_error(
     trim_edges(v, trim_length = 3),
-    "too large; it would remove all elements"
+    "too large; it would affect all elements"
   )
   expect_error(
     trim_edges(df, trim_length = 3),
-    "too large; it would remove all rows"
+    "too large; it would affect all rows"
   )
 })
 

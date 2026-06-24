@@ -162,7 +162,7 @@ aggregate_by_time <- function(
 
 #' Trim Edge Effects from Data
 #'
-#' Removes a specified number of observations from the beginning and end of a
+#' Removes or masks a specified number of observations from the beginning and end of a
 #' vector or data frame. This is highly recommended after applying zero-phase or
 #' polynomial smoothing filters (e.g., Savitzky-Golay) to remove boundary artifacts.
 #'
@@ -170,29 +170,49 @@ aggregate_by_time <- function(
 #' @param trim_length An integer specifying the number of observations to remove
 #'   from both ends. A standard rule of thumb is to set this equal to the window
 #'   size used for smoothing.
-#' @return An object of the same class as `x` with the edges removed.
+#' @param pad_na A logical indicating whether to replace the trimmed edges with `NA`
+#'   instead of dropping them. Set to `TRUE` when using inside `dplyr::mutate()`
+#'   to preserve the original vector length. Default is `FALSE`.
+#' @return An object of the same class as `x` with the edges removed or masked.
 #' @export
-trim_edges <- function(x, trim_length) {
+trim_edges <- function(x, trim_length, pad_na = FALSE) {
   if (!rlang::is_integerish(trim_length, n = 1) || trim_length <= 0) {
     cli::cli_abort("{.arg trim_length} must be a single positive integer.")
+  }
+  if (!rlang::is_logical(pad_na, n = 1)) {
+    cli::cli_abort("{.arg pad_na} must be a single logical value.")
   }
 
   if (is.data.frame(x) || is.matrix(x)) {
     n_rows <- nrow(x)
     if (n_rows <= 2 * trim_length) {
       cli::cli_abort(
-        "{.arg trim_length} is too large; it would remove all rows from the data."
+        "{.arg trim_length} is too large; it would affect all rows from the data."
       )
     }
-    return(x[(trim_length + 1):(n_rows - trim_length), , drop = FALSE])
+
+    if (pad_na) {
+      x[1:trim_length, ] <- NA
+      x[(n_rows - trim_length + 1):n_rows, ] <- NA
+      return(x)
+    } else {
+      return(x[(trim_length + 1):(n_rows - trim_length), , drop = FALSE])
+    }
   } else if (is.atomic(x) && is.vector(x)) {
     n_len <- length(x)
     if (n_len <= 2 * trim_length) {
       cli::cli_abort(
-        "{.arg trim_length} is too large; it would remove all elements from the vector."
+        "{.arg trim_length} is too large; it would affect all elements from the vector."
       )
     }
-    return(x[(trim_length + 1):(n_len - trim_length)])
+
+    if (pad_na) {
+      x[1:trim_length] <- NA
+      x[(n_len - trim_length + 1):n_len] <- NA
+      return(x)
+    } else {
+      return(x[(trim_length + 1):(n_len - trim_length)])
+    }
   } else {
     cli::cli_abort("Input {.arg x} must be a vector, matrix, or data frame.")
   }
