@@ -85,13 +85,16 @@ reduce high-frequency noise and prevent spurious correlations.</p>
 
 
 <dt id="arg-window">window<a class="anchor" aria-label="anchor" href="#arg-window"></a></dt>
-<dd><p>An integer specifying the window size (number of data points) for the
-"moving_average" and "sgolay" methods. Must be an odd number for "sgolay". Default is 5.</p></dd>
+<dd><p>An integer specifying the window size. Must be an odd number
+for "sgolay". Best practice: Calculate this based on the expected duration
+of your target behavior. (e.g., A 2-second behavior sampled at 5Hz = a window of 11).</p></dd>
 
 
 <dt id="arg-sg-order">sg_order<a class="anchor" aria-label="anchor" href="#arg-sg-order"></a></dt>
 <dd><p>An integer specifying the polynomial order for the Savitzky-Golay filter.
-Must be less than `window`. Default is 3.</p></dd>
+Must be less than `window`. Best practice: Use 2 (quadratic) to extract broad structural
+trends for cross-correlation, or 3 (cubic) to preserve absolute peak intensities.
+Orders &gt; 3 will typically overfit to high-frequency tracking noise. Default is 3.</p></dd>
 
 
 <dt id="arg-bw-cutoff">bw_cutoff<a class="anchor" aria-label="anchor" href="#arg-bw-cutoff"></a></dt>

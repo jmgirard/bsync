@@ -33,14 +33,18 @@ smooth_signal(
 
 - window:
 
-  An integer specifying the window size (number of data points) for the
-  "moving_average" and "sgolay" methods. Must be an odd number for
-  "sgolay". Default is 5.
+  An integer specifying the window size. Must be an odd number for
+  "sgolay". Best practice: Calculate this based on the expected duration
+  of your target behavior. (e.g., A 2-second behavior sampled at 5Hz = a
+  window of 11).
 
 - sg_order:
 
   An integer specifying the polynomial order for the Savitzky-Golay
-  filter. Must be less than \`window\`. Default is 3.
+  filter. Must be less than \`window\`. Best practice: Use 2 (quadratic)
+  to extract broad structural trends for cross-correlation, or 3 (cubic)
+  to preserve absolute peak intensities. Orders \> 3 will typically
+  overfit to high-frequency tracking noise. Default is 3.
 
 - bw_cutoff:
 

@@ -1,9 +1,9 @@
 # Trim Edge Effects from Data
 
 Removes or masks a specified number of observations from the beginning
-and end of a vector or data frame. This is highly recommended after
-applying zero-phase or polynomial smoothing filters (e.g.,
-Savitzky-Golay) to remove boundary artifacts.
+and end of a vector or data frame. This is mathematically required after
+applying symmetric rolling filters (like Savitzky-Golay) to remove
+boundary artifacts.
 
 ## Usage
 
@@ -19,9 +19,9 @@ trim_edges(x, trim_length, pad_na = FALSE)
 
 - trim_length:
 
-  An integer specifying the number of observations to remove from both
-  ends. A standard rule of thumb is to set this equal to the window size
-  used for smoothing.
+  An integer specifying the number of observations to mask from both
+  ends. Best practice: For a Savitzky-Golay filter, this must exactly
+  equal (window - 1) / 2.
 
 - pad_na:
 
