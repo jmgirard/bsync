@@ -18,6 +18,7 @@ autotune_wcc(
   window_multipliers = c(0.5, 1, 1.5, 2),
   lag_multipliers = c(0.5, 1, 2),
   min_window_size = 60,
+  max_window_sec = 30,
   progress = TRUE
 )
 ```
@@ -79,6 +80,11 @@ autotune_wcc(
 
   Integer. The absolute minimum number of observations required in a
   window to calculate a stable correlation. Default is 60.
+
+- max_window_sec:
+
+  A single positive number. The absolute maximum number of seconds for a
+  window to span before it is no longer synchrony. Default is 30.
 
 - progress:
 
