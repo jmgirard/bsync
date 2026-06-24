@@ -10,6 +10,7 @@ autotune_wcc(
   n_tune_dyads = 10,
   n_surrogates = 100,
   surrogate_method = c("phase", "circular"),
+  trim_odd = FALSE,
   increment_pct = 0.05,
   window_multipliers = c(0.5, 1, 2),
   lag_multipliers = c(0.5, 1, 2),
@@ -34,6 +35,10 @@ standardized effect sizes during tuning.}
 which preserves the power spectrum and is ideal for continuous physiological data.
 "circular" shifts the time series, which is better for preserving local
 autocorrelation in behavioral data.}
+
+\item{trim_odd}{Logical. If `TRUE` and `surrogate_method = "phase"`, automatically
+drops the final observation of any odd-length time series to allow the Fourier
+transform to execute. Default is `FALSE`.}
 
 \item{increment_pct}{Numeric value between 0.01 and 1.0. Determines the step size
 between successive windows as a percentage of the window size. Default is 0.05.}

@@ -24,6 +24,9 @@
 #'   which preserves the power spectrum and is ideal for continuous physiological data.
 #'   "circular" shifts the time series, which is better for preserving local
 #'   autocorrelation in behavioral data.
+#' @param trim_odd Logical. If `TRUE` and `surrogate_method = "phase"`, automatically
+#'   drops the final observation of any odd-length time series to allow the Fourier
+#'   transform to execute. Default is `FALSE`.
 #' @param increment_pct Numeric value between 0.01 and 1.0. Determines the step size
 #'   between successive windows as a percentage of the window size. Default is 0.05.
 #' @param window_multipliers A numeric vector. Multipliers applied to the baseline cycle
@@ -40,6 +43,7 @@ autotune_wcc <- function(
   n_tune_dyads = 10,
   n_surrogates = 100,
   surrogate_method = c("phase", "circular"),
+  trim_odd = FALSE,
   increment_pct = 0.05,
   window_multipliers = c(0.5, 1.0, 2.0),
   lag_multipliers = c(0.5, 1.0, 2.0),
@@ -49,6 +53,9 @@ autotune_wcc <- function(
 
   if (!rlang::is_logical(progress, n = 1)) {
     cli::cli_abort("{.arg progress} must be a single logical value.")
+  }
+  if (!rlang::is_logical(trim_odd, n = 1)) {
+    cli::cli_abort("{.arg trim_odd} must be a single logical value.")
   }
   if (increment_pct <= 0 || increment_pct > 1) {
     cli::cli_abort(
@@ -127,7 +134,12 @@ autotune_wcc <- function(
       y <- tune_sample[[d]][[2]]
 
       if (surrogate_method == "phase") {
-        y_surrs <- generate_surrogate_phase(y, n_surrogates = n_surrogates)
+        # trim_odd is passed exclusively to the phase generator
+        y_surrs <- generate_surrogate_phase(
+          y,
+          n_surrogates = n_surrogates,
+          trim_odd = trim_odd
+        )
       } else {
         y_surrs <- generate_surrogate_circular(
           y,
