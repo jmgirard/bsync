@@ -4,6 +4,8 @@
 
 - [`aggregate_by_time()`](https://jmgirard.github.io/bsync/reference/aggregate_by_time.md)
   : Aggregate Time Series Data by Time Bins
+- [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  : Auto-Tune WCC Parameters for a Dataset
 - [`calc_speed_1d()`](https://jmgirard.github.io/bsync/reference/calc_speed_1d.md)
   : Calculate 1D Speed
 - [`calc_speed_2d()`](https://jmgirard.github.io/bsync/reference/calc_speed_2d.md)
