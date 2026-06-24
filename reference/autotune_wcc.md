@@ -10,8 +10,8 @@ parameters for a multi-dyad dataset by combining Power Spectral Density
 autotune_wcc(
   dyad_list,
   sample_rate,
-  n_tune_dyads = 10,
-  n_surrogates = 100,
+  n_tune_dyads = 30,
+  n_surrogates = 30,
   surrogate_method = c("phase", "circular"),
   trim_odd = FALSE,
   increment_pct = 0.05,
@@ -36,12 +36,12 @@ autotune_wcc(
 - n_tune_dyads:
 
   Integer. The number of dyads to sample for the tuning phase. Default
-  is 10 to provide a robust sample without excessive computation time.
+  is 30 to provide a robust sample without excessive computation time.
   If the dataset has fewer than this number, all dyads are used.
 
 - n_surrogates:
 
-  Integer. Number of surrogates to generate per test. Default is 100,
+  Integer. Number of surrogates to generate per test. Default is 30,
   which provides a stable enough standard deviation to calculate
   standardized effect sizes during tuning.
 
