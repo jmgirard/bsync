@@ -35,6 +35,8 @@
 #'   to generate the grid of maximum lags. Default is `c(0.5, 1.0, 2.0)`.
 #' @param min_window_size Integer. The absolute minimum number of observations required
 #'   in a window to calculate a stable correlation. Default is 60.
+#' @param max_window_sec A single positive number. The absolute maximum number of
+#'   seconds for a window to span before it is no longer synchrony. Default is 30.
 #' @param progress Logical. If `TRUE` (default), displays a dynamic progress bar
 #'   in the console during the grid search.
 #' @return A list containing the optimal parameters and the full tuning grid results.
@@ -50,6 +52,7 @@ autotune_wcc <- function(
   window_multipliers = c(0.5, 1.0, 1.5, 2.0),
   lag_multipliers = c(0.5, 1.0, 2.0),
   min_window_size = 60,
+  max_window_sec = 30,
   progress = TRUE
 ) {
   surrogate_method <- match.arg(surrogate_method)
@@ -113,22 +116,22 @@ autotune_wcc <- function(
   cli::cli_alert_info("Step 2: Generating parameter grid...")
 
   proposed_windows <- unique(round(baseline_window * window_multipliers))
-  test_windows <- proposed_windows[proposed_windows >= min_window_size]
-  dropped_windows <- proposed_windows[proposed_windows < min_window_size]
+  test_windows <- proposed_windows[
+    (proposed_windows >= min_window_size) &
+      (proposed_windows <= max_window_sec * sample_rate)
+  ]
+  dropped_windows <- proposed_windows[
+    (proposed_windows < min_window_size) |
+      (proposed_windows > max_window_sec * sample_rate)
+  ]
 
   if (length(test_windows) == 0) {
-    max_proposed <- max(proposed_windows)
-
     cli::cli_abort(c(
-      "All calculated window sizes are too small for reliable statistical estimates.",
-      "x" = "The largest proposed window was {max_proposed} samples, but {.arg min_window_size} requires {min_window_size}.",
-      "i" = "Your data's baseline cycle is {baseline_window} samples ({round(baseline_cycle_sec, 2)} sec).",
-      ">" = "Option 1: Increase {.arg window_multipliers} to test wider windows.",
-      ">" = "Option 2: Lower {.arg min_window_size} if you specifically want to evaluate very brief interactions."
+      "All calculated window sizes are outside the specified minimum and maximum values."
     ))
   } else if (length(dropped_windows) > 0) {
     cli::cli_alert_warning(
-      "Dropped {length(dropped_windows)} window size(s) ({paste(dropped_windows, collapse = ', ')}) for falling below {.arg min_window_size}."
+      "Dropped {length(dropped_windows)} window size(s) ({paste(dropped_windows, collapse = ', ')}) for falling below {.arg min_window_size} or above {.arg max_window_sec}*{.arg sample_rate}."
     )
   }
 
