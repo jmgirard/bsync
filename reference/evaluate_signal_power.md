@@ -2,9 +2,9 @@
 
 Calculates the Power Spectral Density (PSD) of continuous time series
 using Welch's method. It determines the frequency below which a
-specified proportion of the total signal power is captured. Can process
-a single vector or iterate over multiple signals to recommend a
-universal downsampling rate.
+specified proportion of the total signal power is captured and
+recommends an optimal integer downsampling factor that yields a clean
+sampling rate.
 
 ## Usage
 
@@ -35,7 +35,6 @@ evaluate_signal_power(x, sample_rate, threshold = 0.95, plot = TRUE)
 
 ## Value
 
-A list containing the recommended target frequency, the calculated
-cutoff frequencies, and optionally a \`ggplot\` object. If multiple
-signals are provided, summary statistics of the cutoffs are also
-returned.
+A list containing the calculated cutoff frequencies, the recommended
+integer downsampling factor, the resulting target frequency, and
+optionally a \`ggplot\` object.

@@ -69,7 +69,8 @@ single_eval <- evaluate_signal_power(
 #> 
 #> ── Signal Power Evaluation ─────────────────────────────────────────────────────
 #> 95% of signal power is captured below 1.41 Hz.
-#> ✔ To prevent aliasing, the minimum universal sampling rate is 2.81 Hz.
+#> ✔ Theoretical minimum rate is 2.81 Hz.
+#> ✔ Recommended integer downsampling factor: 6 (Resulting Target Rate: 5 Hz).
 ```
 
 ![](determine-downsampling_files/figure-html/eval-single-1.png)
@@ -108,7 +109,8 @@ multi_eval <- evaluate_signal_power(
 #> ── Dataset-Level Signal Power Evaluation ───────────────────────────────────────
 #> Evaluated 10 signals.
 #> 95th percentile of cutoffs is 1.41 Hz.
-#> ✔ To prevent aliasing, the minimum universal sampling rate is 2.81 Hz.
+#> ✔ Theoretical minimum rate is 2.81 Hz.
+#> ✔ Recommended integer downsampling factor: 6 (Resulting Target Rate: 5 Hz).
 ```
 
 ![](determine-downsampling_files/figure-html/eval-multi-1.png)
