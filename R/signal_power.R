@@ -2,8 +2,8 @@
 #'
 #' Calculates the Power Spectral Density (PSD) of continuous time series using
 #' Welch's method. It determines the frequency below which a specified proportion
-#' of the total signal power is captured. Can process a single vector or iterate
-#' over multiple signals to recommend a universal downsampling rate.
+#' of the total signal power is captured and recommends an optimal integer
+#' downsampling factor that yields a clean sampling rate.
 #'
 #' @param x A numeric vector, a list of numeric vectors, or a data frame. If a
 #'   data frame is provided, all numeric columns will be evaluated.
@@ -11,9 +11,9 @@
 #' @param threshold A single numeric value between 0 and 1 indicating the cumulative
 #'   proportion of power to capture. Default is 0.95 (95 percent).
 #' @param plot A logical indicating whether to return a cumulative power plot. Default is `TRUE`.
-#' @return A list containing the recommended target frequency, the calculated cutoff
-#'   frequencies, and optionally a `ggplot` object. If multiple signals are provided,
-#'   summary statistics of the cutoffs are also returned.
+#' @return A list containing the calculated cutoff frequencies, the recommended
+#'   integer downsampling factor, the resulting target frequency, and optionally
+#'   a `ggplot` object.
 #' @export
 evaluate_signal_power <- function(
   x,
@@ -66,8 +66,6 @@ evaluate_signal_power <- function(
 
   # Internal helper to calculate PSD for a single vector
   calc_psd <- function(vec) {
-    # as.numeric() strips all attributes (like imputation metadata and na.action)
-    # to prevent gsignal from misinterpreting the vector as a matrix
     vec_clean <- as.numeric(stats::na.omit(vec))
 
     if (length(vec_clean) < sample_rate) {
@@ -85,23 +83,19 @@ evaluate_signal_power <- function(
     )
   }
 
-  # Apply calculation across all signals
   results <- lapply(x_list, calc_psd)
-
-  # Filter out any that failed (e.g., due to too many NAs)
   results <- results[!vapply(results, is.null, logical(1))]
+
   if (length(results) == 0) {
     cli::cli_abort(
       "No signals contained enough non-missing data to calculate PSD."
     )
   }
 
-  # Extract cutoffs and determine the recommendation
   all_cutoffs <- vapply(results, function(res) res$cutoff, numeric(1))
   is_multi <- length(all_cutoffs) > 1
 
   if (is_multi) {
-    # For multiple signals, recommend the 95th percentile to be conservative
     final_cutoff <- stats::quantile(all_cutoffs, probs = 0.95)
     cli::cli_h1("Dataset-Level Signal Power Evaluation")
     cli::cli_text("Evaluated {length(all_cutoffs)} signals.")
@@ -114,15 +108,47 @@ evaluate_signal_power <- function(
     )
   }
 
-  recommended_rate <- final_cutoff * 2
-  cli::cli_alert_success(
-    "To prevent aliasing, the minimum universal sampling rate is {round(recommended_rate, 2)} Hz."
-  )
+  # Calculate safe downsampling targets
+  theoretical_min <- final_cutoff * 2
+  safe_target_rate <- theoretical_min * 1.10
+  max_integer_factor <- floor(sample_rate / safe_target_rate)
 
-  # Prepare the output object
+  best_factor <- max_integer_factor
+
+  # Search for a clean integer Hz outcome up to 3 steps back
+  if (max_integer_factor > 1) {
+    search_range <- max_integer_factor:max(1, max_integer_factor - 3)
+    for (f in search_range) {
+      if (sample_rate %% f == 0) {
+        best_factor <- f
+        break
+      }
+    }
+  }
+
+  if (best_factor < 1) {
+    cli::cli_alert_warning(
+      "The signal contains high frequencies requiring a sampling rate near or above the original {sample_rate} Hz. Downsampling is not recommended."
+    )
+    recommended_rate <- sample_rate
+    downsample_factor <- 1
+  } else {
+    recommended_rate <- sample_rate / best_factor
+    downsample_factor <- best_factor
+
+    cli::cli_alert_success(
+      "Theoretical minimum rate is {round(theoretical_min, 2)} Hz."
+    )
+    cli::cli_alert_success(
+      "Recommended integer downsampling factor: {downsample_factor} (Resulting Target Rate: {recommended_rate} Hz)."
+    )
+  }
+
   out <- list(
-    recommended_target_rate = unname(recommended_rate),
-    primary_cutoff_freq = unname(final_cutoff)
+    primary_cutoff_freq = unname(final_cutoff),
+    theoretical_min_rate = unname(theoretical_min),
+    recommended_downsample_factor = unname(downsample_factor),
+    recommended_target_rate = unname(recommended_rate)
   )
 
   if (is_multi) {
@@ -130,7 +156,6 @@ evaluate_signal_power <- function(
     out$summary_stats <- summary(all_cutoffs)
   }
 
-  # Generate Plot
   if (plot) {
     plot_data <- do.call(
       rbind,

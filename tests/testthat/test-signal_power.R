@@ -19,11 +19,29 @@ test_that("evaluate_signal_power returns expected structure for single vector", 
   # Check structure against the newly refactored variable names
   expect_type(res, "list")
   expect_true(all(
-    c("primary_cutoff_freq", "recommended_target_rate", "plot") %in% names(res)
+    c(
+      "primary_cutoff_freq",
+      "theoretical_min_rate",
+      "recommended_downsample_factor",
+      "recommended_target_rate",
+      "plot"
+    ) %in%
+      names(res)
   ))
+
+  # Check numeric types
   expect_true(is.numeric(res$primary_cutoff_freq))
+  expect_true(is.numeric(res$theoretical_min_rate))
+  expect_true(is.numeric(res$recommended_downsample_factor))
   expect_true(is.numeric(res$recommended_target_rate))
   expect_true(inherits(res$plot, "ggplot"))
+
+  # Check new integer downsampling logic
+  expect_true(res$recommended_downsample_factor %% 1 == 0) # Must be an integer
+  expect_equal(
+    res$recommended_target_rate,
+    fs / res$recommended_downsample_factor
+  )
 
   # Ensure dataset-level metrics are NOT present for a single vector
   expect_false("all_cutoffs" %in% names(res))
@@ -55,6 +73,8 @@ test_that("evaluate_signal_power handles multiple signals via data frame and lis
   expect_true(all(
     c(
       "primary_cutoff_freq",
+      "theoretical_min_rate",
+      "recommended_downsample_factor",
       "recommended_target_rate",
       "all_cutoffs",
       "summary_stats",
@@ -68,6 +88,13 @@ test_that("evaluate_signal_power handles multiple signals via data frame and lis
   expected_cutoff <- unname(stats::quantile(res_df$all_cutoffs, probs = 0.95))
   expect_equal(res_df$primary_cutoff_freq, expected_cutoff)
 
+  # Verify integer math holds for dataframes
+  expect_true(res_df$recommended_downsample_factor %% 1 == 0)
+  expect_equal(
+    res_df$recommended_target_rate,
+    fs / res_df$recommended_downsample_factor
+  )
+
   # Test with a List
   lst <- list(a = df$sig1, b = df$sig2)
   res_lst <- evaluate_signal_power(lst, sample_rate = fs, plot = FALSE)
@@ -75,6 +102,8 @@ test_that("evaluate_signal_power handles multiple signals via data frame and lis
   expect_true(all(
     c(
       "primary_cutoff_freq",
+      "theoretical_min_rate",
+      "recommended_downsample_factor",
       "recommended_target_rate",
       "all_cutoffs",
       "summary_stats"
