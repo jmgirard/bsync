@@ -12,7 +12,7 @@ autotune_wcc(
   surrogate_method = c("phase", "circular"),
   trim_odd = FALSE,
   increment_pct = 0.05,
-  window_multipliers = c(0.5, 1, 2),
+  window_multipliers = c(0.5, 1, 1.5, 2),
   lag_multipliers = c(0.5, 1, 2),
   min_window_size = 60,
   progress = TRUE
@@ -45,7 +45,7 @@ transform to execute. Default is `FALSE`.}
 between successive windows as a percentage of the window size. Default is 0.05.}
 
 \item{window_multipliers}{A numeric vector. Multipliers applied to the baseline cycle
-length to generate the grid of window sizes. Default is `c(0.5, 1.0, 2.0)`.}
+length to generate the grid of window sizes. Default is `c(0.5, 1.0, 1.5, 2.0)`.}
 
 \item{lag_multipliers}{A numeric vector. Multipliers applied to the window size
 to generate the grid of maximum lags. Default is `c(0.5, 1.0, 2.0)`.}

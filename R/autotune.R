@@ -30,7 +30,7 @@
 #' @param increment_pct Numeric value between 0.01 and 1.0. Determines the step size
 #'   between successive windows as a percentage of the window size. Default is 0.05.
 #' @param window_multipliers A numeric vector. Multipliers applied to the baseline cycle
-#'   length to generate the grid of window sizes. Default is `c(0.5, 1.0, 2.0)`.
+#'   length to generate the grid of window sizes. Default is `c(0.5, 1.0, 1.5, 2.0)`.
 #' @param lag_multipliers A numeric vector. Multipliers applied to the window size
 #'   to generate the grid of maximum lags. Default is `c(0.5, 1.0, 2.0)`.
 #' @param min_window_size Integer. The absolute minimum number of observations required
@@ -47,7 +47,7 @@ autotune_wcc <- function(
   surrogate_method = c("phase", "circular"),
   trim_odd = FALSE,
   increment_pct = 0.05,
-  window_multipliers = c(0.5, 1.0, 2.0),
+  window_multipliers = c(0.5, 1.0, 1.5, 2.0),
   lag_multipliers = c(0.5, 1.0, 2.0),
   min_window_size = 60,
   progress = TRUE
@@ -112,11 +112,9 @@ autotune_wcc <- function(
   # 3. Generate the search grid dynamically
   cli::cli_alert_info("Step 2: Generating parameter grid...")
 
-  # Calculate proposed windows BEFORE filtering so we can reference them in errors
-  proposed_windows <- round(baseline_window * window_multipliers)
-
-  # Apply the safety filter
+  proposed_windows <- unique(round(baseline_window * window_multipliers))
   test_windows <- proposed_windows[proposed_windows >= min_window_size]
+  dropped_windows <- proposed_windows[proposed_windows < min_window_size]
 
   if (length(test_windows) == 0) {
     max_proposed <- max(proposed_windows)
@@ -125,9 +123,13 @@ autotune_wcc <- function(
       "All calculated window sizes are too small for reliable statistical estimates.",
       "x" = "The largest proposed window was {max_proposed} samples, but {.arg min_window_size} requires {min_window_size}.",
       "i" = "Your data's baseline cycle is {baseline_window} samples ({round(baseline_cycle_sec, 2)} sec).",
-      ">" = "Option 1: Increase {.arg window_multipliers} to test wider windows (e.g., {.code c(2.0, 3.0, 4.0)}).",
+      ">" = "Option 1: Increase {.arg window_multipliers} to test wider windows (e.g., {.code c(1.0, 2.0, 3.0)}).",
       ">" = "Option 2: Lower {.arg min_window_size} if you specifically want to evaluate very brief interactions."
     ))
+  } else if (length(dropped_windows) > 0) {
+    cli::cli_alert_warning(
+      "Dropped {length(dropped_windows)} window size(s) ({paste(dropped_windows, collapse = ', ')}) for falling below {.arg min_window_size}."
+    )
   }
 
   grid <- base::expand.grid(
