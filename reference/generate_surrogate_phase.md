@@ -5,7 +5,7 @@ Generate Phase-Randomized Surrogates (Fourier Transform)
 ## Usage
 
 ``` r
-generate_surrogate_phase(y, n_surrogates = 100)
+generate_surrogate_phase(y, n_surrogates = 100, trim_odd = FALSE)
 ```
 
 ## Arguments
@@ -17,6 +17,11 @@ generate_surrogate_phase(y, n_surrogates = 100)
 - n_surrogates:
 
   Integer specifying the number of surrogates. Default is 100.
+
+- trim_odd:
+
+  Logical. If TRUE, drops the final observation if the time series
+  length is odd.
 
 ## Value
 

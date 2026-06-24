@@ -53,7 +53,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">generate_surrogate_phase</span><span class="op">(</span><span class="va">y</span>, n_surrogates <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">generate_surrogate_phase</span><span class="op">(</span><span class="va">y</span>, n_surrogates <span class="op">=</span> <span class="fl">100</span>, trim_odd <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -66,6 +66,10 @@
 
 <dt id="arg-n-surrogates">n_surrogates<a class="anchor" aria-label="anchor" href="#arg-n-surrogates"></a></dt>
 <dd><p>Integer specifying the number of surrogates. Default is 100.</p></dd>
+
+
+<dt id="arg-trim-odd">trim_odd<a class="anchor" aria-label="anchor" href="#arg-trim-odd"></a></dt>
+<dd><p>Logical. If TRUE, drops the final observation if the time series length is odd.</p></dd>
 
 </dl></div>
     <div class="section level2">
