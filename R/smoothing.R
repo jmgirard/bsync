@@ -9,10 +9,13 @@
 #' @param x A numeric vector representing the signal to be smoothed.
 #' @param method A character string specifying the smoothing method:
 #'   "moving_average", "sgolay" (Savitzky-Golay), or "butterworth". Default is "sgolay".
-#' @param window An integer specifying the window size (number of data points) for the
-#'   "moving_average" and "sgolay" methods. Must be an odd number for "sgolay". Default is 5.
+#' @param window An integer specifying the window size. Must be an odd number
+#'   for "sgolay". Best practice: Calculate this based on the expected duration
+#'   of your target behavior. (e.g., A 2-second behavior sampled at 5Hz = a window of 11).
 #' @param sg_order An integer specifying the polynomial order for the Savitzky-Golay filter.
-#'   Must be less than `window`. Default is 3.
+#'   Must be less than `window`. Best practice: Use 2 (quadratic) to extract broad structural
+#'   trends for cross-correlation, or 3 (cubic) to preserve absolute peak intensities.
+#'   Orders > 3 will typically overfit to high-frequency tracking noise. Default is 3.
 #' @param bw_cutoff A numeric value between 0 and 1 specifying the normalized cutoff
 #'   frequency for the Butterworth filter. Default is 0.1.
 #' @param bw_order An integer specifying the order of the Butterworth filter. Default is 2.
@@ -163,13 +166,13 @@ aggregate_by_time <- function(
 #' Trim Edge Effects from Data
 #'
 #' Removes or masks a specified number of observations from the beginning and end of a
-#' vector or data frame. This is highly recommended after applying zero-phase or
-#' polynomial smoothing filters (e.g., Savitzky-Golay) to remove boundary artifacts.
+#' vector or data frame. This is mathematically required after applying symmetric
+#' rolling filters (like Savitzky-Golay) to remove boundary artifacts.
 #'
 #' @param x A numeric vector, matrix, or data frame.
-#' @param trim_length An integer specifying the number of observations to remove
-#'   from both ends. A standard rule of thumb is to set this equal to the window
-#'   size used for smoothing.
+#' @param trim_length An integer specifying the number of observations to mask
+#'   from both ends. Best practice: For a Savitzky-Golay filter, this must exactly
+#'   equal (window - 1) / 2.
 #' @param pad_na A logical indicating whether to replace the trimmed edges with `NA`
 #'   instead of dropping them. Set to `TRUE` when using inside `dplyr::mutate()`
 #'   to preserve the original vector length. Default is `FALSE`.

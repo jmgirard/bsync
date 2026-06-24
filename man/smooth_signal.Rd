@@ -21,11 +21,14 @@ smooth_signal(
 \item{method}{A character string specifying the smoothing method:
 "moving_average", "sgolay" (Savitzky-Golay), or "butterworth". Default is "sgolay".}
 
-\item{window}{An integer specifying the window size (number of data points) for the
-"moving_average" and "sgolay" methods. Must be an odd number for "sgolay". Default is 5.}
+\item{window}{An integer specifying the window size. Must be an odd number
+for "sgolay". Best practice: Calculate this based on the expected duration
+of your target behavior. (e.g., A 2-second behavior sampled at 5Hz = a window of 11).}
 
 \item{sg_order}{An integer specifying the polynomial order for the Savitzky-Golay filter.
-Must be less than `window`. Default is 3.}
+Must be less than `window`. Best practice: Use 2 (quadratic) to extract broad structural
+trends for cross-correlation, or 3 (cubic) to preserve absolute peak intensities.
+Orders > 3 will typically overfit to high-frequency tracking noise. Default is 3.}
 
 \item{bw_cutoff}{A numeric value between 0 and 1 specifying the normalized cutoff
 frequency for the Butterworth filter. Default is 0.1.}
