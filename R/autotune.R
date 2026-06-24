@@ -111,13 +111,23 @@ autotune_wcc <- function(
 
   # 3. Generate the search grid dynamically
   cli::cli_alert_info("Step 2: Generating parameter grid...")
-  test_windows <- round(baseline_window * window_multipliers)
-  test_windows <- test_windows[test_windows >= min_window_size]
+
+  # Calculate proposed windows BEFORE filtering so we can reference them in errors
+  proposed_windows <- round(baseline_window * window_multipliers)
+
+  # Apply the safety filter
+  test_windows <- proposed_windows[proposed_windows >= min_window_size]
 
   if (length(test_windows) == 0) {
-    cli::cli_abort(
-      "Calculated window sizes are too small for reliable estimates. Minimum {min_window_size} samples required."
-    )
+    max_proposed <- max(proposed_windows)
+
+    cli::cli_abort(c(
+      "All calculated window sizes are too small for reliable statistical estimates.",
+      "x" = "The largest proposed window was {max_proposed} samples, but {.arg min_window_size} requires {min_window_size}.",
+      "i" = "Your data's baseline cycle is {baseline_window} samples ({round(baseline_cycle_sec, 2)} sec).",
+      ">" = "Option 1: Increase {.arg window_multipliers} to test wider windows (e.g., {.code c(2.0, 3.0, 4.0)}).",
+      ">" = "Option 2: Lower {.arg min_window_size} if you specifically want to evaluate very brief interactions."
+    ))
   }
 
   grid <- base::expand.grid(
