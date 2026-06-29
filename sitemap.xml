@@ -1,7 +1,9 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://jmgirard.github.io/bsync/404.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/CLAUDE.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/CODE_OF_CONDUCT.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/CONTRIBUTING.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/DESIGN.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/LICENSE-text.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/LICENSE.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/SUPPORT.html</loc></url>
@@ -14,6 +16,7 @@
 <url><loc>https://jmgirard.github.io/bsync/articles/wgranger-workflow.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/authors.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/index.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/news/index.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/aggregate_by_time.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/autotune_wcc.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/bsync-package.html</loc></url>
