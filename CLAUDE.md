@@ -41,27 +41,28 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
 
 ## Completed milestones
 
-*(none yet — M1 is the first formal milestone; see Current focus)*
+- **M1 — Correctness & robustness (done).** All six acceptance criteria met (commits
+  `741bf7c`–`3276b01` on `main`; 344 tests passing, 0 errors/warnings in `R CMD check`):
+  1. `na.rm` honored in WCC: `calc_wcc_cpp` gains `na_rm` bool; `na.rm = FALSE` returns `NA` for
+     any window containing `NA`; forwarded through `create_wcc_df()` and `wcc_surrogate()`. Both
+     modes tested in `test-wcc.R`.
+  2. Window-size semantics fixed to exactly `window_size` samples via `w_max = window_size - 1` at
+     the C++ boundary in all three estimators and all three surrogate wrappers; `n_r` grid math
+     updated; a test asserts realized window count (33, not 32, for the reference parameters).
+  3. Short-series robustness: `seq_len()` throughout; `cli::cli_abort()` in all three
+     `create_*_df()` builders and all three surrogate grid builders; abort tested for all three
+     estimators.
+  4. `evaluate_signal_power()` no longer auto-prints: `plot=` arg removed; `plot.signal_power_res()`
+     S3 method added; no `Rplots.pdf` side effect; other compute functions audited.
+  5. Condition style unified to `cli` in `R/impute.R` and `R/surrogate_generation.R`.
+  6. `leadership_asymmetry()` roxygen states centered sliding-window semantics; `min_valid`
+     validated; `suggest_wcc_params()` 4-cycles-per-window heuristic documented in `@details`.
 
 ## Current focus
 
 **Hardening cycle toward a near-term CRAN submission**, run as four focused milestones via the
-plan → implement → review loop. **M1 is active.**
+plan → implement → review loop. **M2 is active.**
 
-- **M1 — Correctness & robustness (active).** Acceptance criteria:
-  1. `na.rm` is honored in WCC: `calc_wcc_cpp` gains an NA-policy parameter; `na.rm = FALSE` returns
-     `NA` for any window containing `NA`; forwarded from `create_wcc_df()`. Test proves both modes.
-  2. Window-size semantics fixed to **exactly `window_size` samples** via `w_max = window_size - 1`
-     at the C++ boundary in all three estimators; `n_r` grid math and all `window_size` docs updated;
-     a test asserts realized window length.
-  3. Short-series robustness: `1:n_r` / `0:(n_r-1)` → `seq_len()`; explicit `cli::cli_abort()` when a
-     series is too short for the chosen `window_size`/`lag_max`, across the three `create_*_df`
-     builders and the three surrogate grid builders. Test for the abort.
-  4. `evaluate_signal_power()` no longer auto-`print()`s its plot (returns it); no `Rplots.pdf` side
-     effect; other compute functions audited for stray devices.
-  5. Condition style unified to `cli` in `R/impute.R` and `R/surrogate_generation.R`.
-  6. Docs: `leadership_asymmetry()` clarified as a centered **sliding** window + `min_valid`
-     validated; `suggest_wcc_params()` 4-cycles-per-window heuristic stated and justified.
 - **M2 — Efficiency.** Prefix-sum WCC core (NA-aware) + numerical-regression oracle vs. reference on
   `sim_dyad`; OpenMP adopt-or-remove decision (serial default, `_OPENMP`-guarded thread arg if
   adopted); `bench/` before/after timings.
