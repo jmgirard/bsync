@@ -10,17 +10,15 @@
 #' @param sample_rate A single positive number indicating the sampling rate in Hertz.
 #' @param threshold A single numeric value between 0 and 1 indicating the cumulative
 #'   proportion of power to capture. Default is 0.95 (95 percent).
-#' @param plot A logical indicating whether to return a cumulative power plot. Default is `TRUE`.
 #' @param quiet A logical indicating whether to suppress console output. Default is `FALSE`.
-#' @return A list containing the calculated cutoff frequencies, the recommended
-#'   integer downsampling factor, the resulting target frequency, and optionally
-#'   a `ggplot` object.
+#' @return A list of class `"signal_power_res"` containing the calculated cutoff
+#'   frequencies, the recommended integer downsampling factor, and the resulting
+#'   target frequency. Call `plot()` on the result to visualize cumulative power.
 #' @export
 evaluate_signal_power <- function(
   x,
   sample_rate,
   threshold = 0.95,
-  plot = TRUE,
   quiet = FALSE
 ) {
   if (
@@ -37,9 +35,6 @@ evaluate_signal_power <- function(
     cli::cli_abort(
       "{.arg threshold} must be a single numeric value between 0 and 1."
     )
-  }
-  if (!rlang::is_logical(plot, n = 1)) {
-    cli::cli_abort("{.arg plot} must be a single logical value.")
   }
   if (!rlang::is_logical(quiet, n = 1)) {
     cli::cli_abort("{.arg quiet} must be a single logical value.")
@@ -88,16 +83,16 @@ evaluate_signal_power <- function(
     )
   }
 
-  results <- lapply(x_list, calc_psd)
-  results <- results[!vapply(results, is.null, logical(1))]
+  psd_results <- lapply(x_list, calc_psd)
+  psd_results <- psd_results[!vapply(psd_results, is.null, logical(1))]
 
-  if (length(results) == 0) {
+  if (length(psd_results) == 0) {
     cli::cli_abort(
       "No signals contained enough non-missing data to calculate PSD."
     )
   }
 
-  all_cutoffs <- vapply(results, function(res) res$cutoff, numeric(1))
+  all_cutoffs <- vapply(psd_results, function(res) res$cutoff, numeric(1))
   is_multi <- length(all_cutoffs) > 1
 
   if (is_multi) {
@@ -168,7 +163,10 @@ evaluate_signal_power <- function(
     theoretical_min_rate = unname(theoretical_min),
     recommended_downsample_factor = unname(downsample_factor),
     recommended_target_rate = unname(recommended_rate),
-    recommended_bin_width_sec = unname(bin_width_sec)
+    recommended_bin_width_sec = unname(bin_width_sec),
+    psd_results = psd_results,
+    threshold = threshold,
+    is_multi = is_multi
   )
 
   if (is_multi) {
@@ -176,87 +174,103 @@ evaluate_signal_power <- function(
     out$summary_stats <- summary(all_cutoffs)
   }
 
-  if (plot) {
-    plot_data <- do.call(
-      rbind,
-      lapply(names(results), function(nm) {
-        data.frame(
-          Signal = nm,
-          Frequency = results[[nm]]$freqs,
-          CumulativePower = results[[nm]]$cum_power
-        )
-      })
-    )
+  structure(out, class = c("signal_power_res", "list"))
+}
 
-    p <- ggplot2::ggplot(
-      plot_data,
-      ggplot2::aes(
-        x = .data$Frequency,
-        y = .data$CumulativePower,
-        group = .data$Signal
+# S3 Methods --------------------------------------------------------------
+
+#' Plot method for signal_power_res objects
+#'
+#' Displays the cumulative power spectrum for each evaluated signal and marks
+#' the frequency cutoff used to derive the recommended downsampling factor.
+#'
+#' @param x An object of class `"signal_power_res"`.
+#' @param ... Additional arguments (not used).
+#' @return A `ggplot` object, returned invisibly.
+#' @export
+plot.signal_power_res <- function(x, ...) {
+  psd_results <- x$psd_results
+  threshold <- x$threshold
+  is_multi <- x$is_multi
+  final_cutoff <- x$primary_cutoff_freq
+
+  plot_data <- do.call(
+    rbind,
+    lapply(names(psd_results), function(nm) {
+      data.frame(
+        Signal = nm,
+        Frequency = psd_results[[nm]]$freqs,
+        CumulativePower = psd_results[[nm]]$cum_power
+      )
+    })
+  )
+
+  p <- ggplot2::ggplot(
+    plot_data,
+    ggplot2::aes(
+      x = .data$Frequency,
+      y = .data$CumulativePower,
+      group = .data$Signal
+    )
+  ) +
+    ggplot2::geom_hline(
+      yintercept = threshold,
+      color = "gray50",
+      linetype = "dashed"
+    ) +
+    ggplot2::scale_y_continuous(
+      labels = scales::percent_format(),
+      limits = c(0, 1)
+    ) +
+    ggplot2::scale_x_continuous(expand = c(0, 0)) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.border = ggplot2::element_rect(
+        color = "black",
+        fill = NA,
+        linewidth = 0.5
       )
     ) +
-      ggplot2::geom_hline(
-        yintercept = threshold,
-        color = "gray50",
-        linetype = "dashed"
+    ggplot2::labs(
+      title = ifelse(
+        is_multi,
+        "Cumulative Power of Multiple Time Series",
+        "Cumulative Power of Time Series"
+      ),
+      x = "Frequency (Hz)",
+      y = "Cumulative Proportion of Power"
+    )
+
+  if (is_multi) {
+    p <- p +
+      ggplot2::geom_line(color = "#2166AC", alpha = 0.15, linewidth = 0.5) +
+      ggplot2::geom_vline(
+        xintercept = final_cutoff,
+        color = "#B2182B",
+        linetype = "dashed",
+        linewidth = 1
       ) +
-      ggplot2::scale_y_continuous(
-        labels = scales::percent_format(),
-        limits = c(0, 1)
-      ) +
-      ggplot2::scale_x_continuous(expand = c(0, 0)) +
-      ggplot2::theme_minimal() +
-      ggplot2::theme(
-        panel.grid.minor = ggplot2::element_blank(),
-        panel.border = ggplot2::element_rect(
-          color = "black",
-          fill = NA,
-          linewidth = 0.5
-        )
-      ) +
-      ggplot2::labs(
-        title = ifelse(
-          is_multi,
-          "Cumulative Power of Multiple Time Series",
-          "Cumulative Power of Time Series"
-        ),
-        x = "Frequency (Hz)",
-        y = "Cumulative Proportion of Power"
+      ggplot2::annotate(
+        "text",
+        x = final_cutoff + 0.2,
+        y = 0.1,
+        label = "95th Percentile Cutoff",
+        color = "#B2182B",
+        hjust = 0,
+        size = 3.5
       )
-
-    if (is_multi) {
-      p <- p +
-        ggplot2::geom_line(color = "#2166AC", alpha = 0.15, linewidth = 0.5) +
-        ggplot2::geom_vline(
-          xintercept = final_cutoff,
-          color = "#B2182B",
-          linetype = "dashed",
-          linewidth = 1
-        ) +
-        ggplot2::annotate(
-          "text",
-          x = final_cutoff + 0.2,
-          y = 0.1,
-          label = "95th Percentile Cutoff",
-          color = "#B2182B",
-          hjust = 0,
-          size = 3.5
-        )
-    } else {
-      p <- p +
-        ggplot2::geom_line(color = "#2166AC", linewidth = 1) +
-        ggplot2::geom_vline(
-          xintercept = final_cutoff,
-          color = "#B2182B",
-          linetype = "dashed",
-          linewidth = 1
-        )
-    }
-
-    out$plot <- p
-    print(p)
+  } else {
+    p <- p +
+      ggplot2::geom_line(color = "#2166AC", linewidth = 1) +
+      ggplot2::geom_vline(
+        xintercept = final_cutoff,
+        color = "#B2182B",
+        linetype = "dashed",
+        linewidth = 1
+      )
   }
 
-  invisible(out)
+  print(p)
+  invisible(p)
 }

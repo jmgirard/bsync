@@ -4,13 +4,7 @@
 \alias{evaluate_signal_power}
 \title{Evaluate Signal Power and Suggest Downsampling Rate}
 \usage{
-evaluate_signal_power(
-  x,
-  sample_rate,
-  threshold = 0.95,
-  plot = TRUE,
-  quiet = FALSE
-)
+evaluate_signal_power(x, sample_rate, threshold = 0.95, quiet = FALSE)
 }
 \arguments{
 \item{x}{A numeric vector, a list of numeric vectors, or a data frame. If a
@@ -21,14 +15,12 @@ data frame is provided, all numeric columns will be evaluated.}
 \item{threshold}{A single numeric value between 0 and 1 indicating the cumulative
 proportion of power to capture. Default is 0.95 (95 percent).}
 
-\item{plot}{A logical indicating whether to return a cumulative power plot. Default is `TRUE`.}
-
 \item{quiet}{A logical indicating whether to suppress console output. Default is `FALSE`.}
 }
 \value{
-A list containing the calculated cutoff frequencies, the recommended
-  integer downsampling factor, the resulting target frequency, and optionally
-  a `ggplot` object.
+A list of class `"signal_power_res"` containing the calculated cutoff
+  frequencies, the recommended integer downsampling factor, and the resulting
+  target frequency. Call `plot()` on the result to visualize cumulative power.
 }
 \description{
 Calculates the Power Spectral Density (PSD) of continuous time series using

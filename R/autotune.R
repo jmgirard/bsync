@@ -81,7 +81,6 @@ autotune_wcc <- function(
   psd_res <- evaluate_signal_power(
     x = sample_signals,
     sample_rate = sample_rate,
-    plot = FALSE,
     quiet = TRUE
   )
   baseline_cycle_sec <- 1 / psd_res$primary_cutoff_freq
