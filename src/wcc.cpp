@@ -8,7 +8,7 @@ using namespace Rcpp;
 // [[Rcpp::export]]
 NumericVector calc_wcc_cpp(NumericVector x, NumericVector y,
                            IntegerVector i_vals, IntegerVector tau_vals,
-                           int w_max) {
+                           int w_max, bool na_rm = true) {
 
   int n_calcs = i_vals.size();
   NumericVector results(n_calcs);
@@ -26,21 +26,31 @@ NumericVector calc_wcc_cpp(NumericVector x, NumericVector y,
     double sum_x = 0.0, sum_y = 0.0, sum_xy = 0.0;
     double sum_x2 = 0.0, sum_y2 = 0.0;
     int valid_n = 0;
+    bool has_na = false;
 
-    // Calculate the Pearson correlation manually for the window
     for(int w = 0; w <= w_max; w++) {
       double val_x = x[i + w];
       double val_y = y[i + tau + w];
 
-      // Replicates na.rm = TRUE behavior
-      if (!NumericVector::is_na(val_x) && !NumericVector::is_na(val_y)) {
-        sum_x += val_x;
-        sum_y += val_y;
-        sum_x2 += val_x * val_x;
-        sum_y2 += val_y * val_y;
-        sum_xy += val_x * val_y;
-        valid_n++;
+      if (NumericVector::is_na(val_x) || NumericVector::is_na(val_y)) {
+        if (!na_rm) {
+          has_na = true;
+          break;
+        }
+        continue; // pairwise: skip this pair
       }
+
+      sum_x += val_x;
+      sum_y += val_y;
+      sum_x2 += val_x * val_x;
+      sum_y2 += val_y * val_y;
+      sum_xy += val_x * val_y;
+      valid_n++;
+    }
+
+    if (!na_rm && has_na) {
+      results[k] = NA_REAL;
+      continue;
     }
 
     if (valid_n > 1) {

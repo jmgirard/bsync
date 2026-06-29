@@ -5,8 +5,8 @@ pick_optima_cpp <- function(metric_list, i_vals, tau_max, L_size, strict_monoton
     .Call(`_bsync_pick_optima_cpp`, metric_list, i_vals, tau_max, L_size, strict_monotonic, find_min)
 }
 
-calc_wcc_cpp <- function(x, y, i_vals, tau_vals, w_max) {
-    .Call(`_bsync_calc_wcc_cpp`, x, y, i_vals, tau_vals, w_max)
+calc_wcc_cpp <- function(x, y, i_vals, tau_vals, w_max, na_rm = TRUE) {
+    .Call(`_bsync_calc_wcc_cpp`, x, y, i_vals, tau_vals, w_max, na_rm)
 }
 
 calc_wdtw_cpp <- function(x, y, i_vals, tau_vals, w_max, use_l2, local_scale) {
