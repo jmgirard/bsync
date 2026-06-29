@@ -38,7 +38,7 @@ test_that("Maxgap argument strictly controls imputation", {
   # Maxgap of 2 should impute the first gap but leave the second
   expect_warning(
     res_maxgap <- impute_ts_gaps(v_maxgap, method = "linear", maxgap = 2),
-    "Found 1 gap\\(s\\) exceeding maxgap"
+    "exceeding"
   )
 
   res_numeric <- as.numeric(res_maxgap)
@@ -49,7 +49,7 @@ test_that("Maxgap argument strictly controls imputation", {
 
 test_that("Programmatic inputs trigger appropriate errors and warnings", {
   # Non-numeric input
-  expect_error(impute_ts_gaps(c("a", "b", "c")), "must be numeric")
+  expect_error(impute_ts_gaps(c("a", "b", "c")), "must be a numeric")
 
   # Too few valid data points
   v_sparse <- c(NA, NA, 1, NA, NA)

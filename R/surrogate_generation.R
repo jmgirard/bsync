@@ -24,17 +24,17 @@ generate_surrogate_circular <- function(y, n_surrogates = 100, lag_max = NULL) {
     min_shift <- lag_max * 2
     max_shift <- n_y - min_shift
     if (max_shift <= min_shift) {
-      stop(
-        "Time series is too short relative to lag_max to perform valid circular shifts."
+      cli::cli_abort(
+        "Time series is too short relative to {.arg lag_max} to perform valid circular shifts."
       )
     }
     valid_shifts <- min_shift:max_shift
   } else {
-    valid_shifts <- 1:(n_y - 1)
+    valid_shifts <- seq_len(n_y - 1)
   }
 
   if (length(valid_shifts) < n_surrogates) {
-    warning("Limited unique shifts available. Sampling with replacement.")
+    cli::cli_warn("Limited unique shifts available. Sampling with replacement.")
     shifts <- sample(valid_shifts, n_surrogates, replace = TRUE)
   } else {
     shifts <- sample(valid_shifts, n_surrogates, replace = FALSE)

@@ -5,7 +5,7 @@
 #' @export
 diagnose_ts_gaps <- function(x) {
   if (!is.numeric(x)) {
-    stop("Input must be numeric.")
+    cli::cli_abort("{.arg x} must be a numeric vector.")
   }
 
   total_na <- sum(is.na(x))
@@ -38,7 +38,7 @@ impute_ts_gaps <- function(x, method = c("linear", "spline"), maxgap = 5) {
   method <- match.arg(method)
 
   if (!is.numeric(x)) {
-    stop("Input time series 'x' must be numeric.")
+    cli::cli_abort("{.arg x} must be a numeric vector.")
   }
 
   original_na <- sum(is.na(x))
@@ -57,7 +57,7 @@ impute_ts_gaps <- function(x, method = c("linear", "spline"), maxgap = 5) {
   # Identify valid data points
   valid_idx <- which(!is.na(x))
   if (length(valid_idx) < 2) {
-    warning("Not enough valid data points to perform interpolation.")
+    cli::cli_warn("Not enough valid data points to perform interpolation.")
     attr(x, "imputation_summary") <- list(
       method = method,
       maxgap_used = maxgap,
@@ -113,13 +113,8 @@ impute_ts_gaps <- function(x, method = c("linear", "spline"), maxgap = 5) {
       x_imp[start_idx[i]:end_idx[i]] <- NA
     }
 
-    warning(
-      sprintf(
-        "Found %d gap(s) exceeding maxgap (%d). These were left as NA.",
-        length(long_gaps),
-        maxgap
-      ),
-      call. = FALSE
+    cli::cli_warn(
+      "Found {length(long_gaps)} gap{?s} exceeding {.arg maxgap} ({maxgap}); left as NA."
     )
   }
 
