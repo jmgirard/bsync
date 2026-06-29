@@ -24,6 +24,12 @@ sig_x_caused_by_y <- dplyr::lag(sig_y, n = 2, default = 0) +
 # Structural & Input Tests
 # -------------------------------------------------------------------------
 
+test_that("wgranger aborts when series is too short for the chosen window_size", {
+  x <- c(1, 2, 3, 4, 5)
+  y <- c(1, 2, 3, 4, 5)
+  expect_error(wgranger(x, y, window_size = 20), "too short")
+})
+
 test_that("wgranger input assertions trigger appropriate errors", {
   # Vector type and length assertions
   expect_error(

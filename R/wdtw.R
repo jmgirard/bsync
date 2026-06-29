@@ -136,7 +136,7 @@ print.wdtw_res <- function(x, ...) {
 #' @noRd
 create_wdtw_df <- function(x, y, time = NULL, settings) {
   n_x <- length(x)
-  w_max <- settings$window_size
+  w_max <- settings$window_size - 1L
   w_inc <- settings$window_increment
   tau_max <- settings$lag_max
   tau_inc <- settings$lag_increment
@@ -149,7 +149,14 @@ create_wdtw_df <- function(x, y, time = NULL, settings) {
   n_r <- floor((n_x - w_max - 2 * tau_max) / w_inc)
   n_c <- length(lags)
 
-  results_df <- base::expand.grid(row = 1:n_r, col = 1:n_c) |>
+  if (n_r < 1L) {
+    cli::cli_abort(c(
+      "Series is too short for the requested {.arg window_size} and {.arg lag_max}.",
+      "i" = "Need at least {w_max + 1L + 2L * tau_max + 1L} samples; got {n_x}."
+    ))
+  }
+
+  results_df <- base::expand.grid(row = seq_len(n_r), col = seq_len(n_c)) |>
     dplyr::mutate(
       i = 1 + tau_max + (row - 1) * w_inc,
       tau = lags[col],

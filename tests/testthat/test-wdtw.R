@@ -143,12 +143,12 @@ test_that("pick_optima handles wdtw_res correctly across search methods", {
   expect_true(all(optima_local$optimum_lag == 0, na.rm = TRUE))
 })
 
-test_that("wdtw handles out-of-bounds cleanly by returning NA", {
-  res <- wdtw(sig1, sig2, window_size = 90, lag_max = 20)
-
-  # Because window_size + lag_max > length(sig), many edge windows will fail
-  # the C++ bounds check and should cleanly return NA rather than crashing
-  expect_true(any(is.na(res$results_df$dtw_dist)))
+test_that("wdtw aborts when series is too short for the chosen parameters", {
+  # sig1/sig2 have 100 elements; window_size=90 + lag_max=20 requires >129 samples
+  expect_error(
+    wdtw(sig1, sig2, window_size = 90, lag_max = 20),
+    "too short"
+  )
 })
 
 test_that("wdtw input assertions trigger appropriate errors", {

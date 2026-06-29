@@ -38,7 +38,7 @@ test_that("generate_surrogate_circular warns and errors correctly", {
   y <- 1:15
   expect_error(
     generate_surrogate_circular(y, n_surrogates = 10, lag_max = 10),
-    "Time series is too short relative to lag_max"
+    "too short relative to"
   )
 
   expect_warning(

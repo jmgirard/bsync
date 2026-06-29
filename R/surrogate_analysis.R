@@ -60,10 +60,18 @@ wcc_surrogate <- function(
   # 2. Build the structural grid ONCE for maximum speed
   lags <- seq(-lag_max, lag_max, by = lag_increment)
   n_x <- length(x)
-  n_r <- floor((n_x - window_size - 2 * lag_max) / window_increment)
+  w_max_surr <- window_size - 1L
+  n_r <- floor((n_x - w_max_surr - 2 * lag_max) / window_increment)
   n_c <- length(lags)
 
-  grid_df <- base::expand.grid(row = 1:n_r, col = 1:n_c)
+  if (n_r < 1L) {
+    cli::cli_abort(c(
+      "Series is too short for the requested {.arg window_size} and {.arg lag_max}.",
+      "i" = "Need at least {w_max_surr + 1L + 2L * lag_max + 1L} samples; got {n_x}."
+    ))
+  }
+
+  grid_df <- base::expand.grid(row = seq_len(n_r), col = seq_len(n_c))
   i_vals <- 1 + lag_max + (grid_df$row - 1) * window_increment
   tau_vals <- lags[grid_df$col]
 
@@ -80,7 +88,8 @@ wcc_surrogate <- function(
         y = y_surr,
         i_vals = i_vals,
         tau_vals = tau_vals,
-        w_max = window_size
+        w_max = w_max_surr,
+        na_rm = na.rm
       )
 
       z_vals <- r_to_z(wcc_vals)
@@ -174,10 +183,18 @@ wdtw_surrogate <- function(
 
   # 2. Build grids for computation
   n_x <- length(x)
-  n_r <- floor((n_x - window_size - 2 * lag_max) / window_increment)
+  w_max_surr <- window_size - 1L
+  n_r <- floor((n_x - w_max_surr - 2 * lag_max) / window_increment)
+
+  if (n_r < 1L) {
+    cli::cli_abort(c(
+      "Series is too short for the requested {.arg window_size} and {.arg lag_max}.",
+      "i" = "Need at least {w_max_surr + 1L + 2L * lag_max + 1L} samples; got {n_x}."
+    ))
+  }
 
   if (fast_method) {
-    i_vals_surr <- 1 + lag_max + (0:(n_r - 1)) * window_increment
+    i_vals_surr <- 1 + lag_max + (seq_len(n_r) - 1L) * window_increment
     tau_vals_surr <- rep(0, n_r)
     cli::cli_alert_info(
       "Running fast method: Evaluating surrogates at lag 0 only."
@@ -185,7 +202,7 @@ wdtw_surrogate <- function(
   } else {
     lags <- seq(-lag_max, lag_max, by = lag_increment)
     n_c <- length(lags)
-    grid_df <- base::expand.grid(row = 1:n_r, col = 1:n_c)
+    grid_df <- base::expand.grid(row = seq_len(n_r), col = seq_len(n_c))
     i_vals_surr <- 1 + lag_max + (grid_df$row - 1) * window_increment
     tau_vals_surr <- lags[grid_df$col]
   }
@@ -207,7 +224,7 @@ wdtw_surrogate <- function(
         y = y_surr,
         i_vals = i_vals_surr,
         tau_vals = tau_vals_surr,
-        w_max = window_size,
+        w_max = w_max_surr,
         use_l2 = use_l2,
         local_scale = local_scale
       )
@@ -281,8 +298,17 @@ wgranger_surrogate <- function(
 
   # 2. Setup structural grid
   n_x <- length(x)
-  n_r <- floor((n_x - window_size) / window_increment)
-  i_vals <- 1 + (0:(n_r - 1)) * window_increment
+  w_max_surr <- window_size - 1L
+  n_r <- floor((n_x - w_max_surr) / window_increment)
+
+  if (n_r < 1L) {
+    cli::cli_abort(c(
+      "Series is too short for the requested {.arg window_size}.",
+      "i" = "Need at least {w_max_surr + 1L + 1L} samples; got {n_x}."
+    ))
+  }
+
+  i_vals <- 1 + (seq_len(n_r) - 1L) * window_increment
 
   x_cpp <- as.double(x)
 
@@ -296,7 +322,7 @@ wgranger_surrogate <- function(
         x = x_cpp,
         y = y_surr,
         i_vals = i_vals,
-        w_max = window_size,
+        w_max = w_max_surr,
         p = ar_order
       )
 

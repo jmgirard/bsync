@@ -118,9 +118,23 @@ wcc <- function(
 #' Calculates principled starting values for Windowed Cross-Correlation parameters
 #' based on the sampling rate of the data and the theoretical timing of the behaviors.
 #'
+#' @details
+#' The `window_size` is derived from the **4-cycles-per-window heuristic**: a window
+#' should span approximately 4 full cycles of the behavior of interest so that the
+#' within-window correlation estimate is stable across a range of lead–lag relationships
+#' (Boker et al., 2002). Concretely, `window_size = round(event_duration_sec * 4 *
+#' sample_rate)`. Four cycles ensures enough oscillation to estimate a reliable
+#' correlation, whereas two cycles (the Nyquist minimum) would leave the estimate
+#' too noisy.
+#'
+#' The `lag_max` is capped at half the `window_size` when the requested
+#' `max_delay_sec` would exceed it; beyond that point the lagged window and the
+#' reference window share fewer than half their samples, severely degrading reliability.
+#'
 #' @param sample_rate A numeric value indicating the sampling rate in Hertz (frames per second).
 #' @param event_duration_sec The expected duration of a single behavioral event in seconds.
-#'   Default is 2 (typical for brief conversational gestures).
+#'   Used as the basis for the 4-cycles-per-window heuristic: `window_size = round(event_duration_sec *
+#'   4 * sample_rate)`. Default is 2 (typical for brief conversational gestures).
 #' @param max_delay_sec The maximum plausible reaction time between participants in seconds.
 #'   Default is 3.
 #' @param overlap_pct The desired percentage of overlap between consecutive time windows.
@@ -229,7 +243,7 @@ summary.wcc_res <- function(object, ...) {
 #' @noRd
 create_wcc_df <- function(x, y, time = NULL, settings) {
   n_x <- length(x)
-  w_max <- settings$window_size
+  w_max <- settings$window_size - 1L
   w_inc <- settings$window_increment
   tau_max <- settings$lag_max
   tau_inc <- settings$lag_increment
@@ -239,7 +253,14 @@ create_wcc_df <- function(x, y, time = NULL, settings) {
   n_r <- floor((n_x - w_max - 2 * tau_max) / w_inc)
   n_c <- length(lags)
 
-  results_df <- base::expand.grid(row = 1:n_r, col = 1:n_c) |>
+  if (n_r < 1L) {
+    cli::cli_abort(c(
+      "Series is too short for the requested {.arg window_size} and {.arg lag_max}.",
+      "i" = "Need at least {w_max + 1L + 2L * tau_max + 1L} samples; got {n_x}."
+    ))
+  }
+
+  results_df <- base::expand.grid(row = seq_len(n_r), col = seq_len(n_c)) |>
     dplyr::mutate(
       i = 1 + tau_max + (row - 1) * w_inc,
       tau = lags[col],
@@ -248,7 +269,8 @@ create_wcc_df <- function(x, y, time = NULL, settings) {
         y = y,
         i_vals = i,
         tau_vals = tau,
-        w_max = w_max
+        w_max = w_max,
+        na_rm = settings$na.rm
       )
     )
 

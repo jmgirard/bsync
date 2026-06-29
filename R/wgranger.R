@@ -134,14 +134,20 @@ summary.wgranger_res <- function(object, ...) {
 #' @noRd
 create_wgranger_df <- function(x, y, time = NULL, settings) {
   n_x <- length(x)
-  w_max <- settings$window_size
+  w_max <- settings$window_size - 1L
   w_inc <- settings$window_increment
   ar_order <- settings$ar_order
 
   n_r <- floor((n_x - w_max) / w_inc)
 
-  # i represents the start index of the window
-  i_vals <- 1 + (0:(n_r - 1)) * w_inc
+  if (n_r < 1L) {
+    cli::cli_abort(c(
+      "Series is too short for the requested {.arg window_size}.",
+      "i" = "Need at least {w_max + 1L + 1L} samples; got {n_x}."
+    ))
+  }
+
+  i_vals <- 1 + (seq_len(n_r) - 1L) * w_inc
 
   stats_df <- calc_wgranger_cpp(x, y, i_vals, w_max, ar_order)
 
