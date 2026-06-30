@@ -88,6 +88,22 @@
 #'   }
 #' @seealso [autotune_wcc()], [suggest_wcc_params()], [plot.bsync_multiverse()],
 #'   [tidy.bsync_multiverse()], [glance.bsync_multiverse()]
+#' @examples
+#' \donttest{
+#' # Sweep a seconds-specified window/lag grid and test each cell vs. a null.
+#' # A small surrogate count keeps the example fast; use >= 1000 for reporting.
+#' mv <- synchrony_multiverse(
+#'   x = sim_dyad$x_A,
+#'   y = sim_dyad$x_B,
+#'   estimator = "wcc",
+#'   sample_rate = 80,
+#'   window_sec = c(1, 2, 4),
+#'   lag_sec = 1,
+#'   n_surrogates = 50
+#' )
+#' mv
+#' glance(mv)
+#' }
 #' @export
 synchrony_multiverse <- function(
   x, y,

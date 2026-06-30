@@ -25,3 +25,8 @@ Removes or masks a specified number of observations from the beginning and end o
 vector or data frame. This is mathematically required after applying symmetric
 rolling filters (like Savitzky-Golay) to remove boundary artifacts.
 }
+\examples{
+# Drop the first and last 50 samples (e.g. filter warm-up artifacts)
+trimmed <- trim_edges(sim_dyad$x_A, trim_length = 50)
+length(trimmed)
+}

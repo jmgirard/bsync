@@ -16,6 +16,10 @@
 #' @param lag_max Optional integer. If provided, ensures shifts are large enough
 #'   to break local autocorrelation.
 #' @return A matrix where each column is a surrogate time series.
+#' @examples
+#' # Build 100 circular-shift surrogates of one partner's signal
+#' surr <- generate_surrogate_circular(sim_dyad$x_B, n_surrogates = 100)
+#' dim(surr)
 #' @export
 generate_surrogate_circular <- function(y, n_surrogates = 100, lag_max = NULL) {
   n_y <- length(y)
@@ -60,6 +64,10 @@ generate_surrogate_circular <- function(y, n_surrogates = 100, lag_max = NULL) {
 #' @param n_surrogates Integer specifying the number of surrogates. Default is 100.
 #' @param trim_odd Logical. If TRUE, drops the final observation if the time series length is odd.
 #' @return A matrix where each column is a surrogate time series.
+#' @examples
+#' # Build 100 phase-randomized surrogates (preserves the power spectrum)
+#' surr <- generate_surrogate_phase(sim_dyad$x_B, n_surrogates = 100)
+#' dim(surr)
 #' @export
 generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
   n_y <- length(y)

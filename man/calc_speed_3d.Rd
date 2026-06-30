@@ -35,3 +35,10 @@ A numeric vector of speeds the same length as the input vectors.
 \description{
 Calculates the magnitude of the 3D velocity vector (speed) using finite difference methods.
 }
+\examples{
+# 3D speed from x/y/z coordinate channels
+s <- calc_speed_3d(
+  t = sim_dyad$time, x = sim_dyad$x_A, y = sim_dyad$y_A, z = sim_dyad$z_A
+)
+head(s)
+}

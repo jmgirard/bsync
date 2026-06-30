@@ -50,3 +50,8 @@ time bins. This is a high-level, data frame-based pipeline function.
   function relies on matrix reshaping and vector math, making it exceptionally
   fast for clean, pre-processed data.
 }
+\examples{
+# Aggregate the dyad into 0.5-second bins by the median
+binned <- aggregate_by_time(sim_dyad, time_var = time, bin_width = 0.5)
+head(binned)
+}

@@ -42,3 +42,15 @@ corresponding observed mean F-statistic. Both null distributions are built with 
 aggregate (`mean(f_xy)` and `mean(f_yx)`) as the observed statistics stored in
 `wgranger_res$results_df`, so the null and observed values are directly comparable.
 }
+\examples{
+\donttest{
+y_surr <- generate_surrogate_circular(sim_dyad$x_B, n_surrogates = 100)
+res <- wgranger_surrogate(
+  x = sim_dyad$x_A,
+  y = sim_dyad$x_B,
+  y_surrogates = y_surr,
+  window_size = 96
+)
+res
+}
+}

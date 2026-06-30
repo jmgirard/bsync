@@ -29,3 +29,8 @@ A numeric vector of speeds the same length as the input vectors.
 \description{
 Calculates the absolute speed along a single axis (e.g., x-axis) using finite difference methods.
 }
+\examples{
+# Unsigned 1D speed (absolute rate of change)
+s <- calc_speed_1d(t = sim_dyad$time, x = sim_dyad$x_A)
+head(s)
+}

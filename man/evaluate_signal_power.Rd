@@ -28,3 +28,11 @@ Welch's method. It determines the frequency below which a specified proportion
 of the total signal power is captured and recommends an optimal integer
 downsampling factor that yields a clean sampling rate.
 }
+\examples{
+# PSD-based downsampling guidance for one signal
+ps <- evaluate_signal_power(sim_dyad$x_A, sample_rate = 80)
+ps
+
+# Visualize the cumulative power spectrum
+plot(ps)
+}

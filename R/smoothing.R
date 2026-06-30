@@ -22,6 +22,10 @@
 #' @param lower_bound Numeric. If provided, smoothed values below this are clamped to this value.
 #' @param upper_bound Numeric. If provided, smoothed values above this are clamped to this value.
 #' @return A numeric vector containing the smoothed signal, of the same length as `x`.
+#' @examples
+#' # Zero-phase Savitzky-Golay smoothing (order 3, 11-sample window)
+#' smoothed <- smooth_signal(sim_dyad$x_A, method = "sgolay", window = 11)
+#' head(smoothed)
 #' @export
 smooth_signal <- function(
   x,
@@ -123,6 +127,10 @@ smooth_signal <- function(
 #' @return A new data frame with the downsampled time series. The time variable
 #'   is updated to represent the center of each bin, and all non-numeric columns
 #'   are dropped.
+#' @examples
+#' # Aggregate the dyad into 0.5-second bins by the median
+#' binned <- aggregate_by_time(sim_dyad, time_var = time, bin_width = 0.5)
+#' head(binned)
 #' @export
 aggregate_by_time <- function(
   data,
@@ -177,6 +185,10 @@ aggregate_by_time <- function(
 #'   instead of dropping them. Set to `TRUE` when using inside `dplyr::mutate()`
 #'   to preserve the original vector length. Default is `FALSE`.
 #' @return An object of the same class as `x` with the edges removed or masked.
+#' @examples
+#' # Drop the first and last 50 samples (e.g. filter warm-up artifacts)
+#' trimmed <- trim_edges(sim_dyad$x_A, trim_length = 50)
+#' length(trimmed)
 #' @export
 trim_edges <- function(x, trim_length, pad_na = FALSE) {
   if (!rlang::is_integerish(trim_length, n = 1) || trim_length <= 0) {
@@ -249,6 +261,10 @@ trim_edges <- function(x, trim_length, pad_na = FALSE) {
 #' @param na.rm A logical indicating whether to remove missing values during
 #'   aggregation. Default is `TRUE`.
 #' @return A numeric vector representing the downsampled time series.
+#' @examples
+#' # Downsample by a factor of 4 (e.g. 80 Hz -> 20 Hz) via the median
+#' ds <- downsample_signal(sim_dyad$x_A, factor = 4)
+#' length(ds)
 #' @export
 downsample_signal <- function(
   x,

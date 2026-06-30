@@ -17,6 +17,11 @@ A [tibble::tibble()].
 \description{
 Alias for [tidy.bsync_surface()]: returns one row per cell of `results_df`.
 }
+\examples{
+wcc_res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+# Alias for tidy(): the full surface as a tibble
+as_tibble(wcc_res)
+}
 \seealso{
 [tidy.bsync_surface()], [glance.bsync_surface()]
 }

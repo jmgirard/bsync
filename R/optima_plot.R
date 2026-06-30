@@ -10,6 +10,10 @@
 #' @param zero_line_color Character string specifying the color of the zero-lag line. Default is "black".
 #' @param ... Additional arguments passed to the underlying plot method (e.g., custom colors for WCC).
 #' @return A `ggplot2` plot object.
+#' @examples
+#' wcc_res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+#' optima <- pick_optima(wcc_res, L_size = 9)
+#' plot_optima_overlay(wcc_res, optima)
 #' @export
 plot_optima_overlay <- function(
   surface_obj,

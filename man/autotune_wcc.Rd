@@ -96,6 +96,25 @@ cell is returned (soft fallback).
 of `n_tune_dyads` dyads is used for speed; call `set.seed()` beforehand for
 reproducibility.
 }
+\examples{
+\donttest{
+# Tune across a small multi-dyad list (here three copies of one dyad).
+# Small surrogate count for a fast example; use >= 1000 for reporting.
+dyads <- replicate(
+  3,
+  list(x = sim_dyad$x_A, y = sim_dyad$x_B),
+  simplify = FALSE
+)
+tuned <- autotune_wcc(
+  dyad_list = dyads,
+  sample_rate = 80,
+  window_sec = c(1, 2, 4),
+  lag_sec = 1,
+  n_surrogates = 30
+)
+tuned
+}
+}
 \seealso{
 [synchrony_multiverse()], [suggest_wcc_params()],
   [select_specification()]

@@ -13,6 +13,14 @@
 #'   This represents the maximum number of lags included in the prediction model.
 #' @param window_increment A positive integer indicating the window shift increment. (default = `1`)
 #' @return A list object of class "wgranger_res".
+#' @examples
+#' # Windowed Granger causality (no lag axis; directional F-statistics)
+#' wgc_res <- wgranger(
+#'   x = sim_dyad$x_A,
+#'   y = sim_dyad$x_B,
+#'   window_size = 96
+#' )
+#' wgc_res
 #' @export
 wgranger <- function(
   x,

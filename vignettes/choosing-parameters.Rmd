@@ -36,7 +36,7 @@ quick-and-informed to thorough-and-multi-dyad:
 selection rule directly to a list of multiverse results.
 
 > **Note:** Steps 1 and 3 are WCC-specific helpers. `synchrony_multiverse()` in step 2 supports
-> all three estimators (`"wcc"`, `"wdtw"`, `"granger"`), so you can run a parameter sweep for any
+> all three estimators (`"wcc"`, `"wdtw"`, `"wgranger"`), so you can run a parameter sweep for any
 > estimator.
 
 ## 1. Data-Driven Starting Values: `suggest_wcc_params()`
@@ -154,7 +154,7 @@ mv_g <- synchrony_multiverse(
   estimator    = "wgranger",
   sample_rate  = 80,
   window_sec   = c(1, 2, 4),
-  lag_sec      = 0,      # ignored for Granger; ar_order used instead
+  lag_sec      = 0, # ignored for Granger; ar_order used instead
   n_surrogates = 100L
 )
 
@@ -263,9 +263,9 @@ params2 <- suggest_wcc_params(
 )
 
 # Step 2: build a grid around that starting point
-w_base       <- params2$window_size / 80 # convert to seconds
+w_base <- params2$window_size / 80 # convert to seconds
 grid_windows <- unique(round(w_base * c(0.5, 1, 2), 1))
-grid_lags    <- unique(round(grid_windows / 2, 1))
+grid_lags <- unique(round(grid_windows / 2, 1))
 
 cat("window_sec:", grid_windows, "\n")
 cat("lag_sec:   ", grid_lags, "\n")

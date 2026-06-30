@@ -45,6 +45,18 @@
 #'   `wcc_surrogate()` so the null distribution matches (see Invariant 2).
 #' @return A list object of class "wcc_res" containing the results matrix and
 #'   useful summaries of it.
+#' @examples
+#' # Windowed cross-correlation on the bundled simulated dyad
+#' wcc_res <- wcc(
+#'   x = sim_dyad$x_A,
+#'   y = sim_dyad$x_B,
+#'   window_size = 96,
+#'   lag_max = 10
+#' )
+#' wcc_res
+#'
+#' # Use the rMEA best-lag "peak" aggregate instead of the SUSY mean
+#' wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10, statistic = "peak")
 #' @export
 wcc <- function(
   x,
@@ -143,6 +155,14 @@ wcc <- function(
 #'   a stable correlation. Default is `20`.
 #' @return A named list with `window_size`, `lag_max`, `window_increment`, and
 #'   `lag_increment`, ready to pass to [wcc()].
+#' @examples
+#' # Derive starting parameters from the signal's own dominant timescale
+#' params <- suggest_wcc_params(
+#'   x = sim_dyad$x_A,
+#'   y = sim_dyad$x_B,
+#'   sample_rate = 80
+#' )
+#' params
 #' @export
 suggest_wcc_params <- function(
   x,

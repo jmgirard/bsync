@@ -81,6 +81,24 @@
 #'   }
 #' @seealso [synchrony_multiverse()], [suggest_wcc_params()],
 #'   [select_specification()]
+#' @examples
+#' \donttest{
+#' # Tune across a small multi-dyad list (here three copies of one dyad).
+#' # Small surrogate count for a fast example; use >= 1000 for reporting.
+#' dyads <- replicate(
+#'   3,
+#'   list(x = sim_dyad$x_A, y = sim_dyad$x_B),
+#'   simplify = FALSE
+#' )
+#' tuned <- autotune_wcc(
+#'   dyad_list = dyads,
+#'   sample_rate = 80,
+#'   window_sec = c(1, 2, 4),
+#'   lag_sec = 1,
+#'   n_surrogates = 30
+#' )
+#' tuned
+#' }
 #' @export
 autotune_wcc <- function(
   dyad_list,
@@ -217,6 +235,23 @@ print.bsync_autotune <- function(x, ...) {
 #' @return A list with `best_row` (one-row tibble from the grid), `sig_rate`,
 #'   `median_es`, `iqr_es`, `score`, and `n_gated` for the selected cell.
 #' @seealso [autotune_wcc()], [synchrony_multiverse()]
+#' @examples
+#' \donttest{
+#' # Build one multiverse per dyad, then pick the most robust specification.
+#' # Small surrogate count for a fast example; use >= 1000 for reporting.
+#' mv_list <- lapply(seq_len(3), function(i) {
+#'   synchrony_multiverse(
+#'     x = sim_dyad$x_A,
+#'     y = sim_dyad$x_B,
+#'     estimator = "wcc",
+#'     sample_rate = 80,
+#'     window_sec = c(1, 2, 4),
+#'     lag_sec = 1,
+#'     n_surrogates = 30
+#'   )
+#' })
+#' select_specification(mv_list)
+#' }
 #' @export
 select_specification <- function(mv_list, sig_pct = 0.5, iqr_penalty = 0.5) {
   if (!is.list(mv_list) || length(mv_list) < 1 ||

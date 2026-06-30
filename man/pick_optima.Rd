@@ -42,3 +42,8 @@ A data frame of class "wcc_optima" or "wdtw_optima".
 \description{
 Find Optimum (Peak or Valley) in Windowed Analyses
 }
+\examples{
+wcc_res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+optima <- pick_optima(wcc_res, L_size = 9)
+head(optima)
+}

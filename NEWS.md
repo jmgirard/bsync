@@ -42,6 +42,16 @@
   access rendered no figure), and a `wdtw_surrogate()` doc reference to the removed
   `$mean_distance` field was corrected to `$aggregate[["mean_distance"]]`.
 
+* **Runnable examples** added to all exported functions, all using the bundled
+  `sim_dyad` dataset. Compute-heavy examples (WDTW, surrogate testing, the
+  multiverse, and autotune) are wrapped in `\donttest{}` and use modest subsets
+  or surrogate counts so they run quickly.
+
+* **Plot axis labels** now spell out "Lag (tau)" instead of using the Greek
+  letter, so the estimator-surface and optima-overlay plots render on graphics
+  devices without UTF-8 support (the non-ASCII label could otherwise fail when
+  rendering examples on some platforms).
+
 ## M6 — Parameter guidance & synchrony multiverse
 
 ### Phase B — autotune_wcc rewrite + vignette

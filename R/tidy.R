@@ -39,6 +39,10 @@ tibble::as_tibble
 #' @param ... Additional arguments (not used).
 #' @return A [tibble::tibble()].
 #' @seealso [glance.bsync_surface()], [as_tibble.bsync_surface()]
+#' @examples
+#' wcc_res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+#' # One row per surface cell (window x lag)
+#' tidy(wcc_res)
 #' @exportS3Method generics::tidy bsync_surface
 tidy.bsync_surface <- function(x, ...) {
   tibble::as_tibble(x$results_df)
@@ -59,6 +63,10 @@ tidy.bsync_surface <- function(x, ...) {
 #' @param ... Additional arguments (not used).
 #' @return A one-row [tibble::tibble()].
 #' @seealso [tidy.bsync_surface()], [as_tibble.bsync_surface()]
+#' @examples
+#' wcc_res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+#' # One-row summary: aggregate statistic(s) + key settings
+#' glance(wcc_res)
 #' @importFrom rlang %||%
 #' @exportS3Method generics::glance bsync_surface
 glance.bsync_surface <- function(x, ...) {
@@ -102,6 +110,10 @@ glance.bsync_surface <- function(x, ...) {
 #' @param ... Additional arguments (not used).
 #' @return A [tibble::tibble()].
 #' @seealso [tidy.bsync_surface()], [glance.bsync_surface()]
+#' @examples
+#' wcc_res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+#' # Alias for tidy(): the full surface as a tibble
+#' as_tibble(wcc_res)
 #' @exportS3Method tibble::as_tibble bsync_surface
 as_tibble.bsync_surface <- function(x, ...) {
   tibble::as_tibble(x$results_df)

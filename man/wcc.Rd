@@ -72,3 +72,16 @@ A list object of class "wcc_res" containing the results matrix and
 \description{
 Conduct a windowed cross-correlation analysis
 }
+\examples{
+# Windowed cross-correlation on the bundled simulated dyad
+wcc_res <- wcc(
+  x = sim_dyad$x_A,
+  y = sim_dyad$x_B,
+  window_size = 96,
+  lag_max = 10
+)
+wcc_res
+
+# Use the rMEA best-lag "peak" aggregate instead of the SUSY mean
+wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10, statistic = "peak")
+}

@@ -20,6 +20,18 @@
 #'   "L1" uses absolute difference (Manhattan). "L2" uses squared difference
 #'   (Euclidean). (default = `"L2"`)
 #' @return A list object of class "wdtw_res".
+#' @examples
+#' \donttest{
+#' # Windowed dynamic time warping. DTW is O(window^2) per cell, so this
+#' # example runs on a short subset; use the full series in real analyses.
+#' wdtw_res <- wdtw(
+#'   x = sim_dyad$x_A[1:600],
+#'   y = sim_dyad$x_B[1:600],
+#'   window_size = 96,
+#'   lag_max = 10
+#' )
+#' wdtw_res
+#' }
 #' @export
 wdtw <- function(
   x,

@@ -60,3 +60,21 @@ only, while the observed statistic is computed over all lags. The null and obser
 aggregates therefore cover different lag ranges, making the resulting p-value
 approximate. Use only for quick exploratory checks, never for reporting.
 }
+\examples{
+\donttest{
+# DTW runs n_surrogates + 1 times, so this example uses a short subset and a
+# small surrogate count for speed; use the full series and
+# n_surrogates >= 1000 for reporting.
+xs <- sim_dyad$x_A[1:250]
+ys <- sim_dyad$x_B[1:250]
+y_surr <- generate_surrogate_circular(ys, n_surrogates = 19)
+res <- wdtw_surrogate(
+  x = xs,
+  y = ys,
+  y_surrogates = y_surr,
+  window_size = 50,
+  lag_max = 5
+)
+res
+}
+}

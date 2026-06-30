@@ -29,3 +29,8 @@ A numeric vector of velocities the same length as the input vectors.
 \description{
 Calculates the velocity (rate of change including direction) along a single axis using finite difference methods.
 }
+\examples{
+# Signed 1D velocity of one coordinate over time
+v <- calc_velocity_1d(t = sim_dyad$time, x = sim_dyad$x_A)
+head(v)
+}

@@ -33,6 +33,19 @@
 #' @param statistic A character string specifying the aggregate statistic; must match the value
 #'   passed to `wcc()`. `"mean_abs_z"` (default) or `"peak"`. See `wcc()` for details.
 #' @return A list object of class "wcc_surr".
+#' @examples
+#' \donttest{
+#' # Two-step pipeline: generate a null matrix, then test the observed WCC
+#' y_surr <- generate_surrogate_circular(sim_dyad$x_B, n_surrogates = 100)
+#' res <- wcc_surrogate(
+#'   x = sim_dyad$x_A,
+#'   y = sim_dyad$x_B,
+#'   y_surrogates = y_surr,
+#'   window_size = 96,
+#'   lag_max = 10
+#' )
+#' res
+#' }
 #' @export
 wcc_surrogate <- function(
   x,
@@ -144,6 +157,23 @@ wcc_surrogate <- function(
 #' @param fast_method Logical. If `TRUE`, severely reduces computation time by only evaluating
 #'   surrogate alignments at lag 0. **See Details for the statistical caveat.** Default is `FALSE`.
 #' @return A list object of class "wdtw_surr".
+#' @examples
+#' \donttest{
+#' # DTW runs n_surrogates + 1 times, so this example uses a short subset and a
+#' # small surrogate count for speed; use the full series and
+#' # n_surrogates >= 1000 for reporting.
+#' xs <- sim_dyad$x_A[1:250]
+#' ys <- sim_dyad$x_B[1:250]
+#' y_surr <- generate_surrogate_circular(ys, n_surrogates = 19)
+#' res <- wdtw_surrogate(
+#'   x = xs,
+#'   y = ys,
+#'   y_surrogates = y_surr,
+#'   window_size = 50,
+#'   lag_max = 5
+#' )
+#' res
+#' }
 #' @export
 wdtw_surrogate <- function(
   x,
@@ -275,6 +305,17 @@ wdtw_surrogate <- function(
 #' @param ar_order A positive integer specifying the Autoregressive (AR) order. Default is 1.
 #' @param window_increment A positive integer indicating the step size for the rolling window. Default is 1.
 #' @return A list object of class "wgranger_surr".
+#' @examples
+#' \donttest{
+#' y_surr <- generate_surrogate_circular(sim_dyad$x_B, n_surrogates = 100)
+#' res <- wgranger_surrogate(
+#'   x = sim_dyad$x_A,
+#'   y = sim_dyad$x_B,
+#'   y_surrogates = y_surr,
+#'   window_size = 96
+#' )
+#' res
+#' }
 #' @export
 wgranger_surrogate <- function(
   x,

@@ -19,6 +19,10 @@
 #'   absolute value below this threshold are set to NA. For WDTW (`find_min = TRUE`),
 #'   optima with a distance above this threshold are set to NA. Default is `NULL`.
 #' @return A data frame of class "wcc_optima" or "wdtw_optima".
+#' @examples
+#' wcc_res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+#' optima <- pick_optima(wcc_res, L_size = 9)
+#' head(optima)
 #' @export
 pick_optima <- function(
   obj,

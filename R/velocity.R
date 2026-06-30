@@ -8,6 +8,10 @@
 #' @param method A character string specifying the method to use: "central", "forward", or "backward". Default is "central".
 #' @param fill_edges A logical indicating whether to automatically use forward and backward differences to estimate velocities at the boundaries when `method = "central"`. Default is `TRUE`.
 #' @return A numeric vector of velocities the same length as the input vectors.
+#' @examples
+#' # Signed 1D velocity of one coordinate over time
+#' v <- calc_velocity_1d(t = sim_dyad$time, x = sim_dyad$x_A)
+#' head(v)
 #' @export
 calc_velocity_1d <- function(
   t,
@@ -50,6 +54,10 @@ calc_velocity_1d <- function(
 #' @param method A character string specifying the method to use: "central", "forward", or "backward". Default is "central".
 #' @param fill_edges A logical indicating whether to automatically use forward and backward differences to estimate speeds at the boundaries when `method = "central"`. Default is `TRUE`.
 #' @return A numeric vector of speeds the same length as the input vectors.
+#' @examples
+#' # Unsigned 1D speed (absolute rate of change)
+#' s <- calc_speed_1d(t = sim_dyad$time, x = sim_dyad$x_A)
+#' head(s)
 #' @export
 calc_speed_1d <- function(
   t,
@@ -93,6 +101,10 @@ calc_speed_1d <- function(
 #' @param method A character string specifying the method to use: "central", "forward", or "backward". Default is "central".
 #' @param fill_edges A logical indicating whether to automatically use forward and backward differences to estimate speeds at the boundaries when `method = "central"`. Default is `TRUE`.
 #' @return A numeric vector of speeds the same length as the input vectors.
+#' @examples
+#' # 2D speed from a pair of coordinate channels
+#' s <- calc_speed_2d(t = sim_dyad$time, x = sim_dyad$x_A, y = sim_dyad$y_A)
+#' head(s)
 #' @export
 calc_speed_2d <- function(
   t,
@@ -150,6 +162,12 @@ calc_speed_2d <- function(
 #' @param method A character string specifying the method to use: "central", "forward", or "backward". Default is "central".
 #' @param fill_edges A logical indicating whether to automatically use forward and backward differences to estimate speeds at the boundaries when `method = "central"`. Default is `TRUE`.
 #' @return A numeric vector of speeds the same length as the input vectors.
+#' @examples
+#' # 3D speed from x/y/z coordinate channels
+#' s <- calc_speed_3d(
+#'   t = sim_dyad$time, x = sim_dyad$x_A, y = sim_dyad$y_A, z = sim_dyad$z_A
+#' )
+#' head(s)
 #' @export
 calc_speed_3d <- function(
   t,

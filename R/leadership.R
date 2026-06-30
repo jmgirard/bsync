@@ -20,6 +20,11 @@
 #'   (non-`NA`) optima required inside an epoch to compute the index. Positions
 #'   with fewer valid optima receive `NA`. Must be at least 1. (default = `3`)
 #' @return A data frame containing the rolling asymmetry index.
+#' @examples
+#' wcc_res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+#' optima <- pick_optima(wcc_res, L_size = 9)
+#' lai <- leadership_asymmetry(optima, epoch_size = 10)
+#' head(lai)
 #' @export
 leadership_asymmetry <- function(optima_obj, epoch_size = 10, min_valid = 3) {
   if (!inherits(optima_obj, c("wcc_optima", "wdtw_optima"))) {

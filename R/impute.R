@@ -2,6 +2,10 @@
 #'
 #' @param x A numeric vector.
 #' @return A data frame with summary statistics about missing values.
+#' @examples
+#' # Summarize the missing-value runs in a signal with gaps
+#' x <- c(1, 2, NA, NA, 5, 6, NA, 8, 9, NA, NA, NA, 13)
+#' diagnose_ts_gaps(x)
 #' @export
 diagnose_ts_gaps <- function(x) {
   if (!is.numeric(x)) {
@@ -33,6 +37,10 @@ diagnose_ts_gaps <- function(x) {
 #' @param maxgap Integer specifying the maximum number of consecutive NAs to impute.
 #'   Gaps larger than this will be left as NA.
 #' @return A numeric vector with small gaps imputed, containing an "imputation_summary" attribute.
+#' @examples
+#' # Linearly impute gaps up to 5 samples wide; leave longer gaps as NA
+#' x <- c(1, 2, NA, NA, 5, 6, NA, 8, 9, NA, NA, NA, NA, NA, NA, 16)
+#' impute_ts_gaps(x, method = "linear", maxgap = 5)
 #' @export
 impute_ts_gaps <- function(x, method = c("linear", "spline"), maxgap = 5) {
   method <- match.arg(method)

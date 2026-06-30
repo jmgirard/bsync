@@ -18,6 +18,11 @@ A [tibble::tibble()].
 Returns one row per cell in `results_df`: window position x lag (or just
 window position for Granger). Column names match the underlying estimator.
 }
+\examples{
+wcc_res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+# One row per surface cell (window x lag)
+tidy(wcc_res)
+}
 \seealso{
 [glance.bsync_surface()], [as_tibble.bsync_surface()]
 }

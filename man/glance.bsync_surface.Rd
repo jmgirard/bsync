@@ -22,6 +22,11 @@ so multiple estimator runs can be compared with [dplyr::bind_rows()].
 For WCC/WDTW the aggregate is a single named column (`mean_abs_z`, `peak`,
 or `mean_distance`). For Granger, `f_xy` and `f_yx` are separate columns.
 }
+\examples{
+wcc_res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+# One-row summary: aggregate statistic(s) + key settings
+glance(wcc_res)
+}
 \seealso{
 [tidy.bsync_surface()], [as_tibble.bsync_surface()]
 }

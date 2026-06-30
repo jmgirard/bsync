@@ -47,3 +47,8 @@ Applies a smoothing filter to a numeric vector. Smoothing is highly recommended
 prior to calculating velocity or running windowed cross-correlation (WCC) to
 reduce high-frequency noise and prevent spurious correlations.
 }
+\examples{
+# Zero-phase Savitzky-Golay smoothing (order 3, 11-sample window)
+smoothed <- smooth_signal(sim_dyad$x_A, method = "sgolay", window = 11)
+head(smoothed)
+}

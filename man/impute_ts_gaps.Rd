@@ -20,3 +20,8 @@ A numeric vector with small gaps imputed, containing an "imputation_summary" att
 \description{
 Impute Missing Values in Continuous Time Series with Metadata
 }
+\examples{
+# Linearly impute gaps up to 5 samples wide; leave longer gaps as NA
+x <- c(1, 2, NA, NA, 5, 6, NA, 8, 9, NA, NA, NA, NA, NA, NA, 16)
+impute_ts_gaps(x, method = "linear", maxgap = 5)
+}

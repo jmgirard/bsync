@@ -15,3 +15,8 @@ A data frame with summary statistics about missing values.
 \description{
 Diagnose Missing Data Gaps in a Time Series
 }
+\examples{
+# Summarize the missing-value runs in a signal with gaps
+x <- c(1, 2, NA, NA, 5, 6, NA, 8, 9, NA, NA, NA, 13)
+diagnose_ts_gaps(x)
+}

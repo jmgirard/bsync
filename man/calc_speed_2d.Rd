@@ -32,3 +32,8 @@ A numeric vector of speeds the same length as the input vectors.
 \description{
 Calculates the magnitude of the 2D velocity vector (speed) using finite difference methods.
 }
+\examples{
+# 2D speed from a pair of coordinate channels
+s <- calc_speed_2d(t = sim_dyad$time, x = sim_dyad$x_A, y = sim_dyad$y_A)
+head(s)
+}

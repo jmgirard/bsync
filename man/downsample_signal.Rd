@@ -40,3 +40,8 @@ aggregation function (median or mean) across non-overlapping windows.
   correctly leaves gaps where tracking was lost. It is also ideal for
   processing multiple numeric columns simultaneously.
 }
+\examples{
+# Downsample by a factor of 4 (e.g. 80 Hz -> 20 Hz) via the median
+ds <- downsample_signal(sim_dyad$x_A, factor = 4)
+length(ds)
+}

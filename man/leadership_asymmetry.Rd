@@ -33,3 +33,9 @@ neighborhood the fraction of positive vs. negative optimum lags determines
 the asymmetry score. Positions where fewer than `min_valid` non-`NA` optima
 fall inside the window receive `NA` in the output.
 }
+\examples{
+wcc_res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+optima <- pick_optima(wcc_res, L_size = 9)
+lai <- leadership_asymmetry(optima, epoch_size = 10)
+head(lai)
+}

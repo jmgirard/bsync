@@ -19,3 +19,8 @@ A matrix where each column is a surrogate time series.
 \description{
 Generate Phase-Randomized Surrogates (Fourier Transform)
 }
+\examples{
+# Build 100 phase-randomized surrogates (preserves the power spectrum)
+surr <- generate_surrogate_phase(sim_dyad$x_B, n_surrogates = 100)
+dim(surr)
+}

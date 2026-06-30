@@ -14,6 +14,13 @@
 #' @return A list of class `"signal_power_res"` containing the calculated cutoff
 #'   frequencies, the recommended integer downsampling factor, and the resulting
 #'   target frequency. Call `plot()` on the result to visualize cumulative power.
+#' @examples
+#' # PSD-based downsampling guidance for one signal
+#' ps <- evaluate_signal_power(sim_dyad$x_A, sample_rate = 80)
+#' ps
+#'
+#' # Visualize the cumulative power spectrum
+#' plot(ps)
 #' @export
 evaluate_signal_power <- function(
   x,

@@ -26,6 +26,24 @@ A list with `best_row` (one-row tibble from the grid), `sig_rate`,
 Applies the gated stability-penalized selection rule to a list of
 `bsync_multiverse` objects (one per dyad) and returns the winning cell.
 }
+\examples{
+\donttest{
+# Build one multiverse per dyad, then pick the most robust specification.
+# Small surrogate count for a fast example; use >= 1000 for reporting.
+mv_list <- lapply(seq_len(3), function(i) {
+  synchrony_multiverse(
+    x = sim_dyad$x_A,
+    y = sim_dyad$x_B,
+    estimator = "wcc",
+    sample_rate = 80,
+    window_sec = c(1, 2, 4),
+    lag_sec = 1,
+    n_surrogates = 30
+  )
+})
+select_specification(mv_list)
+}
+}
 \seealso{
 [autotune_wcc()], [synchrony_multiverse()]
 }

@@ -65,3 +65,12 @@ cycles (the Nyquist minimum) is too noisy.
 }
 All violations produce informative messages, not silent changes.
 }
+\examples{
+# Derive starting parameters from the signal's own dominant timescale
+params <- suggest_wcc_params(
+  x = sim_dyad$x_A,
+  y = sim_dyad$x_B,
+  sample_rate = 80
+)
+params
+}

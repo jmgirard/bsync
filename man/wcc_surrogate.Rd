@@ -55,3 +55,17 @@ comparable (Invariant 2: surrogate nulls match the observed statistic).
 Pass the same `statistic` value you used in `wcc()` so that `observed_z` and the
 surrogate draws use the same quantity.
 }
+\examples{
+\donttest{
+# Two-step pipeline: generate a null matrix, then test the observed WCC
+y_surr <- generate_surrogate_circular(sim_dyad$x_B, n_surrogates = 100)
+res <- wcc_surrogate(
+  x = sim_dyad$x_A,
+  y = sim_dyad$x_B,
+  y_surrogates = y_surr,
+  window_size = 96,
+  lag_max = 10
+)
+res
+}
+}

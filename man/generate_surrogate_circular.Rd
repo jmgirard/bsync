@@ -20,3 +20,8 @@ A matrix where each column is a surrogate time series.
 \description{
 Generate Circular Shift Surrogates
 }
+\examples{
+# Build 100 circular-shift surrogates of one partner's signal
+surr <- generate_surrogate_circular(sim_dyad$x_B, n_surrogates = 100)
+dim(surr)
+}
