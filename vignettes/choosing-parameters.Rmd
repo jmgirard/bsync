@@ -55,15 +55,21 @@ params <- suggest_wcc_params(
 params
 ```
 
-The PSD identifies the 0.5 Hz dominant cycle (~2 s period). The 4-cycles-per-window heuristic
-(Boker et al., 2002) then gives `window_size = round(2 * 4 * 80) = 640 samples`, subject to the
-hard constraints (see `?suggest_wcc_params`):
+The PSD-based cutoff captures 95% of the signal's power below ~1.25 Hz (a 0.8 s timescale). The
+4-cycles-per-window heuristic (Boker et al., 2002) then gives
+`window_size = round(0.8 * 4 * 80) = 256 samples`. Because the default `max_delay_sec`
+(3 s = 240 samples) exceeds `window_size / 2`, the SUSY lag-cap rule caps `lag_max` at 128 samples
+and announces it -- one of three hard constraints that are applied and reported, never silently
+(see `?suggest_wcc_params`):
 
-- `window_size >= 2 * lag_max` (SUSY lag-cap rule)
+- `lag_max <= window_size / 2` (SUSY lag-cap rule)
 - `window_size <= length(x) / 2` (series-length ceiling)
 - Minimum-samples floor for a stable *r*
 
-If you already know the behavioral timescale from theory, pass it directly as an override:
+The data-driven cutoff reflects all of the signal's power, including higher-frequency content, so it
+favors a shorter window. If you already know the behavioral timescale from theory -- here, the
+0.5 Hz interaction cycle that `sim_dyad` was built from -- pass it directly as an override, which
+yields a longer 640-sample window:
 
 ```{r suggest-override}
 params_expert <- suggest_wcc_params(

@@ -156,10 +156,12 @@ wcc <- function(
 #' @return A named list with `window_size`, `lag_max`, `window_increment`, and
 #'   `lag_increment`, ready to pass to [wcc()].
 #' @examples
-#' # Derive starting parameters from the signal's own dominant timescale
+#' # Derive starting parameters from the signal's own dominant timescale.
+#' # (The default max delay exceeds window/2 here, so the SUSY rule caps
+#' # lag_max -- an example of the loud, non-destructive constraint messages.)
 #' params <- suggest_wcc_params(
-#'   x = sim_dyad$x_A,
-#'   y = sim_dyad$x_B,
+#'   x = sim_dyad$z_A,
+#'   y = sim_dyad$z_B,
 #'   sample_rate = 80
 #' )
 #' params
