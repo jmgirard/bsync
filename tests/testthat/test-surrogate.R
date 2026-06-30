@@ -385,8 +385,11 @@ test_that("AC4: run_surrogate_engine returns correct shape", {
 test_that("AC4: surrogate result objects carry no results_df (Invariant 7)", {
   # The aggregate-only path must never materialize a per-cell results_df, even
   # in the returned object. Assert all three surrogate objects omit it.
-  x <- sim_dyad$x_A
-  y <- sim_dyad$x_B
+  # A 600-sample slice exercises the same code path as the full series — this
+  # is a structural assertion, not a numeric one — at a fraction of the WDTW
+  # cost (DTW is O(window^2) per cell).
+  x <- sim_dyad$x_A[1:600]
+  y <- sim_dyad$x_B[1:600]
   y_surr <- generate_surrogate_circular(y, n_surrogates = 3, lag_max = 10)
 
   res_wcc <- wcc_surrogate(x, y, y_surrogates = y_surr, window_size = 96, lag_max = 10)
@@ -419,8 +422,10 @@ test_that("AC4: WDTW fast_method evaluates observed windows at lag 0 (no over-co
   # Regression guard for the fast-path grid: surrogates must cover exactly the
   # observed lagged surface's window positions, evaluated at tau = 0 — not a
   # lag-free grid that shifts windows past the series end and over-counts.
-  x <- sim_dyad$x_A
-  y <- sim_dyad$x_B
+  # The window-alignment identity is length-independent; a 600-sample slice
+  # keeps the guard while cutting the WDTW cost.
+  x <- sim_dyad$x_A[1:600]
+  y <- sim_dyad$x_B[1:600]
   y_self <- matrix(y, ncol = 1)
 
   obs <- wdtw(x, y, window_size = 96, lag_max = 10, scale_method = "none")
@@ -467,8 +472,10 @@ test_that("AC4: run_surrogate_engine supports named-numeric return (Granger-like
 test_that("AC4: WDTW cross-path Invariant-2 (y as its sole surrogate)", {
   # Pass y itself as the sole surrogate at lag=0 path (scale_method='none').
   # The surrogate's mean DTW cost must equal wdtw()$aggregate[['mean_distance']].
-  x <- sim_dyad$x_A
-  y <- sim_dyad$x_B
+  # This is an exact algebraic identity, independent of series length, so a
+  # 600-sample slice preserves it at a fraction of the WDTW cost.
+  x <- sim_dyad$x_A[1:600]
+  y <- sim_dyad$x_B[1:600]
   y_self <- matrix(y, ncol = 1)
 
   res_obs <- wdtw(x, y, window_size = 96, lag_max = 10, scale_method = "none")
