@@ -276,6 +276,28 @@ test_that("M2: calc_wcc_cpp matches oracle on sim_dyad with NA (na.rm = FALSE)",
   expect_equal(res$results_df$wcc, oracle, tolerance = 1e-9)
 })
 
+test_that("M2: calc_wcc_cpp matches oracle with large-mean inputs (prefix-sum cancellation)", {
+  # Prefix sums accumulate O(n * mean) magnitude; subtracting two large sums
+  # loses more relative precision than direct window accumulation.  This test
+  # exercises that path with a non-trivial mean (1e4) on a long-ish series so
+  # that cancellation pressure is real.  Observed max error is ~2e-6 (vs 1e-9
+  # for zero-mean sim_dyad), so we allow 1e-5 — tight enough to catch bugs,
+  # realistic about the known single-pass cancellation trade-off.
+  set.seed(7)
+  n <- 500L
+  offset <- 1e4
+  x <- rnorm(n, mean = offset, sd = 1)
+  y <- rnorm(n, mean = offset, sd = 1)
+
+  window_size <- 50L
+  lag_max <- 10L
+
+  res    <- wcc(x, y, window_size = window_size, lag_max = lag_max, na.rm = TRUE)
+  oracle <- wcc_oracle(x, y, window_size, lag_max, na.rm = TRUE)
+
+  expect_equal(res$results_df$wcc, oracle, tolerance = 1e-5)
+})
+
 test_that("M1: na.rm = FALSE returns NA for any window containing NA", {
   set.seed(42)
   x <- rnorm(30)

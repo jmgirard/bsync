@@ -12,3 +12,7 @@
 ^pkgdown$
 ^\.vscode$
 ^[.]?air[.]toml$
+^\.claude$
+^CLAUDE\.md$
+^DESIGN\.md$
+^bench$
