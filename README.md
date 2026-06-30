@@ -8,7 +8,7 @@ coverage](https://codecov.io/gh/jmgirard/bsync/graph/badge.svg)](https://app.cod
 [![test-coverage](https://github.com/jmgirard/bsync/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/jmgirard/bsync/actions/workflows/test-coverage.yaml)
 [![R-CMD-check](https://github.com/jmgirard/bsync/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jmgirard/bsync/actions/workflows/R-CMD-check.yaml)
 [![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 <!-- badges: end -->
 
 The goal of **bsync** is to provide a modern, high-efficiency R toolkit

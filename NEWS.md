@@ -1,4 +1,4 @@
-# bsync 0.0.0.9000
+# bsync 0.1.0
 
 ## M7 — Documentation & messaging overhaul (Phase A)
 
