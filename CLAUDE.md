@@ -113,10 +113,44 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
 ## Current focus
 
 **Hardening cycle toward a near-term CRAN submission**, run as four focused milestones via the
-plan → implement → review loop. **M4 is next.**
+plan → implement → review loop. **M4 is active (planned, in implementation).**
 
-- **M4 — Selectable WCC aggregate statistic.** `statistic = c("mean_abs_z","peak")` on `wcc()` +
-  `wcc_surrogate()`; null matches observed; vignette documents the choice.
+- **M4 — Selectable WCC aggregate statistic (active).** Add `statistic = c("mean_abs_z", "peak")`
+  to `wcc()` and `wcc_surrogate()` (default `"mean_abs_z"`, unchanged). Scope is **WCC only** (per
+  DESIGN.md §2/§9/§15; extending to WDTW/Granger is M5 shared-framework work, not M4). No C++ core
+  change — the statistic is computed in R from the per-(window × lag) correlations `calc_wcc_cpp`
+  already returns, so Invariants 5/6 are not triggered (no `compileAttributes`, no core oracle, no
+  `bench/`). Statistic definitions:
+  - `mean_abs_z` — mean of |Fisher-z(r)| over **every** (window × lag) surface cell (SUSY *mean
+    absolute Z*; current behavior).
+  - `peak` — per window, **max |Fisher-z| across lags**, then **mean across windows** (rMEA / Boker
+    et al. 2002 *best-lag*). Both are larger-is-more-synchrony, so the surrogate `>=` tail is
+    unchanged.
+
+  A single `wcc_aggregate(z, window_id, statistic)` helper (refactored out of `fisher_z()`, per
+  DESIGN.md §15) computes the aggregate for **both** the observed value and every surrogate, so the
+  null matches the observed by construction (Invariant 2). The result-object field stays
+  `$fisher_z` (holds whichever aggregate is chosen — both are z-scale); `settings$statistic` records
+  the choice; naming is revisited in M5.
+
+  Acceptance criteria:
+  1. `wcc(statistic = c("mean_abs_z","peak"))` with `match.arg`; default `"mean_abs_z"` reproduces
+     the pre-M4 `fisher_z` value bit-for-bit on `sim_dyad`; an invalid value aborts. Tested.
+  2. `peak` = mean-over-windows of max-|Fisher-z|-across-lags, verified against an independent
+     pure-R oracle on `sim_dyad` to 1e-9. Tested.
+  3. One `wcc_aggregate()` helper drives both observed and surrogate paths;
+     `wcc_surrogate(statistic="peak")$observed_z` equals `wcc(..., statistic="peak")$fisher_z`
+     exactly — matched null (Invariant 2), tested for both statistics.
+  4. `print.wcc_res` / `print.wcc_surr` label the aggregate according to the chosen statistic.
+  5. The WCC-workflow vignette documents the choice with the SUSY (`mean_abs_z`) / rMEA–Boker
+     (`peak`) lineage; NEWS.md gains an M4 entry; `inst/WORDLIST` covers any new terms (CI
+     spell-check stays green).
+  6. No C++ core change: `RcppExports` diff is empty; no new `Imports`; no build artifacts staged.
+  7. Full suite green and `R CMD check --as-cran` = 0/0/0; styled and linted.
+
+  Files: `R/wcc.R` (`wcc()` arg + helper + print), `R/surrogate_analysis.R` (`wcc_surrogate()` arg
+  + shared helper + print), `tests/testthat/test-wcc.R`, `tests/testthat/test-surrogate.R`,
+  `vignettes/wcc-workflow.Rmd`, `NEWS.md`, `inst/WORDLIST`.
 
 See `DESIGN.md` §15 for the full roadmap (M5 shared framework; M6 phase synchrony; M7 wavelet
 coherence; M8 CRQA/MEA; M9 group-level workflow).
