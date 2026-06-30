@@ -304,11 +304,11 @@ All **bsync** estimator results support a tidy workflow via `tidy()`, `glance()`
 
 ```{r tidy-interface}
 # One row per surface cell (full windowed results_df as a tibble)
-surface_tbl <- generics::tidy(wcc_results)
+surface_tbl <- tidy(wcc_results)
 head(surface_tbl)
 
 # One-row summary: aggregate statistic(s) + key settings
-generics::glance(wcc_results)
+glance(wcc_results)
 ```
 
 `glance()` is especially useful for comparing several runs in a single data frame:
@@ -334,7 +334,7 @@ wcc_peak2 <- wcc(
 )
 
 dplyr::bind_rows(
-  generics::glance(wcc_maz2),
-  generics::glance(wcc_peak2)
+  glance(wcc_maz2),
+  glance(wcc_peak2)
 )
 ```

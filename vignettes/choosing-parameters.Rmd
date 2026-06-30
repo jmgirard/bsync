@@ -86,7 +86,7 @@ results <- wcc(
   window_increment = params$window_increment,
   lag_increment    = params$lag_increment
 )
-generics::glance(results)
+glance(results)
 ```
 
 ### Window overlap (`overlap_pct`)
@@ -123,7 +123,7 @@ mv
 ```
 
 ```{r multiverse-glance}
-generics::glance(mv)
+glance(mv)
 ```
 
 ```{r multiverse-plot, fig.width = 7, fig.height = 6}
@@ -137,7 +137,7 @@ most cells should be significant regardless of the specific hyperparameters.
 The full specification grid is available as a tibble via `tidy()` or `as_tibble()`:
 
 ```{r multiverse-tidy}
-head(generics::tidy(mv))
+head(tidy(mv))
 ```
 
 ### Running a multiverse for WDTW or Granger
@@ -158,7 +158,7 @@ mv_g <- synchrony_multiverse(
   n_surrogates = 100L
 )
 
-generics::glance(mv_g)
+glance(mv_g)
 ```
 
 ## 3. Multi-Dyad Parameter Selection: `autotune_wcc()`
@@ -198,7 +198,7 @@ results_tuned <- wcc(
   window_increment = best$window_increment,
   lag_increment    = best$lag_increment
 )
-generics::glance(results_tuned)
+glance(results_tuned)
 ```
 
 ### How the selection rule works

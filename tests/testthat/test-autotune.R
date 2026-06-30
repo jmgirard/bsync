@@ -238,3 +238,58 @@ test_that("autotune_wcc: works with data.frame dyads", {
 
   expect_true(result$window_size > 0)
 })
+
+
+test_that("autotune_wcc returns a classed bsync_autotune object", {
+  skip_on_cran()
+
+  set.seed(7)
+  dyad_list <- replicate(
+    2,
+    list(x = sim_dyad$z_A, y = sim_dyad$z_B),
+    simplify = FALSE
+  )
+  result <- suppressWarnings(autotune_wcc(
+    dyad_list    = dyad_list,
+    sample_rate  = 80,
+    window_sec   = c(1, 2),
+    lag_sec      = 0.5,
+    n_surrogates = 20L,
+    n_tune_dyads = 2L
+  ))
+
+  expect_s3_class(result, "bsync_autotune")
+  # Still a named list under the hood (programmatic access preserved)
+  expect_type(unclass(result), "list")
+  expect_true(!is.null(result$window_size))
+})
+
+
+test_that("print.bsync_autotune renders a tidy summary (no double colon)", {
+  # Build a minimal object directly so this runs fast (no CRAN skip needed).
+  fake <- structure(
+    list(
+      window_size = 160L, lag_max = 80L, window_increment = 16L,
+      lag_increment = 1L, window_sec = 2, lag_sec = 1,
+      sig_rate = 1, median_es = 2.19, iqr_es = 0.3, score = 2.04,
+      n_dyads = 3L, n_cells_gated = 4L, dyad_multiverses = list()
+    ),
+    class = "bsync_autotune"
+  )
+
+  expect_invisible(print(fake))
+  expect_message(print(fake), "Auto-Tune Result")
+  expect_message(print(fake), "Window size")
+  expect_message(print(fake), "detectability gate")
+
+  # Capture full output and assert absence of the cli double-colon defect.
+  out <- capture.output(
+    withCallingHandlers(print(fake), message = function(m) {
+      cat(conditionMessage(m))
+      invokeRestart("muffleMessage")
+    })
+  )
+  expect_false(any(grepl(": :", out)),
+    label = "print.bsync_autotune must not contain double colon ': :'"
+  )
+})

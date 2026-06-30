@@ -55,7 +55,8 @@ cell must be significant (p < .05). Default `0.5`.}
 `median(ES) - iqr_penalty * IQR(ES)`. Default `0.5`.}
 }
 \value{
-A named list with:
+An object of class `bsync_autotune` (a named list with a tidy
+  [print()][print.bsync_autotune()] method) containing:
   \describe{
     \item{`window_size`}{Selected window size in samples.}
     \item{`lag_max`}{Selected max lag in samples.}

@@ -14,12 +14,12 @@ template:
 
 navbar:
   structure:
-    left:  [reference, articles]
+    left:  [intro, reference, articles]
     right: [search, github]
 
 articles:
   - title: "Get started"
-    navbar: ~
+    navbar: "Get started"
     contents:
       - bsync
 
@@ -87,6 +87,7 @@ reference:
       - synchrony_multiverse
       - autotune_wcc
       - select_specification
+      - print.bsync_autotune
       - print.bsync_multiverse
       - summary.bsync_multiverse
       - plot.bsync_multiverse

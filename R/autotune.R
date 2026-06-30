@@ -62,7 +62,8 @@
 #'   cell must be significant (p < .05). Default `0.5`.
 #' @param iqr_penalty Penalty weight on cross-dyad IQR of ES. Score =
 #'   `median(ES) - iqr_penalty * IQR(ES)`. Default `0.5`.
-#' @return A named list with:
+#' @return An object of class `bsync_autotune` (a named list with a tidy
+#'   [print()][print.bsync_autotune()] method) containing:
 #'   \describe{
 #'     \item{`window_size`}{Selected window size in samples.}
 #'     \item{`lag_max`}{Selected max lag in samples.}
@@ -171,17 +172,32 @@ autotune_wcc <- function(
     n_cells_gated    = sel$n_gated,
     dyad_multiverses = mv_list
   )
+  class(result) <- "bsync_autotune"
 
+  result
+}
+
+
+#' Print method for bsync_autotune objects
+#'
+#' @param x An object of class `bsync_autotune` (from [autotune_wcc()]).
+#' @param ... Additional arguments (not used).
+#' @return Returns `x` invisibly.
+#' @export
+print.bsync_autotune <- function(x, ...) {
   cli::cli_h2("Auto-Tune Result")
   cli::cli_dl(c(
-    "Window size" = "{best$window_size} samples ({round(best$window_sec, 2)} s)",
-    "Max lag"     = "{best$lag_max} samples ({round(best$lag_sec, 2)} s)",
-    "Increment"   = "{best$window_increment} samples",
-    "Sig. rate"   = "{round(sel$sig_rate * 100, 1)}% of dyads",
-    "Median ES"   = "{round(sel$median_es, 3)} (IQR = {round(sel$iqr_es, 3)})"
+    "Window size" = "{x$window_size} samples ({round(x$window_sec, 2)} s)",
+    "Max lag"     = "{x$lag_max} samples ({round(x$lag_sec, 2)} s)",
+    "Increment"   = "{x$window_increment} samples",
+    "Sig. rate"   = "{round(x$sig_rate * 100, 1)}% of dyads",
+    "Median ES"   = "{round(x$median_es, 3)} (IQR = {round(x$iqr_es, 3)})"
   ))
-
-  invisible(result)
+  cli::cli_alert_info(
+    "Tuned over {x$n_dyads} dyad{?s}; {x$n_cells_gated} cell{?s} passed the \\
+     detectability gate. Per-dyad multiverses in {.field $dyad_multiverses}."
+  )
+  invisible(x)
 }
 
 

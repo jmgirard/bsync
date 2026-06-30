@@ -29,6 +29,16 @@
   double colon in the Fisher's Z aggregate label. The fix also renames the label from
   `Mean |Fisher's Z|` to `Mean Abs. Fisher's Z` to avoid the cli markup ambiguity.
 
+* **`autotune_wcc()` now returns a classed `bsync_autotune` object** with a tidy
+  `print()` method. Previously the result was an unclassed list, so inspecting it at
+  the console dumped the entire object (including the per-dyad `bsync_multiverse`
+  list). Printing now shows only the selected parameters and detectability summary;
+  the per-dyad multiverses remain available in `$dyad_multiverses`.
+
+* **Documentation polish**: the pkgdown navbar again exposes the "Get started"
+  (`vignette("bsync")`) link; vignettes call the re-exported `tidy()` / `glance()`
+  verbs directly instead of the `generics::` prefix.
+
 ## M6 — Parameter guidance & synchrony multiverse
 
 ### Phase B — autotune_wcc rewrite + vignette
