@@ -348,3 +348,91 @@ test_that("M4: peak p-value is small for coupled series, large for independent",
   )
   expect_true(res_indep$p_value > 0.05)
 })
+
+
+# M5 AC4: surrogate engine tests ----------------------------------------------
+
+test_that("AC4: run_surrogate_engine returns correct shape", {
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  y_surr <- generate_surrogate_circular(y, n_surrogates = 3, lag_max = 10)
+
+  grid <- build_surface_grid(
+    n_x = length(x), window_size = 96, window_increment = 1,
+    lag_max = 10, lag_increment = 1, lagged = TRUE
+  )
+  x_cpp <- as.double(x)
+
+  # Scalar aggregate (WCC-like)
+  compute_scalar <- function(xv, y_col, g) {
+    mean(abs(r_to_z(calc_wcc_cpp(
+      x = xv, y = as.double(y_col),
+      i_vals = g$i_vals, tau_vals = g$tau_vals,
+      w_max = g$w_max, na_rm = TRUE
+    ))), na.rm = TRUE)
+  }
+
+  result <- run_surrogate_engine(x_cpp, y_surr, grid, compute_scalar, numeric(1))
+  expect_true(is.numeric(result))
+  expect_equal(length(result), 3L)
+  expect_false(is.data.frame(result))  # aggregate-only: no results_df
+})
+
+test_that("AC4: run_surrogate_engine supports named-numeric return (Granger-like)", {
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  y_surr <- generate_surrogate_circular(y, n_surrogates = 3, lag_max = 10)
+
+  grid <- build_surface_grid(
+    n_x = length(x), window_size = 96, window_increment = 1,
+    lagged = FALSE
+  )
+  x_cpp <- as.double(x)
+
+  compute_pair <- function(xv, y_col, g) {
+    s <- calc_wgranger_cpp(xv, as.double(y_col), g$i_vals, g$w_max, p = 1L)
+    c(f_xy = mean(s$f_xy, na.rm = TRUE), f_yx = mean(s$f_yx, na.rm = TRUE))
+  }
+
+  result <- run_surrogate_engine(x_cpp, y_surr, grid, compute_pair, numeric(2))
+  expect_true(is.matrix(result))
+  expect_equal(dim(result), c(2L, 3L))
+  expect_equal(rownames(result), c("f_xy", "f_yx"))
+})
+
+test_that("AC4: WDTW cross-path Invariant-2 (y as its sole surrogate)", {
+  # Pass y itself as the sole surrogate at lag=0 path (scale_method='none').
+  # The surrogate's mean DTW cost must equal wdtw()$aggregate[['mean_distance']].
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  y_self <- matrix(y, ncol = 1)
+
+  res_obs <- wdtw(x, y, window_size = 96, lag_max = 10, scale_method = "none")
+  res_surr <- wdtw_surrogate(
+    x, y, y_surrogates = y_self,
+    window_size = 96, lag_max = 10, scale_method = "none"
+  )
+
+  expect_equal(
+    res_surr$surrogate_cost[[1]],
+    res_obs$aggregate[["mean_distance"]],
+    tolerance = 1e-12
+  )
+})
+
+test_that("AC4: Granger cross-path Invariant-2 (y as its sole surrogate)", {
+  # Pass y itself as the sole surrogate.
+  # surrogate_f_xy[1] must equal observed_f_xy, and same for f_yx.
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  y_self <- matrix(y, ncol = 1)
+
+  res_obs <- wgranger(x, y, window_size = 96)
+  res_surr <- wgranger_surrogate(
+    x, y, y_surrogates = y_self,
+    window_size = 96
+  )
+
+  expect_equal(res_surr$surrogate_f_xy[[1]], res_obs$aggregate[["f_xy"]], tolerance = 1e-12)
+  expect_equal(res_surr$surrogate_f_yx[[1]], res_obs$aggregate[["f_yx"]], tolerance = 1e-12)
+})

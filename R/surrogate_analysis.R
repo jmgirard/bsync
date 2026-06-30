@@ -72,7 +72,7 @@ wcc_surrogate <- function(
   )
   obs_z <- obs_wcc$aggregate[[1]]
 
-  # 2. Build the structural grid ONCE for maximum speed
+  # 2. Build the structural grid ONCE (hoistable in M6 multiverse)
   grid <- build_surface_grid(
     n_x             = length(x),
     window_size      = window_size,
@@ -81,34 +81,23 @@ wcc_surrogate <- function(
     lag_increment    = lag_increment,
     lagged           = TRUE
   )
-  i_vals   <- grid$i_vals
-  tau_vals <- grid$tau_vals
-  w_max_surr <- grid$w_max
 
   x_cpp <- as.double(x)
 
-  # 3. Parallel-ready Loop using future.apply
-  surrogate_zs <- future.apply::future_vapply(
-    seq_len(n_surrogates),
-    function(idx) {
-      y_surr <- as.double(y_surrogates[, idx])
+  # aggregate-only compute_fn: core → aggregate, no results_df (Invariant 7)
+  wcc_compute <- function(xv, y_col, g) {
+    z_vals <- r_to_z(calc_wcc_cpp(
+      x = xv, y = as.double(y_col),
+      i_vals = g$i_vals, tau_vals = g$tau_vals,
+      w_max = g$w_max, na_rm = na.rm
+    ))
+    wcc_aggregate(z = z_vals, window_id = g$i_vals, statistic = statistic)
+  }
 
-      wcc_vals <- calc_wcc_cpp(
-        x = x_cpp,
-        y = y_surr,
-        i_vals = i_vals,
-        tau_vals = tau_vals,
-        w_max = w_max_surr,
-        na_rm = na.rm
-      )
-
-      z_vals <- r_to_z(wcc_vals)
-
-      # i_vals groups by window position (each unique i = one window)
-      wcc_aggregate(z = z_vals, window_id = i_vals, statistic = statistic)
-    },
-    FUN.VALUE = numeric(1),
-    future.seed = TRUE
+  # 3. Surrogate loop via shared engine
+  surrogate_zs <- run_surrogate_engine(
+    x = x_cpp, y_surrogates = y_surrogates, grid = grid,
+    compute_fn = wcc_compute, fun_value = numeric(1)
   )
 
   p_val <- sum(surrogate_zs >= obs_z) / n_surrogates
@@ -204,19 +193,20 @@ wdtw_surrogate <- function(
     x_cpp <- as.numeric(base::scale(x))
   }
 
-  # 2. Build grids for computation
+  # 2. Build grid (hoistable in M6 multiverse)
   if (fast_method) {
-    grid <- build_surface_grid(
+    # Fast path: surrogates evaluated at lag=0 only (approximate — see @details)
+    grid_fast <- build_surface_grid(
       n_x             = length(x),
       window_size      = window_size,
       window_increment = window_increment,
-      lag_max          = lag_max,
-      lag_increment    = lag_increment,
       lagged           = FALSE
     )
-    # Shift i_vals to account for lag_max offset (fast path uses lag=0 only)
-    i_vals_surr   <- grid$i_vals + lag_max
-    tau_vals_surr <- rep(0L, grid$n_r)
+    # The lag-free grid starts at i=1; shift by lag_max so windows align with
+    # the observed surface which reserves lag_max samples at each edge.
+    grid_fast$i_vals  <- grid_fast$i_vals + lag_max
+    grid_fast$tau_vals <- rep(0L, grid_fast$n_r)
+    grid <- grid_fast
     cli::cli_alert_info(
       "Running fast method: Evaluating surrogates at lag 0 only."
     )
@@ -229,37 +219,26 @@ wdtw_surrogate <- function(
       lag_increment    = lag_increment,
       lagged           = TRUE
     )
-    i_vals_surr   <- grid$i_vals
-    tau_vals_surr <- grid$tau_vals
   }
-  w_max_surr <- grid$w_max
 
-  # 3. Parallel-ready loop using future.apply
-  surrogate_costs <- future.apply::future_vapply(
-    seq_len(n_surrogates),
-    function(idx) {
-      y_surr <- y_surrogates[, idx]
+  # aggregate-only compute_fn (Invariant 7)
+  wdtw_compute <- function(xv, y_col, g) {
+    y_cpp_inner <- if (scale_method == "global") {
+      as.numeric(base::scale(y_col))
+    } else {
+      as.double(y_col)
+    }
+    base::mean(calc_wdtw_cpp(
+      x = xv, y = y_cpp_inner,
+      i_vals = g$i_vals, tau_vals = g$tau_vals,
+      w_max = g$w_max, use_l2 = use_l2, local_scale = local_scale
+    ), na.rm = TRUE)
+  }
 
-      if (scale_method == "global") {
-        y_surr <- as.numeric(base::scale(y_surr))
-      } else {
-        y_surr <- as.double(y_surr)
-      }
-
-      surr_cost_vector <- calc_wdtw_cpp(
-        x = x_cpp,
-        y = y_surr,
-        i_vals = i_vals_surr,
-        tau_vals = tau_vals_surr,
-        w_max = w_max_surr,
-        use_l2 = use_l2,
-        local_scale = local_scale
-      )
-
-      base::mean(surr_cost_vector, na.rm = TRUE)
-    },
-    FUN.VALUE = numeric(1),
-    future.seed = TRUE
+  # 3. Surrogate loop via shared engine
+  surrogate_costs <- run_surrogate_engine(
+    x = x_cpp, y_surrogates = y_surrogates, grid = grid,
+    compute_fn = wdtw_compute, fun_value = numeric(1)
   )
 
   p_val <- sum(surrogate_costs <= obs_cost) / n_surrogates
@@ -330,46 +309,38 @@ wgranger_surrogate <- function(
   obs_f_xy <- obs_wgranger$aggregate[["f_xy"]]
   obs_f_yx <- obs_wgranger$aggregate[["f_yx"]]
 
-  # 2. Setup structural grid
+  # 2. Setup structural grid (hoistable in M6 multiverse)
   grid <- build_surface_grid(
     n_x             = length(x),
     window_size      = window_size,
     window_increment = window_increment,
     lagged           = FALSE
   )
-  i_vals     <- grid$i_vals
-  w_max_surr <- grid$w_max
 
   x_cpp <- as.double(x)
 
-  # 3. Parallel-ready loop using future.apply (returns 2 values per iteration)
-  surr_matrix <- future.apply::future_vapply(
-    seq_len(n_surrogates),
-    function(idx) {
-      y_surr <- as.double(y_surrogates[, idx])
+  # aggregate-only compute_fn returning named numeric(2) (Invariant 7)
+  granger_compute <- function(xv, y_col, g) {
+    surr_stats <- calc_wgranger_cpp(
+      x = xv, y = as.double(y_col),
+      i_vals = g$i_vals, w_max = g$w_max, p = ar_order
+    )
+    c(
+      f_xy = base::mean(surr_stats$f_xy, na.rm = TRUE),
+      f_yx = base::mean(surr_stats$f_yx, na.rm = TRUE)
+    )
+  }
 
-      surr_stats <- calc_wgranger_cpp(
-        x = x_cpp,
-        y = y_surr,
-        i_vals = i_vals,
-        w_max = w_max_surr,
-        p = ar_order
-      )
-
-      c(
-        f_xy = base::mean(surr_stats$f_xy, na.rm = TRUE),
-        f_yx = base::mean(surr_stats$f_yx, na.rm = TRUE)
-      )
-    },
-    FUN.VALUE = numeric(2),
-    future.seed = TRUE
+  # 3. Surrogate loop via shared engine (returns 2 × n_surrogates matrix)
+  surr_matrix <- run_surrogate_engine(
+    x = x_cpp, y_surrogates = y_surrogates, grid = grid,
+    compute_fn = granger_compute, fun_value = numeric(2)
   )
 
-  # Extract the two rows into our separate numeric vectors
   surrogate_f_xy <- surr_matrix["f_xy", ]
   surrogate_f_yx <- surr_matrix["f_yx", ]
 
-  # 4. Calculate empirical p-values (STANDARD LOGIC)
+  # 4. Empirical p-values
   p_val_xy <- sum(surrogate_f_xy >= obs_f_xy) / n_surrogates
   p_val_yx <- sum(surrogate_f_yx >= obs_f_yx) / n_surrogates
 
