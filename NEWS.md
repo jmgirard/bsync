@@ -37,7 +37,10 @@
 
 * **Documentation polish**: the pkgdown navbar again exposes the "Get started"
   (`vignette("bsync")`) link; vignettes call the re-exported `tidy()` / `glance()`
-  verbs directly instead of the `generics::` prefix.
+  verbs directly instead of the `generics::` prefix. The downsampling vignette now
+  calls `plot()` on the `evaluate_signal_power()` result (the stale `$plot` list
+  access rendered no figure), and a `wdtw_surrogate()` doc reference to the removed
+  `$mean_distance` field was corrected to `$aggregate[["mean_distance"]]`.
 
 ## M6 — Parameter guidance & synchrony multiverse
 

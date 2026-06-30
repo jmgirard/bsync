@@ -64,7 +64,7 @@ single_eval <- evaluate_signal_power(
 )
 
 # View the diagnostic plot
-single_eval$plot
+plot(single_eval)
 ```
 
 ## Best Practice: Dataset-Level Evaluation
@@ -82,7 +82,7 @@ multi_eval <- evaluate_signal_power(
 )
 
 # View the dataset-level diagnostic plot
-multi_eval$plot
+plot(multi_eval)
 ```
 
 When provided with multiple signals, the function calculates the cutoff for each individual and then conservatively recommends the **95th percentile** of those cutoffs. This ensures you capture the meaningful behavioral data even for the participants with the fastest expressions.

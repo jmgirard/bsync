@@ -18,4 +18,5 @@ src/*.o
 src/*.so
 src/*.dll
 src/*.dylib
+Rplots.pdf
 tests/testthat/Rplots.pdf

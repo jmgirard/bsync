@@ -52,7 +52,7 @@ Calculate Surrogate Windowed Dynamic Time Warping (WDTW)
 The p-value is the proportion of surrogates whose aggregate statistic is **at most as
 large as** the observed statistic (lower DTW distance = better alignment). The aggregate
 is `mean(dtw_dist)` over all window × lag combinations — the same quantity stored in
-`wdtw_res$mean_distance` — computed identically on both the observed data and every
+`wdtw_res$aggregate[["mean_distance"]]` — computed identically on both the observed data and every
 surrogate, so the null distribution and the observed value are directly comparable.
 
 **`fast_method` warning:** when `fast_method = TRUE`, surrogates are evaluated at lag 0
