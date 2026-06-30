@@ -41,8 +41,9 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
 
 ## Completed milestones
 
-- **M1 — Correctness & robustness (done).** All six acceptance criteria met (commits
-  `741bf7c`–`3276b01` on `main`; 344 tests passing, 0 errors/warnings in `R CMD check`):
+- **M1 — Correctness & robustness (done).** All six acceptance criteria met; post-review fixes
+  applied (commits `741bf7c`–`ed5960f` on `main`; 349 tests passing, 0 errors/0 warnings/2 notes
+  in `R CMD check`; notes are M3 scope):
   1. `na.rm` honored in WCC: `calc_wcc_cpp` gains `na_rm` bool; `na.rm = FALSE` returns `NA` for
      any window containing `NA`; forwarded through `create_wcc_df()` and `wcc_surrogate()`. Both
      modes tested in `test-wcc.R`.
@@ -57,6 +58,9 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
   5. Condition style unified to `cli` in `R/impute.R` and `R/surrogate_generation.R`.
   6. `leadership_asymmetry()` roxygen states centered sliding-window semantics; `min_valid`
      validated; `suggest_wcc_params()` 4-cycles-per-window heuristic documented in `@details`.
+  Post-review: NEWS.md header fixed; OpenMP flags removed from Makevars pending M2 decision;
+  surrogate `@details` document null-statistic semantics and `fast_method` caveat; surrogate
+  robustness and p-value sanity tests added (349 total).
 
 ## Current focus
 
