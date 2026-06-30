@@ -67,7 +67,7 @@ plot.bsync_multiverse <- function(
       y = "Effect Size (ES)",
       title = paste0(
         "Synchrony Multiverse  --  ",
-        x$robustness$n_significant, " / ", x$robustness$n_cells,
+        x$robustness$n_significant, " / ", x$robustness$n_valid,
         " cells significant  |  Median ES = ",
         round(x$robustness$median_es, 2)
       )

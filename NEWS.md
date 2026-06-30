@@ -19,7 +19,14 @@
 * **New vignette** `vignettes/choosing-parameters.Rmd` documents the
   three-tool parameter guidance workflow: `suggest_wcc_params()` for a single
   dyad, `synchrony_multiverse()` for visualizing the specification curve, and
-  `autotune_wcc()` for multi-dyad datasets.
+  `autotune_wcc()` for multi-dyad datasets. The older `wcc-params` vignette is
+  removed; its content (including the window-overlap discussion) is folded into
+  the new guide.
+
+* `glance()` on a `bsync_multiverse` now reports both `n_cells` (total
+  specifications in the grid) and `n_valid` (cells that produced a computable
+  effect size); `pct_significant` is taken over `n_valid`. This disambiguates
+  the grid total from the number of cells actually evaluated.
 
 ### Phase A — Synchrony multiverse + suggest_wcc_params rework
 

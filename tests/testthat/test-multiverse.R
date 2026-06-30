@@ -83,32 +83,47 @@ test_that("AC1: lag_max cap is applied and reported per cell", {
 # AC2: Invariant 2 — matched-null and tail/ES polarity per estimator ----------
 # =============================================================================
 
-test_that("AC2: WCC — pass y as sole surrogate; surrogate_z == observed_z", {
-  # Invariant 2 cross-path: if the surrogate is identical to y, the surrogate
-  # aggregate equals the observed aggregate, so ES = 0.
+# Cross-path Invariant 2: when the sole surrogate IS y itself, the aggregate
+# computed on the surrogate must equal the aggregate computed on the observed
+# data (same statistic), so null_mean == observed. This exercises each
+# estimator's multiverse cell helper directly, proving the surrogate path uses
+# the matching statistic.
+
+test_that("AC2: WCC — matched null (sole surrogate = y) => null_mean == observed", {
   s <- make_test_series(n = 200)
-  set.seed(4)
-  # Build a surrogate matrix where the only column is y itself
-  y_surr_only <- matrix(s$y, ncol = 1)
-  obs_wcc <- wcc_surrogate(
+  y_surr <- matrix(s$y, ncol = 1)
+  for (stat in c("mean_abs_z", "peak")) {
+    cell <- bsync:::.mv_wcc_cell(
+      s$x, s$y,
+      window_size = 20L, lag_max = 5L, window_increment = 4L,
+      statistic = stat, na.rm = TRUE, y_surr = y_surr
+    )
+    expect_equal(cell$null_mean, cell$observed,
+      tolerance = 1e-9, info = paste("statistic:", stat)
+    )
+  }
+})
+
+test_that("AC2: WDTW — matched null (sole surrogate = y) => null_mean == observed", {
+  s <- make_test_series(n = 200)
+  y_surr <- matrix(s$y, ncol = 1)
+  cell <- bsync:::.mv_wdtw_cell(
     s$x, s$y,
-    y_surrogates = y_surr_only,
-    window_size = 20L, lag_max = 5L
+    window_size = 20L, lag_max = 5L, window_increment = 4L,
+    scale_method = "global", distance_metric = "L2", y_surr = y_surr
   )
-  # Now run multiverse with 1-cell grid using same series but real surrogates
-  # Focus: ES = (obs - null_mean)/null_sd with matching statistic
-  # Check that the statistic label in the grid matches what wcc_surrogate returns
-  set.seed(4)
-  res <- synchrony_multiverse(
+  expect_equal(cell$null_mean, cell$observed, tolerance = 1e-9)
+})
+
+test_that("AC2: Granger — matched null (sole surrogate = y) => null_mean == observed both ways", {
+  s <- make_test_series(n = 200)
+  y_surr <- matrix(s$y, ncol = 1)
+  cell <- bsync:::.mv_granger_cell(
     s$x, s$y,
-    estimator = "wcc", sample_rate = 10,
-    window_sec = 2, lag_sec = 0.5,
-    statistic = "mean_abs_z", n_surrogates = 19L
+    window_size = 20L, window_increment = 4L, ar_order = 1L, y_surr = y_surr
   )
-  # Observed should be non-negative (mean|z| ≥ 0)
-  expect_true(res$grid$observed[1] >= 0)
-  # ES is numeric
-  expect_type(res$grid$es[1], "double")
+  expect_equal(cell$null_mean, cell$observed, tolerance = 1e-9) # x -> y
+  expect_equal(cell$null_mean_yx, cell$observed_yx, tolerance = 1e-9) # y -> x
 })
 
 test_that("AC2: WDTW — ES uses lower-tail polarity (null_mean - obs) / null_sd", {

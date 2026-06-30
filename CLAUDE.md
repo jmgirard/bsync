@@ -216,6 +216,20 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
   replaced by heterogeneous-noise synthetic dyads (positive-signal controls with varying SNR).
   Non-ASCII characters in R code files (em-dash, en-dash, math symbols from roxygen) were the main
   R CMD check hurdle; `%` in multiline Rd `\item` content also required `\%` escaping.
+  Post-review fixes (550 tests; `R CMD check --as-cran` remains 0/0/0): (1) AC2 cross-path
+  Invariant-2 gap closed — the WCC test had dead code (built a sole-`y` surrogate but never
+  asserted); replaced with real matched-null tests on `.mv_wcc_cell`/`.mv_wdtw_cell`/
+  `.mv_granger_cell` (sole surrogate = `y` ⇒ `null_mean == observed`, both Granger directions),
+  polarity tests retained. (2) AC8 validation strengthened — `sim_dyad` regression now pins the
+  recommendation to the recovered 0.5 Hz cycle (`window_sec == 2`, `window_size == 160`,
+  `sig_rate == 1`, `median_es > 1.5`); a true uncoupled negative control (i.i.d. noise dyads) was
+  added asserting the detectability gate fails (warning fired, `sig_rate < 0.5`). (3) `n_cells`
+  naming disambiguated — `robustness` now carries `n_cells` (grid total) **and** `n_valid`
+  (computable cells); `print`/plot title/`glance()` updated (`glance` gains an `n_valid` column;
+  `pct_significant` is over `n_valid`). (4) `wcc-params` vignette dropped (superseded by
+  `choosing-parameters`; overlap discussion folded in, `wcc-workflow` link redirected). (5) clean
+  code-line wraps reduced line-length lints; remaining lints are cli strings/roxygen/idiomatic
+  predicates (package-wide style) and glue-variable `object_usage` false positives.
 
 ## Current focus
 

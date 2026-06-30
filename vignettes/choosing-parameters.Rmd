@@ -71,6 +71,17 @@ results <- wcc(
 )
 ```
 
+### Window overlap (`overlap_pct`)
+
+`suggest_wcc_params()` also derives a `window_increment` from `overlap_pct`, which
+controls how far the window shifts on each step:
+
+- **0% overlap** (`overlap_pct = 0`): the window jumps completely forward -- fastest,
+  but lowest temporal resolution.
+- **50-75% overlap** (the default `0.5`): a balanced choice for exploratory analysis.
+- **Increment of 1** (near-complete overlap): highest resolution, and feasible for
+  typical datasets because `bsync` uses a C++ prefix-sum core.
+
 ## 2. Visualizing the Specification Curve: `synchrony_multiverse()`
 
 A single parameter set is a single analytic choice. The synchrony multiverse shows you how your conclusion changes across the full grid of defensible choices. The headline metric is **effect size vs. the matched-null surrogate**, not raw synchrony (which autocorrelation inflates).

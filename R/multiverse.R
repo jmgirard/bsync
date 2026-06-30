@@ -80,9 +80,11 @@
 #'       (samples), `n_windows`, `observed`, `null_mean`, `null_sd`, `es`, `p`
 #'       (plus `es_yx`/`p_yx` for Granger).}
 #'     \item{`$settings`}{Named list of call-level inputs.}
-#'     \item{`$robustness`}{Named list: `n_cells`, `n_significant`,
-#'       `pct_significant`, `median_es`, `iqr_es`, `sign_consistent`
-#'       (proportion of significant cells with ES > 0).}
+#'     \item{`$robustness`}{Named list: `n_cells` (total specifications in the
+#'       grid), `n_valid` (cells that produced a computable ES; the rest were
+#'       skipped as too short), `n_significant`, `pct_significant` (over
+#'       `n_valid`), `median_es`, `iqr_es`, `sign_consistent` (proportion of
+#'       significant cells with ES > 0).}
 #'   }
 #' @seealso [autotune_wcc()], [suggest_wcc_params()], [plot.bsync_multiverse()],
 #'   [tidy.bsync_multiverse()], [glance.bsync_multiverse()]
@@ -105,7 +107,10 @@ synchrony_multiverse <- function(
   estimator <- match.arg(estimator)
   scale_method <- match.arg(scale_method)
   distance_metric <- match.arg(distance_metric)
-  statistic <- match.arg(statistic, choices = c("mean_abs_z", "peak"), several.ok = TRUE)
+  statistic <- match.arg(
+    statistic,
+    choices = c("mean_abs_z", "peak"), several.ok = TRUE
+  )
   surrogate_method <- match.arg(
     surrogate_method,
     choices = c("phase", "circular"), several.ok = TRUE
@@ -353,10 +358,15 @@ synchrony_multiverse <- function(
   n_sig <- sum(valid_p < 0.05, na.rm = TRUE)
 
   robustness <- list(
-    n_cells = n_valid,
-    n_significant = n_sig,
+    n_cells = n_cells, # total specifications in the grid
+    n_valid = n_valid, # cells that produced a computable ES (non-skipped)
+    n_significant = n_sig, # of valid cells, how many have p < .05
     pct_significant = if (n_valid > 0) n_sig / n_valid else NA_real_,
-    median_es = if (n_valid > 0) stats::median(valid_es, na.rm = TRUE) else NA_real_,
+    median_es = if (n_valid > 0) {
+      stats::median(valid_es, na.rm = TRUE)
+    } else {
+      NA_real_
+    },
     iqr_es = if (n_valid > 0) stats::IQR(valid_es, na.rm = TRUE) else NA_real_,
     sign_consistent = if (n_sig > 0) {
       mean(valid_es[valid_p < 0.05] > 0, na.rm = TRUE)
@@ -380,8 +390,8 @@ synchrony_multiverse <- function(
 # Per-estimator cell helpers ---------------------------------------------------
 
 #' @noRd
-.mv_wcc_cell <- function(x, y, window_size, lag_max, window_increment, statistic,
-                         na.rm, y_surr) {
+.mv_wcc_cell <- function(x, y, window_size, lag_max, window_increment,
+                         statistic, na.rm, y_surr) {
   surr_res <- wcc_surrogate(
     x = x, y = y,
     y_surrogates = y_surr,
@@ -395,7 +405,11 @@ synchrony_multiverse <- function(
   surr_vals <- surr_res$surrogate_z
   null_mean <- mean(surr_vals, na.rm = TRUE)
   null_sd <- stats::sd(surr_vals, na.rm = TRUE)
-  es <- if (!is.na(null_sd) && null_sd > 0) (obs - null_mean) / null_sd else NA_real_
+  es <- if (!is.na(null_sd) && null_sd > 0) {
+    (obs - null_mean) / null_sd
+  } else {
+    NA_real_
+  }
   p <- surr_res$p_value
   # n_windows via grid
   n_r <- build_surface_grid(
@@ -426,7 +440,11 @@ synchrony_multiverse <- function(
   null_mean <- mean(surr_vals, na.rm = TRUE)
   null_sd <- stats::sd(surr_vals, na.rm = TRUE)
   # WDTW: lower distance = better -> ES = (null_mean - obs) / null_sd
-  es <- if (!is.na(null_sd) && null_sd > 0) (null_mean - obs) / null_sd else NA_real_
+  es <- if (!is.na(null_sd) && null_sd > 0) {
+    (null_mean - obs) / null_sd
+  } else {
+    NA_real_
+  }
   # p = proportion of surrogates <= obs (lower tail)
   p <- surr_res$p_value
   n_r <- build_surface_grid(
@@ -441,7 +459,8 @@ synchrony_multiverse <- function(
 }
 
 #' @noRd
-.mv_granger_cell <- function(x, y, window_size, window_increment, ar_order, y_surr) {
+.mv_granger_cell <- function(x, y, window_size, window_increment, ar_order,
+                             y_surr) {
   surr_res <- wgranger_surrogate(
     x = x, y = y,
     y_surrogates = y_surr,
@@ -502,9 +521,9 @@ print.bsync_multiverse <- function(x, ...) {
 
   cli::cli_h1("Synchrony Multiverse Analysis ({s$estimator})")
   cli::cli_dl(c(
-    "Cells evaluated" = "{rb$n_cells}",
+    "Specifications" = "{rb$n_cells} ({rb$n_valid} computable)",
     "Surrogates per cell" = "{s$n_surrogates}",
-    "Cells significant (p < .05)" = "{rb$n_significant} ({round(rb$pct_significant * 100, 1)}%)",
+    "Significant (p < .05)" = "{rb$n_significant} of {rb$n_valid} ({round(rb$pct_significant * 100, 1)}%)",
     "Median ES" = "{round(rb$median_es, 3)} [IQR: {round(rb$iqr_es, 3)}]",
     "Sign-consistent (sig. cells)" = "{round(rb$sign_consistent * 100, 1)}%"
   ))

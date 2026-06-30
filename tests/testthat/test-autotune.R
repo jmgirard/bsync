@@ -37,8 +37,14 @@ test_that("autotune_wcc: structure and sanity on sim_dyad (regression)", {
   # Seconds conversion is consistent
   expect_equal(result$window_sec * 80, result$window_size, tolerance = 1)
 
-  # Effect size is positive (sim_dyad has real synchrony)
-  expect_true(result$median_es > 0)
+  # --- Regression pin (AC8): recommendation recovers the known timescale -----
+  # sim_dyad carries a 0.5 Hz (2 s cycle) coupling. With seed 2024 the engine
+  # selects the cycle-matched 2 s window and detects synchrony in every dyad.
+  # These pin the selection logic to the ground truth, not just sanity.
+  expect_equal(result$window_sec, 2) # recovers the 0.5 Hz cycle (2 s window)
+  expect_equal(result$window_size, 160L) # 2 s * 80 Hz
+  expect_equal(result$sig_rate, 1) # significant in all 3 dyads (gate passes)
+  expect_gt(result$median_es, 1.5) # strong detection (observed ~2.19)
 
   # Diagnostics in [0, 1]
   expect_true(result$sig_rate >= 0 && result$sig_rate <= 1)
@@ -84,6 +90,35 @@ test_that("autotune_wcc: stability test -- consistent ES across heterogeneous dy
   expect_true(result$window_size > 0)
   expect_true(result$lag_max > 0)
   expect_true(is.finite(result$score))
+})
+
+
+test_that("autotune_wcc: uncoupled negative control fails the detectability gate", {
+  skip_on_cran()
+
+  set.seed(101)
+  # Three dyads of independent white noise: no real synchrony to detect. The
+  # matched-null surrogate (phase randomization of i.i.d. noise) is
+  # statistically identical to the data, so no cell should clear the gate.
+  mk <- function() {
+    n <- 300
+    list(x = stats::rnorm(n), y = stats::rnorm(n))
+  }
+  dyad_list <- list(mk(), mk(), mk())
+
+  result <- NULL
+  expect_warning(
+    result <- autotune_wcc(
+      dyad_list    = dyad_list,
+      sample_rate  = 10,
+      window_sec   = c(1, 2),
+      lag_sec      = c(0.3, 0.5),
+      n_surrogates = 30L
+    ),
+    "detectability gate"
+  )
+  # The fallback cell is not detectable across dyads
+  expect_lt(result$sig_rate, 0.5)
 })
 
 

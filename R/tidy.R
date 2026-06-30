@@ -143,7 +143,8 @@ glance.bsync_multiverse <- function(x, ...) {
   rb <- x$robustness
   tibble::tibble(
     estimator       = x$settings$estimator,
-    n_cells         = rb$n_cells,
+    n_cells         = rb$n_cells, # total specifications in the grid
+    n_valid         = rb$n_valid, # cells with a computable (non-NA) ES
     n_significant   = rb$n_significant,
     pct_significant = rb$pct_significant,
     median_es       = rb$median_es,

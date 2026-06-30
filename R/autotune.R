@@ -149,7 +149,10 @@ autotune_wcc <- function(
   })
 
   # Apply selection rule
-  sel <- select_specification(mv_list, sig_pct = sig_pct, iqr_penalty = iqr_penalty)
+  sel <- select_specification(
+    mv_list,
+    sig_pct = sig_pct, iqr_penalty = iqr_penalty
+  )
   best <- sel$best_row
 
   # Assemble result
