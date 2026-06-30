@@ -42,11 +42,11 @@ wgranger <- function(
 
   out <- list(
     results_df = results_df,
-    aggregate  = c(
+    aggregate = c(
       f_xy = base::mean(results_df$f_xy, na.rm = TRUE),
       f_yx = base::mean(results_df$f_yx, na.rm = TRUE)
     ),
-    settings   = settings
+    settings = settings
   )
 
   new_bsync_surface(out, "wgranger_res")
@@ -110,10 +110,10 @@ summary.wgranger_res <- function(object, ...) {
 #' @noRd
 create_wgranger_df <- function(x, y, time = NULL, settings) {
   grid <- build_surface_grid(
-    n_x             = length(x),
-    window_size      = settings$window_size,
+    n_x = length(x),
+    window_size = settings$window_size,
     window_increment = settings$window_increment,
-    lagged           = FALSE
+    lagged = FALSE
   )
 
   stats_df <- calc_wgranger_cpp(x, y, grid$i_vals, grid$w_max, settings$ar_order)

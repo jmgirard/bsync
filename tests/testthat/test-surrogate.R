@@ -322,8 +322,10 @@ test_that("M4: peak p-value is small for coupled series, large for independent",
   n <- 100
   x_coupled <- sin(seq(0, 4 * pi, length.out = n))
   y_coupled <- x_coupled + rnorm(n, sd = 0.05)
-  y_surr_coupled <- generate_surrogate_circular(y_coupled, n_surrogates = 50,
-    lag_max = 5)
+  y_surr_coupled <- generate_surrogate_circular(y_coupled,
+    n_surrogates = 50,
+    lag_max = 5
+  )
 
   res_coupled <- wcc_surrogate(
     x_coupled, y_coupled,
@@ -337,8 +339,10 @@ test_that("M4: peak p-value is small for coupled series, large for independent",
   set.seed(456)
   x_indep <- rnorm(n)
   y_indep <- rnorm(n)
-  y_surr_indep <- generate_surrogate_circular(y_indep, n_surrogates = 50,
-    lag_max = 5)
+  y_surr_indep <- generate_surrogate_circular(y_indep,
+    n_surrogates = 50,
+    lag_max = 5
+  )
 
   res_indep <- wcc_surrogate(
     x_indep, y_indep,
@@ -375,7 +379,7 @@ test_that("AC4: run_surrogate_engine returns correct shape", {
   result <- run_surrogate_engine(x_cpp, y_surr, grid, compute_scalar, numeric(1))
   expect_true(is.numeric(result))
   expect_equal(length(result), 3L)
-  expect_false(is.data.frame(result))  # aggregate-only: no results_df
+  expect_false(is.data.frame(result)) # aggregate-only: no results_df
 })
 
 test_that("AC4: run_surrogate_engine supports named-numeric return (Granger-like)", {
@@ -409,7 +413,8 @@ test_that("AC4: WDTW cross-path Invariant-2 (y as its sole surrogate)", {
 
   res_obs <- wdtw(x, y, window_size = 96, lag_max = 10, scale_method = "none")
   res_surr <- wdtw_surrogate(
-    x, y, y_surrogates = y_self,
+    x, y,
+    y_surrogates = y_self,
     window_size = 96, lag_max = 10, scale_method = "none"
   )
 
@@ -429,7 +434,8 @@ test_that("AC4: Granger cross-path Invariant-2 (y as its sole surrogate)", {
 
   res_obs <- wgranger(x, y, window_size = 96)
   res_surr <- wgranger_surrogate(
-    x, y, y_surrogates = y_self,
+    x, y,
+    y_surrogates = y_self,
     window_size = 96
   )
 

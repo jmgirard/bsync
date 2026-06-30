@@ -179,8 +179,8 @@ wcc_peak <- wcc(
   statistic = "peak"
 )
 
-cat("mean_abs_z:", round(wcc_maz$fisher_z, 4), "\n")
-cat("peak:      ", round(wcc_peak$fisher_z, 4), "\n")
+cat("mean_abs_z:", round(wcc_maz$aggregate[[1]], 4), "\n")
+cat("peak:      ", round(wcc_peak$aggregate[[1]], 4), "\n")
 ```
 
 **Important:** Always pass the *same* `statistic` to `wcc_surrogate()` so that the null distribution is built with the same quantity as the observed value (see Section 4).
@@ -297,3 +297,44 @@ wcc_results |>
 By grouping the windows into local epochs (in this case, groups of 10 windows), the LAI function smooths over momentary frame-by-frame jitter to reveal the broader structural periods of dominance.
 
 The resulting plot tells the entire story of the interaction at a glance. The metric starts firmly at `1.0` (Person A leading), smoothly transitions down through zero during the uncorrelated lull, hits `-1.0` (Person B leading) right at the 30-second mark, and finally climbs back up to `1.0` as Person A re-enters the conversation.
+
+## 8. Tidy Interface
+
+All **bsync** estimator results support a tidy workflow via `tidy()`, `glance()`, and `as_tibble()`.
+
+```{r tidy-interface}
+# One row per surface cell (full windowed results_df as a tibble)
+surface_tbl <- generics::tidy(wcc_results)
+head(surface_tbl)
+
+# One-row summary: aggregate statistic(s) + key settings
+generics::glance(wcc_results)
+```
+
+`glance()` is especially useful for comparing several runs in a single data frame:
+
+```{r glance-compare}
+wcc_maz2 <- wcc(
+  x = dyad_data$person_A,
+  y = dyad_data$person_B,
+  time = dyad_data$time,
+  window_size = 90,
+  lag_max = 45,
+  window_increment = 30,
+  statistic = "mean_abs_z"
+)
+wcc_peak2 <- wcc(
+  x = dyad_data$person_A,
+  y = dyad_data$person_B,
+  time = dyad_data$time,
+  window_size = 90,
+  lag_max = 45,
+  window_increment = 30,
+  statistic = "peak"
+)
+
+dplyr::bind_rows(
+  generics::glance(wcc_maz2),
+  generics::glance(wcc_peak2)
+)
+```

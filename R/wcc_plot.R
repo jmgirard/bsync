@@ -22,9 +22,9 @@ plot.wcc_res <- function(
   ...
 ) {
   build_surface_heatmap(
-    df             = x$results_df,
-    fill_col       = "wcc",
-    fill_scale     = ggplot2::scale_fill_gradient2(
+    df = x$results_df,
+    fill_col = "wcc",
+    fill_scale = ggplot2::scale_fill_gradient2(
       low      = color_low,
       mid      = color_mid,
       high     = color_high,
@@ -33,9 +33,9 @@ plot.wcc_res <- function(
       na.value = "grey80",
       name     = "WCC (r)"
     ),
-    has_time       = isTRUE(x$settings$has_time),
-    time_step      = time_step,
-    show_zero_lag  = show_zero_lag,
+    has_time = isTRUE(x$settings$has_time),
+    time_step = time_step,
+    show_zero_lag = show_zero_lag,
     zero_line_color = zero_line_color
   )
 }

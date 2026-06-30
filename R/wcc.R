@@ -228,16 +228,16 @@ summary.wcc_res <- function(object, ...) {
 #' @noRd
 create_wcc_df <- function(x, y, time = NULL, settings) {
   grid <- build_surface_grid(
-    n_x             = length(x),
-    window_size      = settings$window_size,
+    n_x = length(x),
+    window_size = settings$window_size,
     window_increment = settings$window_increment,
-    lag_max          = settings$lag_max,
-    lag_increment    = settings$lag_increment,
-    lagged           = TRUE
+    lag_max = settings$lag_max,
+    lag_increment = settings$lag_increment,
+    lagged = TRUE
   )
 
   results_df <- data.frame(
-    i   = grid$i_vals,
+    i = grid$i_vals,
     tau = grid$tau_vals,
     wcc = calc_wcc_cpp(
       x        = x,

@@ -16,15 +16,15 @@ plot.wdtw_res <- function(
   ...
 ) {
   build_surface_heatmap(
-    df            = x$results_df,
-    fill_col      = "dtw_dist",
-    fill_scale    = ggplot2::scale_fill_gradientn(
+    df = x$results_df,
+    fill_col = "dtw_dist",
+    fill_scale = ggplot2::scale_fill_gradientn(
       colors    = grDevices::hcl.colors(100, "viridis", rev = TRUE),
       na.value  = "grey80",
       name      = "DTW Distance"
     ),
-    has_time      = isTRUE(x$settings$has_time),
-    time_step     = time_step,
+    has_time = isTRUE(x$settings$has_time),
+    time_step = time_step,
     show_zero_lag = show_zero_lag,
     zero_line_color = zero_line_color
   )

@@ -61,7 +61,7 @@ tidy.bsync_surface <- function(x, ...) {
 #' @seealso [tidy.bsync_surface()], [as_tibble.bsync_surface()]
 #' @exportS3Method generics::glance bsync_surface
 glance.bsync_surface <- function(x, ...) {
-  agg <- as.list(x$aggregate)  # names preserved; scalar or two-element list
+  agg <- as.list(x$aggregate) # names preserved; scalar or two-element list
   cfg <- x$settings
 
   # n_windows is not stored in settings; derive from the surface
@@ -74,24 +74,21 @@ glance.bsync_surface <- function(x, ...) {
   # Common fields available on every surface
   common <- list(
     n_windows        = n_unique_i,
-    window_size      = cfg$window_size %||% NA_integer_,
+    window_size      = cfg$window_size %||% NA_integer_,   # rlang::`%||%`
     window_increment = cfg$window_increment %||% NA_integer_
   )
 
   # Estimator-specific settings from $settings (keys vary by estimator)
   extra <- list()
-  if (!is.null(cfg$lag_max))   extra$lag_max   <- cfg$lag_max
+  if (!is.null(cfg$lag_max)) extra$lag_max <- cfg$lag_max
   if (!is.null(cfg$lag_increment)) extra$lag_increment <- cfg$lag_increment
-  if (!is.null(cfg$statistic)) extra$statistic  <- cfg$statistic
+  if (!is.null(cfg$statistic)) extra$statistic <- cfg$statistic
   if (!is.null(cfg$scale_method)) extra$scale_method <- cfg$scale_method
   if (!is.null(cfg$distance_metric)) extra$distance_metric <- cfg$distance_metric
-  if (!is.null(cfg$ar_order))  extra$ar_order   <- cfg$ar_order
+  if (!is.null(cfg$ar_order)) extra$ar_order <- cfg$ar_order
 
   tibble::as_tibble(c(agg, common, extra))
 }
-
-# Null-coalescing helper (base R, no rlang dep needed here)
-`%||%` <- function(x, y) if (!is.null(x)) x else y
 
 
 # as_tibble() -----------------------------------------------------------------

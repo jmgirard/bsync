@@ -403,8 +403,10 @@ test_that("M4: peak statistic is unaffected by time remapping", {
   t_vec <- seq(0, by = 1 / 30, length.out = length(x))
 
   res_no_time <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "peak")
-  res_with_time <- wcc(x, y, time = t_vec, window_size = 96, lag_max = 10,
-    statistic = "peak")
+  res_with_time <- wcc(x, y,
+    time = t_vec, window_size = 96, lag_max = 10,
+    statistic = "peak"
+  )
 
   expect_equal(res_with_time$aggregate[[1]], res_no_time$aggregate[[1]])
 })

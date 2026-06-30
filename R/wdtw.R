@@ -104,20 +104,20 @@ print.wdtw_res <- function(x, ...) {
 #' @noRd
 create_wdtw_df <- function(x, y, time = NULL, settings) {
   grid <- build_surface_grid(
-    n_x             = length(x),
-    window_size      = settings$window_size,
+    n_x = length(x),
+    window_size = settings$window_size,
     window_increment = settings$window_increment,
-    lag_max          = settings$lag_max,
-    lag_increment    = settings$lag_increment,
-    lagged           = TRUE
+    lag_max = settings$lag_max,
+    lag_increment = settings$lag_increment,
+    lagged = TRUE
   )
 
   use_l2 <- settings$distance_metric == "L2"
   local_scale <- settings$scale_method == "local"
 
   results_df <- data.frame(
-    i        = grid$i_vals,
-    tau      = grid$tau_vals,
+    i = grid$i_vals,
+    tau = grid$tau_vals,
     dtw_dist = calc_wdtw_cpp(
       x           = x,
       y           = y,

@@ -74,12 +74,12 @@ wcc_surrogate <- function(
 
   # 2. Build the structural grid ONCE (hoistable in M6 multiverse)
   grid <- build_surface_grid(
-    n_x             = length(x),
-    window_size      = window_size,
+    n_x = length(x),
+    window_size = window_size,
     window_increment = window_increment,
-    lag_max          = lag_max,
-    lag_increment    = lag_increment,
-    lagged           = TRUE
+    lag_max = lag_max,
+    lag_increment = lag_increment,
+    lagged = TRUE
   )
 
   x_cpp <- as.double(x)
@@ -197,14 +197,14 @@ wdtw_surrogate <- function(
   if (fast_method) {
     # Fast path: surrogates evaluated at lag=0 only (approximate — see @details)
     grid_fast <- build_surface_grid(
-      n_x             = length(x),
-      window_size      = window_size,
+      n_x = length(x),
+      window_size = window_size,
       window_increment = window_increment,
-      lagged           = FALSE
+      lagged = FALSE
     )
     # The lag-free grid starts at i=1; shift by lag_max so windows align with
     # the observed surface which reserves lag_max samples at each edge.
-    grid_fast$i_vals  <- grid_fast$i_vals + lag_max
+    grid_fast$i_vals <- grid_fast$i_vals + lag_max
     grid_fast$tau_vals <- rep(0L, grid_fast$n_r)
     grid <- grid_fast
     cli::cli_alert_info(
@@ -212,12 +212,12 @@ wdtw_surrogate <- function(
     )
   } else {
     grid <- build_surface_grid(
-      n_x             = length(x),
-      window_size      = window_size,
+      n_x = length(x),
+      window_size = window_size,
       window_increment = window_increment,
-      lag_max          = lag_max,
-      lag_increment    = lag_increment,
-      lagged           = TRUE
+      lag_max = lag_max,
+      lag_increment = lag_increment,
+      lagged = TRUE
     )
   }
 
@@ -311,10 +311,10 @@ wgranger_surrogate <- function(
 
   # 2. Setup structural grid (hoistable in M6 multiverse)
   grid <- build_surface_grid(
-    n_x             = length(x),
-    window_size      = window_size,
+    n_x = length(x),
+    window_size = window_size,
     window_increment = window_increment,
-    lagged           = FALSE
+    lagged = FALSE
   )
 
   x_cpp <- as.double(x)

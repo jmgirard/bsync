@@ -215,8 +215,10 @@ test_that("AC6: glance.bsync_surface — Granger has f_xy and f_yx columns", {
 
 test_that("AC6: glance() outputs from two runs can be bound into a tibble", {
   res1 <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
-  res2 <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10,
-              statistic = "peak")
+  res2 <- wcc(sim_dyad$x_A, sim_dyad$x_B,
+    window_size = 96, lag_max = 10,
+    statistic = "peak"
+  )
   combined <- dplyr::bind_rows(generics::glance(res1), generics::glance(res2))
 
   expect_equal(nrow(combined), 2L)
