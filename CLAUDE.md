@@ -222,6 +222,26 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
   the M5-removed `$mean_distance` field corrected to `$aggregate[["mean_distance"]]`. (4) vignettes
   call the re-exported `tidy()`/`glance()` verbs directly instead of the `generics::` prefix. (5)
   root-level `Rplots.pdf` added to `.gitignore`.
+  Second post-review pass (commits `4def838`–`575295f`, 564 tests / 171 blocks, `R CMD check
+  --as-cran` remains 0/0/0): (a) `cran-comments.md` + this M7 entry reconciled to the now-deployed
+  pkgdown site (live `articles/bsync.html`, `urlchecker` clean), and the stale "6,000 rows" note
+  fixed to 2,400. (b) Test suite sped up ~4x (285s -> 73s) by hoisting the shared full-series
+  estimator surfaces in `test-surface.R` to file-scope read-only fixtures (one WDTW build, not five)
+  and slicing the three length-independent WDTW Invariant-2/structure tests in `test-surrogate.R` to
+  600 samples; the frozen numeric anchors (AC1 characterization, the 91/99 & 83/99 reproducibility
+  guard, external-oracle goldens) are untouched. (c) Runnable `@examples` on `sim_dyad` added to
+  every exported function (closing the long-standing "examples ... NONE"); heavy ones (`wdtw`, the
+  three `*_surrogate` wrappers, `synchrony_multiverse`, `autotune_wcc`, `select_specification`)
+  wrapped in `\donttest{}` and trimmed to short subsets / small surrogate counts so each runs in a
+  few seconds under `--run-donttest`. (d) Example rendering surfaced a real portability bug: the
+  non-ASCII "Lag (tau)" surface-plot axis label (`τ`) *errors* in grid's text-bounds on a
+  non-UTF-8 graphics device; relabeled to ASCII "Lag (tau)" with the 6 label assertions and 3 vdiffr
+  snapshots regenerated. (e) `suggest_wcc_params()` example switched to `sim_dyad$z_A`/`z_B` (the
+  coupled channel; the `x` channel floored to the 20-sample minimum with two warnings), and its
+  docs/console message corrected to describe the PSD *power-cutoff* timescale (not "dominant" cycle)
+  — a deliberate robustness choice documented with its rationale; the `choosing-parameters` vignette's
+  worked numbers were corrected to match (PSD path -> 256-sample window; the 640 figure is the
+  `event_duration_sec = 2` theory override). No estimator numerics changed in any of this.
 
 - **M6 — Parameter guidance & synchrony multiverse (done).** All nine acceptance criteria met
   (commits `026b2f4`–`bb5f6bc` on `main`; 542 tests passing, 0 errors/0 warnings/0 notes in
