@@ -85,10 +85,34 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
 ## Current focus
 
 **Hardening cycle toward a near-term CRAN submission**, run as four focused milestones via the
-plan → implement → review loop. **M3 is next.**
+plan → implement → review loop. **M3 is active.**
 
-- **M3 — CRAN readiness.** Untrack build artifacts; clean `.gitignore`/`.Rbuildignore`; regenerate
-  `RcppExports`; `R CMD check --as-cran` → 0/0/0; README/pkgdown pass.
+- **M3 — CRAN readiness (active).** Make the package `R CMD check --as-cran`-clean and submission-
+  ready *locally* (no upload this milestone). No C++ core numerics change — only `RcppExports` is
+  regenerated to confirm zero diff, so Invariant 5 (numerical-regression oracle) is **not**
+  triggered. Decisions settled at plan time: keep version `0.0.0.9000` (bump only at real
+  submission); **defer** `cran-comments.md` to submission; **refresh** the DESCRIPTION Description to
+  cover the full estimator set. `bench/` not required (no efficiency work). Acceptance criteria:
+  1. **No tracked build artifacts.** `git rm --cached` the slipped-in files (`.DS_Store`,
+     `tests/.DS_Store`, `src/*.o`, `src/bsync.{so,dll}`, `tests/testthat/Rplots.pdf`); extend
+     `.gitignore` with `*.o`/`*.so`/`*.dll`/`*.dylib`/`Rplots.pdf` so they cannot re-slip.
+     `git ls-files` returns none of those patterns. Keep `bsync.Rproj`/`LICENSE.md` (already
+     `.Rbuildignore`'d, not artifacts).
+  2. **`RcppExports` regenerates clean.** `Rcpp::compileAttributes()` yields zero diff in
+     `src/RcppExports.cpp` / `R/RcppExports.R`; no core numerics changed (Invariant 5 untriggered).
+  3. **`\value` everywhere required.** Add `@return` roxygen to the 18 exported `print`/`plot`/
+     `summary` methods + `plot_optima_overlay` (in `R/wcc.R`, `R/wdtw.R`, `R/wgranger.R`,
+     `R/optima.R`, `R/leadership.R`, `R/signal_power.R`); re-document. Only `sim_dyad` (data) and
+     `bsync-package` (overview) legitimately omit `\value`.
+  4. **`R CMD check --as-cran` = 0/0/0**, all examples runnable (`\donttest{}` only where runtime
+     forces it, justified — likely surrogate/autotune), no filesystem side effects.
+  5. **URLs + spelling clean.** `urlchecker::url_check()` passes; `spelling::spell_check_package()`
+     clean (genuine terms in `inst/WORDLIST`). Both run ad hoc — not added to deps.
+  6. **README + pkgdown build.** `devtools::build_readme()` regenerates `README.md` from
+     `README.Rmd`; `pkgdown::check_pkgdown()` passes; DESCRIPTION Description reflects WDTW, windowed
+     Granger, optima/leadership, and phase+circular surrogates.
+  7. **353 tests still green**; vdiffr snapshots unchanged; styler/air + lintr clean; NEWS.md gains
+     an M3 entry.
 - **M4 — Selectable WCC aggregate statistic.** `statistic = c("mean_abs_z","peak")` on `wcc()` +
   `wcc_surrogate()`; null matches observed; vignette documents the choice.
 
