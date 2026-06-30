@@ -24,9 +24,9 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/choosing-parameters.html">Choosing WCC Parameters</a></li>
+    <li><a class="dropdown-item" href="../articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
     <li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
-    <li><a class="dropdown-item" href="../articles/wcc-params.html">WCC Parameters</a></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
     <li><a class="dropdown-item" href="../articles/wgranger-workflow.html">Windowed Granger Causality</a></li>
@@ -128,10 +128,10 @@ windows when calculating windowed cross-correlations. (default = `TRUE`)</p></dd
 <dt id="arg-statistic">statistic<a class="anchor" aria-label="anchor" href="#arg-statistic"></a></dt>
 <dd><p>A character string specifying how to aggregate the WCC
 surface into a single number. `"mean_abs_z"` (default) takes the mean of
-absolute Fisher's Z values over **all** windows and lags — the SUSY *mean
+absolute Fisher's Z values over **all** windows and lags – the SUSY *mean
 absolute Z* (Tschacher &amp; Meier, 2020). `"peak"` takes the maximum absolute
 Fisher's Z across lags **within each window**, then averages those per-window
-peaks — the rMEA *best-lag* convention (Boker et al., 2002). Both are
+peaks – the rMEA *best-lag* convention (Boker et al., 2002). Both are
 larger-is-more-synchrony quantities. Pass the same value to
 `wcc_surrogate()` so the null distribution matches (see Invariant 2).</p></dd>
 

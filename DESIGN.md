@@ -460,35 +460,36 @@ M12); segment-shuffling surrogates a candidate alongside.
     reproducible; revisit only if a future estimator has a genuinely
     parallelisable inner loop that prefix sums cannot collapse.
 
-10. **Parameter selection** → no single “correct” WCC parameter set
-    exists; the optimum is a function of the signal’s own timescales
-    (autocorrelation, spectral content), which is why published advice
-    contradicts across clean-oscillatory vs. noisy-biological data.
-    **Resolution (roadmap M6, after the M5 framework) — one engine,
-    three read-outs:** `synchrony_multiverse()` is the grid +
-    matched-null-surrogate engine (headline metric = ES vs. null, not
-    raw synchrony, which autocorrelation inflates);
+10. **Parameter selection** → **resolved (M6).** No single “correct” WCC
+    parameter set exists; the optimum is a function of the signal’s own
+    timescales. Three read-outs on the shared M5 engine: (a)
+    `suggest_wcc_params(x, y, sample_rate, ...)` is the PSD-data-driven
+    starting point for a single dyad (4-cycles heuristic + three hard
+    SUSY constraints enforced and warned); (b)
+    [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
+    sweeps a seconds-specified grid with matched-null surrogates per
+    cell and returns a `bsync_multiverse` object with a Simonsohn-style
+    specification-curve plot; (c) `autotune_wcc(dyad_list, ...)` is a
+    thin wrapper over
+    [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md) +
+    the gated stability-penalized
+    [`select_specification()`](https://jmgirard.github.io/bsync/reference/select_specification.md)
+    rule (detectability gate: significant in \>= 50% of dyads; score:
+    `median(ES) - 0.5 * IQR(ES)`). All three validated against
+    `sim_dyad`;
     [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
-    becomes a thin wrapper = multiverse + a selection rule
-    (detectability + cross-dyad stability, not bare ES-`which.max`),
-    validated with a `sim_dyad` regression test;
+    and
     [`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)
-    stays the single PSD-data-driven starting point with the SUSY
-    constraints enforced/reported. The matched-null surrogate (Inv. 2)
-    is the principled defense against autocorrelation-driven spurious
-    cross-correlation. Sequencing: the
-    [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
-    validation lands in M6, which precedes the M7 first CRAN release —
-    so no unverified tuner ever ships. **Efficiency seam (decided M5,
-    exploited M6):** surrogate *generation* stays decoupled from
-    surrogate *analysis* (the pre-generated `y_surrogates` matrix
+    confirmed on the 0.5 Hz synchrony structure. **Efficiency seam
+    (decided M5, exploited M6):** surrogate *generation* stays decoupled
+    from surrogate *analysis* (the pre-generated `y_surrogates` matrix
     interface), and the M5 `run_surrogate_engine()` accepts a prebuilt
     grid + prebuilt surrogate matrix and exposes an aggregate-only path
-    (core → aggregate, no per-cell `results_df`). This is what keeps the
-    multiverse affordable: surrogates of `y` depend only on
+    (core -\> aggregate, no per-cell `results_df`). This is what keeps
+    the multiverse affordable: surrogates of `y` depend only on
     `surrogate_method`, not on `window_size`/`lag_max`/increment, so one
     surrogate matrix is generated per method and reused across every
-    parameter cell that shares it — collapsing the dominant cost by the
+    parameter cell that shares it – collapsing the dominant cost by the
     size of the parameter grid. The heavy inner compute remains the M2
     prefix-sum C++ core; M5/M6 add only R orchestration over it,
     parallelized via `future.apply`.
@@ -569,20 +570,20 @@ building.
     headline metric is **ES (vs. matched null), not raw synchrony**,
     because raw mean\|Z\| rises mechanically with window length /
     autocorrelation while ES is the robust quantity.
-    - 1.  **`synchrony_multiverse()` (the engine + headline).** Run a
-          windowed estimator across a grid of analytic choices —
-          `window_size`, `lag_max` (hard-capped at `window/2`),
-          `window_increment`, `statistic` (M4), `surrogate_method`;
-          prewhitening is a documented *future* axis (it interacts with
-          the surrogate choice) — over a single dyad or a `dyad_list`
-          (autotune’s multi-dyad convention). Per cell: observed
-          aggregate + matched-null surrogate → ES + p (Inv. 2 reused).
-          Returns a light `bsync_multiverse` object (Inv. 7): a **tidy**
-          grid (one row per cell × dyad:
-          window/lag/increment/statistic/method, observed, null_mean,
-          null_sd, ES, p, n_windows) + `settings` + a robustness summary
-          (% specs significant, median ES \[IQR\], sign-consistency); no
-          raw surrogate draws, no raw input.
+    - 1.  **[`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
+          (the engine + headline).** Run a windowed estimator across a
+          grid of analytic choices — `window_size`, `lag_max`
+          (hard-capped at `window/2`), `window_increment`, `statistic`
+          (M4), `surrogate_method`; prewhitening is a documented
+          *future* axis (it interacts with the surrogate choice) — over
+          a single dyad or a `dyad_list` (autotune’s multi-dyad
+          convention). Per cell: observed aggregate + matched-null
+          surrogate → ES + p (Inv. 2 reused). Returns a light
+          `bsync_multiverse` object (Inv. 7): a **tidy** grid (one row
+          per cell × dyad: window/lag/increment/statistic/method,
+          observed, null_mean, null_sd, ES, p, n_windows) + `settings` +
+          a robustness summary (% specs significant, median ES \[IQR\],
+          sign-consistency); no raw surrogate draws, no raw input.
           `print`/`summary`/`tidy`/`as_tibble`/`glance` (M5 `generics`)
 
       - a **specification-curve `plot`** (Simonsohn-style: specs sorted
@@ -667,9 +668,10 @@ building.
     pipeline (list / nested frame in, per-dyad surfaces out) +
     aggregation / mixed-model summaries across many dyads, reusing the
     [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
-    / `synchrony_multiverse()` dyad-list conventions; the `mvSUSY`
-    multivariate-synchrony measures are the reference for the \>2-series
-    case.
+    /
+    [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
+    dyad-list conventions; the `mvSUSY` multivariate-synchrony measures
+    are the reference for the \>2-series case.
 12. **M12 — Expanded surrogate generators.** Three new generators wired
     through the matched-null engine (Inv. 2), making bsync’s nulls
     comparable to SUSY/rMEA: **IAAFT** (Schreiber & Schmitz

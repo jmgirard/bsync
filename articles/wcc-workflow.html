@@ -39,9 +39,9 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
+<li><a class="dropdown-item" href="../articles/choosing-parameters.html">Choosing WCC Parameters</a></li>
+    <li><a class="dropdown-item" href="../articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
     <li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
-    <li><a class="dropdown-item" href="../articles/wcc-params.html">WCC Parameters</a></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
     <li><a class="dropdown-item" href="../articles/wgranger-workflow.html">Windowed Granger Causality</a></li>
@@ -87,8 +87,10 @@ find the highest Pearson correlation.</p>
 <p><strong>Note on Parameter Selection:</strong> Selecting the right
 window size and lag parameters is critical for a valid analysis. Before
 running your own data, we highly recommend reading the
-<code><a href="../articles/wcc-params.html">vignette("wcc-params")</a></code> guide to learn how to use the
-<code><a href="../reference/suggest_wcc_params.html">suggest_wcc_params()</a></code> helper function.</p>
+<code><a href="../articles/choosing-parameters.html">vignette("choosing-parameters")</a></code> guide to learn how to use
+the <code><a href="../reference/suggest_wcc_params.html">suggest_wcc_params()</a></code>,
+<code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code>, and <code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code>
+helpers.</p>
 </blockquote>
 <div class="section level2">
 <h2 id="what-is-windowed-cross-correlation">1. What is Windowed Cross-Correlation?<a class="anchor" aria-label="anchor" href="#what-is-windowed-cross-correlation"></a>

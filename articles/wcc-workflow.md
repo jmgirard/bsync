@@ -13,10 +13,13 @@ find the highest Pearson correlation.
 > **Note on Parameter Selection:** Selecting the right window size and
 > lag parameters is critical for a valid analysis. Before running your
 > own data, we highly recommend reading the
-> [`vignette("wcc-params")`](https://jmgirard.github.io/bsync/articles/wcc-params.md)
+> [`vignette("choosing-parameters")`](https://jmgirard.github.io/bsync/articles/choosing-parameters.md)
 > guide to learn how to use the
-> [`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)
-> helper function.
+> [`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md),
+> [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md),
+> and
+> [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+> helpers.
 
 ## 1. What is Windowed Cross-Correlation?
 

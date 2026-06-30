@@ -1,0 +1,215 @@
+# Choosing WCC Parameters
+
+``` r
+
+library(bsync)
+```
+
+## The Parameter-Selection Problem
+
+There is no single “correct” set of WCC hyperparameters. The optimal
+window size and lag ceiling depend on the timescale of the behavior you
+are measuring, and those timescales vary enormously: a mother-infant
+gaze interaction unfolds on a completely different timescale than a
+high-speed athletic exchange.
+
+This vignette shows three tools `bsync` provides to address this
+problem, in order from quick-and-informed to thorough-and-multi-dyad:
+
+1.  **[`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)**
+    — PSD-based starting values for a single dyad.
+2.  **[`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)**
+    — sweep the full parameter grid and see the specification curve.
+3.  **[`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)**
+    — automatically select parameters that generalize across a dyad
+    dataset.
+
+## 1. Data-Driven Starting Values: `suggest_wcc_params()`
+
+When you have a representative series in hand, let the signal tell you
+its own dominant timescale via power spectral density (PSD):
+
+``` r
+
+fs <- 80 # sampling rate of sim_dyad (Hz)
+
+params <- suggest_wcc_params(
+  x           = sim_dyad$z_A,
+  y           = sim_dyad$z_B,
+  sample_rate = fs
+)
+```
+
+The PSD identifies the 0.5 Hz dominant cycle (~2 s period). The
+4-cycles-per-window heuristic (Boker et al., 2002) then gives
+`window_size = round(2 * 4 * 80) = 640 samples`, subject to the hard
+constraints (see
+[`?suggest_wcc_params`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)).
+
+If you already know the behavioral timescale from theory, pass it
+directly:
+
+``` r
+
+params_expert <- suggest_wcc_params(
+  x                  = sim_dyad$z_A,
+  y                  = sim_dyad$z_B,
+  sample_rate        = fs,
+  event_duration_sec = 2 # 0.5 Hz cycle = 2 s
+)
+```
+
+Either way, plug the result directly into
+[`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md):
+
+``` r
+
+results <- wcc(
+  x                = sim_dyad$z_A,
+  y                = sim_dyad$z_B,
+  window_size      = params$window_size,
+  lag_max          = params$lag_max,
+  window_increment = params$window_increment,
+  lag_increment    = params$lag_increment
+)
+```
+
+### Window overlap (`overlap_pct`)
+
+[`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)
+also derives a `window_increment` from `overlap_pct`, which controls how
+far the window shifts on each step:
+
+- **0% overlap** (`overlap_pct = 0`): the window jumps completely
+  forward – fastest, but lowest temporal resolution.
+- **50-75% overlap** (the default `0.5`): a balanced choice for
+  exploratory analysis.
+- **Increment of 1** (near-complete overlap): highest resolution, and
+  feasible for typical datasets because `bsync` uses a C++ prefix-sum
+  core.
+
+## 2. Visualizing the Specification Curve: `synchrony_multiverse()`
+
+A single parameter set is a single analytic choice. The synchrony
+multiverse shows you how your conclusion changes across the full grid of
+defensible choices. The headline metric is **effect size vs. the
+matched-null surrogate**, not raw synchrony (which autocorrelation
+inflates).
+
+``` r
+
+# Sweep window sizes from 0.5 s to 4 s and lag from 0.5 s to 1 s
+mv <- synchrony_multiverse(
+  x            = sim_dyad$z_A,
+  y            = sim_dyad$z_B,
+  estimator    = "wcc",
+  sample_rate  = 80,
+  window_sec   = c(0.5, 1, 2, 4),
+  lag_sec      = c(0.5, 1),
+  n_surrogates = 100L
+)
+
+glance(mv) # robustness summary
+plot(mv) # specification curve
+```
+
+The specification curve (top panel) shows effect sizes sorted by
+magnitude; the choice dashboard (bottom panel) reveals which analytic
+choices drive the result. If synchrony is robust, most cells should be
+significant regardless of the specific hyperparameters.
+
+## 3. Multi-Dyad Parameter Selection: `autotune_wcc()`
+
+When you have a dataset of multiple dyads,
+[`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+selects parameters that are both detectable (significant vs. the null in
+many dyads) and stable (consistent across dyads with different signal
+characteristics).
+
+``` r
+
+# Simulate a dataset: three dyads sharing the same 0.5 Hz synchrony structure
+set.seed(42)
+dyad_list <- replicate(
+  3,
+  list(x = sim_dyad$z_A, y = sim_dyad$z_B),
+  simplify = FALSE
+)
+
+best <- autotune_wcc(
+  dyad_list    = dyad_list,
+  sample_rate  = 80,
+  window_sec   = c(1, 2, 4),
+  lag_sec      = c(0.5, 1),
+  n_surrogates = 100L
+)
+
+# Plug the result directly into wcc()
+results <- wcc(
+  x                = sim_dyad$z_A,
+  y                = sim_dyad$z_B,
+  window_size      = best$window_size,
+  lag_max          = best$lag_max,
+  window_increment = best$window_increment,
+  lag_increment    = best$lag_increment
+)
+```
+
+### How the selection rule works
+
+[`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+applies a two-stage rule:
+
+1.  **Detectability gate.** A parameter cell must be significant (p \<
+    .05 vs. the matched-null surrogate) in at least `sig_pct` (default
+    50%) of dyads. Cells that fail this gate are excluded.
+
+2.  **Stability-penalized score.** Among gated cells, the score is
+    `median(ES) - iqr_penalty * IQR(ES)`. This rewards high median ES
+    but penalizes spread, so a parameter set that is consistent across
+    dyads beats one that is spectacular for one dyad but weak for
+    others.
+
+If no cell passes the gate (insufficient data or too few surrogates), a
+warning is issued and the highest-median-ES cell is returned as a
+fallback.
+
+### Choosing the grid to sweep
+
+Start with a range informed by
+[`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)
+on a representative dyad. A practical workflow:
+
+``` r
+
+# Step 1: get a data-driven starting point
+params <- suggest_wcc_params(
+  x           = sim_dyad$z_A,
+  y           = sim_dyad$z_B,
+  sample_rate = 80
+)
+
+# Step 2: build a grid around that starting point
+w_base <- params$window_size / 80 # convert to seconds
+grid_windows <- unique(round(w_base * c(0.5, 1, 2), 1))
+grid_lags <- unique(round(grid_windows / 2, 1))
+
+# Step 3: autotune across dyads
+best <- autotune_wcc(
+  dyad_list = dyad_list,
+  sample_rate = 80,
+  window_sec = grid_windows,
+  lag_sec = grid_lags,
+  n_surrogates = 200L
+)
+```
+
+## References
+
+Boker, S. M., Xu, M., Rotondo, J. L., & King, K. (2002). Windowed
+cross-correlation and peak picking for the analysis of variability in
+the association between behavioral time series. *Psychological Methods*,
+*7*(3), 338-355.
+
+Tschacher, W., & Meier, D. (2020). Physiological synchrony in
+psychotherapy sessions. *Psychotherapy Research*, *30*(5), 558-573.

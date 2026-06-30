@@ -1,6 +1,6 @@
 # Tidy a bsync_surface object into a tibble of per-cell results
 
-Returns one row per cell in \`results_df\`: window position × lag (or
+Returns one row per cell in \`results_df\`: window position x lag (or
 just window position for Granger). Column names match the underlying
 estimator.
 

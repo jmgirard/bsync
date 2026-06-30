@@ -2,6 +2,82 @@
 
 ## bsync 0.0.0.9000
 
+### M6 — Parameter guidance & synchrony multiverse
+
+#### Phase B — autotune_wcc rewrite + vignette
+
+- **[`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  rewritten** as a thin wrapper over
+  [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
+
+  - a gated stability-penalized selection rule. Takes a `dyad_list`,
+    sweeps a seconds-specified grid, and selects the parameter cell that
+    is (a) significant vs. the matched-null surrogate in at least
+    `sig_pct` (default 50%) of dyads, and (b) maximizes
+    `median(ES) - iqr_penalty * IQR(ES)` across dyads. Interface change:
+    `window_sec`/`lag_sec` replace the old `window_multipliers`/
+    `lag_multipliers` arguments.
+
+- **[`select_specification()`](https://jmgirard.github.io/bsync/reference/select_specification.md)**
+  — new exported helper that implements the gated stability-penalized
+  rule on a list of `bsync_multiverse` objects (one per dyad). Can be
+  called directly by advanced users.
+
+- **New vignette** `vignettes/choosing-parameters.Rmd` documents the
+  three-tool parameter guidance workflow:
+  [`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)
+  for a single dyad,
+  [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
+  for visualizing the specification curve, and
+  [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  for multi-dyad datasets. The older `wcc-params` vignette is removed;
+  its content (including the window-overlap discussion) is folded into
+  the new guide.
+
+- [`glance()`](https://generics.r-lib.org/reference/glance.html) on a
+  `bsync_multiverse` now reports both `n_cells` (total specifications in
+  the grid) and `n_valid` (cells that produced a computable effect
+  size); `pct_significant` is taken over `n_valid`. This disambiguates
+  the grid total from the number of cells actually evaluated.
+
+#### Phase A — Synchrony multiverse + suggest_wcc_params rework
+
+- **[`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)**
+  — new function that sweeps a seconds-specified parameter grid across
+  analytic choices (window size, max lag, increment, surrogate method,
+  WCC statistic) and evaluates each specification with a matched-null
+  surrogate test (Invariant 2). The headline metric is effect size
+  vs. the null, not raw synchrony. Supports all three estimators
+  (`"wcc"`, `"wdtw"`, `"wgranger"`). Surrogates are generated once per
+  method and reused across every cell sharing that method (efficiency
+  seam). Returns a `bsync_multiverse` object (`$grid`, `$settings`,
+  `$robustness`).
+
+- **[`plot.bsync_multiverse()`](https://jmgirard.github.io/bsync/reference/plot.bsync_multiverse.md)**
+  — Simonsohn-style specification curve: top panel shows effect sizes
+  sorted by magnitude with significance highlighting; bottom panel is a
+  choice dashboard showing which analytic choices each specification
+  used. Uses pure ggplot2 + base `grid` package; no new dependencies.
+
+- **Tidy interface for `bsync_multiverse`.**
+  [`tidy()`](https://generics.r-lib.org/reference/tidy.html) returns the
+  full specification grid tibble;
+  [`glance()`](https://generics.r-lib.org/reference/glance.html) returns
+  a one-row robustness summary (n_cells, significance rate, median ES,
+  IQR, sign-consistency);
+  [`as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
+  aliases [`tidy()`](https://generics.r-lib.org/reference/tidy.html).
+
+- **[`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)
+  reworked.** New signature takes the actual time series (`x`, `y`,
+  `sample_rate`) and estimates the dominant behavioral cycle from the
+  signal’s own PSD via
+  [`evaluate_signal_power()`](https://jmgirard.github.io/bsync/reference/evaluate_signal_power.md)
+  (pass `event_duration_sec` to override with a theoretical estimate).
+  Three hard constraints are enforced and reported as warnings: the SUSY
+  lag cap (`lag_max <= floor(window_size/2)`), a series-length ceiling
+  (`window_size <= floor(n/2)`), and a minimum-samples floor.
+
 ### M5 — Shared windowed-surface + surrogate framework + tidy interface
 
 - **Unified `$aggregate` slot.** All three estimators

@@ -2,13 +2,13 @@ pandoc: 3.8.3
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  choosing-parameters: choosing-parameters.html
   determine-downsampling: determine-downsampling.html
   surrogate-testing: surrogate-testing.html
-  wcc-params: wcc-params.html
   wcc-workflow: wcc-workflow.html
   wdtw-workflow: wdtw-workflow.html
   wgranger-workflow: wgranger-workflow.html
-last_built: 2026-06-30T04:20Z
+last_built: 2026-06-30T07:04Z
 urls:
   reference: https://jmgirard.github.io/bsync/reference
   article: https://jmgirard.github.io/bsync/articles

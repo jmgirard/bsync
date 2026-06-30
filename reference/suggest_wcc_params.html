@@ -5,9 +5,9 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Suggest WCC Hyperparameters — suggest_wcc_params"><meta name="description" content="Calculates principled starting values for Windowed Cross-Correlation parameters
-based on the sampling rate of the data and the theoretical timing of the behaviors."><meta property="og:description" content="Calculates principled starting values for Windowed Cross-Correlation parameters
-based on the sampling rate of the data and the theoretical timing of the behaviors."></head><body>
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Suggest WCC Hyperparameters — suggest_wcc_params"><meta name="description" content="Derives principled starting values for Windowed Cross-Correlation parameters
+from the **measured signal** via PSD-based dominant timescale estimation."><meta property="og:description" content="Derives principled starting values for Windowed Cross-Correlation parameters
+from the **measured signal** via PSD-based dominant timescale estimation."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -26,9 +26,9 @@ based on the sampling rate of the data and the theoretical timing of the behavio
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/choosing-parameters.html">Choosing WCC Parameters</a></li>
+    <li><a class="dropdown-item" href="../articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
     <li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
-    <li><a class="dropdown-item" href="../articles/wcc-params.html">WCC Parameters</a></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
     <li><a class="dropdown-item" href="../articles/wgranger-workflow.html">Windowed Granger Causality</a></li>
@@ -50,17 +50,20 @@ based on the sampling rate of the data and the theoretical timing of the behavio
     </div>
 
     <div class="ref-description section level2">
-    <p>Calculates principled starting values for Windowed Cross-Correlation parameters
-based on the sampling rate of the data and the theoretical timing of the behaviors.</p>
+    <p>Derives principled starting values for Windowed Cross-Correlation parameters
+from the **measured signal** via PSD-based dominant timescale estimation.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">suggest_wcc_params</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">y</span>,</span>
 <span>  <span class="va">sample_rate</span>,</span>
-<span>  event_duration_sec <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  event_duration_sec <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  max_delay_sec <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  overlap_pct <span class="op">=</span> <span class="fl">0.5</span></span>
+<span>  overlap_pct <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  min_window_samples <span class="op">=</span> <span class="fl">20L</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -68,42 +71,62 @@ based on the sampling rate of the data and the theoretical timing of the behavio
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-sample-rate">sample_rate<a class="anchor" aria-label="anchor" href="#arg-sample-rate"></a></dt>
-<dd><p>A numeric value indicating the sampling rate in Hertz (frames per second).</p></dd>
+<dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dd><p>Numeric vector; the reference time series.</p></dd>
+
+
+<dt id="arg-y">y<a class="anchor" aria-label="anchor" href="#arg-y"></a></dt>
+<dd><p>Numeric vector; the query time series (same length as `x`).</p></dd>
+
+
+<dt id="arg-sample-rate">sample_rate<a class="anchor" aria-label="anchor" href="#arg-sample-rate"></a></dt>
+<dd><p>A numeric value indicating the sampling rate in Hertz.</p></dd>
 
 
 <dt id="arg-event-duration-sec">event_duration_sec<a class="anchor" aria-label="anchor" href="#arg-event-duration-sec"></a></dt>
-<dd><p>The expected duration of a single behavioral event in seconds.
-Used as the basis for the 4-cycles-per-window heuristic: `window_size = round(event_duration_sec *
-4 * sample_rate)`. Default is 2 (typical for brief conversational gestures).</p></dd>
+<dd><p>Optional numeric override for the dominant
+behavioral cycle duration in seconds. Default `NULL` derives it from the
+PSD of `x` and `y` via [evaluate_signal_power()].</p></dd>
 
 
 <dt id="arg-max-delay-sec">max_delay_sec<a class="anchor" aria-label="anchor" href="#arg-max-delay-sec"></a></dt>
-<dd><p>The maximum plausible reaction time between participants in seconds.
-Default is 3.</p></dd>
+<dd><p>The maximum plausible reaction time between participants
+in seconds, used to set the initial `lag_max`. Default is `3`.</p></dd>
 
 
 <dt id="arg-overlap-pct">overlap_pct<a class="anchor" aria-label="anchor" href="#arg-overlap-pct"></a></dt>
-<dd><p>The desired percentage of overlap between consecutive time windows.
-Default is 0.5 (50 percent overlap).</p></dd>
+<dd><p>The desired proportion of overlap between consecutive
+windows (0-1). Default is `0.5` (50% overlap).</p></dd>
+
+
+<dt id="arg-min-window-samples">min_window_samples<a class="anchor" aria-label="anchor" href="#arg-min-window-samples"></a></dt>
+<dd><p>Minimum number of samples required in a window for
+a stable correlation. Default is `20`.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list of recommended parameters ready to be passed to `wcc()`.</p>
+    <p>A named list with `window_size`, `lag_max`, `window_increment`, and
+  `lag_increment`, ready to pass to [wcc()].</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The `window_size` is derived from the **4-cycles-per-window heuristic**: a window
-should span approximately 4 full cycles of the behavior of interest so that the
-within-window correlation estimate is stable across a range of lead–lag relationships
-(Boker et al., 2002). Concretely, `window_size = round(event_duration_sec * 4 *
-sample_rate)`. Four cycles ensures enough oscillation to estimate a reliable
-correlation, whereas two cycles (the Nyquist minimum) would leave the estimate
-too noisy.</p>
-<p>The `lag_max` is capped at half the `window_size` when the requested
-`max_delay_sec` would exceed it; beyond that point the lagged window and the
-reference window share fewer than half their samples, severely degrading reliability.</p>
+    <p>**Dominant timescale.** When `event_duration_sec` is `NULL` (default), the
+function estimates the dominant behavioral cycle from the measured signal via
+[evaluate_signal_power()]: `event_duration_sec = 1 / primary_cutoff_freq`.
+Pass a numeric value to override with your own theoretical estimate.</p>
+<p>**Window size (4-cycles heuristic).** `window_size = round(event_duration_sec
+* 4 * sample_rate)` (Boker et al., 2002). Four cycles yields a stable
+within-window correlation across the range of lead-lag relationships; two
+cycles (the Nyquist minimum) is too noisy.</p>
+<p>**Hard constraints applied and reported:**</p><ul><li><p>`lag_max &lt;= floor(window_size / 2)` – the SUSY reliability constraint
+    (`segment &gt;= 2*maxlag`); beyond this the lagged windows share fewer than
+    half their samples.</p></li>
+<li><p>`window_size &lt;= floor(series_length / 2)` – ensures at least two
+    non-overlapping windows fit in the series.</p></li>
+<li><p>`window_size &gt;= min_window_samples` – a minimum-samples floor for a
+    stable correlation estimate.</p></li>
+</ul><p>All violations produce informative messages, not silent changes.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
