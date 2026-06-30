@@ -204,6 +204,78 @@ test_that("M1: realized window length is exactly window_size samples", {
   expect_equal(expected_n_windows, 33L)
 })
 
+# M2 numerical-regression oracle (Invariant 5) --------------------------------
+# Pure-R reference independent of the C++ core. Written against the current
+# implementation first (to prove the oracle is correct), and must stay green
+# after the prefix-sum rewrite.
+
+#' @noRd
+wcc_oracle <- function(x, y, window_size, lag_max, na.rm = TRUE) {
+  w_max <- window_size - 1L
+  tau_max <- lag_max
+  n_x <- length(x)
+  n_r <- floor((n_x - w_max - 2 * tau_max) / 1L)
+  lags <- seq(-tau_max, tau_max)
+
+  use_arg <- if (na.rm) "pairwise.complete.obs" else "everything"
+
+  # Iterate in expand.grid order: row varies fastest (outer=col, inner=row),
+  # matching the index layout that create_wcc_df passes to calc_wcc_cpp.
+  results <- vector("numeric", n_r * length(lags))
+  k <- 0L
+  for (col in seq_along(lags)) {
+    tau <- lags[col]
+    for (row in seq_len(n_r)) {
+      i <- 1L + tau_max + (row - 1L)
+      k <- k + 1L
+      x_win <- x[i:(i + w_max)]
+      y_win <- y[(i + tau):(i + tau + w_max)]
+      results[k] <- suppressWarnings(stats::cor(x_win, y_win, use = use_arg))
+    }
+  }
+  results
+}
+
+test_that("M2: calc_wcc_cpp matches pure-R stats::cor oracle on sim_dyad (clean)", {
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  window_size <- 96L
+  lag_max <- 10L
+
+  res <- wcc(x, y, window_size = window_size, lag_max = lag_max, na.rm = TRUE)
+  oracle <- wcc_oracle(x, y, window_size, lag_max, na.rm = TRUE)
+
+  expect_equal(res$results_df$wcc, oracle, tolerance = 1e-9)
+})
+
+test_that("M2: calc_wcc_cpp matches oracle on sim_dyad with NA (na.rm = TRUE)", {
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  x[100:110] <- NA
+
+  window_size <- 96L
+  lag_max <- 10L
+
+  res <- wcc(x, y, window_size = window_size, lag_max = lag_max, na.rm = TRUE)
+  oracle <- wcc_oracle(x, y, window_size, lag_max, na.rm = TRUE)
+
+  expect_equal(res$results_df$wcc, oracle, tolerance = 1e-9)
+})
+
+test_that("M2: calc_wcc_cpp matches oracle on sim_dyad with NA (na.rm = FALSE)", {
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  x[100:110] <- NA
+
+  window_size <- 96L
+  lag_max <- 10L
+
+  res <- wcc(x, y, window_size = window_size, lag_max = lag_max, na.rm = FALSE)
+  oracle <- wcc_oracle(x, y, window_size, lag_max, na.rm = FALSE)
+
+  expect_equal(res$results_df$wcc, oracle, tolerance = 1e-9)
+})
+
 test_that("M1: na.rm = FALSE returns NA for any window containing NA", {
   set.seed(42)
   x <- rnorm(30)
