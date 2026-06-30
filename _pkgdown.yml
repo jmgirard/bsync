@@ -16,3 +16,119 @@ navbar:
   structure:
     left:  [reference, articles]
     right: [search, github]
+
+articles:
+  - title: "Get started"
+    navbar: ~
+    contents:
+      - bsync
+
+  - title: "Core estimators"
+    navbar: "Core estimators"
+    contents:
+      - wcc-workflow
+      - wdtw-workflow
+      - wgranger-workflow
+
+  - title: "Going deeper"
+    navbar: "Going deeper"
+    contents:
+      - choosing-parameters
+      - surrogate-testing
+      - determine-downsampling
+
+reference:
+  - title: "Estimators"
+    desc: >
+      Windowed estimators of nonstationary lead-lag synchrony. All three return a
+      `bsync_surface` object with a shared `print()`, `summary()`, and `plot()`.
+    contents:
+      - wcc
+      - wdtw
+      - wgranger
+      - matches("^print\\.(wcc|wdtw|wgranger)_res$")
+      - matches("^summary\\.(wcc|wdtw|wgranger)_res$")
+      - matches("^plot\\.(wcc|wdtw|wgranger)_res$")
+
+  - title: "Surrogate testing"
+    desc: >
+      Generate null distributions (pseudo-synchrony) and compare observed statistics
+      against them. Two-step pipeline: generate a surrogate matrix, then pass it to
+      the matched surrogate wrapper.
+    contents:
+      - generate_surrogate_circular
+      - generate_surrogate_phase
+      - wcc_surrogate
+      - wdtw_surrogate
+      - wgranger_surrogate
+      - matches("^print\\.(wcc|wdtw|wgranger)_surr$")
+
+  - title: "Optima extraction & leadership"
+    desc: >
+      Extract lag optima from an estimator surface and derive a continuous
+      Leadership Asymmetry Index (LAI).
+    contents:
+      - pick_optima
+      - leadership_asymmetry
+      - plot_optima_overlay
+      - matches("^print\\.(wcc|wdtw)_optima$")
+      - matches("^summary\\.(wcc|wdtw)_optima$")
+      - print.bsync_lai
+      - plot.bsync_lai
+
+  - title: "Parameter guidance"
+    desc: >
+      Tools for choosing and evaluating analysis hyperparameters. Start with
+      `suggest_wcc_params()` for a single dyad, use `synchrony_multiverse()` to
+      visualize the specification curve, and `autotune_wcc()` for multi-dyad datasets.
+      `select_specification()` is the underlying selection rule for advanced use.
+    contents:
+      - suggest_wcc_params
+      - synchrony_multiverse
+      - autotune_wcc
+      - select_specification
+      - print.bsync_multiverse
+      - summary.bsync_multiverse
+      - plot.bsync_multiverse
+
+  - title: "Preprocessing — signal & kinematics"
+    desc: >
+      Smooth, trim, and compute kinematic derivatives on continuous signals before
+      running a synchrony estimator.
+    contents:
+      - smooth_signal
+      - trim_edges
+      - calc_velocity_1d
+      - calc_speed_1d
+      - calc_speed_2d
+      - calc_speed_3d
+      - evaluate_signal_power
+      - plot.signal_power_res
+
+  - title: "Preprocessing — resampling & gaps"
+    desc: >
+      Resample continuous signals and diagnose or repair time-series gaps.
+    contents:
+      - downsample_signal
+      - aggregate_by_time
+      - diagnose_ts_gaps
+      - impute_ts_gaps
+
+  - title: "Tidy interface"
+    desc: >
+      `tidy()`, `glance()`, and `as_tibble()` methods for `bsync_surface` and
+      `bsync_multiverse` objects, enabling integration with tidyverse workflows.
+    contents:
+      - tidy
+      - glance
+      - as_tibble
+      - tidy.bsync_surface
+      - tidy.bsync_multiverse
+      - glance.bsync_surface
+      - glance.bsync_multiverse
+      - as_tibble.bsync_surface
+      - as_tibble.bsync_multiverse
+
+  - title: "Data"
+    contents:
+      - sim_dyad
