@@ -1,5 +1,31 @@
 # bsync 0.0.0.9000
 
+## M3 — CRAN readiness
+
+* **Build artifacts removed from version control.** `src/*.o`, `src/bsync.{so,dll}`,
+  `.DS_Store`, and `tests/testthat/Rplots.pdf` were untracked via `git rm --cached`;
+  `.gitignore` now carries `*.o`, `*.so`, `*.dll`, `*.dylib`, and `Rplots.pdf` patterns.
+
+* **Documentation complete.** Added `@return` to all 18 exported `print()`, `plot()`,
+  and `summary()` methods (`print.wcc_res`, `summary.wcc_res`, `print.wdtw_res`,
+  `print/summary.wgranger_res`, `print/summary.wcc_optima`, `print/summary.wdtw_optima`,
+  `print.bsync_lai`, `plot.bsync_lai`, `plot.wcc_res`, `plot.wdtw_res`,
+  `plot.wgranger_res`, `plot_optima_overlay`, `print.wcc_surr`, `print.wdtw_surr`,
+  `print.wgranger_surr`). `R CMD check --as-cran` now reports 0 errors / 0 warnings
+  / 0 notes.
+
+* **DESCRIPTION updated.** Description field refreshed to cover all three windowed
+  estimators (WCC, WDTW, Granger), surrogate significance testing (circular-shift and
+  phase-randomization generators), optima picking, leadership asymmetry index, and the
+  full preprocessing pipeline. `Language: en-US` field added.
+
+* **Spell-check clean.** `inst/WORDLIST` created with domain terms, acronyms, and
+  proper names; `spelling::spell_check_package()` returns no errors.
+
+* **README corrected.** The surrogate example chunk now uses the correct two-step API:
+  `generate_surrogate_circular()` to build the null matrix, then `wcc_surrogate()` with
+  `y_surrogates`. `pkgdown::check_pkgdown()` passes.
+
 ## M2 — Efficiency
 
 * **WCC core rewritten to an NA-aware prefix-sum algorithm.** `calc_wcc_cpp()` now
