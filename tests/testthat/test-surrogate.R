@@ -145,6 +145,67 @@ test_that("WGranger surrogate pipeline integrates and returns valid object", {
 })
 
 # =========================================================================
+# --- 2b. ADDITIONAL ROBUSTNESS TESTS -------------------------------------
+# =========================================================================
+
+test_that("wcc_surrogate handles NA values in surrogate matrices without crashing", {
+  set.seed(7)
+  x <- rnorm(50)
+  y <- rnorm(50)
+  y_surr_mat <- generate_surrogate_circular(y, n_surrogates = 5, lag_max = 5)
+
+  # Inject NAs into one surrogate column
+  y_surr_mat[10:15, 2] <- NA
+
+  # na.rm = TRUE (default): should return finite p-value
+  res_true <- wcc_surrogate(
+    x, y, y_surrogates = y_surr_mat,
+    window_size = 10, lag_max = 5, na.rm = TRUE
+  )
+  expect_true(res_true$p_value >= 0 && res_true$p_value <= 1)
+
+  # na.rm = FALSE: surrogate 2 will have NA-affected windows; p-value still valid
+  res_false <- wcc_surrogate(
+    x, y, y_surrogates = y_surr_mat,
+    window_size = 10, lag_max = 5, na.rm = FALSE
+  )
+  expect_true(res_false$p_value >= 0 && res_false$p_value <= 1)
+})
+
+test_that("wcc_surrogate p-value is small for strongly coupled series", {
+  set.seed(123)
+  n <- 100
+  x <- sin(seq(0, 4 * pi, length.out = n))
+  y <- x + rnorm(n, sd = 0.05)  # nearly identical to x
+  y_surr_mat <- generate_surrogate_circular(y, n_surrogates = 50, lag_max = 5)
+
+  res <- wcc_surrogate(
+    x, y, y_surrogates = y_surr_mat,
+    window_size = 20, lag_max = 5
+  )
+
+  # Observed synchrony is real; surrogate distribution should be much lower
+  expect_true(res$observed_z > mean(res$surrogate_z))
+  expect_true(res$p_value <= 0.10)
+})
+
+test_that("wcc_surrogate p-value is large for independent series", {
+  set.seed(456)
+  n <- 100
+  x <- rnorm(n)
+  y <- rnorm(n)  # independent of x
+  y_surr_mat <- generate_surrogate_circular(y, n_surrogates = 50, lag_max = 5)
+
+  res <- wcc_surrogate(
+    x, y, y_surrogates = y_surr_mat,
+    window_size = 20, lag_max = 5
+  )
+
+  # No real synchrony; observed z should not consistently exceed surrogates
+  expect_true(res$p_value > 0.05)
+})
+
+# =========================================================================
 # --- 3. S3 PRINT METHOD TESTS --------------------------------------------
 # =========================================================================
 
