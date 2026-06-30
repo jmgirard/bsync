@@ -6,10 +6,17 @@ argument-hint: "[milestone-number]"
 ---
 
 0. Confirm $ARGUMENTS appears in CLAUDE.md's "## Completed milestones" section (e.g., look for
-   "M$ARGUMENTS (done)"). If it does not appear there, stop and flag: either the milestone has not
-   been implemented yet (run /implement-milestone first) or the number is wrong. Do NOT rely on
-   "## Current focus" — a successfully implemented milestone should have been moved to "Completed
-   milestones".
+   "M$ARGUMENTS (done)"). Do NOT rely on "## Current focus" — a finalized milestone should have been
+   moved to "Completed milestones" by /implement-milestone's finalize step. If it is NOT there, stop
+   and flag the *actual* state rather than guessing:
+   - Still listed as active/next in "## Current focus" **with** implementation commits on `main` →
+     it was implemented but never finalized (the finalize bookkeeping is missing). Say so and point
+     the user to finalize it first — this is the /implement-milestone finalize step, **not** a
+     re-implementation.
+   - Absent everywhere **and** no implementation commits → not implemented yet; run
+     /implement-milestone first.
+   - Present but numbered differently than the work actually on `main` → the milestone number is
+     wrong.
 
 # Post-Milestone Review: Milestone $ARGUMENTS
 

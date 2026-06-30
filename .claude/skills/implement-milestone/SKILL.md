@@ -39,5 +39,24 @@ Follow `CLAUDE.md`'s dev workflow and definition of done throughout:
   unilaterally — design decisions belong in `DESIGN.md`.
 - Update `NEWS.md` for user-visible changes (create it if it does not yet exist).
 
+## Finalize (only when the milestone is genuinely done)
+
+When — and only when — **every** acceptance criterion for this milestone in `CLAUDE.md` is
+demonstrably met **and** `devtools::check()` (`--as-cran` on release-track milestones) is clean
+(0 errors / 0 warnings, notes triaged) **and** the working tree is committed, finalize the
+bookkeeping yourself (this is mechanical, not a judgment call — the human quality gate is
+`/post-milestone-review`, run separately):
+
+- Move the milestone's entry from "## Current focus" to "## Completed milestones" in `CLAUDE.md`,
+  rewritten in the same `(done)` style as M1/M2: the met acceptance criteria, the commit range on
+  `main`, the test count, and the `R CMD check` result; note any post-plan deviations.
+- Promote the next milestone to the front of "## Current focus" (mark it "next").
+- Commit this bookkeeping **on its own**, not bundled with any implementation commit
+  (e.g. `Mark M$ARGUMENTS complete; promote M<next> to next in CLAUDE.md`).
+
+If any acceptance criterion is unmet, the check is not clean, or a guardrail decision is still
+pending, **stop and report** — do **not** mark the milestone complete or move it to "Completed
+milestones".
+
 Do not run `/post-milestone-review` yourself at the end — that's a separate, deliberate step the user
 triggers after reviewing the work.
