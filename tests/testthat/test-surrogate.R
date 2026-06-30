@@ -502,3 +502,48 @@ test_that("AC4: Granger cross-path Invariant-2 (y as its sole surrogate)", {
   expect_equal(res_surr$surrogate_f_xy[[1]], res_obs$aggregate[["f_xy"]], tolerance = 1e-12)
   expect_equal(res_surr$surrogate_f_yx[[1]], res_obs$aggregate[["f_yx"]], tolerance = 1e-12)
 })
+
+# M7 Phase B regression tests -------------------------------------------------
+
+test_that("M7: print.wcc_surr labels have no double-colon (cli regression)", {
+  set.seed(42)
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  y_surr <- generate_surrogate_circular(y, n_surrogates = 20, lag_max = 10)
+
+  res_maz <- wcc_surrogate(x, y,
+    y_surrogates = y_surr, window_size = 96, lag_max = 10,
+    statistic = "mean_abs_z"
+  )
+  res_peak <- wcc_surrogate(x, y,
+    y_surrogates = y_surr, window_size = 96, lag_max = 10,
+    statistic = "peak"
+  )
+
+  # Labels must appear exactly once, with a single colon (no ": :" double colon)
+  expect_message(print(res_maz), "Observed Mean Abs\\. Fisher")
+  expect_message(print(res_maz), "Average Null Mean Abs\\. Fisher")
+  expect_message(print(res_peak), "Observed Mean Peak Abs\\. Fisher")
+  expect_message(print(res_peak), "Average Null Mean Peak Abs\\. Fisher")
+
+  # Capture full output and assert absence of double colon
+  out_maz <- capture.output(suppressMessages(
+    withCallingHandlers(print(res_maz), message = function(m) {
+      cat(conditionMessage(m))
+      invokeRestart("muffleMessage")
+    })
+  ))
+  expect_false(any(grepl(": :", out_maz)),
+    label = "print.wcc_surr (mean_abs_z) must not contain double colon ': :'"
+  )
+
+  out_peak <- capture.output(suppressMessages(
+    withCallingHandlers(print(res_peak), message = function(m) {
+      cat(conditionMessage(m))
+      invokeRestart("muffleMessage")
+    })
+  ))
+  expect_false(any(grepl(": :", out_peak)),
+    label = "print.wcc_surr (peak) must not contain double colon ': :'"
+  )
+})
