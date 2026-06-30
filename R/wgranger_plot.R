@@ -6,6 +6,7 @@
 #'   `"F"` for F-Statistics or `"p"` for negative log10 p-values. Default is `"F"`.
 #' @param smooth Logical indicating whether to apply loess smoothing to the lines. Default is `FALSE`.
 #' @param ... Additional arguments (not used).
+#' @return A `ggplot2` plot object.
 #' @export
 plot.wgranger_res <- function(
   x,

@@ -110,6 +110,7 @@ new_wdtw_res <- function(x = list()) {
 #'
 #' @param x An object of class "wdtw_res".
 #' @param ... Additional arguments (not used).
+#' @return Returns `x` invisibly.
 #' @export
 print.wdtw_res <- function(x, ...) {
   s <- x$settings

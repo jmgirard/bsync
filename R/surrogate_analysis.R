@@ -391,6 +391,7 @@ wgranger_surrogate <- function(
 #'
 #' @param x An object of class "wcc_surr".
 #' @param ... Additional arguments (not used).
+#' @return Returns `x` invisibly.
 #' @export
 print.wcc_surr <- function(x, ...) {
   cli::cli_h1("WCC Surrogate Analysis (Pseudo-Synchrony)")
@@ -431,6 +432,7 @@ print.wcc_surr <- function(x, ...) {
 #'
 #' @param x An object of class "wdtw_surr".
 #' @param ... Additional arguments (not used).
+#' @return Returns `x` invisibly.
 #' @export
 print.wdtw_surr <- function(x, ...) {
   cli::cli_h1("WDTW Surrogate Analysis (Pseudo-Synchrony)")
@@ -471,6 +473,7 @@ print.wdtw_surr <- function(x, ...) {
 #'
 #' @param x An object of class "wgranger_surr".
 #' @param ... Additional arguments (not used).
+#' @return Returns `x` invisibly.
 #' @export
 print.wgranger_surr <- function(x, ...) {
   cli::cli_h1("Windowed Granger Surrogate Analysis")

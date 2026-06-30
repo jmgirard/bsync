@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments (not used).}
 }
+\value{
+Returns `x` invisibly.
+}
 \description{
 Print method for wcc_surr objects
 }

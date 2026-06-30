@@ -35,6 +35,9 @@ plot_optima_overlay(
 
 \item{...}{Additional arguments passed to the underlying plot method (e.g., custom colors for WCC).}
 }
+\value{
+A `ggplot2` plot object.
+}
 \description{
 Plot Surface with Optima Overlay
 }

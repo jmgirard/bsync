@@ -17,6 +17,9 @@
 
 \item{...}{Additional arguments (not used).}
 }
+\value{
+A `ggplot2` plot object.
+}
 \description{
 Plot bsync_lai object
 }

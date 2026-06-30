@@ -33,6 +33,9 @@ If not 1, axes will be converted from raw indices to time units. Default is 1.}
 
 \item{...}{Additional arguments (not used).}
 }
+\value{
+A `ggplot2` plot object.
+}
 \description{
 Plot wcc_res object
 }

@@ -9,6 +9,7 @@
 #' @param show_zero_lag Logical indicating whether to draw a vertical line at lag = 0. Default is `TRUE`.
 #' @param zero_line_color Character string specifying the color of the zero-lag line. Default is "black".
 #' @param ... Additional arguments (not used).
+#' @return A `ggplot2` plot object.
 #' @export
 plot.wcc_res <- function(
   x,

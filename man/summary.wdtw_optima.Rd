@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments (not used).}
 }
+\value{
+Returns `object` invisibly.
+}
 \description{
 Summary method for wdtw_optima objects
 }

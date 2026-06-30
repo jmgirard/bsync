@@ -137,6 +137,7 @@ pick_optima <- function(
 #' @param x An object of class "wcc_optima".
 #' @param n An integer specifying how many rows to print. Default is 5.
 #' @param ... Additional arguments (not used).
+#' @return Returns `x` invisibly.
 #' @export
 print.wcc_optima <- function(x, n = 5, ...) {
   print_optima(x, n, title = "WCC Optima Results")
@@ -147,6 +148,7 @@ print.wcc_optima <- function(x, n = 5, ...) {
 #' @param x An object of class "wdtw_optima".
 #' @param n An integer specifying how many rows to print. Default is 5.
 #' @param ... Additional arguments (not used).
+#' @return Returns `x` invisibly.
 #' @export
 print.wdtw_optima <- function(x, n = 5, ...) {
   print_optima(x, n, title = "WDTW Optima Results")
@@ -156,6 +158,7 @@ print.wdtw_optima <- function(x, n = 5, ...) {
 #'
 #' @param object An object of class "wcc_optima".
 #' @param ... Additional arguments (not used).
+#' @return Returns `object` invisibly.
 #' @export
 summary.wcc_optima <- function(object, ...) {
   summary_optima(object, title = "WCC Optima Summary")
@@ -165,6 +168,7 @@ summary.wcc_optima <- function(object, ...) {
 #'
 #' @param object An object of class "wdtw_optima".
 #' @param ... Additional arguments (not used).
+#' @return Returns `object` invisibly.
 #' @export
 summary.wdtw_optima <- function(object, ...) {
   summary_optima(object, title = "WDTW Optima Summary")

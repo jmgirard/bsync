@@ -90,6 +90,7 @@ leadership_asymmetry <- function(optima_obj, epoch_size = 10, min_valid = 3) {
 #' @param x An object of class "bsync_lai".
 #' @param n An integer specifying how many rows to print. Default is 5.
 #' @param ... Additional arguments (not used).
+#' @return Returns `x` invisibly.
 #' @export
 print.bsync_lai <- function(x, n = 5, ...) {
   df <- as.data.frame(x)
@@ -134,6 +135,7 @@ print.bsync_lai <- function(x, n = 5, ...) {
 #' @param line_color Character string specifying the color of the LAI line. Default is "black".
 #' @param smooth Logical indicating whether to add a loess smoothing line. Default is `FALSE`.
 #' @param ... Additional arguments (not used).
+#' @return A `ggplot2` plot object.
 #' @export
 plot.bsync_lai <- function(
   x,

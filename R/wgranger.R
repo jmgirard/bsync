@@ -84,6 +84,7 @@ new_wgranger_res <- function(x = list()) {
 #'
 #' @param x An object of class "wgranger_res".
 #' @param ... Additional arguments (not used).
+#' @return Returns `x` invisibly.
 #' @export
 print.wgranger_res <- function(x, ...) {
   s <- x$settings
@@ -104,6 +105,7 @@ print.wgranger_res <- function(x, ...) {
 #'
 #' @param object An object of class "wgranger_res".
 #' @param ... Additional arguments (not used).
+#' @return Returns `object` invisibly.
 #' @export
 summary.wgranger_res <- function(object, ...) {
   print(object)

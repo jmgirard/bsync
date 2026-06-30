@@ -13,6 +13,9 @@
 
 \item{...}{Additional arguments (not used).}
 }
+\value{
+Returns `x` invisibly.
+}
 \description{
 Print method for bsync_lai objects
 }

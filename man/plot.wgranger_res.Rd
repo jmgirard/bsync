@@ -18,6 +18,9 @@
 
 \item{...}{Additional arguments (not used).}
 }
+\value{
+A `ggplot2` plot object.
+}
 \description{
 Plot wgranger_res object
 }
