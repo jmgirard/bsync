@@ -188,17 +188,75 @@ plan → implement → review loop. The first release is **explicitly not near-t
 milestone (M7, `v0.1.0`) after the M6 parameter guidance lands, not a deadline hanging over the
 hardening work. **M6 is next.**
 
-- **M6 — Parameter guidance & synchrony multiverse.** One engine, three read-outs on the M5 shared
-  framework: `synchrony_multiverse()` is the grid + matched-null-surrogate engine (headline metric =
-  ES vs. null, not raw synchrony) with a specification-curve plot; `autotune_wcc()` becomes a thin
-  wrapper = multiverse + a selection rule (detectability + cross-dyad stability, not bare ES argmax),
-  validated against `sim_dyad`; `suggest_wcc_params()` stays the single PSD-data-driven starting
-  point with the SUSY constraints enforced/reported. There is no single "correct" WCC parameter set —
-  the optimum depends on the signal's own timescales — so the honest deliverable is the multiverse,
-  with the matched-null surrogate as the defense against autocorrelation-driven spurious correlation
-  (DESIGN.md §14 #10, §15 M6). Engine grid axes are in **time units (seconds), not samples**, so
-  downsample/smoothing can be *opt-in* multiverse axes (default fixes preprocessing). The
+- **M6 — Parameter guidance & synchrony multiverse (active).** One engine, three read-outs on the M5
+  shared framework: `synchrony_multiverse()` is the grid + matched-null-surrogate engine (headline
+  metric = ES vs. null, not raw synchrony) with a specification-curve plot; `autotune_wcc()` becomes a
+  thin wrapper = multiverse + a selection rule (detectability + cross-dyad stability, not bare ES
+  argmax), validated against `sim_dyad`; `suggest_wcc_params()` stays the single PSD-data-driven
+  starting point with the SUSY constraints enforced/reported. There is no single "correct" WCC
+  parameter set — the optimum depends on the signal's own timescales — so the honest deliverable is the
+  multiverse, with the matched-null surrogate as the defense against autocorrelation-driven spurious
+  correlation (DESIGN.md §14 #10, §15 M6). Engine grid axes are in **time units (seconds), not
+  samples**, so downsample/smoothing can be *opt-in* multiverse axes (default fixes preprocessing). The
   `autotune_wcc()` validation lands here, before the M7 release.
+
+  **Pure R orchestration over the M2 prefix-sum core + the M5 engine — no C++ change** (Invariants 5/6
+  untouched, no `RcppExports` regen, no `bench/` step), **no new `Imports`** (spec-curve plot is pure
+  ggplot2; tidy reuses M5's `generics`/`tibble`). The efficiency win is algorithmic in R: one
+  `y_surrogates` matrix per `surrogate_method`, reused across every grid cell sharing it.
+
+  Run as **two phases under the M6 number** (no roadmap renumber): **Phase A** = engine
+  (`synchrony_multiverse()`) + `bsync_multiverse` object + spec-curve plot + tidy methods +
+  `suggest_wcc_params()` rework; **Phase B** = `autotune_wcc()` rewrite + selection rule + `sim_dyad`
+  validation + parameter vignette. Optional post-milestone-review after each phase.
+
+  Plan-time decisions (approved; the three design choices the roadmap left open get written into
+  DESIGN.md §14 #10 in Phase B): (i) **Selection rule = gated stability-penalized score** — detectability
+  GATE (cell significant `p < .05` in a majority of dyads), then rank survivors by
+  `median ES − penalty(ES spread / sign-inconsistency)`; `stability_flag` from sign-consistency +
+  low spread; single dyad falls back to `score = ES`, `stability_flag = NA`. (ii) **`suggest_wcc_params()`
+  signature changes to `suggest_wcc_params(x, y, sample_rate, ...)`** — PSD over both series;
+  `event_duration_sec` becomes an optional expert override (`NULL` ⇒ derive from PSD); breaking change,
+  fine pre-1.0, NEWS-noted. (iii) **Engine wires all three estimators** (WCC/WDTW/Granger adapters:
+  per-estimator grid axes, surrogate wrapper, aggregate extraction, tail direction + ES polarity —
+  WDTW lower-tail, Granger two directional aggregates with no lag axis); heavy validation on WCC,
+  smoke + correctness on WDTW/Granger; `autotune_wcc()`/`suggest_wcc_params()` stay WCC-only.
+  Cross-dyad stability is validated in M6 with a **synthetic `dyad_list` built in-test from the
+  `data-raw/sim_dyad.R` recipe** (incl. uncoupled negative controls) — the real multi-dyad workflow
+  stays M11.
+
+  Acceptance criteria (M6 done when all nine hold):
+  1. `synchrony_multiverse(x, y, estimator, sample_rate, ...)` runs a **seconds-specified** grid
+     (`window_sec`, `lag_sec`, `increment_pct`, `statistic`, `surrogate_method`), converts to samples
+     per cell, caps `lag_max ≤ window/2`, and returns a light `bsync_multiverse` (Invariant 7: tidy
+     grid + `settings` + robustness summary; no raw surrogate draws, no raw input). Tested.
+  2. Per cell: observed aggregate + matched-null surrogate → ES + p, with the **null matching the
+     observed statistic** (Invariant 2) and **tail/ES polarity correct per estimator** (WCC/Granger
+     upper-tail, WDTW lower-tail). Cross-path Invariant-2 test for all three estimators (extends the M5
+     pattern).
+  3. **Surrogate-reuse efficiency seam:** one `y_surrogates` matrix generated per `surrogate_method`
+     and reused across all cells sharing it — asserted by a call-count/spy test (CRAN-safe, not a
+     timing test); per-method surrogate cost never multiplies by grid size.
+  4. **WDTW and Granger adapters** produce a correct grid (Granger axis = `window_sec`/`increment`/
+     `ar_order`, no lag axis; two ES/p columns `f_xy`/`f_yx`). Smoke + correctness tested.
+  5. `print`/`summary`/`tidy`/`glance`/`as_tibble`/`plot` on `bsync_multiverse`: `plot` is a
+     Simonsohn-style **specification curve** (specs sorted by ES, significance shading, choice-dashboard
+     panel; pure ggplot2, no new dep). vdiffr snapshot added.
+  6. `suggest_wcc_params(x, y, sample_rate, ...)` derives the dominant timescale from the **measured
+     signal** via `evaluate_signal_power()` (PSD), keeps `event_duration_sec` as an expert override
+     (`NULL` ⇒ derive), and enforces/reports the hard constraints (`window ≥ 2·lag_max`,
+     `window ≤ series/2`, min-samples floor). **Signature change** documented in NEWS. Tested.
+  7. `autotune_wcc()` is a thin wrapper over the engine applying `select_specification()` (gated
+     stability-penalized score per decision (i), **not** bare ES argmax); returns recommended cell +
+     `stability_flag` + top-k; duplicated PSD/grid logic removed.
+  8. **Validation (the gap this milestone closes):** a `sim_dyad` regression test pins
+     `autotune_wcc()`'s recommendation to the known 0.5 Hz / ~0.5 s lead–lag; a synthetic multi-dyad
+     fixture (from the `sim_dyad` recipe, incl. uncoupled negative controls) exercises the stability
+     flag.
+  9. `R CMD check --as-cran` = 0/0/0; styled (styler) + linted; **no new `Imports`**; **no C++ change**
+     (`RcppExports` diff empty); **CRAN-run test time does not regress** (heavy power/validation tests
+     `skip_on_cran`, slowest existing surrogate tests audited for the same); parameter vignette builds;
+     NEWS/WORDLIST/DESIGN.md (§14 #10, §15 M6) updated.
 
 - **M7 — First CRAN release (`v0.1.0`).** Cut the first public release once WCC/WDTW/Granger + the M5
   framework + tidy interface + M6 parameter guidance cohere; later estimators are post-1.0 minors.
