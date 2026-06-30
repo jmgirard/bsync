@@ -8,3 +8,14 @@ inst/doc
 /doc/
 /Meta/
 docs
+
+# Compiled build artifacts
+*.o
+*.so
+*.dll
+*.dylib
+src/*.o
+src/*.so
+src/*.dll
+src/*.dylib
+tests/testthat/Rplots.pdf
