@@ -49,12 +49,12 @@ test_that("plot.wcc_res handles logical arguments and layers correctly", {
 test_that("plot.wcc_res handles tau scaling and time axis logic", {
   # 1. Raw Indices (No time vector, time_step = 1)
   p_raw <- plot(mock_wcc)
-  expect_equal(p_raw$labels$x, "Lag (\u03c4) Index")
+  expect_equal(p_raw$labels$x, "Lag (tau) Index")
   expect_equal(p_raw$labels$y, "Elapsed Time Window Index")
 
   # 2. Calculated Time (No time vector, time_step != 1)
   p_scaled <- plot(mock_wcc, time_step = 2)
-  expect_equal(p_scaled$labels$x, "Lag (\u03c4) in Seconds")
+  expect_equal(p_scaled$labels$x, "Lag (tau) in Seconds")
   expect_equal(p_scaled$labels$y, "Elapsed Time (Seconds)")
 
   # Verify both tau and i data were scaled
@@ -63,14 +63,14 @@ test_that("plot.wcc_res handles tau scaling and time axis logic", {
 
   # 3. Native Time (Time vector provided)
   p_native <- plot(mock_wcc_time)
-  expect_equal(p_native$labels$x, "Lag (\u03c4) Index")
+  expect_equal(p_native$labels$x, "Lag (tau) Index")
   expect_equal(p_native$labels$y, "Elapsed Time")
   expect_true(all(p_native$data$i %in% time_vec))
 
   # 4. Native Time + Tau Scaling
   # When both occur, tau should scale, but the natively mapped 'i' should not.
   p_hybrid <- plot(mock_wcc_time, time_step = 2)
-  expect_equal(p_hybrid$labels$x, "Lag (\u03c4) in Seconds")
+  expect_equal(p_hybrid$labels$x, "Lag (tau) in Seconds")
   expect_equal(p_hybrid$labels$y, "Elapsed Time")
   expect_equal(max(p_hybrid$data$tau), mock_wcc_time$settings$lag_max * 2)
   expect_true(all(p_hybrid$data$i %in% time_vec)) # i remains unscaled
@@ -85,12 +85,12 @@ test_that("plot.wdtw_res handles tau scaling and time axis logic", {
   # 1. Raw Indices
   p_raw <- plot(mock_wdtw)
   expect_s3_class(p_raw, "ggplot")
-  expect_equal(p_raw$labels$x, "Lag (\u03c4) Index")
+  expect_equal(p_raw$labels$x, "Lag (tau) Index")
   expect_equal(p_raw$labels$y, "Elapsed Time Window Index")
 
   # 2. Calculated Time
   p_scaled <- plot(mock_wdtw, time_step = 0.5)
-  expect_equal(p_scaled$labels$x, "Lag (\u03c4) in Seconds")
+  expect_equal(p_scaled$labels$x, "Lag (tau) in Seconds")
   expect_equal(p_scaled$labels$y, "Elapsed Time (Seconds)")
   expect_equal(max(p_scaled$data$tau), mock_wdtw$settings$lag_max * 0.5)
   expect_equal(max(p_scaled$data$i), max(mock_wdtw$results_df$i) * 0.5)

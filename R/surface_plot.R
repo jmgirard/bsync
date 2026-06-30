@@ -23,9 +23,9 @@ build_surface_heatmap <- function(df, fill_col, fill_scale,
                                   zero_line_color = "black") {
   if (time_step != 1) {
     df$tau <- df$tau * time_step
-    x_label <- "Lag (\u03c4) in Seconds"
+    x_label <- "Lag (tau) in Seconds"
   } else {
-    x_label <- "Lag (\u03c4) Index"
+    x_label <- "Lag (tau) Index"
   }
 
   if (!has_time && time_step != 1) {
