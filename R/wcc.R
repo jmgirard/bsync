@@ -59,43 +59,13 @@ wcc <- function(
 ) {
   statistic <- match.arg(statistic)
 
-  # Assertions
-  if (!is.numeric(x)) {
-    cli::cli_abort("{.arg x} must be a numeric vector.")
-  }
-  if (!is.numeric(y)) {
-    cli::cli_abort("{.arg y} must be a numeric vector.")
-  }
-  if (length(x) != length(y)) {
-    cli::cli_abort("{.arg x} and {.arg y} must be the same length.")
-  }
+  validate_series(x, y, time)
+  validate_window_params(
+    window_size, window_increment,
+    lag_max = lag_max, lag_increment = lag_increment,
+    na.rm = na.rm
+  )
 
-  if (!is.null(time)) {
-    if (!is.numeric(time)) {
-      cli::cli_abort("{.arg time} must be a numeric vector.")
-    }
-    if (length(time) != length(x)) {
-      cli::cli_abort("{.arg time} must be the same length as {.arg x}.")
-    }
-  }
-
-  if (!rlang::is_integerish(window_size, n = 1) || window_size <= 0) {
-    cli::cli_abort("{.arg window_size} must be a single positive integer.")
-  }
-  if (!rlang::is_integerish(lag_max, n = 1) || lag_max <= 0) {
-    cli::cli_abort("{.arg lag_max} must be a single positive integer.")
-  }
-  if (!rlang::is_integerish(window_increment, n = 1) || window_increment <= 0) {
-    cli::cli_abort("{.arg window_increment} must be a single positive integer.")
-  }
-  if (!rlang::is_integerish(lag_increment, n = 1) || lag_increment <= 0) {
-    cli::cli_abort("{.arg lag_increment} must be a single positive integer.")
-  }
-  if (!rlang::is_logical(na.rm, n = 1)) {
-    cli::cli_abort("{.arg na.rm} must be a single logical value.")
-  }
-
-  # Conversions
   x <- as.double(x)
   y <- as.double(y)
 
@@ -116,17 +86,19 @@ wcc <- function(
     settings = settings
   )
 
-  out <- list(
-    results_df = results_df,
-    fisher_z = wcc_aggregate(
-      z = r_to_z(results_df$wcc),
-      window_id = results_df$i,
-      statistic = statistic
-    ),
-    settings = settings
+  agg_val <- wcc_aggregate(
+    z = r_to_z(results_df$wcc),
+    window_id = results_df$i,
+    statistic = statistic
   )
 
-  wcc_res(out)
+  out <- list(
+    results_df = results_df,
+    aggregate  = stats::setNames(agg_val, statistic),
+    settings   = settings
+  )
+
+  new_bsync_surface(out, "wcc_res")
 }
 
 #' Suggest WCC Hyperparameters
@@ -192,17 +164,6 @@ suggest_wcc_params <- function(
   ))
 }
 
-# Constructors ------------------------------------------------------------
-
-new_wcc_res <- function(x = list()) {
-  stopifnot(is.list(x))
-  structure(x, class = c("wcc_res", class(x)))
-}
-
-wcc_res <- function(x = list()) {
-  new_wcc_res(x)
-}
-
 # S3 Methods --------------------------------------------------------------
 
 #' Print method for wcc_res objects
@@ -229,7 +190,7 @@ print.wcc_res <- function(x, ...) {
     "Total Lags Tested" = "{n_lags}",
     "Window Size" = "{s$window_size}",
     "Max Lag" = "{s$lag_max}",
-    "{agg_label}" = "{round(x$fisher_z, 4)}"
+    "{agg_label}" = "{round(x$aggregate[[1]], 4)}"
   ))
 
   invisible(x)
@@ -266,37 +227,27 @@ summary.wcc_res <- function(object, ...) {
 
 #' @noRd
 create_wcc_df <- function(x, y, time = NULL, settings) {
-  n_x <- length(x)
-  w_max <- settings$window_size - 1L
-  w_inc <- settings$window_increment
-  tau_max <- settings$lag_max
-  tau_inc <- settings$lag_increment
+  grid <- build_surface_grid(
+    n_x             = length(x),
+    window_size      = settings$window_size,
+    window_increment = settings$window_increment,
+    lag_max          = settings$lag_max,
+    lag_increment    = settings$lag_increment,
+    lagged           = TRUE
+  )
 
-  lags <- seq(-tau_max, tau_max, by = tau_inc)
-
-  n_r <- floor((n_x - w_max - 2 * tau_max) / w_inc)
-  n_c <- length(lags)
-
-  if (n_r < 1L) {
-    cli::cli_abort(c(
-      "Series is too short for the requested {.arg window_size} and {.arg lag_max}.",
-      "i" = "Need at least {w_max + 1L + 2L * tau_max + 1L} samples; got {n_x}."
-    ))
-  }
-
-  results_df <- base::expand.grid(row = seq_len(n_r), col = seq_len(n_c)) |>
-    dplyr::mutate(
-      i = 1 + tau_max + (row - 1) * w_inc,
-      tau = lags[col],
-      wcc = calc_wcc_cpp(
-        x = x,
-        y = y,
-        i_vals = i,
-        tau_vals = tau,
-        w_max = w_max,
-        na_rm = settings$na.rm
-      )
+  results_df <- data.frame(
+    i   = grid$i_vals,
+    tau = grid$tau_vals,
+    wcc = calc_wcc_cpp(
+      x        = x,
+      y        = y,
+      i_vals   = grid$i_vals,
+      tau_vals = grid$tau_vals,
+      w_max    = grid$w_max,
+      na_rm    = settings$na.rm
     )
+  )
 
   if (!is.null(time)) {
     results_df$i <- time[results_df$i]

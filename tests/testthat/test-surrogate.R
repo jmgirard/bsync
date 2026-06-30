@@ -255,7 +255,7 @@ test_that("M4: wcc_surrogate observed_z matches wcc() fisher_z exactly (Invarian
     window_size = 96, lag_max = 10,
     statistic = "mean_abs_z"
   )
-  expect_equal(res_surr_maz$observed_z, res_wcc_maz$fisher_z)
+  expect_equal(res_surr_maz$observed_z, res_wcc_maz$aggregate[[1]])
 
   # peak path
   res_wcc_peak <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "peak")
@@ -265,7 +265,7 @@ test_that("M4: wcc_surrogate observed_z matches wcc() fisher_z exactly (Invarian
     window_size = 96, lag_max = 10,
     statistic = "peak"
   )
-  expect_equal(res_surr_peak$observed_z, res_wcc_peak$fisher_z)
+  expect_equal(res_surr_peak$observed_z, res_wcc_peak$aggregate[[1]])
 })
 
 test_that("M4: surrogate loop aggregate equals observed path (cross-path Invariant 2)", {
@@ -286,7 +286,7 @@ test_that("M4: surrogate loop aggregate equals observed path (cross-path Invaria
       statistic = stat
     )
     expect_equal(
-      res_surr$surrogate_z[[1]], res_obs$fisher_z,
+      res_surr$surrogate_z[[1]], res_obs$aggregate[[1]],
       label = paste0("surrogate loop == observed for statistic='", stat, "'")
     )
   }

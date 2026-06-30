@@ -20,7 +20,8 @@ test_that("wcc returns correct structure and perfect correlation at lag 0", {
 
   # Check object classes and structure
   expect_s3_class(res, "wcc_res")
-  expect_type(res$fisher_z, "double")
+  expect_s3_class(res, "bsync_surface")
+  expect_type(res$aggregate[[1]], "double")
   expect_true(is.data.frame(res$results_df))
 
   # At lag 0 for identical series, the correlation should be exactly 1
@@ -43,7 +44,7 @@ test_that("wcc handles missing values without crashing", {
 
   # It should successfully return a valid data frame and a numeric summary
   expect_true(is.data.frame(res_na_rm$results_df))
-  expect_type(res_na_rm$fisher_z, "double")
+  expect_type(res_na_rm$aggregate[[1]], "double")
 })
 
 test_that("wcc handles time mapping correctly", {
@@ -351,7 +352,7 @@ test_that("M4: mean_abs_z default reproduces pre-M4 fisher_z behaviour on sim_dy
   r_clamped <- pmax(pmin(r, 0.9999), -0.9999)
   expected <- mean(abs(atanh(r_clamped)), na.rm = TRUE)
 
-  expect_equal(res$fisher_z, expected, tolerance = 1e-15)
+  expect_equal(res$aggregate[[1]], expected, tolerance = 1e-15)
 })
 
 test_that("M4: peak statistic matches pure-R oracle on sim_dyad", {
@@ -371,7 +372,7 @@ test_that("M4: peak statistic matches pure-R oracle on sim_dyad", {
   }
   oracle_peak <- mean(peaks, na.rm = TRUE)
 
-  expect_equal(res$fisher_z, oracle_peak, tolerance = 1e-9)
+  expect_equal(res$aggregate[[1]], oracle_peak, tolerance = 1e-9)
 })
 
 test_that("M4: peak > mean_abs_z (peak is an upper bound on mean)", {
@@ -381,7 +382,7 @@ test_that("M4: peak > mean_abs_z (peak is an upper bound on mean)", {
   res_maz <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "mean_abs_z")
   res_peak <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "peak")
 
-  expect_gte(res_peak$fisher_z, res_maz$fisher_z)
+  expect_gte(res_peak$aggregate[[1]], res_maz$aggregate[[1]])
 })
 
 test_that("M4: peak handles all-NA windows (wcc_aggregate NA branch)", {
@@ -391,7 +392,7 @@ test_that("M4: peak handles all-NA windows (wcc_aggregate NA branch)", {
   res <- wcc(x_const, y, window_size = 8, lag_max = 3, statistic = "peak")
 
   expect_true(all(is.na(res$results_df$wcc)))
-  expect_true(is.nan(res$fisher_z) || is.na(res$fisher_z))
+  expect_true(is.nan(res$aggregate[[1]]) || is.na(res$aggregate[[1]]))
 })
 
 test_that("M4: peak statistic is unaffected by time remapping", {
@@ -405,7 +406,7 @@ test_that("M4: peak statistic is unaffected by time remapping", {
   res_with_time <- wcc(x, y, time = t_vec, window_size = 96, lag_max = 10,
     statistic = "peak")
 
-  expect_equal(res_with_time$fisher_z, res_no_time$fisher_z)
+  expect_equal(res_with_time$aggregate[[1]], res_no_time$aggregate[[1]])
 })
 
 test_that("M4: print.wcc_res labels aggregate by chosen statistic", {

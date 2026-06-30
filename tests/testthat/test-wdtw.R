@@ -19,12 +19,12 @@ test_that("wdtw returns expected structure and classes", {
 
   expect_s3_class(res, "wdtw_res")
   expect_type(res$settings, "list")
-  expect_type(res$mean_distance, "double")
+  expect_type(res$aggregate[["mean_distance"]], "double")
   expect_s3_class(res$results_df, "data.frame")
 
   # Check expected columns
   expect_true(all(
-    c("row", "col", "i", "tau", "dtw_dist") %in% names(res$results_df)
+    c("i", "tau", "dtw_dist") %in% names(res$results_df)
   ))
 
   # Check basic dimensions based on the parameters
@@ -59,8 +59,8 @@ test_that("wdtw correctly scales data globally and locally", {
   )
 
   # Scaled distances should be drastically smaller than unscaled distances for these vectors
-  expect_true(res_global$mean_distance < res_unscaled$mean_distance)
-  expect_true(res_local$mean_distance < res_unscaled$mean_distance)
+  expect_true(res_global$aggregate[["mean_distance"]] < res_unscaled$aggregate[["mean_distance"]])
+  expect_true(res_local$aggregate[["mean_distance"]] < res_unscaled$aggregate[["mean_distance"]])
 })
 
 test_that("wdtw computes distance metrics L1 and L2 correctly", {
@@ -82,7 +82,7 @@ test_that("wdtw computes distance metrics L1 and L2 correctly", {
   )
 
   # Squared Euclidean (L2) and Manhattan (L1) should yield different mean distances for shifted waves
-  expect_false(res_l2$mean_distance == res_l1$mean_distance)
+  expect_false(res_l2$aggregate[["mean_distance"]] == res_l1$aggregate[["mean_distance"]])
 })
 
 test_that("wdtw logic correctly identifies perfect alignment", {

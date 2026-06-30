@@ -70,25 +70,20 @@ wcc_surrogate <- function(
     na.rm = na.rm,
     statistic = statistic
   )
-  obs_z <- obs_wcc$fisher_z
+  obs_z <- obs_wcc$aggregate[[1]]
 
   # 2. Build the structural grid ONCE for maximum speed
-  lags <- seq(-lag_max, lag_max, by = lag_increment)
-  n_x <- length(x)
-  w_max_surr <- window_size - 1L
-  n_r <- floor((n_x - w_max_surr - 2 * lag_max) / window_increment)
-  n_c <- length(lags)
-
-  if (n_r < 1L) {
-    cli::cli_abort(c(
-      "Series is too short for the requested {.arg window_size} and {.arg lag_max}.",
-      "i" = "Need at least {w_max_surr + 1L + 2L * lag_max + 1L} samples; got {n_x}."
-    ))
-  }
-
-  grid_df <- base::expand.grid(row = seq_len(n_r), col = seq_len(n_c))
-  i_vals <- 1 + lag_max + (grid_df$row - 1) * window_increment
-  tau_vals <- lags[grid_df$col]
+  grid <- build_surface_grid(
+    n_x             = length(x),
+    window_size      = window_size,
+    window_increment = window_increment,
+    lag_max          = lag_max,
+    lag_increment    = lag_increment,
+    lagged           = TRUE
+  )
+  i_vals   <- grid$i_vals
+  tau_vals <- grid$tau_vals
+  w_max_surr <- grid$w_max
 
   x_cpp <- as.double(x)
 
@@ -109,7 +104,8 @@ wcc_surrogate <- function(
 
       z_vals <- r_to_z(wcc_vals)
 
-      wcc_aggregate(z = z_vals, window_id = grid_df$row, statistic = statistic)
+      # i_vals groups by window position (each unique i = one window)
+      wcc_aggregate(z = z_vals, window_id = i_vals, statistic = statistic)
     },
     FUN.VALUE = numeric(1),
     future.seed = TRUE
@@ -201,7 +197,7 @@ wdtw_surrogate <- function(
     scale_method = scale_method,
     distance_metric = distance_metric
   )
-  obs_cost <- obs_wdtw$mean_distance
+  obs_cost <- obs_wdtw$aggregate[["mean_distance"]]
 
   x_cpp <- as.double(x)
   if (scale_method == "global") {
@@ -209,30 +205,34 @@ wdtw_surrogate <- function(
   }
 
   # 2. Build grids for computation
-  n_x <- length(x)
-  w_max_surr <- window_size - 1L
-  n_r <- floor((n_x - w_max_surr - 2 * lag_max) / window_increment)
-
-  if (n_r < 1L) {
-    cli::cli_abort(c(
-      "Series is too short for the requested {.arg window_size} and {.arg lag_max}.",
-      "i" = "Need at least {w_max_surr + 1L + 2L * lag_max + 1L} samples; got {n_x}."
-    ))
-  }
-
   if (fast_method) {
-    i_vals_surr <- 1 + lag_max + (seq_len(n_r) - 1L) * window_increment
-    tau_vals_surr <- rep(0, n_r)
+    grid <- build_surface_grid(
+      n_x             = length(x),
+      window_size      = window_size,
+      window_increment = window_increment,
+      lag_max          = lag_max,
+      lag_increment    = lag_increment,
+      lagged           = FALSE
+    )
+    # Shift i_vals to account for lag_max offset (fast path uses lag=0 only)
+    i_vals_surr   <- grid$i_vals + lag_max
+    tau_vals_surr <- rep(0L, grid$n_r)
     cli::cli_alert_info(
       "Running fast method: Evaluating surrogates at lag 0 only."
     )
   } else {
-    lags <- seq(-lag_max, lag_max, by = lag_increment)
-    n_c <- length(lags)
-    grid_df <- base::expand.grid(row = seq_len(n_r), col = seq_len(n_c))
-    i_vals_surr <- 1 + lag_max + (grid_df$row - 1) * window_increment
-    tau_vals_surr <- lags[grid_df$col]
+    grid <- build_surface_grid(
+      n_x             = length(x),
+      window_size      = window_size,
+      window_increment = window_increment,
+      lag_max          = lag_max,
+      lag_increment    = lag_increment,
+      lagged           = TRUE
+    )
+    i_vals_surr   <- grid$i_vals
+    tau_vals_surr <- grid$tau_vals
   }
+  w_max_surr <- grid$w_max
 
   # 3. Parallel-ready loop using future.apply
   surrogate_costs <- future.apply::future_vapply(
@@ -327,22 +327,18 @@ wgranger_surrogate <- function(
     window_increment = window_increment
   )
 
-  obs_f_xy <- base::mean(obs_wgranger$results_df$f_xy, na.rm = TRUE)
-  obs_f_yx <- base::mean(obs_wgranger$results_df$f_yx, na.rm = TRUE)
+  obs_f_xy <- obs_wgranger$aggregate[["f_xy"]]
+  obs_f_yx <- obs_wgranger$aggregate[["f_yx"]]
 
   # 2. Setup structural grid
-  n_x <- length(x)
-  w_max_surr <- window_size - 1L
-  n_r <- floor((n_x - w_max_surr) / window_increment)
-
-  if (n_r < 1L) {
-    cli::cli_abort(c(
-      "Series is too short for the requested {.arg window_size}.",
-      "i" = "Need at least {w_max_surr + 1L + 1L} samples; got {n_x}."
-    ))
-  }
-
-  i_vals <- 1 + (seq_len(n_r) - 1L) * window_increment
+  grid <- build_surface_grid(
+    n_x             = length(x),
+    window_size      = window_size,
+    window_increment = window_increment,
+    lagged           = FALSE
+  )
+  i_vals     <- grid$i_vals
+  w_max_surr <- grid$w_max
 
   x_cpp <- as.double(x)
 

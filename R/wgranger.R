@@ -22,37 +22,14 @@ wgranger <- function(
   ar_order = 1,
   window_increment = 1
 ) {
-  if (!is.numeric(x)) {
-    cli::cli_abort("{.arg x} must be a numeric vector.")
-  }
-  if (!is.numeric(y)) {
-    cli::cli_abort("{.arg y} must be a numeric vector.")
-  }
-  if (length(x) != length(y)) {
-    cli::cli_abort("{.arg x} and {.arg y} must be the same length.")
-  }
-
-  if (!is.null(time)) {
-    if (!is.numeric(time)) {
-      cli::cli_abort("{.arg time} must be a numeric vector.")
-    }
-    if (length(time) != length(x)) {
-      cli::cli_abort("{.arg time} must be the same length as {.arg x}.")
-    }
-  }
+  validate_series(x, y, time)
+  validate_window_params(
+    window_size, window_increment,
+    ar_order = ar_order
+  )
 
   x <- as.double(x)
   y <- as.double(y)
-
-  if (!rlang::is_integerish(window_size, n = 1) || window_size <= 0) {
-    cli::cli_abort("{.arg window_size} must be a single positive integer.")
-  }
-  if (!rlang::is_integerish(ar_order, n = 1) || ar_order <= 0) {
-    cli::cli_abort("{.arg ar_order} must be a single positive integer.")
-  }
-  if (!rlang::is_integerish(window_increment, n = 1) || window_increment <= 0) {
-    cli::cli_abort("{.arg window_increment} must be a single positive integer.")
-  }
 
   settings <- list(
     window_size = window_size,
@@ -65,17 +42,14 @@ wgranger <- function(
 
   out <- list(
     results_df = results_df,
-    settings = settings
+    aggregate  = c(
+      f_xy = base::mean(results_df$f_xy, na.rm = TRUE),
+      f_yx = base::mean(results_df$f_yx, na.rm = TRUE)
+    ),
+    settings   = settings
   )
 
-  new_wgranger_res(out)
-}
-
-# Constructors ------------------------------------------------------------
-
-new_wgranger_res <- function(x = list()) {
-  stopifnot(is.list(x))
-  structure(x, class = c("wgranger_res", class(x)))
+  new_bsync_surface(out, "wgranger_res")
 }
 
 # S3 Methods --------------------------------------------------------------
@@ -135,25 +109,16 @@ summary.wgranger_res <- function(object, ...) {
 
 #' @noRd
 create_wgranger_df <- function(x, y, time = NULL, settings) {
-  n_x <- length(x)
-  w_max <- settings$window_size - 1L
-  w_inc <- settings$window_increment
-  ar_order <- settings$ar_order
+  grid <- build_surface_grid(
+    n_x             = length(x),
+    window_size      = settings$window_size,
+    window_increment = settings$window_increment,
+    lagged           = FALSE
+  )
 
-  n_r <- floor((n_x - w_max) / w_inc)
+  stats_df <- calc_wgranger_cpp(x, y, grid$i_vals, grid$w_max, settings$ar_order)
 
-  if (n_r < 1L) {
-    cli::cli_abort(c(
-      "Series is too short for the requested {.arg window_size}.",
-      "i" = "Need at least {w_max + 1L + 1L} samples; got {n_x}."
-    ))
-  }
-
-  i_vals <- 1 + (seq_len(n_r) - 1L) * w_inc
-
-  stats_df <- calc_wgranger_cpp(x, y, i_vals, w_max, ar_order)
-
-  results_df <- data.frame(i = i_vals)
+  results_df <- data.frame(i = grid$i_vals)
   results_df <- cbind(results_df, stats_df)
 
   if (!is.null(time)) {

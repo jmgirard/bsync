@@ -4,8 +4,6 @@ utils::globalVariables(c(
   "wcc_bin",
   "peak_lag",
   "wcc",
-  "row",
-  "col",
   ".bin_center",
   ":=",
   ".data",

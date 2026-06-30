@@ -35,24 +35,11 @@ wdtw <- function(
   scale_method <- match.arg(scale_method)
   distance_metric <- match.arg(distance_metric)
 
-  if (!is.numeric(x)) {
-    cli::cli_abort("{.arg x} must be a numeric vector.")
-  }
-  if (!is.numeric(y)) {
-    cli::cli_abort("{.arg y} must be a numeric vector.")
-  }
-  if (length(x) != length(y)) {
-    cli::cli_abort("{.arg x} and {.arg y} must be the same length.")
-  }
-
-  if (!is.null(time)) {
-    if (!is.numeric(time)) {
-      cli::cli_abort("{.arg time} must be a numeric vector.")
-    }
-    if (length(time) != length(x)) {
-      cli::cli_abort("{.arg time} must be the same length as {.arg x}.")
-    }
-  }
+  validate_series(x, y, time)
+  validate_window_params(
+    window_size, window_increment,
+    lag_max = lag_max, lag_increment = lag_increment
+  )
 
   if (scale_method == "global") {
     x <- as.numeric(base::scale(x))
@@ -61,19 +48,6 @@ wdtw <- function(
 
   x <- as.double(x)
   y <- as.double(y)
-
-  if (!rlang::is_integerish(window_size, n = 1) || window_size <= 0) {
-    cli::cli_abort("{.arg window_size} must be a single positive integer.")
-  }
-  if (!rlang::is_integerish(lag_max, n = 1) || lag_max <= 0) {
-    cli::cli_abort("{.arg lag_max} must be a single positive integer.")
-  }
-  if (!rlang::is_integerish(window_increment, n = 1) || window_increment <= 0) {
-    cli::cli_abort("{.arg window_increment} must be a single positive integer.")
-  }
-  if (!rlang::is_integerish(lag_increment, n = 1) || lag_increment <= 0) {
-    cli::cli_abort("{.arg lag_increment} must be a single positive integer.")
-  }
 
   settings <- list(
     window_size = window_size,
@@ -90,18 +64,11 @@ wdtw <- function(
 
   out <- list(
     results_df = results_df,
-    mean_distance = mean_dist,
-    settings = settings
+    aggregate  = c(mean_distance = mean_dist),
+    settings   = settings
   )
 
-  new_wdtw_res(out)
-}
-
-# Constructors ------------------------------------------------------------
-
-new_wdtw_res <- function(x = list()) {
-  stopifnot(is.list(x))
-  structure(x, class = c("wdtw_res", class(x)))
+  new_bsync_surface(out, "wdtw_res")
 }
 
 # S3 Methods --------------------------------------------------------------
@@ -126,7 +93,7 @@ print.wdtw_res <- function(x, ...) {
     "Max Lag" = "{s$lag_max}",
     "Scale Method" = "{s$scale_method}",
     "Distance Metric" = "{s$distance_metric}",
-    "Overall Mean Distance" = "{round(x$mean_distance, 4)}"
+    "Overall Mean Distance" = "{round(x$aggregate[['mean_distance']], 4)}"
   ))
 
   invisible(x)
@@ -136,41 +103,31 @@ print.wdtw_res <- function(x, ...) {
 
 #' @noRd
 create_wdtw_df <- function(x, y, time = NULL, settings) {
-  n_x <- length(x)
-  w_max <- settings$window_size - 1L
-  w_inc <- settings$window_increment
-  tau_max <- settings$lag_max
-  tau_inc <- settings$lag_increment
+  grid <- build_surface_grid(
+    n_x             = length(x),
+    window_size      = settings$window_size,
+    window_increment = settings$window_increment,
+    lag_max          = settings$lag_max,
+    lag_increment    = settings$lag_increment,
+    lagged           = TRUE
+  )
 
   use_l2 <- settings$distance_metric == "L2"
   local_scale <- settings$scale_method == "local"
 
-  lags <- seq(-tau_max, tau_max, by = tau_inc)
-
-  n_r <- floor((n_x - w_max - 2 * tau_max) / w_inc)
-  n_c <- length(lags)
-
-  if (n_r < 1L) {
-    cli::cli_abort(c(
-      "Series is too short for the requested {.arg window_size} and {.arg lag_max}.",
-      "i" = "Need at least {w_max + 1L + 2L * tau_max + 1L} samples; got {n_x}."
-    ))
-  }
-
-  results_df <- base::expand.grid(row = seq_len(n_r), col = seq_len(n_c)) |>
-    dplyr::mutate(
-      i = 1 + tau_max + (row - 1) * w_inc,
-      tau = lags[col],
-      dtw_dist = calc_wdtw_cpp(
-        x = x,
-        y = y,
-        i_vals = i,
-        tau_vals = tau,
-        w_max = w_max,
-        use_l2 = use_l2,
-        local_scale = local_scale
-      )
+  results_df <- data.frame(
+    i        = grid$i_vals,
+    tau      = grid$tau_vals,
+    dtw_dist = calc_wdtw_cpp(
+      x           = x,
+      y           = y,
+      i_vals      = grid$i_vals,
+      tau_vals    = grid$tau_vals,
+      w_max       = grid$w_max,
+      use_l2      = use_l2,
+      local_scale = local_scale
     )
+  )
 
   if (!is.null(time)) {
     results_df$i <- time[results_df$i]
