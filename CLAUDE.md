@@ -130,6 +130,12 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
   7. 363 tests green; `R CMD check --as-cran` = 0/0/0; styled (styler) and linted.
   Plan-time decisions held: WCC-only scope; `$fisher_z` field name kept (revisit in M5);
   `settings$statistic` records the choice.
+  Post-review: peak oracle rewritten to an explicit for-loop (no `tapply`) so it cannot
+  share a latent bug with the implementation; cross-path Invariant-2 test added (pass `y`
+  itself as the sole surrogate, assert `surrogate_z[1] == observed_z` for both statistics —
+  exercises the surrogate loop's `wcc_aggregate(grid_df$row)` call site independently);
+  peak + all-NA-window, peak + `time`-supplied grouping, peak print-label, and peak
+  p-value sanity tests added (373 tests total, `R CMD check --as-cran` remains 0/0/0).
 
 ## Current focus
 
