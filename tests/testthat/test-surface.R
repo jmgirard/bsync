@@ -150,3 +150,75 @@ test_that("AC3: $aggregate is a named numeric on all three", {
   expect_named(wdtw_res$aggregate, "mean_distance")
   expect_named(wg_res$aggregate, c("f_xy", "f_yx"))
 })
+
+
+# AC6: tidy interface (tidy / glance / as_tibble) -----------------------------
+
+test_that("AC6: tidy.bsync_surface returns tibble matching results_df", {
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+
+  res <- wcc(x, y, window_size = 96, lag_max = 10)
+  t <- generics::tidy(res)
+
+  expect_s3_class(t, "tbl_df")
+  expect_equal(nrow(t), nrow(res$results_df))
+  expect_equal(names(t), c("i", "tau", "wcc"))
+  expect_equal(t$wcc, res$results_df$wcc)
+})
+
+test_that("AC6: tidy / as_tibble return the same tibble", {
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  res <- wdtw(x, y, window_size = 96, lag_max = 10)
+  expect_equal(generics::tidy(res), tibble::as_tibble(res))
+})
+
+test_that("AC6: glance.bsync_surface — WCC has 1 row with correct fields", {
+  res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+  g <- generics::glance(res)
+
+  expect_s3_class(g, "tbl_df")
+  expect_equal(nrow(g), 1L)
+  expect_true("mean_abs_z" %in% names(g))
+  expect_equal(g$mean_abs_z, res$aggregate[["mean_abs_z"]], tolerance = 1e-12)
+  expect_equal(g$n_windows, 2285L)
+  expect_equal(g$window_size, 96L)
+  expect_equal(g$lag_max, 10L)
+  expect_equal(g$statistic, "mean_abs_z")
+})
+
+test_that("AC6: glance.bsync_surface — WDTW has 1 row with correct fields", {
+  res <- wdtw(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+  g <- generics::glance(res)
+
+  expect_s3_class(g, "tbl_df")
+  expect_equal(nrow(g), 1L)
+  expect_true("mean_distance" %in% names(g))
+  expect_equal(g$mean_distance, res$aggregate[["mean_distance"]], tolerance = 1e-10)
+  expect_equal(g$n_windows, 2285L)
+  expect_true("scale_method" %in% names(g))
+})
+
+test_that("AC6: glance.bsync_surface — Granger has f_xy and f_yx columns", {
+  res <- wgranger(sim_dyad$x_A, sim_dyad$x_B, window_size = 96)
+  g <- generics::glance(res)
+
+  expect_s3_class(g, "tbl_df")
+  expect_equal(nrow(g), 1L)
+  expect_true(all(c("f_xy", "f_yx") %in% names(g)))
+  expect_equal(g$f_xy, res$aggregate[["f_xy"]], tolerance = 1e-10)
+  expect_equal(g$f_yx, res$aggregate[["f_yx"]], tolerance = 1e-10)
+  expect_equal(g$n_windows, 2305L)
+  expect_equal(g$ar_order, 1L)
+})
+
+test_that("AC6: glance() outputs from two runs can be bound into a tibble", {
+  res1 <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+  res2 <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10,
+              statistic = "peak")
+  combined <- dplyr::bind_rows(generics::glance(res1), generics::glance(res2))
+
+  expect_equal(nrow(combined), 2L)
+  expect_equal(combined$statistic, c("mean_abs_z", "peak"))
+})

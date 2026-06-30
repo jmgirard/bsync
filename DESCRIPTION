@@ -30,12 +30,14 @@ Imports:
     cli,
     dplyr,
     future.apply,
+    generics,
     ggplot2,
     grDevices,
     gsignal,
     Rcpp,
     rlang,
     scales,
+    tibble,
     utils
 Suggests:
     future,
