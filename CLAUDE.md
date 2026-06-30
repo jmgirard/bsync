@@ -82,37 +82,35 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
   (tolerance 1e-5 catches real bugs); `.Rbuildignore` gains `^\.claude$`, `^CLAUDE\.md$`,
   `^DESIGN\.md$`, `^bench$` — `R CMD check` is now 0/0/0.
 
+- **M3 — CRAN readiness (done).** All seven acceptance criteria met (commits `184e874`–`69f1ca4`
+  on `main`; 353 tests passing, 0 errors/0 warnings/0 notes in `R CMD check --as-cran`). No C++
+  core numerics changed — only `RcppExports` regenerated to confirm zero diff, so Invariant 5 was
+  not triggered. Plan-time decisions held: version stays `0.0.0.9000`; `cran-comments.md` deferred
+  to actual submission; DESCRIPTION Description refreshed:
+  1. Build artifacts untracked via `git rm --cached` (`.DS_Store`, `tests/.DS_Store`, six
+     `src/*.o`, `src/bsync.{so,dll}`, `tests/testthat/Rplots.pdf`); `.gitignore` extended with
+     `*.o`/`*.so`/`*.dll`/`*.dylib` + `tests/testthat/Rplots.pdf`. `git ls-files` is artifact-free;
+     `bsync.Rproj`/`LICENSE.md` deliberately kept (already `.Rbuildignore`'d).
+  2. `Rcpp::compileAttributes()` produced zero diff in `src/RcppExports.cpp` / `R/RcppExports.R`.
+  3. `@return` roxygen added to all 18 exported `print`/`plot`/`summary` methods +
+     `plot_optima_overlay`; re-documented. Only `sim_dyad` (data) and `bsync-package` (overview)
+     omit `\value`, both legitimately.
+  4. `R CMD check --as-cran` = 0/0/0 (verified twice during implementation); examples needed no
+     `\donttest{}` (check reports "examples ... NONE").
+  5. `urlchecker::url_check()` clean; `spelling::spell_check_package()` clean via new `inst/WORDLIST`
+     and `Language: en-US` in DESCRIPTION (neither tool added to deps).
+  6. `devtools::build_readme()` regenerated `README.md` (and fixed a broken `wcc_surrogate()`
+     example that passed a non-existent `n_surrogates` arg instead of a `y_surrogates` matrix);
+     `pkgdown::check_pkgdown()` passes; DESCRIPTION Description now covers WDTW/Granger/surrogates/
+     optima/leadership.
+  7. 353 tests green; vdiffr snapshots unchanged; styler applied across tests + vignettes; NEWS.md
+     gained an M3 entry.
+
 ## Current focus
 
 **Hardening cycle toward a near-term CRAN submission**, run as four focused milestones via the
-plan → implement → review loop. **M3 is active.**
+plan → implement → review loop. **M4 is next.**
 
-- **M3 — CRAN readiness (active).** Make the package `R CMD check --as-cran`-clean and submission-
-  ready *locally* (no upload this milestone). No C++ core numerics change — only `RcppExports` is
-  regenerated to confirm zero diff, so Invariant 5 (numerical-regression oracle) is **not**
-  triggered. Decisions settled at plan time: keep version `0.0.0.9000` (bump only at real
-  submission); **defer** `cran-comments.md` to submission; **refresh** the DESCRIPTION Description to
-  cover the full estimator set. `bench/` not required (no efficiency work). Acceptance criteria:
-  1. **No tracked build artifacts.** `git rm --cached` the slipped-in files (`.DS_Store`,
-     `tests/.DS_Store`, `src/*.o`, `src/bsync.{so,dll}`, `tests/testthat/Rplots.pdf`); extend
-     `.gitignore` with `*.o`/`*.so`/`*.dll`/`*.dylib`/`Rplots.pdf` so they cannot re-slip.
-     `git ls-files` returns none of those patterns. Keep `bsync.Rproj`/`LICENSE.md` (already
-     `.Rbuildignore`'d, not artifacts).
-  2. **`RcppExports` regenerates clean.** `Rcpp::compileAttributes()` yields zero diff in
-     `src/RcppExports.cpp` / `R/RcppExports.R`; no core numerics changed (Invariant 5 untriggered).
-  3. **`\value` everywhere required.** Add `@return` roxygen to the 18 exported `print`/`plot`/
-     `summary` methods + `plot_optima_overlay` (in `R/wcc.R`, `R/wdtw.R`, `R/wgranger.R`,
-     `R/optima.R`, `R/leadership.R`, `R/signal_power.R`); re-document. Only `sim_dyad` (data) and
-     `bsync-package` (overview) legitimately omit `\value`.
-  4. **`R CMD check --as-cran` = 0/0/0**, all examples runnable (`\donttest{}` only where runtime
-     forces it, justified — likely surrogate/autotune), no filesystem side effects.
-  5. **URLs + spelling clean.** `urlchecker::url_check()` passes; `spelling::spell_check_package()`
-     clean (genuine terms in `inst/WORDLIST`). Both run ad hoc — not added to deps.
-  6. **README + pkgdown build.** `devtools::build_readme()` regenerates `README.md` from
-     `README.Rmd`; `pkgdown::check_pkgdown()` passes; DESCRIPTION Description reflects WDTW, windowed
-     Granger, optima/leadership, and phase+circular surrogates.
-  7. **353 tests still green**; vdiffr snapshots unchanged; styler/air + lintr clean; NEWS.md gains
-     an M3 entry.
 - **M4 — Selectable WCC aggregate statistic.** `statistic = c("mean_abs_z","peak")` on `wcc()` +
   `wcc_surrogate()`; null matches observed; vignette documents the choice.
 
