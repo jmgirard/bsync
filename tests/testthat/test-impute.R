@@ -1,8 +1,5 @@
 library(testthat)
 
-# Create a context for the test file
-context("Time Series Imputation")
-
 test_that("Mathematical imputation is correct for small gaps", {
   # Linear interpolation
   v_linear <- c(2, NA, 6, NA, 10)
