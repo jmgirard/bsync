@@ -37,10 +37,10 @@
 #'   windows when calculating windowed cross-correlations. (default = `TRUE`)
 #' @param statistic A character string specifying how to aggregate the WCC
 #'   surface into a single number. `"mean_abs_z"` (default) takes the mean of
-#'   absolute Fisher's Z values over **all** windows and lags — the SUSY *mean
+#'   absolute Fisher's Z values over **all** windows and lags -- the SUSY *mean
 #'   absolute Z* (Tschacher & Meier, 2020). `"peak"` takes the maximum absolute
 #'   Fisher's Z across lags **within each window**, then averages those per-window
-#'   peaks — the rMEA *best-lag* convention (Boker et al., 2002). Both are
+#'   peaks -- the rMEA *best-lag* convention (Boker et al., 2002). Both are
 #'   larger-is-more-synchrony quantities. Pass the same value to
 #'   `wcc_surrogate()` so the null distribution matches (see Invariant 2).
 #' @return A list object of class "wcc_res" containing the results matrix and
@@ -103,64 +103,153 @@ wcc <- function(
 
 #' Suggest WCC Hyperparameters
 #'
-#' Calculates principled starting values for Windowed Cross-Correlation parameters
-#' based on the sampling rate of the data and the theoretical timing of the behaviors.
+#' Derives principled starting values for Windowed Cross-Correlation parameters
+#' from the **measured signal** via PSD-based dominant timescale estimation.
 #'
 #' @details
-#' The `window_size` is derived from the **4-cycles-per-window heuristic**: a window
-#' should span approximately 4 full cycles of the behavior of interest so that the
-#' within-window correlation estimate is stable across a range of lead–lag relationships
-#' (Boker et al., 2002). Concretely, `window_size = round(event_duration_sec * 4 *
-#' sample_rate)`. Four cycles ensures enough oscillation to estimate a reliable
-#' correlation, whereas two cycles (the Nyquist minimum) would leave the estimate
-#' too noisy.
+#' **Dominant timescale.** When `event_duration_sec` is `NULL` (default), the
+#' function estimates the dominant behavioral cycle from the measured signal via
+#' [evaluate_signal_power()]: `event_duration_sec = 1 / primary_cutoff_freq`.
+#' Pass a numeric value to override with your own theoretical estimate.
 #'
-#' The `lag_max` is capped at half the `window_size` when the requested
-#' `max_delay_sec` would exceed it; beyond that point the lagged window and the
-#' reference window share fewer than half their samples, severely degrading reliability.
+#' **Window size (4-cycles heuristic).** `window_size = round(event_duration_sec
+#' * 4 * sample_rate)` (Boker et al., 2002). Four cycles yields a stable
+#' within-window correlation across the range of lead-lag relationships; two
+#' cycles (the Nyquist minimum) is too noisy.
 #'
-#' @param sample_rate A numeric value indicating the sampling rate in Hertz (frames per second).
-#' @param event_duration_sec The expected duration of a single behavioral event in seconds.
-#'   Used as the basis for the 4-cycles-per-window heuristic: `window_size = round(event_duration_sec *
-#'   4 * sample_rate)`. Default is 2 (typical for brief conversational gestures).
-#' @param max_delay_sec The maximum plausible reaction time between participants in seconds.
-#'   Default is 3.
-#' @param overlap_pct The desired percentage of overlap between consecutive time windows.
-#'   Default is 0.5 (50 percent overlap).
-#' @return A list of recommended parameters ready to be passed to `wcc()`.
+#' **Hard constraints applied and reported:**
+#' \itemize{
+#'   \item `lag_max <= floor(window_size / 2)` -- the SUSY reliability constraint
+#'     (`segment >= 2*maxlag`); beyond this the lagged windows share fewer than
+#'     half their samples.
+#'   \item `window_size <= floor(series_length / 2)` -- ensures at least two
+#'     non-overlapping windows fit in the series.
+#'   \item `window_size >= min_window_samples` -- a minimum-samples floor for a
+#'     stable correlation estimate.
+#' }
+#' All violations produce informative messages, not silent changes.
+#'
+#' @param x Numeric vector; the reference time series.
+#' @param y Numeric vector; the query time series (same length as `x`).
+#' @param sample_rate A numeric value indicating the sampling rate in Hertz.
+#' @param event_duration_sec Optional numeric override for the dominant
+#'   behavioral cycle duration in seconds. Default `NULL` derives it from the
+#'   PSD of `x` and `y` via [evaluate_signal_power()].
+#' @param max_delay_sec The maximum plausible reaction time between participants
+#'   in seconds, used to set the initial `lag_max`. Default is `3`.
+#' @param overlap_pct The desired proportion of overlap between consecutive
+#'   windows (0-1). Default is `0.5` (50\% overlap).
+#' @param min_window_samples Minimum number of samples required in a window for
+#'   a stable correlation. Default is `20`.
+#' @return A named list with `window_size`, `lag_max`, `window_increment`, and
+#'   `lag_increment`, ready to pass to [wcc()].
 #' @export
 suggest_wcc_params <- function(
+  x,
+  y,
   sample_rate,
-  event_duration_sec = 2,
+  event_duration_sec = NULL,
   max_delay_sec = 3,
-  overlap_pct = 0.5
+  overlap_pct = 0.5,
+  min_window_samples = 20L
 ) {
-  suggested_window <- round((event_duration_sec * 4) * sample_rate)
-  suggested_lag <- round(max_delay_sec * sample_rate)
-
-  if (suggested_lag > (suggested_window / 2)) {
-    cli::cli_warn(c(
-      "The requested {.arg max_delay_sec} is too large relative to the {.arg event_duration_sec}.",
-      "i" = "Capping {.arg lag_max} at half the {.arg window_size} to preserve statistical reliability."
-    ))
-    suggested_lag <- floor(suggested_window / 2)
+  validate_series(x, y)
+  if (!is.numeric(sample_rate) || length(sample_rate) != 1 || sample_rate <= 0) {
+    cli::cli_abort("{.arg sample_rate} must be a single positive number.")
+  }
+  if (!is.null(event_duration_sec)) {
+    if (!is.numeric(event_duration_sec) || length(event_duration_sec) != 1 ||
+      event_duration_sec <= 0) {
+      cli::cli_abort(
+        "{.arg event_duration_sec} must be a single positive number or {.val NULL}."
+      )
+    }
+  }
+  if (!is.numeric(max_delay_sec) || length(max_delay_sec) != 1 || max_delay_sec <= 0) {
+    cli::cli_abort("{.arg max_delay_sec} must be a single positive number.")
+  }
+  if (!is.numeric(overlap_pct) || length(overlap_pct) != 1 ||
+    overlap_pct < 0 || overlap_pct >= 1) {
+    cli::cli_abort("{.arg overlap_pct} must be a single number in [0, 1).")
+  }
+  if (!rlang::is_integerish(min_window_samples, n = 1) || min_window_samples < 2) {
+    cli::cli_abort("{.arg min_window_samples} must be a single integer >= 2.")
   }
 
-  suggested_w_inc <- max(1, round(suggested_window * (1 - overlap_pct)))
+  n <- length(x)
+
+  # --- Derive dominant timescale from PSD if not supplied ---------------
+  if (is.null(event_duration_sec)) {
+    psd_res <- evaluate_signal_power(
+      x           = list(x = x, y = y),
+      sample_rate = sample_rate,
+      quiet       = TRUE
+    )
+    cycle_sec <- 1 / psd_res$primary_cutoff_freq
+    cli::cli_alert_info(
+      "PSD dominant cycle: {round(cycle_sec, 2)} s \\
+       (cutoff {round(psd_res$primary_cutoff_freq, 2)} Hz)."
+    )
+  } else {
+    cycle_sec <- event_duration_sec
+    cli::cli_alert_info(
+      "Using supplied {.arg event_duration_sec} = {event_duration_sec} s."
+    )
+  }
+
+  # --- 4-cycles-per-window heuristic ------------------------------------
+  suggested_window <- round(cycle_sec * 4 * sample_rate)
+
+  # --- Enforce hard constraints with warnings ---------------------------
+  # Constraint 1: minimum samples floor
+  if (suggested_window < min_window_samples) {
+    cli::cli_warn(c(
+      "Derived window ({suggested_window} samples) is below {.arg min_window_samples} \\
+       ({min_window_samples}).",
+      "i" = "Increasing to {min_window_samples}."
+    ))
+    suggested_window <- as.integer(min_window_samples)
+  }
+
+  # Constraint 2: series-length ceiling (window <= series / 2)
+  max_window <- floor(n / 2L)
+  if (suggested_window > max_window) {
+    cli::cli_warn(c(
+      "Derived window ({suggested_window} samples) exceeds series_length/2 ({max_window}).",
+      "i" = "Capping {.arg window_size} to {max_window}."
+    ))
+    suggested_window <- as.integer(max_window)
+  }
+
+  # Lag: convert seconds -> samples
+  suggested_lag <- round(max_delay_sec * sample_rate)
+
+  # Constraint 3: lag_max <= window / 2 (SUSY reliability constraint)
+  max_lag <- floor(suggested_window / 2L)
+  if (suggested_lag > max_lag) {
+    cli::cli_warn(c(
+      "Requested {.arg max_delay_sec} ({round(max_delay_sec, 2)} s = \\
+       {round(suggested_lag)} samples) exceeds window_size/2 ({max_lag}).",
+      "i" = "Capping {.arg lag_max} at {max_lag} (= {round(max_lag / sample_rate, 2)} s)."
+    ))
+    suggested_lag <- as.integer(max_lag)
+  }
+
+  suggested_w_inc <- max(1L, round(suggested_window * (1 - overlap_pct)))
 
   cli::cli_h1("Suggested WCC Parameters")
   cli::cli_dl(c(
-    "window_size" = "{suggested_window} ({round(suggested_window / sample_rate, 1)} seconds)",
-    "lag_max" = "{suggested_lag} ({round(suggested_lag / sample_rate, 1)} seconds)",
+    "window_size"      = "{suggested_window} ({round(suggested_window / sample_rate, 2)} s)",
+    "lag_max"          = "{suggested_lag} ({round(suggested_lag / sample_rate, 2)} s)",
     "window_increment" = "{suggested_w_inc} ({overlap_pct * 100}% overlap)",
-    "lag_increment" = "1"
+    "lag_increment"    = "1"
   ))
 
   invisible(list(
-    window_size = suggested_window,
-    lag_max = suggested_lag,
+    window_size      = suggested_window,
+    lag_max          = suggested_lag,
     window_increment = suggested_w_inc,
-    lag_increment = 1
+    lag_increment    = 1L
   ))
 }
 

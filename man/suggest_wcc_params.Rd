@@ -5,42 +5,63 @@
 \title{Suggest WCC Hyperparameters}
 \usage{
 suggest_wcc_params(
+  x,
+  y,
   sample_rate,
-  event_duration_sec = 2,
+  event_duration_sec = NULL,
   max_delay_sec = 3,
-  overlap_pct = 0.5
+  overlap_pct = 0.5,
+  min_window_samples = 20L
 )
 }
 \arguments{
-\item{sample_rate}{A numeric value indicating the sampling rate in Hertz (frames per second).}
+\item{x}{Numeric vector; the reference time series.}
 
-\item{event_duration_sec}{The expected duration of a single behavioral event in seconds.
-Used as the basis for the 4-cycles-per-window heuristic: `window_size = round(event_duration_sec *
-4 * sample_rate)`. Default is 2 (typical for brief conversational gestures).}
+\item{y}{Numeric vector; the query time series (same length as `x`).}
 
-\item{max_delay_sec}{The maximum plausible reaction time between participants in seconds.
-Default is 3.}
+\item{sample_rate}{A numeric value indicating the sampling rate in Hertz.}
 
-\item{overlap_pct}{The desired percentage of overlap between consecutive time windows.
-Default is 0.5 (50 percent overlap).}
+\item{event_duration_sec}{Optional numeric override for the dominant
+behavioral cycle duration in seconds. Default `NULL` derives it from the
+PSD of `x` and `y` via [evaluate_signal_power()].}
+
+\item{max_delay_sec}{The maximum plausible reaction time between participants
+in seconds, used to set the initial `lag_max`. Default is `3`.}
+
+\item{overlap_pct}{The desired proportion of overlap between consecutive
+windows (0-1). Default is `0.5` (50\% overlap).}
+
+\item{min_window_samples}{Minimum number of samples required in a window for
+a stable correlation. Default is `20`.}
 }
 \value{
-A list of recommended parameters ready to be passed to `wcc()`.
+A named list with `window_size`, `lag_max`, `window_increment`, and
+  `lag_increment`, ready to pass to [wcc()].
 }
 \description{
-Calculates principled starting values for Windowed Cross-Correlation parameters
-based on the sampling rate of the data and the theoretical timing of the behaviors.
+Derives principled starting values for Windowed Cross-Correlation parameters
+from the **measured signal** via PSD-based dominant timescale estimation.
 }
 \details{
-The `window_size` is derived from the **4-cycles-per-window heuristic**: a window
-should span approximately 4 full cycles of the behavior of interest so that the
-within-window correlation estimate is stable across a range of lead–lag relationships
-(Boker et al., 2002). Concretely, `window_size = round(event_duration_sec * 4 *
-sample_rate)`. Four cycles ensures enough oscillation to estimate a reliable
-correlation, whereas two cycles (the Nyquist minimum) would leave the estimate
-too noisy.
+**Dominant timescale.** When `event_duration_sec` is `NULL` (default), the
+function estimates the dominant behavioral cycle from the measured signal via
+[evaluate_signal_power()]: `event_duration_sec = 1 / primary_cutoff_freq`.
+Pass a numeric value to override with your own theoretical estimate.
 
-The `lag_max` is capped at half the `window_size` when the requested
-`max_delay_sec` would exceed it; beyond that point the lagged window and the
-reference window share fewer than half their samples, severely degrading reliability.
+**Window size (4-cycles heuristic).** `window_size = round(event_duration_sec
+* 4 * sample_rate)` (Boker et al., 2002). Four cycles yields a stable
+within-window correlation across the range of lead-lag relationships; two
+cycles (the Nyquist minimum) is too noisy.
+
+**Hard constraints applied and reported:**
+\itemize{
+  \item `lag_max <= floor(window_size / 2)` -- the SUSY reliability constraint
+    (`segment >= 2*maxlag`); beyond this the lagged windows share fewer than
+    half their samples.
+  \item `window_size <= floor(series_length / 2)` -- ensures at least two
+    non-overlapping windows fit in the series.
+  \item `window_size >= min_window_samples` -- a minimum-samples floor for a
+    stable correlation estimate.
+}
+All violations produce informative messages, not silent changes.
 }

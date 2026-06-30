@@ -117,29 +117,34 @@ test_that("wcc catches invalid inputs", {
 # Tests for suggest_wcc_params() ------------------------------------------
 
 test_that("suggest_wcc_params calculates values correctly and warns if lag is too long", {
-  # Standard case: 30Hz, 2s duration, 1s delay
-  # Suppress messages to keep the test output clean
-  params <- suppressMessages(
+  # Use n=600 at 30Hz (20 s) so window=240 < floor(600/2)=300 — no length cap fires
+  set.seed(1)
+  x <- rnorm(600)
+  y <- rnorm(600)
+  params <- suppressWarnings(suppressMessages(
     suggest_wcc_params(
+      x, y,
       sample_rate = 30,
       event_duration_sec = 2,
       max_delay_sec = 1,
       overlap_pct = 0.5
     )
-  )
+  ))
 
-  expect_equal(params$window_size, 240)
-  expect_equal(params$lag_max, 30)
-  expect_equal(params$window_increment, 120)
+  # window = round(2 * 4 * 30) = 240; lag = round(1 * 30) = 30; increment = round(240 * 0.5) = 120
+  expect_equal(params$window_size, 240L)
+  expect_equal(params$lag_max, 30L)
+  expect_equal(params$window_increment, 120L)
 
-  # Warning case: lag exceeds half the window size
+  # Warning case: lag exceeds half the window size (window=120, lag would be 150 → capped to 60)
   expect_warning(
     suppressMessages(suggest_wcc_params(
+      x, y,
       sample_rate = 30,
       event_duration_sec = 1,
       max_delay_sec = 5
     )),
-    "Capping `lag_max` at half the `window_size`"
+    "Capping"
   )
 })
 

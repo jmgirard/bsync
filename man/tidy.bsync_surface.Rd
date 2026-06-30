@@ -15,7 +15,7 @@
 A [tibble::tibble()].
 }
 \description{
-Returns one row per cell in `results_df`: window position × lag (or just
+Returns one row per cell in `results_df`: window position x lag (or just
 window position for Granger). Column names match the underlying estimator.
 }
 \seealso{

@@ -4,9 +4,9 @@
 # the "bsync_surface" superclass so users can use the standard tidyverse verbs.
 #
 # Shape conventions:
-#   tidy()     — one row per cell of results_df (the full windowed surface)
-#   glance()   — one row per estimator run (aggregate scalar(s) + settings)
-#   as_tibble()— same as tidy() but via the tibble generic
+#   tidy()     -- one row per cell of results_df (the full windowed surface)
+#   glance()   -- one row per estimator run (aggregate scalar(s) + settings)
+#   as_tibble()-- same as tidy() but via the tibble generic
 #
 # Granger note: two aggregate statistics (f_xy, f_yx) are stacked as separate
 # columns in glance(), and as a pair of rows (by direction) in an auxiliary
@@ -32,7 +32,7 @@ tibble::as_tibble
 
 #' Tidy a bsync_surface object into a tibble of per-cell results
 #'
-#' Returns one row per cell in `results_df`: window position × lag (or just
+#' Returns one row per cell in `results_df`: window position x lag (or just
 #' window position for Granger). Column names match the underlying estimator.
 #'
 #' @param x A `bsync_surface` object (`wcc_res`, `wdtw_res`, or `wgranger_res`).
@@ -105,4 +105,65 @@ glance.bsync_surface <- function(x, ...) {
 #' @exportS3Method tibble::as_tibble bsync_surface
 as_tibble.bsync_surface <- function(x, ...) {
   tibble::as_tibble(x$results_df)
+}
+
+
+# bsync_multiverse tidy interface (M6) ----------------------------------------
+
+#' Tidy a bsync_multiverse object into the specification grid
+#'
+#' Returns the parameter grid as a tibble: one row per specification cell with
+#' all analytic choices and the resulting effect size, p-value, and null
+#' statistics.
+#'
+#' @param x A `bsync_multiverse` object from [synchrony_multiverse()].
+#' @param ... Additional arguments (not used).
+#' @return A [tibble::tibble()] (the `$grid` slot).
+#' @seealso [glance.bsync_multiverse()], [as_tibble.bsync_multiverse()],
+#'   [synchrony_multiverse()]
+#' @exportS3Method generics::tidy bsync_multiverse
+tidy.bsync_multiverse <- function(x, ...) {
+  x$grid
+}
+
+
+#' One-row robustness summary of a bsync_multiverse object
+#'
+#' Returns a single-row tibble summarising robustness across the specification
+#' curve: the number of cells, significance rate, median effect size, IQR, and
+#' sign-consistency.
+#'
+#' @param x A `bsync_multiverse` object from [synchrony_multiverse()].
+#' @param ... Additional arguments (not used).
+#' @return A one-row [tibble::tibble()].
+#' @seealso [tidy.bsync_multiverse()], [as_tibble.bsync_multiverse()],
+#'   [synchrony_multiverse()]
+#' @exportS3Method generics::glance bsync_multiverse
+glance.bsync_multiverse <- function(x, ...) {
+  rb <- x$robustness
+  tibble::tibble(
+    estimator       = x$settings$estimator,
+    n_cells         = rb$n_cells,
+    n_significant   = rb$n_significant,
+    pct_significant = rb$pct_significant,
+    median_es       = rb$median_es,
+    iqr_es          = rb$iqr_es,
+    sign_consistent = rb$sign_consistent,
+    n_surrogates    = x$settings$n_surrogates
+  )
+}
+
+
+#' Convert a bsync_multiverse object to a tibble
+#'
+#' Alias for [tidy.bsync_multiverse()]: returns the full specification grid
+#' tibble.
+#'
+#' @param x A `bsync_multiverse` object.
+#' @param ... Additional arguments (not used).
+#' @return A [tibble::tibble()].
+#' @seealso [tidy.bsync_multiverse()], [glance.bsync_multiverse()]
+#' @exportS3Method tibble::as_tibble bsync_multiverse
+as_tibble.bsync_multiverse <- function(x, ...) {
+  x$grid
 }

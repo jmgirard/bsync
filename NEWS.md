@@ -1,5 +1,35 @@
 # bsync 0.0.0.9000
 
+## M6 Phase A — Synchrony multiverse + suggest_wcc_params rework
+
+* **`synchrony_multiverse()`** — new function that sweeps a seconds-specified
+  parameter grid across analytic choices (window size, max lag, increment,
+  surrogate method, WCC statistic) and evaluates each specification with a
+  matched-null surrogate test (Invariant 2). The headline metric is effect size
+  vs. the null, not raw synchrony. Supports all three estimators (`"wcc"`,
+  `"wdtw"`, `"wgranger"`). Surrogates are generated once per method and reused
+  across every cell sharing that method (efficiency seam). Returns a
+  `bsync_multiverse` object (`$grid`, `$settings`, `$robustness`).
+
+* **`plot.bsync_multiverse()`** — Simonsohn-style specification curve: top
+  panel shows effect sizes sorted by magnitude with significance highlighting;
+  bottom panel is a choice dashboard showing which analytic choices each
+  specification used. Uses pure ggplot2 + base `grid` package; no new
+  dependencies.
+
+* **Tidy interface for `bsync_multiverse`.** `tidy()` returns the full
+  specification grid tibble; `glance()` returns a one-row robustness summary
+  (n_cells, significance rate, median ES, IQR, sign-consistency); `as_tibble()`
+  aliases `tidy()`.
+
+* **`suggest_wcc_params()` reworked.** New signature takes the actual time
+  series (`x`, `y`, `sample_rate`) and estimates the dominant behavioral cycle
+  from the signal's own PSD via `evaluate_signal_power()` (pass
+  `event_duration_sec` to override with a theoretical estimate). Three hard
+  constraints are enforced and reported as warnings: the SUSY lag cap
+  (`lag_max <= floor(window_size/2)`), a series-length ceiling
+  (`window_size <= floor(n/2)`), and a minimum-samples floor.
+
 ## M5 — Shared windowed-surface + surrogate framework + tidy interface
 
 * **Unified `$aggregate` slot.** All three estimators (`wcc()`, `wdtw()`,

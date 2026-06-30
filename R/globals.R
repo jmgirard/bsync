@@ -14,5 +14,11 @@ utils::globalVariables(c(
   "Signal",
   "asymmetry_index",
   "stat",
-  "direction"
+  "direction",
+  # bsync_multiverse plot (M6)
+  "spec_rank",
+  "es",
+  "significant",
+  "y_val",
+  "active"
 ))

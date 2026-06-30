@@ -18,69 +18,79 @@ Selecting hyperparameters is often the most challenging aspect of running a Wind
 
 The `bsync` package provides the `suggest_wcc_params()` function to help you ground your parameter selection in the physical properties of your data and the theoretical boundaries of the behavior you are studying.
 
-## A Real-World Example: Conversational Head Nods
+## Deriving Parameters from the Measured Signal
 
-Imagine we are studying interpersonal synchrony during a conversation. We have video tracking data sampled at 30 Hz (30 frames per second), and we are specifically interested in how Person B nods in response to Person A's nods.
+The new interface to `suggest_wcc_params()` takes the actual data (`x` and `y`) so it can
+estimate the dominant behavioral cycle from the signal's own power spectral density (PSD).
+This is a stronger starting point than a theoretical guess: you let the signal tell you what
+its characteristic timescale is.
 
-To use `suggest_wcc_params()`, we need to define three theoretical values: the typical duration of the event, the maximum plausible delay, and the desired window overlap.
+We illustrate with the built-in `sim_dyad` dataset (3D positional data, 80 Hz, 30 seconds).
+The synchronized signals are `z_A` and `z_B`, which share a 0.5 Hz sine wave with a shifting
+lead–lag relationship.
 
 ```{r example-setup}
 library(bsync)
 
-# 30 Hz sampling rate
-fs <- 30
+fs <- 80 # sampling rate of sim_dyad (Hz)
 
-suggest_wcc_params(
-  sample_rate = fs,
-  event_duration_sec = 1,
-  max_delay_sec = 2,
-  overlap_pct = 0.5
+params <- suggest_wcc_params(
+  x           = sim_dyad$z_A,
+  y           = sim_dyad$z_B,
+  sample_rate = fs
 )
 ```
 
-### 1. Event Duration (`event_duration_sec`)
+The PSD identifies the dominant cycle (~2 s for a 0.5 Hz signal). The 4-cycles-per-window
+heuristic (Boker et al., 2002) then yields `window_size ≈ 4 × 2 s × 80 Hz = 640 samples`,
+which is capped when the series is too short to fit two non-overlapping windows.
 
-The first step is to estimate how long a single instance of your target behavior takes to complete. In our example, a typical conversational head nod takes approximately 1 second to begin, peak, and return to rest.
+### Expert override: `event_duration_sec`
 
-The helper function uses this value to calculate your `window_size`. It intentionally suggests a window that is 4 times the duration of the event (in our case, 4 seconds, which translates to 120 frames at 30 Hz).
+If you already know the behavioral timescale from theory or pilot data, pass it directly.
+This bypasses the PSD step while still enforcing the hard constraints:
 
-This 4x multiplier serves two critical purposes:
+```{r example-override, eval=FALSE}
+# Override: assume a 1-second event at 80 Hz
+params_expert <- suggest_wcc_params(
+  x                  = sim_dyad$z_A,
+  y                  = sim_dyad$z_B,
+  sample_rate        = fs,
+  event_duration_sec = 1
+)
+```
 
-1. **Statistical Stability:** Pearson correlations become highly unstable with very small sample sizes. A wider window ensures there are enough data points to reliably calculate a correlation coefficient.
-2. **Contextual Capture:** To identify that two signals are correlated, the window must be large enough to capture the "quiet" periods before and after the movement. If the window only captured the peak of the nod, the data would appear as a flat line, making correlation impossible.
+### Hard constraints always applied
 
-### 2. Maximum Delay (`max_delay_sec`)
+Regardless of how the window size is derived, `suggest_wcc_params()` enforces and reports:
 
-Next, we must consider the biological or psychological limits of the interaction. If Person A nods, how long does Person B have to respond before their nod is considered a new, independent action rather than a reaction?
+- **`lag_max ≤ floor(window_size / 2)`** (SUSY reliability constraint: `segment ≥ 2·maxlag`).
+  If your `max_delay_sec` would exceed this, `lag_max` is capped with a warning.
+- **`window_size ≤ floor(series_length / 2)`** — at least two non-overlapping windows must
+  fit in the series. A warning is issued when the derived window is too large.
+- **`window_size ≥ min_window_samples`** — a minimum-samples floor for stable correlations
+  (default 20). A warning is issued if the derived window falls below this.
 
-In conversational dynamics, a response delay of more than 2 seconds is often considered a completely new initiation. We set `max_delay_sec = 2`. The helper function converts this directly into frames to set your `lag_max` (60 frames).
+### Window overlap (`overlap_pct`)
 
-It is important to note that `lag_max` mathematically cannot exceed half of your `window_size`. If you shift the two signals too far apart relative to the window, the overlapping region where correlation can be calculated becomes dangerously small. The helper function will automatically cap your lag if it detects this imbalance.
+The `overlap_pct` parameter controls how far the window shifts on each step.
 
-### 3. Window Overlap (`overlap_pct`)
-
-The `overlap_pct` parameter dictates the temporal resolution of your final elapsed time axis. This controls how far the window shifts forward after calculating each correlation landscape.
-
-This parameter is a direct trade-off between computational speed and visual smoothness:
-
-- **0% Overlap:** The window jumps completely forward (e.g., 4 seconds at a time). This is extremely fast to compute but results in a blocky, low-resolution plot that might skip over rapid shifts in synchrony.
-- **50% to 75% Overlap:** A balanced choice for exploratory data analysis. The window slides forward incrementally, providing a smooth curve of correlation changes while keeping processing times low.
-- **High Overlap (Increment of 1):** The window moves forward by exactly 1 frame at a time. This provides the highest possible resolution and the smoothest peak tracking. Because `bsync` is optimized in C++, many modern machines can handle an increment of 1 for typical datasets, making it ideal for final publication plots.
-
-By setting `overlap_pct = 0.5`, the helper function suggests a `window_increment` of 60 frames. This means our 120-frame window will shift forward by 60 frames on each step, ensuring continuous coverage of the conversation.
+- **0% overlap:** window jumps completely forward — fastest but lowest temporal resolution.
+- **50–75% overlap:** a balanced choice for exploratory analysis.
+- **Increment of 1:** highest resolution; feasible for typical datasets because `bsync` uses
+  a C++ prefix-sum core.
 
 ## Putting it into Practice
 
-Once you have reviewed the suggested parameters, you can plug them directly into the core `wcc()` function to run your analysis with confidence.
+Once you have reviewed the suggested parameters, plug them directly into `wcc()`:
 
 ```{r example-run, eval=FALSE}
-# Using the suggested parameters from above
 results <- wcc(
-  x = df$person_A_nod,
-  y = df$person_B_nod,
-  window_size = 120,
-  lag_max = 60,
-  window_increment = 60,
-  lag_increment = 1
+  x                = sim_dyad$z_A,
+  y                = sim_dyad$z_B,
+  window_size      = params$window_size,
+  lag_max          = params$lag_max,
+  window_increment = params$window_increment,
+  lag_increment    = params$lag_increment
 )
 ```
