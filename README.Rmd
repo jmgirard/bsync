@@ -110,15 +110,19 @@ This function uses a circular shift method to misalign the two time series, gene
 
 ```{r example-surrogate}
 # Step 5: Run surrogate analysis to calculate an empirical p-value
+# First generate a null distribution via circular shift
 set.seed(2026)
+null_matrix <- generate_surrogate_circular(y = df$vel_B, n_surrogates = 100)
+
+# Then compare observed WCC against the null distribution
 surrogate_results <- wcc_surrogate(
   x = df$vel_A,
   y = df$vel_B,
+  y_surrogates = null_matrix,
   window_size = 150,
   lag_max = 75,
   window_increment = 25,
-  lag_increment = 1,
-  n_surrogates = 100
+  lag_increment = 1
 )
 
 surrogate_results
