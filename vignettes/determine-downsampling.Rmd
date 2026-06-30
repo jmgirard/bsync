@@ -97,3 +97,10 @@ Valid options would be:
 * **5 Hz** (Downsample factor of 6)
 
 We can now safely proceed to downsample our entire dataset using `bsync::aggregate_by_time()` or `bsync::downsample_signal()` before running our synchrony analyses.
+
+## See also
+
+- `vignette("choosing-parameters")` for the next step: choosing `window_size` and `lag_max`
+  parameters that are appropriate for your (possibly resampled) signal
+- `vignette("wcc-workflow")` for the full Windowed Cross-Correlation pipeline, which builds on
+  preprocessed data prepared with the tools shown here
