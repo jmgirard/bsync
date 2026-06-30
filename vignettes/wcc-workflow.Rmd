@@ -61,32 +61,28 @@ n_frames <- 1800 # 60 seconds of data
 
 # 1. Generate underlying rhythms (a shared rhythm and two independent rhythms)
 # We use a moving average to create smooth, human-like motion waves
-time_seq <- seq(0, by = 1/fs, length.out = n_frames)
-shared_base <- as.numeric(stats::filter(rnorm(n_frames + 300), rep(1/15, 15), circular = TRUE))
-indep_base_A <- as.numeric(stats::filter(rnorm(n_frames + 300), rep(1/15, 15), circular = TRUE))
-indep_base_B <- as.numeric(stats::filter(rnorm(n_frames + 300), rep(1/15, 15), circular = TRUE))
+time_seq <- seq(0, by = 1 / fs, length.out = n_frames)
+shared_base <- as.numeric(stats::filter(rnorm(n_frames + 300), rep(1 / 15, 15), circular = TRUE))
+indep_base_A <- as.numeric(stats::filter(rnorm(n_frames + 300), rep(1 / 15, 15), circular = TRUE))
+indep_base_B <- as.numeric(stats::filter(rnorm(n_frames + 300), rep(1 / 15, 15), circular = TRUE))
 
 person_A_raw <- numeric(n_frames)
 person_B_raw <- numeric(n_frames)
 
 # 2. Piece together the dyadic interaction
 for (i in 1:n_frames) {
-
   if (i <= 600) {
     # Phase 1 (0-20s): Person A leads by 10 frames (0.33 seconds)
     person_A_raw[i] <- shared_base[150 + i]
     person_B_raw[i] <- shared_base[150 + i - 10]
-
   } else if (i <= 900) {
     # Phase 2 (20-30s): Lull / No correlation
     person_A_raw[i] <- indep_base_A[150 + i]
     person_B_raw[i] <- indep_base_B[150 + i]
-
   } else if (i <= 1400) {
     # Phase 3 (30-46s): Person B leads by 12 frames (0.40 seconds)
     person_A_raw[i] <- shared_base[150 + i - 12]
     person_B_raw[i] <- shared_base[150 + i]
-
   } else {
     # Phase 4 (46-60s): Person A leads by 8 frames (0.26 seconds)
     person_A_raw[i] <- shared_base[150 + i]

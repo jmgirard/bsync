@@ -292,7 +292,7 @@ test_that("M2: calc_wcc_cpp matches oracle with large-mean inputs (prefix-sum ca
   window_size <- 50L
   lag_max <- 10L
 
-  res    <- wcc(x, y, window_size = window_size, lag_max = lag_max, na.rm = TRUE)
+  res <- wcc(x, y, window_size = window_size, lag_max = lag_max, na.rm = TRUE)
   oracle <- wcc_oracle(x, y, window_size, lag_max, na.rm = TRUE)
 
   expect_equal(res$results_df$wcc, oracle, tolerance = 1e-5)
@@ -302,9 +302,9 @@ test_that("M1: na.rm = FALSE returns NA for any window containing NA", {
   set.seed(42)
   x <- rnorm(30)
   y <- rnorm(30)
-  x[10] <- NA  # NA in the middle; window_size=8 means windows i=4..10 touch it
+  x[10] <- NA # NA in the middle; window_size=8 means windows i=4..10 touch it
 
-  res_true  <- wcc(x, y, window_size = 8, lag_max = 3, na.rm = TRUE)
+  res_true <- wcc(x, y, window_size = 8, lag_max = 3, na.rm = TRUE)
   res_false <- wcc(x, y, window_size = 8, lag_max = 3, na.rm = FALSE)
 
   # na.rm=TRUE: windows beyond position 10 (i >= 11) at tau=0 should be non-NA

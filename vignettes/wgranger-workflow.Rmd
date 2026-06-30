@@ -59,8 +59,8 @@ fs <- 30
 n_frames <- 1800 # 60 seconds of data
 
 # Generate smooth baseline movements using a moving average
-base_A <- as.numeric(stats::filter(rnorm(n_frames + 50), rep(1/10, 10), circular = TRUE))[1:n_frames]
-base_B <- as.numeric(stats::filter(rnorm(n_frames + 50), rep(1/10, 10), circular = TRUE))[1:n_frames]
+base_A <- as.numeric(stats::filter(rnorm(n_frames + 50), rep(1 / 10, 10), circular = TRUE))[1:n_frames]
+base_B <- as.numeric(stats::filter(rnorm(n_frames + 50), rep(1 / 10, 10), circular = TRUE))[1:n_frames]
 
 person_A <- numeric(n_frames)
 person_B <- numeric(n_frames)
@@ -80,7 +80,7 @@ for (i in 1:n_frames) {
 }
 
 dyad_data <- data.frame(
-  time = seq(0, by = 1/fs, length.out = n_frames),
+  time = seq(0, by = 1 / fs, length.out = n_frames),
   person_A = person_A,
   person_B = person_B
 )

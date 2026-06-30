@@ -56,7 +56,7 @@ n_frames <- 1800 # 60 seconds of data
 
 # Generate a smooth base signal using a 30-frame moving average.
 raw_noise <- rnorm(n_frames + 300)
-base_signal <- stats::filter(raw_noise, rep(1/30, 30), circular = TRUE)
+base_signal <- stats::filter(raw_noise, rep(1 / 30, 30), circular = TRUE)
 base_signal <- as.numeric(base_signal)
 
 person_A <- numeric(n_frames)
@@ -75,7 +75,7 @@ for (i in 1:n_frames) {
 }
 
 dyad_data <- data.frame(
-  time = seq(0, by = 1/fs, length.out = n_frames),
+  time = seq(0, by = 1 / fs, length.out = n_frames),
   person_A = person_A,
   person_B = person_B
 )
