@@ -1,230 +1,280 @@
-#' Auto-Tune WCC Parameters for a Dataset
+# Auto-tune WCC parameters (M6) -----------------------------------------------
+#
+# autotune_wcc() is a thin wrapper over synchrony_multiverse() that applies a
+# gated stability-penalized selection rule across a dyad_list:
+#
+#   GATE: specification must be significant in >= sig_pct of dyads
+#   SCORE: median ES across dyads - iqr_penalty * IQR(ES across dyads)
+#
+# select_specification() is the internal helper that runs on a list of
+# bsync_multiverse objects (one per dyad) and returns the winning row index.
+#
+# Invariant 6: stochastics respect set.seed() / future.seed; no internal
+# reseeding. The per-dyad synchrony_multiverse() calls use future.apply
+# internally, which honors future.seed.
+
+
+#' Auto-Tune WCC Parameters for a Multi-Dyad Dataset
 #'
-#' Automatically determines the optimal Windowed Cross-Correlation parameters
-#' for a multi-dyad dataset by combining Power Spectral Density (PSD) analysis
-#' with a surrogate-driven grid search.
+#' Selects Windowed Cross-Correlation hyperparameters that are both detectable
+#' (significant vs. the null) and stable (consistent) across a collection of
+#' dyads. Internally calls [synchrony_multiverse()] on each dyad and applies
+#' a gated stability-penalized selection rule via [select_specification()].
 #'
 #' @details
-#' **Reproducibility and Parallelization:**
-#' This function involves random sampling (selecting dyads and generating surrogate
-#' data). For reproducible results, call `set.seed()` before running this function.
-#' To speed up computation, ensure you have set a parallel backend using the `future`
-#' package (e.g., `future::plan(future::multisession)`) prior to execution.
+#' **Why cross-dyad stability?** A parameter set that maximizes raw synchrony
+#' for one dyad may simply match that dyad's autocorrelation structure. The
+#' matched-null surrogate controls for autocorrelation within a dyad (Invariant
+#' 2), but the *best* parameters should also replicate across dyads with
+#' structurally different signals -- hence the multi-dyad stability criterion.
 #'
-#' @param dyad_list A list of data frames, where each data frame represents a
-#'   dyad and contains two numeric columns (the two time series).
-#' @param sample_rate A single positive number indicating the sampling rate in Hertz.
-#' @param n_tune_dyads Integer. The number of dyads to sample for the tuning phase.
-#'   Default is 30 to provide a robust sample without excessive computation time.
-#'   If the dataset has fewer than this number, all dyads are used.
-#' @param n_surrogates Integer. Number of surrogates to generate per test.
-#'   Default is 30, which provides a stable enough standard deviation to calculate
-#'   standardized effect sizes during tuning.
-#' @param surrogate_method Character string. "phase" (default) uses phase randomization,
-#'   which preserves the power spectrum and is ideal for continuous physiological data.
-#'   "circular" shifts the time series, which is better for preserving local
-#'   autocorrelation in behavioral data.
-#' @param trim_odd Logical. If `TRUE` and `surrogate_method = "phase"`, automatically
-#'   drops the final observation of any odd-length time series to allow the Fourier
-#'   transform to execute. Default is `FALSE`.
-#' @param increment_pct Numeric value between 0.01 and 1.0. Determines the step size
-#'   between successive windows as a percentage of the window size. Default is 0.05.
-#' @param window_multipliers A numeric vector. Multipliers applied to the baseline cycle
-#'   length to generate the grid of window sizes. Default is `c(0.5, 1.0, 1.5, 2.0)`.
-#' @param lag_multipliers A numeric vector. Multipliers applied to the window size
-#'   to generate the grid of maximum lags. Default is `c(0.5, 1.0, 2.0)`.
-#' @param min_window_size Integer. The absolute minimum number of observations required
-#'   in a window to calculate a stable correlation. Default is 60.
-#' @param max_window_sec A single positive number. The absolute maximum number of
-#'   seconds for a window to span before it is no longer synchrony. Default is 30.
-#' @param progress Logical. If `TRUE` (default), displays a dynamic progress bar
-#'   in the console during the grid search.
-#' @return A list containing the optimal parameters and the full tuning grid results.
+#' **Selection rule.** Cells pass a detectability gate (significant in at least
+#' `sig_pct` of dyads). Among passing cells, the score is
+#' `median(ES) - iqr_penalty * IQR(ES)` across dyads, penalizing spread.
+#' If no cell passes the gate, a warning is issued and the highest-median-ES
+#' cell is returned (soft fallback).
+#'
+#' **Dyad sampling.** If `length(dyad_list) > n_tune_dyads`, a random sample
+#' of `n_tune_dyads` dyads is used for speed; call `set.seed()` beforehand for
+#' reproducibility.
+#'
+#' @param dyad_list A list of data frames or lists. Each element represents one
+#'   dyad and must have at least two numeric columns (or two named list elements
+#'   `x` and `y`) containing the two time series.
+#' @param sample_rate Single positive number; sampling rate in Hz, used to
+#'   convert `window_sec` and `lag_sec` to samples.
+#' @param window_sec Numeric vector; window size(s) in seconds to sweep.
+#'   Use [suggest_wcc_params()] on a representative dyad to find a principled
+#'   starting range.
+#' @param lag_sec Numeric vector; max lag(s) in seconds. Default `NULL` uses
+#'   `window_sec / 2` per cell (the SUSY reliability ceiling).
+#' @param increment_pct Numeric; window increment as a fraction of window size
+#'   (e.g., `0.1` = 10\% step). Default is `0.1`.
+#' @param statistic Character; WCC aggregate statistic. Default `"mean_abs_z"`.
+#' @param surrogate_method Character; surrogate generator: `"phase"` (default)
+#'   or `"circular"`.
+#' @param n_surrogates Single positive integer; surrogates per cell per dyad.
+#'   Default `100`. Increase to >= 1000 for reporting.
+#' @param n_tune_dyads Maximum number of dyads to use. If
+#'   `length(dyad_list) > n_tune_dyads`, a random sample is taken. Default
+#'   `30`.
+#' @param sig_pct Detectability gate: minimum proportion of dyads in which a
+#'   cell must be significant (p < .05). Default `0.5`.
+#' @param iqr_penalty Penalty weight on cross-dyad IQR of ES. Score =
+#'   `median(ES) - iqr_penalty * IQR(ES)`. Default `0.5`.
+#' @return A named list with:
+#'   \describe{
+#'     \item{`window_size`}{Selected window size in samples.}
+#'     \item{`lag_max`}{Selected max lag in samples.}
+#'     \item{`window_increment`}{Selected window increment in samples.}
+#'     \item{`lag_increment`}{`1L` (standard lag increment).}
+#'     \item{`window_sec`}{Selected window size in seconds.}
+#'     \item{`lag_sec`}{Selected max lag in seconds.}
+#'     \item{`sig_rate`}{Proportion of dyads where selected cell was significant.}
+#'     \item{`median_es`}{Median ES across dyads for the selected cell.}
+#'     \item{`iqr_es`}{IQR of ES across dyads for the selected cell.}
+#'     \item{`score`}{Selection score for the chosen cell.}
+#'     \item{`n_dyads`}{Number of dyads used for tuning.}
+#'     \item{`n_cells_gated`}{Number of cells that passed the detectability gate.}
+#'     \item{`dyad_multiverses`}{List of `bsync_multiverse` objects, one per dyad.}
+#'   }
+#' @seealso [synchrony_multiverse()], [suggest_wcc_params()],
+#'   [select_specification()]
 #' @export
 autotune_wcc <- function(
   dyad_list,
   sample_rate,
-  n_tune_dyads = 30,
-  n_surrogates = 30,
-  surrogate_method = c("phase", "circular"),
-  trim_odd = FALSE,
-  increment_pct = 0.05,
-  window_multipliers = c(0.5, 1.0, 1.5, 2.0),
-  lag_multipliers = c(0.5, 1.0, 2.0),
-  min_window_size = 60,
-  max_window_sec = 30,
-  progress = TRUE
+  window_sec,
+  lag_sec = NULL,
+  increment_pct = 0.1,
+  statistic = "mean_abs_z",
+  surrogate_method = "phase",
+  n_surrogates = 100L,
+  n_tune_dyads = 30L,
+  sig_pct = 0.5,
+  iqr_penalty = 0.5
 ) {
-  surrogate_method <- match.arg(surrogate_method)
-
-  if (!rlang::is_logical(progress, n = 1)) {
-    cli::cli_abort("{.arg progress} must be a single logical value.")
+  if (!is.list(dyad_list) || length(dyad_list) < 1) {
+    cli::cli_abort("{.arg dyad_list} must be a non-empty list.")
   }
-  if (!rlang::is_logical(trim_odd, n = 1)) {
-    cli::cli_abort("{.arg trim_odd} must be a single logical value.")
+  if (!is.numeric(sample_rate) || length(sample_rate) != 1 || sample_rate <= 0) {
+    cli::cli_abort("{.arg sample_rate} must be a single positive number.")
   }
-  if (increment_pct <= 0 || increment_pct > 1) {
-    cli::cli_abort(
-      "{.arg increment_pct} must be strictly greater than 0 and less than or equal to 1."
-    )
+  if (!is.numeric(window_sec) || length(window_sec) < 1 || any(window_sec <= 0)) {
+    cli::cli_abort("{.arg window_sec} must be a positive numeric vector.")
+  }
+  if (!rlang::is_integerish(n_tune_dyads, n = 1) || n_tune_dyads < 1) {
+    cli::cli_abort("{.arg n_tune_dyads} must be a single positive integer.")
+  }
+  if (!is.numeric(sig_pct) || length(sig_pct) != 1 ||
+    sig_pct < 0 || sig_pct > 1) {
+    cli::cli_abort("{.arg sig_pct} must be a single number in [0, 1].")
+  }
+  if (!is.numeric(iqr_penalty) || length(iqr_penalty) != 1 || iqr_penalty < 0) {
+    cli::cli_abort("{.arg iqr_penalty} must be a single non-negative number.")
   }
 
-  cli::cli_h1("Starting WCC Auto-Tuning")
+  # Default lag_sec: SUSY ceiling (window / 2)
+  lag_sec_use <- lag_sec %||% (window_sec / 2)
 
-  # 1. Analyze signal power on all the data (it is cheaper)
-  cli::cli_alert_info("Step 1: Analyzing signal power...")
-  sample_signals <- unlist(
-    lapply(dyad_list, function(df) list(df[[1]], df[[2]])),
-    recursive = FALSE
-  )
-
-  psd_res <- evaluate_signal_power(
-    x = sample_signals,
-    sample_rate = sample_rate,
-    quiet = TRUE
-  )
-  baseline_cycle_sec <- 1 / psd_res$primary_cutoff_freq
-  baseline_window <- round(baseline_cycle_sec * sample_rate)
-
-  # 2. Safely sample dyads to prevent memory bloat and long compute times
+  # Sample dyads
   n_total <- length(dyad_list)
-  if (n_tune_dyads >= n_total) {
-    tune_sample <- dyad_list
-    cli::cli_alert_info("Using all {n_total} dyads for tuning.")
+  n_use <- min(n_tune_dyads, n_total)
+  if (n_use < n_total) {
+    tune_idx <- sample.int(n_total, n_use)
+    cli::cli_inform("Sampling {n_use} of {n_total} dyads for tuning.")
   } else {
-    tune_sample <- sample(dyad_list, n_tune_dyads)
-    cli::cli_alert_info(
-      "Sampled {n_tune_dyads} dyads from {n_total} for tuning."
+    tune_idx <- seq_len(n_total)
+  }
+  tune_list <- dyad_list[tune_idx]
+
+  cli::cli_inform("Running synchrony_multiverse() on {n_use} dyad(s) \\
+    ({length(window_sec)} window x {length(lag_sec_use)} lag cells each)...")
+
+  # Run multiverse on each dyad
+  mv_list <- lapply(tune_list, function(dyad) {
+    xy <- .extract_xy(dyad)
+    synchrony_multiverse(
+      x = xy$x,
+      y = xy$y,
+      estimator = "wcc",
+      sample_rate = sample_rate,
+      window_sec = window_sec,
+      lag_sec = lag_sec_use,
+      increment_pct = increment_pct,
+      statistic = statistic,
+      surrogate_method = surrogate_method,
+      n_surrogates = n_surrogates
     )
-  }
+  })
 
-  if (surrogate_method == "phase" && trim_odd) {
-    odd_count <- sum(vapply(
-      tune_sample,
-      function(df) nrow(df) %% 2 != 0,
-      logical(1)
-    ))
-    if (odd_count > 0) {
-      cli::cli_alert_warning(
-        "Trimming 1 observation from {odd_count} odd-length dyads to enable phase randomization."
-      )
-    }
-  }
+  # Apply selection rule
+  sel <- select_specification(mv_list, sig_pct = sig_pct, iqr_penalty = iqr_penalty)
+  best <- sel$best_row
 
-  # 3. Generate the search grid dynamically
-  cli::cli_alert_info("Step 2: Generating parameter grid...")
-
-  proposed_windows <- unique(round(baseline_window * window_multipliers))
-  test_windows <- proposed_windows[
-    (proposed_windows >= min_window_size) &
-      (proposed_windows <= max_window_sec * sample_rate)
-  ]
-  dropped_windows <- proposed_windows[
-    (proposed_windows < min_window_size) |
-      (proposed_windows > max_window_sec * sample_rate)
-  ]
-
-  if (length(test_windows) == 0) {
-    cli::cli_abort(c(
-      "All calculated window sizes are outside the specified minimum and maximum values."
-    ))
-  } else if (length(dropped_windows) > 0) {
-    cli::cli_alert_warning(
-      "Dropped {length(dropped_windows)} window size(s) ({paste(dropped_windows, collapse = ', ')}) for falling below {.arg min_window_size} or above {.arg max_window_sec}*{.arg sample_rate}."
-    )
-  }
-
-  grid <- base::expand.grid(
-    window_size = unique(test_windows),
-    lag_multiplier = unique(lag_multipliers)
-  )
-  grid$lag_max <- round(grid$window_size * grid$lag_multiplier)
-  grid$lag_max[grid$lag_max < 1] <- 1
-  grid$mean_effect_size <- NA
-
-  cli::cli_alert_info(
-    "Step 3: Evaluating {nrow(grid)} parameter combinations via surrogates..."
+  # Assemble result
+  result <- list(
+    window_size      = best$window_size,
+    lag_max          = best$lag_max,
+    window_increment = best$window_increment,
+    lag_increment    = 1L,
+    window_sec       = best$window_sec,
+    lag_sec          = best$lag_sec,
+    sig_rate         = sel$sig_rate,
+    median_es        = sel$median_es,
+    iqr_es           = sel$iqr_es,
+    score            = sel$score,
+    n_dyads          = n_use,
+    n_cells_gated    = sel$n_gated,
+    dyad_multiverses = mv_list
   )
 
-  if (progress) {
-    total_iterations <- nrow(grid) * length(tune_sample)
-    cli::cli_progress_bar("Running Grid Search", total = total_iterations)
-  }
-
-  # 4. Grid Search
-  for (i in seq_len(nrow(grid))) {
-    w_size <- grid$window_size[i]
-    l_max <- grid$lag_max[i]
-    w_inc <- max(1, round(w_size * increment_pct))
-
-    dyad_effects <- numeric(length(tune_sample))
-
-    for (d in seq_along(tune_sample)) {
-      x <- tune_sample[[d]][[1]]
-      y <- tune_sample[[d]][[2]]
-
-      if (surrogate_method == "phase" && trim_odd && length(y) %% 2 != 0) {
-        x <- x[-length(x)]
-        y <- y[-length(y)]
-      }
-
-      if (surrogate_method == "phase") {
-        y_surrs <- generate_surrogate_phase(
-          y,
-          n_surrogates = n_surrogates,
-          trim_odd = trim_odd
-        )
-      } else {
-        y_surrs <- generate_surrogate_circular(
-          y,
-          n_surrogates = n_surrogates,
-          lag_max = l_max
-        )
-      }
-
-      surr_res <- wcc_surrogate(
-        x = x,
-        y = y,
-        y_surrogates = y_surrs,
-        window_size = w_size,
-        lag_max = l_max,
-        window_increment = w_inc
-      )
-
-      null_mean <- base::mean(surr_res$surrogate_z, na.rm = TRUE)
-      null_sd <- stats::sd(surr_res$surrogate_z, na.rm = TRUE)
-
-      if (is.na(null_sd) || null_sd == 0) {
-        dyad_effects[d] <- 0
-      } else {
-        dyad_effects[d] <- (surr_res$observed_z - null_mean) / null_sd
-      }
-
-      if (progress) {
-        cli::cli_progress_update()
-      }
-    }
-
-    grid$mean_effect_size[i] <- base::mean(dyad_effects, na.rm = TRUE)
-  }
-
-  if (progress) {
-    cli::cli_progress_done()
-  }
-
-  # 5. Extract Optimal Parameters
-  optimal_params <- grid[which.max(grid$mean_effect_size), ]
-
-  cli::cli_alert_success("Optimization complete.")
+  cli::cli_h2("Auto-Tune Result")
   cli::cli_dl(c(
-    "Optimal Window Size" = "{optimal_params$window_size} ({optimal_params$window_size / sample_rate} sec)",
-    "Optimal Max Lag" = "{optimal_params$lag_max} ({optimal_params$lag_max / sample_rate} sec)",
-    "Maximized Effect Size (Z)" = "{round(optimal_params$mean_effect_size, 4)}"
+    "Window size" = "{best$window_size} samples ({round(best$window_sec, 2)} s)",
+    "Max lag"     = "{best$lag_max} samples ({round(best$lag_sec, 2)} s)",
+    "Increment"   = "{best$window_increment} samples",
+    "Sig. rate"   = "{round(sel$sig_rate * 100, 1)}% of dyads",
+    "Median ES"   = "{round(sel$median_es, 3)} (IQR = {round(sel$iqr_es, 3)})"
   ))
 
-  invisible(list(
-    recommended_window_size = optimal_params$window_size,
-    recommended_lag_max = optimal_params$lag_max,
-    tuning_grid_results = grid
-  ))
+  invisible(result)
+}
+
+
+#' Select the Best Specification from a Multi-Dyad Multiverse
+#'
+#' Applies the gated stability-penalized selection rule to a list of
+#' `bsync_multiverse` objects (one per dyad) and returns the winning cell.
+#'
+#' @param mv_list A list of `bsync_multiverse` objects, all run with the same
+#'   parameter grid (i.e., all produced by [synchrony_multiverse()] with
+#'   identical `window_sec`, `lag_sec`, `increment_pct`, `statistic`, and
+#'   `surrogate_method` arguments).
+#' @param sig_pct Minimum proportion of dyads in which a cell must be
+#'   significant (p < .05) to pass the detectability gate. Default `0.5`.
+#' @param iqr_penalty Penalty weight on cross-dyad IQR of ES in the score
+#'   `median(ES) - iqr_penalty * IQR(ES)`. Default `0.5`.
+#' @return A list with `best_row` (one-row tibble from the grid), `sig_rate`,
+#'   `median_es`, `iqr_es`, `score`, and `n_gated` for the selected cell.
+#' @seealso [autotune_wcc()], [synchrony_multiverse()]
+#' @export
+select_specification <- function(mv_list, sig_pct = 0.5, iqr_penalty = 0.5) {
+  if (!is.list(mv_list) || length(mv_list) < 1 ||
+    !all(vapply(mv_list, inherits, logical(1), "bsync_multiverse"))) {
+    cli::cli_abort(
+      "{.arg mv_list} must be a non-empty list of {.cls bsync_multiverse} objects."
+    )
+  }
+
+  grids <- lapply(mv_list, function(mv) mv$grid)
+  n_dyads <- length(grids)
+  n_cells <- nrow(grids[[1]])
+
+  sig_rate <- numeric(n_cells)
+  median_es <- numeric(n_cells)
+  iqr_es <- numeric(n_cells)
+
+  for (j in seq_len(n_cells)) {
+    es_j <- vapply(grids, function(g) g$es[j], numeric(1))
+    p_j <- vapply(grids, function(g) g$p[j], numeric(1))
+    ok <- !is.na(es_j) & !is.na(p_j)
+    if (!any(ok)) {
+      sig_rate[j] <- NA_real_
+      median_es[j] <- NA_real_
+      iqr_es[j] <- NA_real_
+    } else {
+      sig_rate[j] <- mean(p_j[ok] < 0.05)
+      median_es[j] <- stats::median(es_j[ok])
+      iqr_es[j] <- stats::IQR(es_j[ok])
+    }
+  }
+
+  gated <- !is.na(sig_rate) & sig_rate >= sig_pct
+
+  if (!any(gated)) {
+    cli::cli_warn(
+      "No specification passed the detectability gate ({.val {sig_pct}} significance rate). \\
+      Falling back to highest median ES."
+    )
+    gated <- !is.na(median_es)
+  }
+
+  score <- median_es - iqr_penalty * iqr_es
+  score[!gated] <- NA_real_
+
+  best_idx <- which.max(score)
+
+  list(
+    best_row  = grids[[1]][best_idx, ],
+    sig_rate  = sig_rate[best_idx],
+    median_es = median_es[best_idx],
+    iqr_es    = iqr_es[best_idx],
+    score     = score[best_idx],
+    n_gated   = sum(gated, na.rm = TRUE)
+  )
+}
+
+
+# .extract_xy() ----------------------------------------------------------------
+# Internal helper: pull x and y from a dyad element (data.frame with 2+ cols
+# or list with $x and $y).
+
+.extract_xy <- function(dyad) {
+  if (is.data.frame(dyad)) {
+    if (ncol(dyad) < 2) {
+      cli::cli_abort("Each dyad data frame must have at least two columns.")
+    }
+    list(x = dyad[[1]], y = dyad[[2]])
+  } else if (is.list(dyad)) {
+    if (!is.null(dyad$x) && !is.null(dyad$y)) {
+      list(x = dyad$x, y = dyad$y)
+    } else if (length(dyad) >= 2) {
+      list(x = dyad[[1]], y = dyad[[2]])
+    } else {
+      cli::cli_abort("Each dyad must be a data frame or a list with at least two elements.")
+    }
+  } else {
+    cli::cli_abort("Each dyad must be a data frame or a list.")
+  }
 }

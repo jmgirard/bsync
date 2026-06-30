@@ -1,6 +1,27 @@
 # bsync 0.0.0.9000
 
-## M6 Phase A — Synchrony multiverse + suggest_wcc_params rework
+## M6 — Parameter guidance & synchrony multiverse
+
+### Phase B — autotune_wcc rewrite + vignette
+
+* **`autotune_wcc()` rewritten** as a thin wrapper over `synchrony_multiverse()`
+  + a gated stability-penalized selection rule. Takes a `dyad_list`, sweeps a
+  seconds-specified grid, and selects the parameter cell that is (a) significant
+  vs. the matched-null surrogate in at least `sig_pct` (default 50%) of dyads,
+  and (b) maximizes `median(ES) - iqr_penalty * IQR(ES)` across dyads. Interface
+  change: `window_sec`/`lag_sec` replace the old `window_multipliers`/
+  `lag_multipliers` arguments.
+
+* **`select_specification()`** — new exported helper that implements the gated
+  stability-penalized rule on a list of `bsync_multiverse` objects (one per
+  dyad). Can be called directly by advanced users.
+
+* **New vignette** `vignettes/choosing-parameters.Rmd` documents the
+  three-tool parameter guidance workflow: `suggest_wcc_params()` for a single
+  dyad, `synchrony_multiverse()` for visualizing the specification curve, and
+  `autotune_wcc()` for multi-dyad datasets.
+
+### Phase A — Synchrony multiverse + suggest_wcc_params rework
 
 * **`synchrony_multiverse()`** — new function that sweeps a seconds-specified
   parameter grid across analytic choices (window size, max lag, increment,

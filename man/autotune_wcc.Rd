@@ -2,76 +2,100 @@
 % Please edit documentation in R/autotune.R
 \name{autotune_wcc}
 \alias{autotune_wcc}
-\title{Auto-Tune WCC Parameters for a Dataset}
+\title{Auto-Tune WCC Parameters for a Multi-Dyad Dataset}
 \usage{
 autotune_wcc(
   dyad_list,
   sample_rate,
-  n_tune_dyads = 30,
-  n_surrogates = 30,
-  surrogate_method = c("phase", "circular"),
-  trim_odd = FALSE,
-  increment_pct = 0.05,
-  window_multipliers = c(0.5, 1, 1.5, 2),
-  lag_multipliers = c(0.5, 1, 2),
-  min_window_size = 60,
-  max_window_sec = 30,
-  progress = TRUE
+  window_sec,
+  lag_sec = NULL,
+  increment_pct = 0.1,
+  statistic = "mean_abs_z",
+  surrogate_method = "phase",
+  n_surrogates = 100L,
+  n_tune_dyads = 30L,
+  sig_pct = 0.5,
+  iqr_penalty = 0.5
 )
 }
 \arguments{
-\item{dyad_list}{A list of data frames, where each data frame represents a
-dyad and contains two numeric columns (the two time series).}
+\item{dyad_list}{A list of data frames or lists. Each element represents one
+dyad and must have at least two numeric columns (or two named list elements
+`x` and `y`) containing the two time series.}
 
-\item{sample_rate}{A single positive number indicating the sampling rate in Hertz.}
+\item{sample_rate}{Single positive number; sampling rate in Hz, used to
+convert `window_sec` and `lag_sec` to samples.}
 
-\item{n_tune_dyads}{Integer. The number of dyads to sample for the tuning phase.
-Default is 30 to provide a robust sample without excessive computation time.
-If the dataset has fewer than this number, all dyads are used.}
+\item{window_sec}{Numeric vector; window size(s) in seconds to sweep.
+Use [suggest_wcc_params()] on a representative dyad to find a principled
+starting range.}
 
-\item{n_surrogates}{Integer. Number of surrogates to generate per test.
-Default is 30, which provides a stable enough standard deviation to calculate
-standardized effect sizes during tuning.}
+\item{lag_sec}{Numeric vector; max lag(s) in seconds. Default `NULL` uses
+`window_sec / 2` per cell (the SUSY reliability ceiling).}
 
-\item{surrogate_method}{Character string. "phase" (default) uses phase randomization,
-which preserves the power spectrum and is ideal for continuous physiological data.
-"circular" shifts the time series, which is better for preserving local
-autocorrelation in behavioral data.}
+\item{increment_pct}{Numeric; window increment as a fraction of window size
+(e.g., `0.1` = 10\% step). Default is `0.1`.}
 
-\item{trim_odd}{Logical. If `TRUE` and `surrogate_method = "phase"`, automatically
-drops the final observation of any odd-length time series to allow the Fourier
-transform to execute. Default is `FALSE`.}
+\item{statistic}{Character; WCC aggregate statistic. Default `"mean_abs_z"`.}
 
-\item{increment_pct}{Numeric value between 0.01 and 1.0. Determines the step size
-between successive windows as a percentage of the window size. Default is 0.05.}
+\item{surrogate_method}{Character; surrogate generator: `"phase"` (default)
+or `"circular"`.}
 
-\item{window_multipliers}{A numeric vector. Multipliers applied to the baseline cycle
-length to generate the grid of window sizes. Default is `c(0.5, 1.0, 1.5, 2.0)`.}
+\item{n_surrogates}{Single positive integer; surrogates per cell per dyad.
+Default `100`. Increase to >= 1000 for reporting.}
 
-\item{lag_multipliers}{A numeric vector. Multipliers applied to the window size
-to generate the grid of maximum lags. Default is `c(0.5, 1.0, 2.0)`.}
+\item{n_tune_dyads}{Maximum number of dyads to use. If
+`length(dyad_list) > n_tune_dyads`, a random sample is taken. Default
+`30`.}
 
-\item{min_window_size}{Integer. The absolute minimum number of observations required
-in a window to calculate a stable correlation. Default is 60.}
+\item{sig_pct}{Detectability gate: minimum proportion of dyads in which a
+cell must be significant (p < .05). Default `0.5`.}
 
-\item{max_window_sec}{A single positive number. The absolute maximum number of
-seconds for a window to span before it is no longer synchrony. Default is 30.}
-
-\item{progress}{Logical. If `TRUE` (default), displays a dynamic progress bar
-in the console during the grid search.}
+\item{iqr_penalty}{Penalty weight on cross-dyad IQR of ES. Score =
+`median(ES) - iqr_penalty * IQR(ES)`. Default `0.5`.}
 }
 \value{
-A list containing the optimal parameters and the full tuning grid results.
+A named list with:
+  \describe{
+    \item{`window_size`}{Selected window size in samples.}
+    \item{`lag_max`}{Selected max lag in samples.}
+    \item{`window_increment`}{Selected window increment in samples.}
+    \item{`lag_increment`}{`1L` (standard lag increment).}
+    \item{`window_sec`}{Selected window size in seconds.}
+    \item{`lag_sec`}{Selected max lag in seconds.}
+    \item{`sig_rate`}{Proportion of dyads where selected cell was significant.}
+    \item{`median_es`}{Median ES across dyads for the selected cell.}
+    \item{`iqr_es`}{IQR of ES across dyads for the selected cell.}
+    \item{`score`}{Selection score for the chosen cell.}
+    \item{`n_dyads`}{Number of dyads used for tuning.}
+    \item{`n_cells_gated`}{Number of cells that passed the detectability gate.}
+    \item{`dyad_multiverses`}{List of `bsync_multiverse` objects, one per dyad.}
+  }
 }
 \description{
-Automatically determines the optimal Windowed Cross-Correlation parameters
-for a multi-dyad dataset by combining Power Spectral Density (PSD) analysis
-with a surrogate-driven grid search.
+Selects Windowed Cross-Correlation hyperparameters that are both detectable
+(significant vs. the null) and stable (consistent) across a collection of
+dyads. Internally calls [synchrony_multiverse()] on each dyad and applies
+a gated stability-penalized selection rule via [select_specification()].
 }
 \details{
-**Reproducibility and Parallelization:**
-This function involves random sampling (selecting dyads and generating surrogate
-data). For reproducible results, call `set.seed()` before running this function.
-To speed up computation, ensure you have set a parallel backend using the `future`
-package (e.g., `future::plan(future::multisession)`) prior to execution.
+**Why cross-dyad stability?** A parameter set that maximizes raw synchrony
+for one dyad may simply match that dyad's autocorrelation structure. The
+matched-null surrogate controls for autocorrelation within a dyad (Invariant
+2), but the *best* parameters should also replicate across dyads with
+structurally different signals -- hence the multi-dyad stability criterion.
+
+**Selection rule.** Cells pass a detectability gate (significant in at least
+`sig_pct` of dyads). Among passing cells, the score is
+`median(ES) - iqr_penalty * IQR(ES)` across dyads, penalizing spread.
+If no cell passes the gate, a warning is issued and the highest-median-ES
+cell is returned (soft fallback).
+
+**Dyad sampling.** If `length(dyad_list) > n_tune_dyads`, a random sample
+of `n_tune_dyads` dyads is used for speed; call `set.seed()` beforehand for
+reproducibility.
+}
+\seealso{
+[synchrony_multiverse()], [suggest_wcc_params()],
+  [select_specification()]
 }

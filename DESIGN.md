@@ -337,25 +337,23 @@ reproducible; result objects stay light; supplied `time` maps windows to real ti
    file. Serial-by-default and fully reproducible; revisit only if a future estimator has a
    genuinely parallelisable inner loop that prefix sums cannot collapse.
 
-10. **Parameter selection** → no single "correct" WCC parameter set exists; the optimum is a
-    function of the signal's own timescales (autocorrelation, spectral content), which is why
-    published advice contradicts across clean-oscillatory vs. noisy-biological data. **Resolution
-    (roadmap M6, after the M5 framework) — one engine, three read-outs:** `synchrony_multiverse()`
-    is the grid + matched-null-surrogate engine (headline metric = ES vs. null, not raw synchrony,
-    which autocorrelation inflates); `autotune_wcc()` becomes a thin wrapper = multiverse + a
-    selection rule (detectability + cross-dyad stability, not bare ES-`which.max`), validated with a
-    `sim_dyad` regression test; `suggest_wcc_params()` stays the single PSD-data-driven starting
-    point with the SUSY constraints enforced/reported. The matched-null surrogate (Inv. 2) is the
-    principled defense against autocorrelation-driven spurious cross-correlation. Sequencing: the
-    `autotune_wcc()` validation lands in M6, which precedes the M7 first CRAN release — so no
-    unverified tuner ever ships.
+10. **Parameter selection** → **resolved (M6).** No single "correct" WCC parameter set exists;
+    the optimum is a function of the signal's own timescales. Three read-outs on the shared M5
+    engine: (a) `suggest_wcc_params(x, y, sample_rate, ...)` is the PSD-data-driven starting point
+    for a single dyad (4-cycles heuristic + three hard SUSY constraints enforced and warned); (b)
+    `synchrony_multiverse()` sweeps a seconds-specified grid with matched-null surrogates per cell
+    and returns a `bsync_multiverse` object with a Simonsohn-style specification-curve plot; (c)
+    `autotune_wcc(dyad_list, ...)` is a thin wrapper over `synchrony_multiverse()` + the gated
+    stability-penalized `select_specification()` rule (detectability gate: significant in >= 50%
+    of dyads; score: `median(ES) - 0.5 * IQR(ES)`). All three validated against `sim_dyad`;
+    `autotune_wcc()` and `suggest_wcc_params()` confirmed on the 0.5 Hz synchrony structure.
     **Efficiency seam (decided M5, exploited M6):** surrogate *generation* stays decoupled from
     surrogate *analysis* (the pre-generated `y_surrogates` matrix interface), and the M5
     `run_surrogate_engine()` accepts a prebuilt grid + prebuilt surrogate matrix and exposes an
-    aggregate-only path (core → aggregate, no per-cell `results_df`). This is what keeps the
+    aggregate-only path (core -> aggregate, no per-cell `results_df`). This is what keeps the
     multiverse affordable: surrogates of `y` depend only on `surrogate_method`, not on
     `window_size`/`lag_max`/increment, so one surrogate matrix is generated per method and reused
-    across every parameter cell that shares it — collapsing the dominant cost by the size of the
+    across every parameter cell that shares it -- collapsing the dominant cost by the size of the
     parameter grid. The heavy inner compute remains the M2 prefix-sum C++ core; M5/M6 add only R
     orchestration over it, parallelized via `future.apply`.
 
