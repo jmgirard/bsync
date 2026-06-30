@@ -1,5 +1,34 @@
 # bsync 0.0.0.9000
 
+## M7 — Documentation & messaging overhaul (Phase A)
+
+* **New `vignette("bsync")`** ("Get started") provides a full end-to-end workflow
+  walkthrough using `sim_dyad`, a WCC / WDTW / WGC estimator-choice decision table,
+  and a reading map into the six deep-dive articles. This is now the recommended
+  entry point for new users.
+
+* **Structured pkgdown site**: articles are now grouped into "Get started", "Core
+  estimators", and "Going deeper" sections; the function reference index is organized
+  into eight thematic groups (Estimators, Surrogate testing, Optima & leadership,
+  Parameter guidance, Preprocessing x2, Tidy interface, Data).
+
+* **`choosing-parameters` vignette reworked** — retitled "Choosing Analysis Parameters"
+  (was WCC-only); the `synchrony_multiverse()` / `autotune_wcc()` / `select_specification()`
+  examples now run on `sim_dyad` so the Simonsohn specification-curve plot and
+  `glance()` robustness summary render; WDTW and Granger `estimator=` support shown.
+
+* **Cross-linking**: `wdtw-workflow`, `wgranger-workflow`, and `determine-downsampling`
+  vignettes now carry "See also / Next steps" footers consistent with `wcc-workflow`.
+
+* **README refreshed**: Granger causality added to the headline scope sentence;
+  parameter-guidance tools (`suggest_wcc_params()`, `synchrony_multiverse()`,
+  `autotune_wcc()`) mentioned in the overview; "Where to go next" article table added;
+  canned output regenerated to reflect current (M4/M5) labels.
+
+* **Bug fix**: `print.wcc_res` and `print.wcc_surr` no longer display a spurious
+  double colon in the Fisher's Z aggregate label. The fix also renames the label from
+  `Mean |Fisher's Z|` to `Mean Abs. Fisher's Z` to avoid the cli markup ambiguity.
+
 ## M6 — Parameter guidance & synchrony multiverse
 
 ### Phase B — autotune_wcc rewrite + vignette
