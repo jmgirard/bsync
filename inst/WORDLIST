@@ -20,6 +20,8 @@ PSD
 Parallelization
 README
 Ramseyer
+Selectable
+SUSY
 Rotondo
 Sakoe
 Savitzky
@@ -50,6 +52,7 @@ lai
 loess
 misalign
 multisession
+rMEA
 natively
 nonstationary
 overfit

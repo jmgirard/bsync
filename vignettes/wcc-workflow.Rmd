@@ -146,6 +146,45 @@ plot(wcc_results, time_step = 1 / fs)
 
 This generates a heatmap where deep blue indicates strong positive correlation (synchrony) and deep red indicates strong negative correlation. You can already see a clear track of high correlation shifting across the zero-lag line over time alongside a washed-out period of low correlation in the middle.
 
+### 3.1 Choosing the aggregate statistic
+
+`wcc()` reduces the full WCC surface to a single number via the `statistic` argument.  Two conventions are available:
+
+* **`"mean_abs_z"` (default):** The mean of |Fisher's Z| over *every* (window × lag) cell in the surface.  This is the *mean absolute Z* from the SUSY toolbox (Tschacher & Meier, 2020) and reflects the average strength of coupling across the entire lag range tested.
+
+* **`"peak"`:** Within each window, the *maximum* |Fisher's Z| across all lags is identified (the strongest lead–lag coupling in that moment).  These per-window peaks are then averaged across the recording.  This is the *best-lag* convention used in rMEA and introduced by Boker et al. (2002).
+
+The two statistics answer slightly different questions.  `"mean_abs_z"` captures average coupling strength over the full lag range; `"peak"` highlights the *strongest* lag coupling in each window and will always be ≥ `"mean_abs_z"`.  Choose based on your research question.
+
+```{r statistic-comparison}
+# Default: SUSY mean absolute Z
+wcc_maz <- wcc(
+  x = dyad_data$person_A,
+  y = dyad_data$person_B,
+  time = dyad_data$time,
+  window_size = 90,
+  lag_max = 45,
+  window_increment = 30,
+  statistic = "mean_abs_z" # the default
+)
+
+# rMEA best-lag convention
+wcc_peak <- wcc(
+  x = dyad_data$person_A,
+  y = dyad_data$person_B,
+  time = dyad_data$time,
+  window_size = 90,
+  lag_max = 45,
+  window_increment = 30,
+  statistic = "peak"
+)
+
+cat("mean_abs_z:", round(wcc_maz$fisher_z, 4), "\n")
+cat("peak:      ", round(wcc_peak$fisher_z, 4), "\n")
+```
+
+**Important:** Always pass the *same* `statistic` to `wcc_surrogate()` so that the null distribution is built with the same quantity as the observed value (see Section 4).
+
 ## 4. Surrogate Testing for Significance
 
 Time series data are inherently autocorrelated. Because of this, high cross-correlation values can sometimes occur purely by chance. To test if the synchronization we observed is meaningful, we evaluate it against a null distribution.

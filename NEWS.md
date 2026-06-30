@@ -1,5 +1,25 @@
 # bsync 0.0.0.9000
 
+## M4 — Selectable WCC aggregate statistic
+
+* **`wcc()` gains a `statistic` argument** (`"mean_abs_z"` | `"peak"`, default
+  `"mean_abs_z"`). `"mean_abs_z"` is the SUSY *mean absolute Z* (Tschacher &
+  Meier, 2020) — the mean of |Fisher's Z| over all windows and lags — and
+  reproduces the pre-M4 behavior exactly. `"peak"` is the rMEA *best-lag*
+  convention (Boker et al., 2002): per window, the maximum |Fisher's Z| across
+  lags; then mean across windows.
+
+* **`wcc_surrogate()` gains the same `statistic` argument.** The null
+  distribution is always built with the same statistic as the observed value
+  (Invariant 2). Pass the same value to both functions.
+
+* **Shared internal helper.** Both functions now call `wcc_aggregate()`, a
+  single internal helper, guaranteeing the observed and surrogate aggregates
+  are numerically identical.
+
+* **Print methods updated.** `print.wcc_res` and `print.wcc_surr` label the
+  aggregate line according to the chosen statistic.
+
 ## M3 — CRAN readiness
 
 * **Build artifacts removed from version control.** `src/*.o`, `src/bsync.{so,dll}`,
