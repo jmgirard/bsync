@@ -179,7 +179,13 @@ hanging over the hardening work. **M5 is the active milestone.**
      surrogate statistics flow through the same grid builder + aggregate fn (Inv 2/4); tail
      direction parameterized once (upper WCC/Granger, lower WDTW). The M4 cross-path Inv-2 test
      (pass `y` as its sole surrogate ⇒ null draw == observed) is extended to WDTW and Granger (both
-     directions). p-values bit-identical to pre-refactor for a fixed seed.
+     directions). p-values bit-identical to pre-refactor for a fixed seed. **M6-enabling seams
+     (contractual, not incidental):** the engine accepts a **prebuilt grid** and a **prebuilt
+     surrogate matrix**, and exposes an **aggregate-only path** (core → aggregate, no per-cell
+     `results_df`), so the M6 multiverse can hoist surrogate generation and grid construction out
+     of its inner loop and reuse one surrogate matrix across every parameter cell sharing a
+     `surrogate_method`. A test asserts the engine never materializes a full `results_df` on the
+     surrogate path.
   5. **One heatmap scaffold.** `build_surface_heatmap()` factors the `time_step`/axis/theme/
      zero-line scaffold; `plot.wcc_res`/`plot.wdtw_res` supply only the fill scale; all plot
      snapshots unchanged. Granger retains its line plot.

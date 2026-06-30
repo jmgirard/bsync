@@ -326,6 +326,15 @@ reproducible; result objects stay light; supplied `time` maps windows to real ti
     principled defense against autocorrelation-driven spurious cross-correlation. Sequencing: the
     `autotune_wcc()` validation lands in M6, which precedes the M7 first CRAN release — so no
     unverified tuner ever ships.
+    **Efficiency seam (decided M5, exploited M6):** surrogate *generation* stays decoupled from
+    surrogate *analysis* (the pre-generated `y_surrogates` matrix interface), and the M5
+    `run_surrogate_engine()` accepts a prebuilt grid + prebuilt surrogate matrix and exposes an
+    aggregate-only path (core → aggregate, no per-cell `results_df`). This is what keeps the
+    multiverse affordable: surrogates of `y` depend only on `surrogate_method`, not on
+    `window_size`/`lag_max`/increment, so one surrogate matrix is generated per method and reused
+    across every parameter cell that shares it — collapsing the dominant cost by the size of the
+    parameter grid. The heavy inner compute remains the M2 prefix-sum C++ core; M5/M6 add only R
+    orchestration over it, parallelized via `future.apply`.
 
 **Remaining / to resolve at the named milestone:**
 - **Shared-surface refactor shape** (M5) — how far to merge Granger (directional, no `tau`) into the
