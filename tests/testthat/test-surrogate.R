@@ -218,7 +218,8 @@ test_that("Print methods return silently and output text", {
     observed_z = 0.8,
     surrogate_z = c(0.1, 0.2),
     p_value = 0.01,
-    n_surrogates = 100
+    n_surrogates = 100,
+    settings = list(statistic = "mean_abs_z")
   )
   class(mock_wcc_obj) <- c("wcc_surr", "list")
 

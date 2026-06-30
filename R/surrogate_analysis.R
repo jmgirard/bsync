@@ -13,10 +13,13 @@
 #'
 #' @details
 #' The p-value is the proportion of surrogates whose aggregate statistic is **at least as
-#' large as** the observed statistic. The aggregate is `mean(abs(Fisher's Z))` — the same
-#' quantity stored in `wcc_res$fisher_z` — computed identically on both the observed data
-#' and every surrogate, so the null distribution and the observed value are directly
-#' comparable.
+#' large as** the observed statistic. The aggregate — either `"mean_abs_z"` or `"peak"` —
+#' is computed identically on the observed data and every surrogate via the same internal
+#' helper, so the null distribution and the observed value are guaranteed to be directly
+#' comparable (Invariant 2: surrogate nulls match the observed statistic).
+#'
+#' Pass the same `statistic` value you used in `wcc()` so that `observed_z` and the
+#' surrogate draws use the same quantity.
 #'
 #' @param x A numeric vector containing a time series.
 #' @param y A numeric vector containing a time series.
@@ -27,6 +30,8 @@
 #' @param window_increment A positive integer indicating the window shift increment. Default is 1.
 #' @param lag_increment A positive integer indicating the lag shift increment. Default is 1.
 #' @param na.rm A logical indicating whether to remove missing values. Default is `TRUE`.
+#' @param statistic A character string specifying the aggregate statistic; must match the value
+#'   passed to `wcc()`. `"mean_abs_z"` (default) or `"peak"`. See `wcc()` for details.
 #' @return A list object of class "wcc_surr".
 #' @export
 wcc_surrogate <- function(
@@ -38,8 +43,10 @@ wcc_surrogate <- function(
   lag_max,
   window_increment = 1,
   lag_increment = 1,
-  na.rm = TRUE
+  na.rm = TRUE,
+  statistic = c("mean_abs_z", "peak")
 ) {
+  statistic <- match.arg(statistic)
   if (!is.matrix(y_surrogates)) {
     cli::cli_abort("{.arg y_surrogates} must be a matrix.")
   }
@@ -60,7 +67,8 @@ wcc_surrogate <- function(
     lag_max = lag_max,
     window_increment = window_increment,
     lag_increment = lag_increment,
-    na.rm = na.rm
+    na.rm = na.rm,
+    statistic = statistic
   )
   obs_z <- obs_wcc$fisher_z
 
@@ -101,7 +109,7 @@ wcc_surrogate <- function(
 
       z_vals <- r_to_z(wcc_vals)
 
-      base::mean(base::abs(z_vals), na.rm = TRUE)
+      wcc_aggregate(z = z_vals, window_id = grid_df$row, statistic = statistic)
     },
     FUN.VALUE = numeric(1),
     future.seed = TRUE
@@ -402,10 +410,16 @@ print.wcc_surr <- function(x, ...) {
     p_disp <- as.character(round(x$p_value, 4))
   }
 
+  agg_label <- if (x$settings$statistic == "peak") {
+    "Mean Peak |Fisher's Z|"
+  } else {
+    "Mean |Fisher's Z|"
+  }
+
   cli::cli_dl(c(
     "Permutations" = "{x$n_surrogates}",
-    "Observed Fisher's Z" = "{round(x$observed_z, 4)}",
-    "Average Null Z" = "{round(mean(x$surrogate_z), 4)}",
+    "Observed {agg_label}" = "{round(x$observed_z, 4)}",
+    "Average Null {agg_label}" = "{round(mean(x$surrogate_z), 4)}",
     "Empirical p-value" = "{p_disp}"
   ))
 

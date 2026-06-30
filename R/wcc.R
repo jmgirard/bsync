@@ -35,8 +35,16 @@
 #'   (default = `1`)
 #' @param na.rm A logical indicating whether to remove missing values from the
 #'   windows when calculating windowed cross-correlations. (default = `TRUE`)
-#' @return A list object of class "wcc" containing the results matrix and useful
-#'   summaries of it.
+#' @param statistic A character string specifying how to aggregate the WCC
+#'   surface into a single number. `"mean_abs_z"` (default) takes the mean of
+#'   absolute Fisher's Z values over **all** windows and lags — the SUSY *mean
+#'   absolute Z* (Tschacher & Meier, 2020). `"peak"` takes the maximum absolute
+#'   Fisher's Z across lags **within each window**, then averages those per-window
+#'   peaks — the rMEA *best-lag* convention (Boker et al., 2002). Both are
+#'   larger-is-more-synchrony quantities. Pass the same value to
+#'   `wcc_surrogate()` so the null distribution matches (see Invariant 2).
+#' @return A list object of class "wcc_res" containing the results matrix and
+#'   useful summaries of it.
 #' @export
 wcc <- function(
   x,
@@ -46,8 +54,11 @@ wcc <- function(
   lag_max,
   window_increment = 1,
   lag_increment = 1,
-  na.rm = TRUE
+  na.rm = TRUE,
+  statistic = c("mean_abs_z", "peak")
 ) {
+  statistic <- match.arg(statistic)
+
   # Assertions
   if (!is.numeric(x)) {
     cli::cli_abort("{.arg x} must be a numeric vector.")
@@ -94,6 +105,7 @@ wcc <- function(
     lag_max = lag_max,
     lag_increment = lag_increment,
     na.rm = na.rm,
+    statistic = statistic,
     has_time = !is.null(time)
   )
 
@@ -106,7 +118,11 @@ wcc <- function(
 
   out <- list(
     results_df = results_df,
-    fisher_z = fisher_z(results_df),
+    fisher_z = wcc_aggregate(
+      z = r_to_z(results_df$wcc),
+      window_id = results_df$i,
+      statistic = statistic
+    ),
     settings = settings
   )
 
@@ -200,6 +216,12 @@ print.wcc_res <- function(x, ...) {
   n_windows <- length(unique(x$results_df$i))
   n_lags <- length(unique(x$results_df$tau))
 
+  agg_label <- if (s$statistic == "peak") {
+    "Mean Peak |Fisher's Z|"
+  } else {
+    "Mean |Fisher's Z|"
+  }
+
   cli::cli_h1("Windowed Cross-Correlation Analysis")
 
   cli::cli_dl(c(
@@ -207,7 +229,7 @@ print.wcc_res <- function(x, ...) {
     "Total Lags Tested" = "{n_lags}",
     "Window Size" = "{s$window_size}",
     "Max Lag" = "{s$lag_max}",
-    "Overall Fisher's Z" = "{round(x$fisher_z, 4)}"
+    "{agg_label}" = "{round(x$fisher_z, 4)}"
   ))
 
   invisible(x)
@@ -292,11 +314,14 @@ r_to_z <- function(r) {
 }
 
 #' @noRd
-fisher_z <- function(results_df) {
-  rvec <- results_df$wcc
-  zvec <- r_to_z(rvec)
-  azvec <- base::abs(zvec)
-  res <- base::mean(azvec, na.rm = TRUE)
-
-  res
+wcc_aggregate <- function(z, window_id, statistic) {
+  az <- base::abs(z)
+  if (statistic == "mean_abs_z") {
+    base::mean(az, na.rm = TRUE)
+  } else {
+    peaks <- tapply(az, window_id, function(v) {
+      if (all(is.na(v))) NA_real_ else max(v, na.rm = TRUE)
+    })
+    base::mean(peaks, na.rm = TRUE)
+  }
 }

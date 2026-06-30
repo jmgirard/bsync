@@ -6,7 +6,7 @@
 \alias{bsync-package}
 \title{bsync: Behavioral Synchrony Analyses}
 \description{
-A comprehensive toolkit for analyzing interpersonal and behavioral synchrony in continuous time series data. Provides highly efficient, C++ backed implementations of windowed cross-correlation (WCC) and peak-picking algorithms to quantify nonstationary lead-lag relationships. Includes a complete preprocessing pipeline for behavioral data featuring zero-phase smoothing, time-bin aggregation, and kinematic velocity and speed calculations. Additionally, the package supports rigorous null-hypothesis testing through circular-shift surrogate data generation (pseudo-synchrony analysis) to distinguish genuine interaction from spurious correlation.
+A comprehensive toolkit for analyzing interpersonal and behavioral synchrony in continuous dyadic time series. Provides efficient, C++ backed implementations of three windowed estimators: cross-correlation (WCC), dynamic time warping (WDTW), and Granger causality, each with a full surrogate (pseudo-synchrony) significance testing layer using circular-shift and phase-randomization generators. Includes peak and valley optima picking, a rolling leadership asymmetry index, and a preprocessing pipeline featuring zero-phase smoothing, time-bin aggregation, gap imputation, and kinematic velocity and speed calculations. Theory-driven and data-driven hyperparameter helpers guide window size and lag selection.
 }
 \seealso{
 Useful links:
