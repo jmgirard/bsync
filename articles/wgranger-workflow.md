@@ -79,8 +79,8 @@ fs <- 30
 n_frames <- 1800 # 60 seconds of data
 
 # Generate smooth baseline movements using a moving average
-base_A <- as.numeric(stats::filter(rnorm(n_frames + 50), rep(1/10, 10), circular = TRUE))[1:n_frames]
-base_B <- as.numeric(stats::filter(rnorm(n_frames + 50), rep(1/10, 10), circular = TRUE))[1:n_frames]
+base_A <- as.numeric(stats::filter(rnorm(n_frames + 50), rep(1 / 10, 10), circular = TRUE))[1:n_frames]
+base_B <- as.numeric(stats::filter(rnorm(n_frames + 50), rep(1 / 10, 10), circular = TRUE))[1:n_frames]
 
 person_A <- numeric(n_frames)
 person_B <- numeric(n_frames)
@@ -100,7 +100,7 @@ for (i in 1:n_frames) {
 }
 
 dyad_data <- data.frame(
-  time = seq(0, by = 1/fs, length.out = n_frames),
+  time = seq(0, by = 1 / fs, length.out = n_frames),
   person_A = person_A,
   person_B = person_B
 )
@@ -140,7 +140,7 @@ summary(wgc_results)
 #> ── Significance Summary (p < 0.05) ──
 #> 
 #> • 'x' significantly predicts 'y' in 59 windows (52.7%)
-#> • 'y' significantly predicts 'x' in 68 windows (60.7%)
+#> • 'y' significantly predicts 'x' in 66 windows (58.9%)
 ```
 
 The summary output provides an immediate, high-level view of the
@@ -193,15 +193,15 @@ print(surrogate_results)
 #> ── Direction: x -> y ──
 #> 
 #> Permutations: 1000
-#> Observed Mean F-statistic: 161.2713
-#> Average Null F-statistic: 1.8703
+#> Observed Mean F-statistic: 159.482
+#> Average Null F-statistic: 1.867
 #> Empirical p-value: 0.001
 #> ✔ Predictive power (x -> y) is significantly greater than chance.
 #> 
 #> ── Direction: y -> x ──
 #> 
-#> Observed Mean F-statistic: 134.8659
-#> Average Null F-statistic: 1.8723
+#> Observed Mean F-statistic: 133.1204
+#> Average Null F-statistic: 1.8685
 #> Empirical p-value: 0.003
 #> ✔ Predictive power (y -> x) is significantly greater than chance.
 ```

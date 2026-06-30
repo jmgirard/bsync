@@ -33,3 +33,7 @@ plot(x, time_step = 1, metric = c("F", "p"), smooth = FALSE, ...)
 - ...:
 
   Additional arguments (not used).
+
+## Value
+
+A \`ggplot2\` plot object.

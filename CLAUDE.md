@@ -71,47 +71,118 @@ focus and `DESIGN.md` §14/§15).
 
 ## Completed milestones
 
-*(none yet — M1 is the first formal milestone; see Current focus)*
+- **M1 — Correctness & robustness (done).** All six acceptance criteria
+  met; post-review fixes applied (commits `741bf7c`–`ed5960f` on `main`;
+  349 tests passing, 0 errors/0 warnings/2 notes in `R CMD check`; notes
+  are M3 scope):
+  1.  `na.rm` honored in WCC: `calc_wcc_cpp` gains `na_rm` bool;
+      `na.rm = FALSE` returns `NA` for any window containing `NA`;
+      forwarded through `create_wcc_df()` and
+      [`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md).
+      Both modes tested in `test-wcc.R`.
+  2.  Window-size semantics fixed to exactly `window_size` samples via
+      `w_max = window_size - 1` at the C++ boundary in all three
+      estimators and all three surrogate wrappers; `n_r` grid math
+      updated; a test asserts realized window count (33, not 32, for the
+      reference parameters).
+  3.  Short-series robustness:
+      [`seq_len()`](https://rdrr.io/r/base/seq.html) throughout;
+      [`cli::cli_abort()`](https://cli.r-lib.org/reference/cli_abort.html)
+      in all three `create_*_df()` builders and all three surrogate grid
+      builders; abort tested for all three estimators.
+  4.  [`evaluate_signal_power()`](https://jmgirard.github.io/bsync/reference/evaluate_signal_power.md)
+      no longer auto-prints: `plot=` arg removed;
+      [`plot.signal_power_res()`](https://jmgirard.github.io/bsync/reference/plot.signal_power_res.md)
+      S3 method added; no `Rplots.pdf` side effect; other compute
+      functions audited.
+  5.  Condition style unified to `cli` in `R/impute.R` and
+      `R/surrogate_generation.R`.
+  6.  [`leadership_asymmetry()`](https://jmgirard.github.io/bsync/reference/leadership_asymmetry.md)
+      roxygen states centered sliding-window semantics; `min_valid`
+      validated;
+      [`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)
+      4-cycles-per-window heuristic documented in `@details`.
+      Post-review: NEWS.md header fixed; OpenMP flags removed from
+      Makevars pending M2 decision; surrogate `@details` document
+      null-statistic semantics and `fast_method` caveat; surrogate
+      robustness and p-value sanity tests added (349 total).
+- **M2 — Efficiency (done).** All five acceptance criteria met;
+  post-review fixes applied (commits `ce385b1`–`644d140` on `main`; 353
+  tests passing, 0 errors/0 warnings/0 notes in `R CMD check`):
+  1.  `calc_wcc_cpp` rewritten to an NA-aware prefix-sum algorithm
+      (loops over distinct lags, builds six masked prefix arrays in O(n)
+      per τ, evaluates each window in O(1)). Both `na_rm` modes,
+      bounds-check→NA, and variance-zero guard preserved. Signature
+      unchanged; `RcppExports` regenerates with no diff.
+  2.  Pure-R [`stats::cor`](https://rdrr.io/r/stats/cor.html) oracle
+      matches new core at 1e-9 on `sim_dyad` for clean, NA na.rm=TRUE,
+      and NA na.rm=FALSE cases (`test-wcc.R`). Oracle was first
+      validated against the pre-rewrite core, proving it correct before
+      the optimization.
+  3.  `bench/bench_wcc.R` + `bench/RESULTS.md` record 5.4×–24.9× speedup
+      across four configs (sim_dyad narrow/wide, n=10000 narrow/wide).
+      Speedup grows with w_max as expected.
+  4.  OpenMP removed: no `SHLIB_OPENMP` flags in
+      `Makevars`/`Makevars.win`, no `#pragma omp` in any source file.
+      Decision logged in `DESIGN.md §14`; core is serial and
+      reproducible.
+  5.  353 tests green; vdiffr snapshots unchanged; no build artifacts
+      staged. Post-review: explicit C++ stdlib includes added
+      (`<algorithm>`, `<unordered_map>`, etc.) for CRAN portability;
+      large-mean oracle test added documenting ~2e-6 prefix-sum
+      cancellation loss (tolerance 1e-5 catches real bugs);
+      `.Rbuildignore` gains `^\.claude$`, `^CLAUDE\.md$`,
+      `^DESIGN\.md$`, `^bench$` — `R CMD check` is now 0/0/0.
+- **M3 — CRAN readiness (done).** All seven acceptance criteria met
+  (commits `184e874`–`69f1ca4` on `main`; 353 tests passing, 0 errors/0
+  warnings/0 notes in `R CMD check --as-cran`). No C++ core numerics
+  changed — only `RcppExports` regenerated to confirm zero diff, so
+  Invariant 5 was not triggered. Plan-time decisions held: version stays
+  `0.0.0.9000`; `cran-comments.md` deferred to actual submission;
+  DESCRIPTION Description refreshed:
+  1.  Build artifacts untracked via `git rm --cached` (`.DS_Store`,
+      `tests/.DS_Store`, six `src/*.o`, `src/bsync.{so,dll}`,
+      `tests/testthat/Rplots.pdf`); `.gitignore` extended with
+      `*.o`/`*.so`/`*.dll`/`*.dylib` + `tests/testthat/Rplots.pdf`.
+      `git ls-files` is artifact-free; `bsync.Rproj`/`LICENSE.md`
+      deliberately kept (already `.Rbuildignore`’d).
+  2.  [`Rcpp::compileAttributes()`](https://rdrr.io/pkg/Rcpp/man/compileAttributes.html)
+      produced zero diff in `src/RcppExports.cpp` / `R/RcppExports.R`.
+  3.  `@return` roxygen added to all 18 exported
+      `print`/`plot`/`summary` methods + `plot_optima_overlay`;
+      re-documented. Only `sim_dyad` (data) and `bsync-package`
+      (overview) omit `\value`, both legitimately.
+  4.  `R CMD check --as-cran` = 0/0/0 (verified twice during
+      implementation); examples needed no `\donttest{}` (check reports
+      “examples … NONE”).
+  5.  `urlchecker::url_check()` clean;
+      [`spelling::spell_check_package()`](https://docs.ropensci.org/spelling//reference/spell_check_package.html)
+      clean via new `inst/WORDLIST` and `Language: en-US` in DESCRIPTION
+      (neither tool added to deps).
+  6.  `devtools::build_readme()` regenerated `README.md` (and fixed a
+      broken
+      [`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md)
+      example that passed a non-existent `n_surrogates` arg instead of a
+      `y_surrogates` matrix);
+      [`pkgdown::check_pkgdown()`](https://pkgdown.r-lib.org/reference/check_pkgdown.html)
+      passes; DESCRIPTION Description now covers
+      WDTW/Granger/surrogates/ optima/leadership.
+  7.  353 tests green; vdiffr snapshots unchanged; styler applied across
+      tests + vignettes; NEWS.md gained an M3 entry. Post-review:
+      deprecated `context()` removed from `test-impute.R` (suite now 0
+      warnings); spell-check enforced in CI via
+      `usethis::use_spell_check()` (adds `tests/spelling.R` skip-on-cran
+
+  - `spelling` to `Suggests`) so `inst/WORDLIST` can no longer drift
+    unnoticed — reverses the plan-time “ad hoc, not a dep” choice by
+    design. `R CMD check --as-cran` remains 0/0/0.
 
 ## Current focus
 
 **Hardening cycle toward a near-term CRAN submission**, run as four
-focused milestones via the plan → implement → review loop. **M1 is
-active.**
+focused milestones via the plan → implement → review loop. **M4 is
+next.**
 
-- **M1 — Correctness & robustness (active).** Acceptance criteria:
-  1.  `na.rm` is honored in WCC: `calc_wcc_cpp` gains an NA-policy
-      parameter; `na.rm = FALSE` returns `NA` for any window containing
-      `NA`; forwarded from `create_wcc_df()`. Test proves both modes.
-  2.  Window-size semantics fixed to **exactly `window_size` samples**
-      via `w_max = window_size - 1` at the C++ boundary in all three
-      estimators; `n_r` grid math and all `window_size` docs updated; a
-      test asserts realized window length.
-  3.  Short-series robustness: `1:n_r` / `0:(n_r-1)` →
-      [`seq_len()`](https://rdrr.io/r/base/seq.html); explicit
-      [`cli::cli_abort()`](https://cli.r-lib.org/reference/cli_abort.html)
-      when a series is too short for the chosen `window_size`/`lag_max`,
-      across the three `create_*_df` builders and the three surrogate
-      grid builders. Test for the abort.
-  4.  [`evaluate_signal_power()`](https://jmgirard.github.io/bsync/reference/evaluate_signal_power.md)
-      no longer auto-[`print()`](https://rdrr.io/r/base/print.html)s its
-      plot (returns it); no `Rplots.pdf` side effect; other compute
-      functions audited for stray devices.
-  5.  Condition style unified to `cli` in `R/impute.R` and
-      `R/surrogate_generation.R`.
-  6.  Docs:
-      [`leadership_asymmetry()`](https://jmgirard.github.io/bsync/reference/leadership_asymmetry.md)
-      clarified as a centered **sliding** window + `min_valid`
-      validated;
-      [`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)
-      4-cycles-per-window heuristic stated and justified.
-- **M2 — Efficiency.** Prefix-sum WCC core (NA-aware) +
-  numerical-regression oracle vs. reference on `sim_dyad`; OpenMP
-  adopt-or-remove decision (serial default, `_OPENMP`-guarded thread arg
-  if adopted); `bench/` before/after timings.
-- **M3 — CRAN readiness.** Untrack build artifacts; clean
-  `.gitignore`/`.Rbuildignore`; regenerate `RcppExports`;
-  `R CMD check --as-cran` → 0/0/0; README/pkgdown pass.
 - **M4 — Selectable WCC aggregate statistic.**
   `statistic = c("mean_abs_z","peak")` on
   [`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md) +

@@ -32,3 +32,7 @@ plot(x, time_step = 1, line_color = "#2166AC", smooth = FALSE, ...)
 - ...:
 
   Additional arguments (not used).
+
+## Value
+
+A \`ggplot2\` plot object.

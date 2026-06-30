@@ -69,9 +69,25 @@ wdtw_surrogate(
 - fast_method:
 
   Logical. If \`TRUE\`, severely reduces computation time by only
-  evaluating the surrogate alignments at a lag of 0. Useful for
-  exploratory analysis. Default is \`FALSE\`.
+  evaluating surrogate alignments at lag 0. \*\*See Details for the
+  statistical caveat.\*\* Default is \`FALSE\`.
 
 ## Value
 
 A list object of class "wdtw_surr".
+
+## Details
+
+The p-value is the proportion of surrogates whose aggregate statistic is
+\*\*at most as large as\*\* the observed statistic (lower DTW distance =
+better alignment). The aggregate is \`mean(dtw_dist)\` over all window ×
+lag combinations — the same quantity stored in
+\`wdtw_res\$mean_distance\` — computed identically on both the observed
+data and every surrogate, so the null distribution and the observed
+value are directly comparable.
+
+\*\*\`fast_method\` warning:\*\* when \`fast_method = TRUE\`, surrogates
+are evaluated at lag 0 only, while the observed statistic is computed
+over all lags. The null and observed aggregates therefore cover
+different lag ranges, making the resulting p-value approximate. Use only
+for quick exploratory checks, never for reporting.

@@ -61,3 +61,7 @@ plot_optima_overlay(
 
   Additional arguments passed to the underlying plot method (e.g.,
   custom colors for WCC).
+
+## Value
+
+A \`ggplot2\` plot object.

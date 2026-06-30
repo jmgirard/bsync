@@ -74,7 +74,7 @@ n_frames <- 1800 # 60 seconds of data
 
 # Generate a smooth base signal using a 30-frame moving average.
 raw_noise <- rnorm(n_frames + 300)
-base_signal <- stats::filter(raw_noise, rep(1/30, 30), circular = TRUE)
+base_signal <- stats::filter(raw_noise, rep(1 / 30, 30), circular = TRUE)
 base_signal <- as.numeric(base_signal)
 
 person_A <- numeric(n_frames)
@@ -93,7 +93,7 @@ for (i in 1:n_frames) {
 }
 
 dyad_data <- data.frame(
-  time = seq(0, by = 1/fs, length.out = n_frames),
+  time = seq(0, by = 1 / fs, length.out = n_frames),
   person_A = person_A,
   person_B = person_B
 )
@@ -140,7 +140,7 @@ print(wdtw_results)
 #> Max Lag: 45
 #> Scale Method: global
 #> Distance Metric: L2
-#> Overall Mean Distance: 27.1612
+#> Overall Mean Distance: 27.043
 ```
 
 The [`wdtw()`](https://jmgirard.github.io/bsync/reference/wdtw.md)
@@ -259,13 +259,13 @@ summary(wdtw_optima_df)
 #> ── Lag Directionality (Leadership) ──
 #> 
 #> • Positive Lags (x leads y): 24 (44.4%)
-#> • Negative Lags (y leads x): 29 (53.7%)
-#> • Zero Lags (Simultaneous): 1 (1.9%)
+#> • Negative Lags (y leads x): 28 (51.9%)
+#> • Zero Lags (Simultaneous): 2 (3.7%)
 #> 
 #> ── Optimum Value Distribution ──
 #> 
 #>     0%    25%    50%    75%   100% 
-#> 4.1667 5.1867 5.5318 5.8954 6.8954
+#> 4.1393 5.1405 5.4232 5.8031 6.8041
 ```
 
 This returns a `wdtw_optima` data frame containing the elapsed time

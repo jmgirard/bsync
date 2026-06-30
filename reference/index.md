@@ -32,6 +32,8 @@
   : Find Optimum (Peak or Valley) in Windowed Analyses
 - [`plot(`*`<bsync_lai>`*`)`](https://jmgirard.github.io/bsync/reference/plot.bsync_lai.md)
   : Plot bsync_lai object
+- [`plot(`*`<signal_power_res>`*`)`](https://jmgirard.github.io/bsync/reference/plot.signal_power_res.md)
+  : Plot method for signal_power_res objects
 - [`plot(`*`<wcc_res>`*`)`](https://jmgirard.github.io/bsync/reference/plot.wcc_res.md)
   : Plot wcc_res object
 - [`plot(`*`<wdtw_res>`*`)`](https://jmgirard.github.io/bsync/reference/plot.wdtw_res.md)

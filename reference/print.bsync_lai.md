@@ -22,3 +22,7 @@ print(x, n = 5, ...)
 - ...:
 
   Additional arguments (not used).
+
+## Value
+
+Returns \`x\` invisibly.

@@ -88,12 +88,12 @@ summary(wcc_results)
 #> Total Lags Tested: 151
 #> Window Size: 150
 #> Max Lag: 75
-#> Overall Fisher's Z: 1.0706
+#> Overall Fisher's Z: 1.071
 #> 
 #> ── Cross-Correlation Value Distribution ──
 #> 
 #>      0%     25%     50%     75%    100% 
-#> -0.9984 -0.6821  0.0345  0.7156  0.9986
+#> -0.9984 -0.6830  0.0338  0.7164  0.9986
 ```
 
 Once the cross-correlations are calculated, we extract the specific lags
@@ -130,7 +130,7 @@ summary(optima)
 #> ── Optimum Value Distribution ──
 #> 
 #>     0%    25%    50%    75%   100% 
-#> 0.9742 0.9951 0.9971 0.9976 0.9986
+#> 0.9739 0.9951 0.9971 0.9976 0.9986
 ```
 
 Finally, we visualize the resulting correlation landscape. The
@@ -167,24 +167,28 @@ interaction.
 ``` r
 
 # Step 5: Run surrogate analysis to calculate an empirical p-value
+# First generate a null distribution via circular shift
 set.seed(2026)
+null_matrix <- generate_surrogate_circular(y = df$vel_B, n_surrogates = 100)
+
+# Then compare observed WCC against the null distribution
 surrogate_results <- wcc_surrogate(
   x = df$vel_A,
   y = df$vel_B,
+  y_surrogates = null_matrix,
   window_size = 150,
   lag_max = 75,
   window_increment = 25,
-  lag_increment = 1,
-  n_surrogates = 100
+  lag_increment = 1
 )
 
 surrogate_results
 #> ── WCC Surrogate Analysis (Pseudo-Synchrony) ───────────────────────────────────
 #> Permutations: 100
-#> Observed Fisher's Z: 1.0706
-#> Average Null Z: 0.9894
-#> Empirical p-value: < 0.01
-#> ✔ Observed synchrony is significantly greater than chance.
+#> Observed Fisher's Z: 1.071
+#> Average Null Z: 1.007
+#> Empirical p-value: 0.06
+#> ! Observed synchrony is not significantly different from chance.
 #> ℹ Note: 100 permutations may be too few for stable p-values.
 #> Consider setting `n_surrogates >= 1000` for final reporting.
 ```

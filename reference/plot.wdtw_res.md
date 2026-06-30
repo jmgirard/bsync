@@ -33,3 +33,7 @@ plot(x, time_step = 1, show_zero_lag = TRUE, zero_line_color = "black", ...)
 - ...:
 
   Additional arguments (not used).
+
+## Value
+
+A \`ggplot2\` plot object.

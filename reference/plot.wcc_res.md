@@ -57,3 +57,7 @@ plot(
 - ...:
 
   Additional arguments (not used).
+
+## Value
+
+A \`ggplot2\` plot object.

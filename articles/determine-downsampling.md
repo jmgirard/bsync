@@ -71,18 +71,11 @@ single_eval <- evaluate_signal_power(
 #> 95% of signal power is captured below 1.41 Hz.
 #> ✔ Theoretical minimum rate is 2.81 Hz.
 #> ✔ Recommended downsampling factor: 6 (Target: 5 Hz | Bin Width: 0.2 sec).
-```
-
-![](determine-downsampling_files/figure-html/eval-single-1.png)
-
-``` r
-
 
 # View the diagnostic plot
 single_eval$plot
+#> NULL
 ```
-
-![](determine-downsampling_files/figure-html/eval-single-2.png)
 
 ## Best Practice: Dataset-Level Evaluation
 
@@ -111,18 +104,11 @@ multi_eval <- evaluate_signal_power(
 #> 95th percentile of cutoffs is 1.41 Hz.
 #> ✔ Theoretical minimum rate is 2.81 Hz.
 #> ✔ Recommended downsampling factor: 6 (Target: 5 Hz | Bin Width: 0.2 sec).
-```
-
-![](determine-downsampling_files/figure-html/eval-multi-1.png)
-
-``` r
-
 
 # View the dataset-level diagnostic plot
 multi_eval$plot
+#> NULL
 ```
-
-![](determine-downsampling_files/figure-html/eval-multi-2.png)
 
 When provided with multiple signals, the function calculates the cutoff
 for each individual and then conservatively recommends the **95th

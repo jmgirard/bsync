@@ -24,8 +24,10 @@ suggest_wcc_params(
 
 - event_duration_sec:
 
-  The expected duration of a single behavioral event in seconds. Default
-  is 2 (typical for brief conversational gestures).
+  The expected duration of a single behavioral event in seconds. Used as
+  the basis for the 4-cycles-per-window heuristic: \`window_size =
+  round(event_duration_sec \* 4 \* sample_rate)\`. Default is 2 (typical
+  for brief conversational gestures).
 
 - max_delay_sec:
 
@@ -40,3 +42,19 @@ suggest_wcc_params(
 ## Value
 
 A list of recommended parameters ready to be passed to \`wcc()\`.
+
+## Details
+
+The \`window_size\` is derived from the \*\*4-cycles-per-window
+heuristic\*\*: a window should span approximately 4 full cycles of the
+behavior of interest so that the within-window correlation estimate is
+stable across a range of lead–lag relationships (Boker et al., 2002).
+Concretely, \`window_size = round(event_duration_sec \* 4 \*
+sample_rate)\`. Four cycles ensures enough oscillation to estimate a
+reliable correlation, whereas two cycles (the Nyquist minimum) would
+leave the estimate too noisy.
+
+The \`lag_max\` is capped at half the \`window_size\` when the requested
+\`max_delay_sec\` would exceed it; beyond that point the lagged window
+and the reference window share fewer than half their samples, severely
+degrading reliability.

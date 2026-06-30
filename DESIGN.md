@@ -400,12 +400,19 @@ C++-accelerated. 7. **tidy / glance / as_tibble** → **will be added**
 that point). 8. **IAAFT surrogates** → **will be added** (§6, roadmap
 M10); segment-shuffling surrogates a candidate alongside.
 
-**Remaining / to resolve at the named milestone:** - **OpenMP
-adopt-or-remove** (M2) — see §11. - **Shared-surface refactor shape**
-(M5) — how far to merge Granger (directional, no `tau`) into the common
-contract without contorting it; whether to expose a `bsync_surface`
-superclass. - A unified **`bsync_ts` preprocessing object** (§5) —
-future; specify before building.
+9.  **OpenMP** → **removed** (M2). The prefix-sum algorithm eliminates
+    the inner w_max loop that motivated OpenMP; the serial
+    implementation already achieves 5–25× speedup over the baseline.
+    `SHLIB_OPENMP_CXXFLAGS` stripped from `Makevars`/`Makevars.win`; no
+    `#pragma omp` in any source file. Serial-by-default and fully
+    reproducible; revisit only if a future estimator has a genuinely
+    parallelisable inner loop that prefix sums cannot collapse.
+
+**Remaining / to resolve at the named milestone:** - **Shared-surface
+refactor shape** (M5) — how far to merge Granger (directional, no `tau`)
+into the common contract without contorting it; whether to expose a
+`bsync_surface` superclass. - A unified **`bsync_ts` preprocessing
+object** (§5) — future; specify before building.
 
 ## 15. Milestone roadmap
 

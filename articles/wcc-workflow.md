@@ -85,32 +85,28 @@ n_frames <- 1800 # 60 seconds of data
 
 # 1. Generate underlying rhythms (a shared rhythm and two independent rhythms)
 # We use a moving average to create smooth, human-like motion waves
-time_seq <- seq(0, by = 1/fs, length.out = n_frames)
-shared_base <- as.numeric(stats::filter(rnorm(n_frames + 300), rep(1/15, 15), circular = TRUE))
-indep_base_A <- as.numeric(stats::filter(rnorm(n_frames + 300), rep(1/15, 15), circular = TRUE))
-indep_base_B <- as.numeric(stats::filter(rnorm(n_frames + 300), rep(1/15, 15), circular = TRUE))
+time_seq <- seq(0, by = 1 / fs, length.out = n_frames)
+shared_base <- as.numeric(stats::filter(rnorm(n_frames + 300), rep(1 / 15, 15), circular = TRUE))
+indep_base_A <- as.numeric(stats::filter(rnorm(n_frames + 300), rep(1 / 15, 15), circular = TRUE))
+indep_base_B <- as.numeric(stats::filter(rnorm(n_frames + 300), rep(1 / 15, 15), circular = TRUE))
 
 person_A_raw <- numeric(n_frames)
 person_B_raw <- numeric(n_frames)
 
 # 2. Piece together the dyadic interaction
 for (i in 1:n_frames) {
-
   if (i <= 600) {
     # Phase 1 (0-20s): Person A leads by 10 frames (0.33 seconds)
     person_A_raw[i] <- shared_base[150 + i]
     person_B_raw[i] <- shared_base[150 + i - 10]
-
   } else if (i <= 900) {
     # Phase 2 (20-30s): Lull / No correlation
     person_A_raw[i] <- indep_base_A[150 + i]
     person_B_raw[i] <- indep_base_B[150 + i]
-
   } else if (i <= 1400) {
     # Phase 3 (30-46s): Person B leads by 12 frames (0.40 seconds)
     person_A_raw[i] <- shared_base[150 + i - 12]
     person_B_raw[i] <- shared_base[150 + i]
-
   } else {
     # Phase 4 (46-60s): Person A leads by 8 frames (0.26 seconds)
     person_A_raw[i] <- shared_base[150 + i]
@@ -183,12 +179,12 @@ summary(wcc_results)
 #> Total Lags Tested: 91
 #> Window Size: 90
 #> Max Lag: 45
-#> Overall Fisher's Z: 0.4506
+#> Overall Fisher's Z: 0.452
 #> 
 #> ── Cross-Correlation Value Distribution ──
 #> 
 #>      0%     25%     50%     75%    100% 
-#> -0.8432 -0.2721  0.0168  0.3989  0.9983
+#> -0.8416 -0.2729  0.0133  0.3984  0.9982
 ```
 
 The [`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md)
@@ -268,8 +264,8 @@ plan(sequential)
 print(surrogate_results)
 #> ── WCC Surrogate Analysis (Pseudo-Synchrony) ───────────────────────────────────
 #> Permutations: 1000
-#> Observed Fisher's Z: 0.4506
-#> Average Null Z: 0.3155
+#> Observed Fisher's Z: 0.452
+#> Average Null Z: 0.3175
 #> Empirical p-value: < 0.001
 #> ✔ Observed synchrony is significantly greater than chance.
 ```
@@ -325,7 +321,7 @@ summary(wcc_optima_df)
 #> ── Optimum Value Distribution ──
 #> 
 #>     0%    25%    50%    75%   100% 
-#> 0.5708 0.9877 0.9936 0.9961 0.9983
+#> 0.5837 0.9876 0.9932 0.9962 0.9982
 ```
 
 ### 5.1 Interpreting the Optima Summary

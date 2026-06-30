@@ -18,3 +18,7 @@ summary(object, ...)
 - ...:
 
   Additional arguments (not used).
+
+## Value
+
+Returns \`object\` invisibly.

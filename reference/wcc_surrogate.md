@@ -62,3 +62,12 @@ wcc_surrogate(
 ## Value
 
 A list object of class "wcc_surr".
+
+## Details
+
+The p-value is the proportion of surrogates whose aggregate statistic is
+\*\*at least as large as\*\* the observed statistic. The aggregate is
+\`mean(abs(Fisher's Z))\` — the same quantity stored in
+\`wcc_res\$fisher_z\` — computed identically on both the observed data
+and every surrogate, so the null distribution and the observed value are
+directly comparable.
