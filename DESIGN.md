@@ -34,14 +34,14 @@ output) and **powerful for experts** (every consequential choice is exposed and 
   no DTW, no Granger, no peak/valley optima, no preprocessing or tuning layer.
 - **`mvSUSY`** — *Multivariate Surrogate Synchrony* (Meier & Tschacher 2021). Extends SUSY beyond
   the dyad to >2 simultaneous series with surrogate controls. The reference for bsync's group /
-  multivariate direction (§15, M9).
+  multivariate direction (§15, M11).
 - **`rMEA`** — *Motion Energy Analysis synchrony* (Kleinbub & Ramseyer 2020). Import/filter/plot MEA
   time series; `MEAccf()` does windowed lagged cross-correlation with increments, a per-window
   **best lag**, pseudosynchrony via shuffled-surrogate dyads, and **lead/follow** indices
   (`s1_lead`/`s2_lead`). Pure R; the MEA-specific sibling to bsync's WCC + optima + leadership layer.
-- **`crqa`** (Coco & Dale 2014) — (cross-)recurrence quantification analysis. Reference for M8.
+- **`crqa`** (Coco & Dale 2014) — (cross-)recurrence quantification analysis. Reference for M10.
 - **`dtw`** (Giorgino 2009) — full-series dynamic time warping (not windowed/nonstationary).
-- **`WaveletComp` / `biwavelet`** — wavelet coherence. Reference for M7.
+- **`WaveletComp` / `biwavelet`** — wavelet coherence. Reference for M9.
 - base `ccf`, `signal`/`gsignal` — cross-correlation and signal-processing primitives.
 
 **Our contribution.** bsync is, in effect, the **SUSY/rMEA windowed-cross-correlation-plus-surrogate
@@ -146,7 +146,14 @@ never silently change the basis. Each pairs a *diagnostic* with an *action*.
 - **Downsampling.** `evaluate_signal_power()` (Welch PSD → cumulative-power cutoff → recommended
   integer downsample factor + clean target Hz) advises; `downsample_signal()` (regular vectors) and
   `aggregate_by_time()` (irregular/timestamped frames) act. The two action functions are documented
-  with an explicit "when to use which" contract.
+  with an explicit "when to use which" contract. *Principle:* choose the target rate from each
+  signal's **own informative bandwidth** (the PSD cutoff), at ≥ 2–3× it — not by copying another
+  study's rate. Different modalities of the "same" behavior legitimately want different rates (e.g.
+  video-derived facial AUs are band-limited well below surface-EMG envelopes), and the PSD makes that
+  visible rather than a judgment call. *Planned enhancement (small):* `downsample_signal()` currently
+  decimates by **median/mean binning** (robust to tracking glitches but only a partial anti-alias);
+  add an **optional Butterworth anti-alias low-pass** before decimation so high-frequency noise is
+  not folded into band for non-glitchy signals (default stays median binning; opt-in low-pass).
 - **Smoothing.** `smooth_signal()` — Savitzky–Golay (default, zero-phase), centered moving average,
   or zero-phase Butterworth — with optional output clamping. `trim_edges()` removes the boundary
   artifacts that symmetric filters mathematically require.
@@ -298,7 +305,7 @@ reproducible; result objects stay light; supplied `time` maps windows to real ti
    + mean\|Z\| path is the SUSY method generalized and C++-accelerated.
 7. **tidy / glance / as_tibble** → **will be added** (§7), built in M5 from the shared framework
    (`generics` → Imports at that point).
-8. **IAAFT surrogates** → **will be added** (§6, roadmap M10); segment-shuffling surrogates a
+8. **IAAFT surrogates** → **will be added** (§6, roadmap M12); segment-shuffling surrogates a
    candidate alongside.
 
 9. **OpenMP** → **removed** (M2). The prefix-sum algorithm eliminates the inner w_max loop that
@@ -306,6 +313,19 @@ reproducible; result objects stay light; supplied `time` maps windows to real ti
    `SHLIB_OPENMP_CXXFLAGS` stripped from `Makevars`/`Makevars.win`; no `#pragma omp` in any source
    file. Serial-by-default and fully reproducible; revisit only if a future estimator has a
    genuinely parallelisable inner loop that prefix sums cannot collapse.
+
+10. **Parameter selection** → no single "correct" WCC parameter set exists; the optimum is a
+    function of the signal's own timescales (autocorrelation, spectral content), which is why
+    published advice contradicts across clean-oscillatory vs. noisy-biological data. **Resolution
+    (roadmap M6, after the M5 framework) — one engine, three read-outs:** `synchrony_multiverse()`
+    is the grid + matched-null-surrogate engine (headline metric = ES vs. null, not raw synchrony,
+    which autocorrelation inflates); `autotune_wcc()` becomes a thin wrapper = multiverse + a
+    selection rule (detectability + cross-dyad stability, not bare ES-`which.max`), validated with a
+    `sim_dyad` regression test; `suggest_wcc_params()` stays the single PSD-data-driven starting
+    point with the SUSY constraints enforced/reported. The matched-null surrogate (Inv. 2) is the
+    principled defense against autocorrelation-driven spurious cross-correlation. Sequencing: the
+    `autotune_wcc()` validation lands in M6, which precedes the M7 first CRAN release — so no
+    unverified tuner ever ships.
 
 **Remaining / to resolve at the named milestone:**
 - **Shared-surface refactor shape** (M5) — how far to merge Granger (directional, no `tau`) into the
@@ -343,19 +363,82 @@ reproducible; result objects stay light; supplied `time` maps windows to real ti
    grid-builder, surrogate engine, optima, and plot layer so new estimators plug in cheaply; resolve
    the Granger-into-the-contract question (§14). Add broom-style `tidy()`/`glance()`/`as_tibble()`
    (§7) for all estimators from this shared layer (`generics` → Imports).
-6. **M6 — Phase synchrony (Hilbert).** Analytic-signal instantaneous phase; windowed phase-locking
+6. **M6 — Parameter guidance & synchrony multiverse.** Resolve the parameter-selection problem with
+   **one engine and three read-outs**, built on the M5 shared surface + surrogate + tidy framework
+   so it generalizes across estimators (WCC, WDTW, Granger), not WCC alone. The core realization:
+   `suggest`, `autotune`, and the multiverse are not three implementations — `autotune` *is* the
+   multiverse plus a selection rule, so the grid-builder + per-cell surrogate evaluation + multi-dyad
+   aggregation are written once. The honest headline metric is **ES (vs. matched null), not raw
+   synchrony**, because raw mean|Z| rises mechanically with window length / autocorrelation while ES
+   is the robust quantity.
+   - (a) **`synchrony_multiverse()` (the engine + headline).** Run a windowed estimator across a grid
+     of analytic choices — `window_size`, `lag_max` (hard-capped at `window/2`), `window_increment`,
+     `statistic` (M4), `surrogate_method`; prewhitening is a documented *future* axis (it interacts
+     with the surrogate choice) — over a single dyad or a `dyad_list` (autotune's multi-dyad
+     convention). Per cell: observed aggregate + matched-null surrogate → ES + p (Inv. 2 reused).
+     Returns a light `bsync_multiverse` object (Inv. 7): a **tidy** grid (one row per cell × dyad:
+     window/lag/increment/statistic/method, observed, null_mean, null_sd, ES, p, n_windows) +
+     `settings` + a robustness summary (% specs significant, median ES [IQR], sign-consistency); no
+     raw surrogate draws, no raw input. `print`/`summary`/`tidy`/`as_tibble`/`glance` (M5 `generics`)
+     + a **specification-curve `plot`** (Simonsohn-style: specs sorted by ES with significance
+     shading over a choice-dashboard panel; pure ggplot2, no new dep).
+   - (a′) **Grid axes are specified in time units (seconds), not samples**, so cells stay comparable
+     across sample rates and **preprocessing becomes a legitimate axis**. Downsample rate and
+     smoothing are *opt-in* multiverse axes (the default fixes preprocessing at one principled
+     choice; full preprocessing × estimator sweeps are advanced, to avoid combinatorial blow-up);
+     the engine applies `raw → preprocess(cell) → surface → surrogate` per cell. This makes the
+     downsample/smoothing question — e.g. OpenFace AU at 5 Hz vs. higher-rate facial EMG — answerable
+     in the *same* framework: the two are different informative bandwidths (measure each via
+     `evaluate_signal_power()`), and the robustness check is whether a finding survives both the
+     matched-null surrogate and a small preprocessing sweep, not defending one sample rate.
+   - (b) **`autotune_wcc()` = multiverse + selection.** Rebuild as a thin wrapper that calls the
+     engine and applies a selection rule, *removing* the duplicated PSD-baseline logic. Reframe the
+     objective from bare surrogate-ES `which.max` (which autocorrelation can game) to *detectability
+     **and** cross-dyad stability*: return a recommended cell **plus a stability flag** and the
+     top-k, point the user at the multiverse plot, raise the noisy defaults (`n_surrogates`,
+     `n_tune_dyads`), and **pin it against `sim_dyad`'s known lead–lag with a regression test** (the
+     validation this currently-exported helper lacks).
+   - (c) **Rework `suggest_wcc_params()`** to derive the dominant timescale from the *measured*
+     signal via `evaluate_signal_power()` (PSD) rather than a user-guessed `event_duration_sec`
+     (kept as an expert override), and to apply/report the hard constraints — `window_size ≥
+     2·lag_max` (= SUSY's `segment ≥ 2·maxlag`), `window_size ≤ series/2`, and a min-samples floor
+     for a stable `r`. Stays the *newcomer* entry point: one principled starting point with stated
+     assumptions, not a claim of optimality.
+   - (d) **Vignette** "choosing parameters / the parameter multiverse," stating the contradiction in
+     the literature honestly and the timescale-matching + surrogate-defense logic. Lineage to cite:
+     Boker et al. (2002); Tschacher & Meier (2020, SUSY constraints); Kleinbub & Ramseyer (rMEA
+     conventions); the bioRxiv (2020) "statistical & theoretical considerations" paper (tie
+     parameters to the signal's biological boundaries); the Multiverse-IPS paper (2025, window ≫ lag
+     in influence; report the curve); Dean & Dunsmuir (2016) — autocorrelation inflates spurious
+     cross-correlation, for which bsync's matched-null surrogate is the principled defense (the
+     reason parameter advice "contradicts" across clean-oscillatory vs. noisy-biological regimes).
+   - No C++ change (Inv. 5/6 untouched); no new `Imports`. The `autotune_wcc()` validation lands here
+     in M6, which precedes the M7 first release — so the first CRAN submission never ships an
+     unverified tuner without any pre-release scramble.
+7. **M7 — First CRAN release (`v0.1.0`).** First public release once the core estimators (WCC/WDTW/
+   Granger) + the M5 shared framework + tidy interface + M6 parameter guidance form a coherent,
+   citable package. Version bump `0.0.0.9000` → `0.1.0`; `cran-comments.md`; final
+   `R CMD check --as-cran` across platforms (win-builder / R-hub); spell/url/pkgdown clean; submit.
+   The later estimators (M8+) become post-1.0 minor releases.
+8. **M8 — Phase synchrony (Hilbert).** Analytic-signal instantaneous phase; windowed phase-locking
    value / phase synchrony; relative-phase output.
-7. **M7 — Wavelet coherence.** Cross-wavelet / wavelet coherence for nonstationary time–frequency
+9. **M9 — Wavelet coherence.** Cross-wavelet / wavelet coherence for nonstationary time–frequency
    lead–lag across scales.
-8. **M8 — CRQA / MEA conventions.** Cross-recurrence quantification analysis and motion-energy-
-   analysis-style windowed cross-correlation conventions/conveniences.
-9. **M9 — Group-level / multivariate workflow.** Tidy multi-dyad pipeline (list / nested frame in,
-   per-dyad surfaces out) + aggregation / mixed-model summaries across many dyads, reusing the
-   `autotune_wcc()` dyad-list conventions; the `mvSUSY` multivariate-synchrony measures are the
-   reference for the >2-series case.
-10. **M10 — Expanded surrogate generators.** IAAFT (Schreiber & Schmitz 1996) and segment-shuffling
-    (SUSY/rMEA) generators, wired through the matched-null engine (Inv. 2); makes bsync's nulls
-    comparable to SUSY/rMEA.
+10. **M10 — CRQA / MEA conventions.** Cross-recurrence quantification analysis and motion-energy-
+    analysis-style windowed cross-correlation conventions/conveniences.
+11. **M11 — Group-level / multivariate workflow.** Tidy multi-dyad pipeline (list / nested frame in,
+    per-dyad surfaces out) + aggregation / mixed-model summaries across many dyads, reusing the
+    `autotune_wcc()` / `synchrony_multiverse()` dyad-list conventions; the `mvSUSY`
+    multivariate-synchrony measures are the reference for the >2-series case.
+12. **M12 — Expanded surrogate generators.** Three new generators wired through the matched-null
+    engine (Inv. 2), making bsync's nulls comparable to SUSY/rMEA: **IAAFT** (Schreiber & Schmitz
+    1996) and **segment-shuffling** (SUSY) — both *within-series* nulls — plus the **pseudo-dyad**
+    (between-dyad) null, the rMEA "pseudosynchrony" convention that pairs a real participant with a
+    real partner from a *different* dyad. The pseudo-dyad generator **depends on M11** (it needs the
+    multi-dyad `dyad_list` structure to draw cross-dyad pairings) and slots straight into the
+    existing `y_surrogates` matrix interface; document that, unlike phase/circular, it does not
+    preserve the partner's own autocorrelation (it substitutes a different real person's), so it
+    tests a slightly different null (§2 honesty caveat — state which null).
 
 Later, unscheduled: a unified `bsync_ts` preprocessing object, expanded educational vignettes
 (choosing a method, interpreting a surface, reporting synchrony).

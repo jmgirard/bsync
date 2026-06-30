@@ -139,16 +139,33 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
 
 ## Current focus
 
-**Hardening cycle toward a near-term CRAN submission**, run as focused milestones via the
-plan → implement → review loop. **M5 is next.**
+**Hardening + core-completion cycle toward a first CRAN release**, run as focused milestones via the
+plan → implement → review loop. The first release is **explicitly not near-term** — it is its own
+milestone (M7, `v0.1.0`) after the M5 framework and M6 parameter guidance land, not a deadline
+hanging over the hardening work. **M5 is next.**
 
 - **M5 — Shared windowed-surface + surrogate framework + tidy interface.** Factor the common
   grid-builder, surrogate engine, optima, and plot layer so new estimators plug in cheaply; resolve
   the Granger-into-the-contract question (DESIGN.md §14). Add broom-style `tidy()`/`glance()`/
   `as_tibble()` (DESIGN.md §7) for all estimators from the shared layer (`generics` → Imports).
 
-See `DESIGN.md` §15 for the full roadmap (M6 phase synchrony; M7 wavelet coherence; M8 CRQA/MEA;
-M9 group-level workflow).
+- **M6 — Parameter guidance & synchrony multiverse.** One engine, three read-outs on the M5 shared
+  framework: `synchrony_multiverse()` is the grid + matched-null-surrogate engine (headline metric =
+  ES vs. null, not raw synchrony) with a specification-curve plot; `autotune_wcc()` becomes a thin
+  wrapper = multiverse + a selection rule (detectability + cross-dyad stability, not bare ES argmax),
+  validated against `sim_dyad`; `suggest_wcc_params()` stays the single PSD-data-driven starting
+  point with the SUSY constraints enforced/reported. There is no single "correct" WCC parameter set —
+  the optimum depends on the signal's own timescales — so the honest deliverable is the multiverse,
+  with the matched-null surrogate as the defense against autocorrelation-driven spurious correlation
+  (DESIGN.md §14 #10, §15 M6). Engine grid axes are in **time units (seconds), not samples**, so
+  downsample/smoothing can be *opt-in* multiverse axes (default fixes preprocessing). The
+  `autotune_wcc()` validation lands here, before the M7 release.
+
+- **M7 — First CRAN release (`v0.1.0`).** Cut the first public release once WCC/WDTW/Granger + the M5
+  framework + tidy interface + M6 parameter guidance cohere; later estimators are post-1.0 minors.
+
+See `DESIGN.md` §15 for the full roadmap (M7 first CRAN release; M8 phase synchrony; M9 wavelet
+coherence; M10 CRQA/MEA; M11 group-level workflow; M12 expanded surrogates).
 
 ## Invariants — do not violate without flagging
 
@@ -247,10 +264,15 @@ snapshots; roxygen2 for every exported function (document the *why* of each defa
 
 ## Out of scope for now
 
-- **New estimators** (phase synchrony, wavelet coherence, CRQA/MEA) — deferred to M6–M8, and only
+- **New estimators** (phase synchrony, wavelet coherence, CRQA/MEA) — deferred to M8–M10, and only
   after the M5 shared-surface framework lands.
-- **Group-level / multivariate modeling** — deferred to M9 (`mvSUSY` is the multivariate reference).
+- **Parameter-guidance overhaul** (`synchrony_multiverse()` engine, `autotune_wcc()` as a thin
+  wrapper over it, PSD-driven `suggest_wcc_params()`) — deferred to **M6**, after the M5 framework
+  (DESIGN.md §14 #10).
+- **First CRAN release** (`v0.1.0`) — explicitly its own milestone **M7**, after M6; not near-term.
+- **Group-level / multivariate modeling** — deferred to M11 (`mvSUSY` is the multivariate reference).
 - **tidy/glance/as_tibble methods** — resolved to add (DESIGN.md §7/§14), built in **M5**; not before.
-- **IAAFT / segment-shuffling surrogates** — resolved to add (DESIGN.md §6/§14), scheduled **M10**.
+- **IAAFT / segment-shuffling / pseudo-dyad surrogates** — resolved to add (DESIGN.md §6/§14),
+  scheduled **M12**; the pseudo-dyad (between-dyad rMEA) generator depends on M11's `dyad_list`.
 - **A unified `bsync_ts` preprocessing object** — logged in DESIGN.md §14; specify before building.
 - **OpenMP** — not adopted until the M2 decision; no `#pragma omp` ships before then.
