@@ -18,6 +18,7 @@
 <url><loc>https://jmgirard.github.io/bsync/index.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/news/index.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/aggregate_by_time.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/as_tibble.bsync_surface.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/autotune_wcc.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/bsync-package.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/calc_speed_1d.html</loc></url>
@@ -29,6 +30,7 @@
 <url><loc>https://jmgirard.github.io/bsync/reference/evaluate_signal_power.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/glance.bsync_surface.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/impute_ts_gaps.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/index.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/leadership_asymmetry.html</loc></url>
@@ -48,6 +50,7 @@
 <url><loc>https://jmgirard.github.io/bsync/reference/print.wdtw_surr.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/print.wgranger_res.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/print.wgranger_surr.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/reexports.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/sim_dyad.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/smooth_signal.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/suggest_wcc_params.html</loc></url>
@@ -55,6 +58,7 @@
 <url><loc>https://jmgirard.github.io/bsync/reference/summary.wcc_res.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/summary.wdtw_optima.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/summary.wgranger_res.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/tidy.bsync_surface.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/trim_edges.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/wcc.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/wcc_surrogate.html</loc></url>

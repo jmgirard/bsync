@@ -13,7 +13,8 @@ wcc(
   lag_max,
   window_increment = 1,
   lag_increment = 1,
-  na.rm = TRUE
+  na.rm = TRUE,
+  statistic = c("mean_abs_z", "peak")
 )
 ```
 
@@ -74,7 +75,19 @@ wcc(
   A logical indicating whether to remove missing values from the windows
   when calculating windowed cross-correlations. (default = \`TRUE\`)
 
+- statistic:
+
+  A character string specifying how to aggregate the WCC surface into a
+  single number. \`"mean_abs_z"\` (default) takes the mean of absolute
+  Fisher's Z values over \*\*all\*\* windows and lags — the SUSY \*mean
+  absolute Z\* (Tschacher & Meier, 2020). \`"peak"\` takes the maximum
+  absolute Fisher's Z across lags \*\*within each window\*\*, then
+  averages those per-window peaks — the rMEA \*best-lag\* convention
+  (Boker et al., 2002). Both are larger-is-more-synchrony quantities.
+  Pass the same value to \`wcc_surrogate()\` so the null distribution
+  matches (see Invariant 2).
+
 ## Value
 
-A list object of class "wcc" containing the results matrix and useful
-summaries of it.
+A list object of class "wcc_res" containing the results matrix and
+useful summaries of it.

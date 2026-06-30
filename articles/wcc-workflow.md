@@ -179,7 +179,7 @@ summary(wcc_results)
 #> Total Lags Tested: 91
 #> Window Size: 90
 #> Max Lag: 45
-#> Overall Fisher's Z: 0.452
+#> Mean |Fisher's Z|: 0.452
 #> 
 #> ── Cross-Correlation Value Distribution ──
 #> 
@@ -208,6 +208,63 @@ correlation (synchrony) and deep red indicates strong negative
 correlation. You can already see a clear track of high correlation
 shifting across the zero-lag line over time alongside a washed-out
 period of low correlation in the middle.
+
+### 3.1 Choosing the aggregate statistic
+
+[`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md) reduces the
+full WCC surface to a single number via the `statistic` argument. Two
+conventions are available:
+
+- **`"mean_abs_z"` (default):** The mean of \|Fisher’s Z\| over *every*
+  (window × lag) cell in the surface. This is the *mean absolute Z* from
+  the SUSY toolbox (Tschacher & Meier, 2020) and reflects the average
+  strength of coupling across the entire lag range tested.
+
+- **`"peak"`:** Within each window, the *maximum* \|Fisher’s Z\| across
+  all lags is identified (the strongest lead–lag coupling in that
+  moment). These per-window peaks are then averaged across the
+  recording. This is the *best-lag* convention used in rMEA and
+  introduced by Boker et al. (2002).
+
+The two statistics answer slightly different questions. `"mean_abs_z"`
+captures average coupling strength over the full lag range; `"peak"`
+highlights the *strongest* lag coupling in each window and will always
+be ≥ `"mean_abs_z"`. Choose based on your research question.
+
+``` r
+
+# Default: SUSY mean absolute Z
+wcc_maz <- wcc(
+  x = dyad_data$person_A,
+  y = dyad_data$person_B,
+  time = dyad_data$time,
+  window_size = 90,
+  lag_max = 45,
+  window_increment = 30,
+  statistic = "mean_abs_z" # the default
+)
+
+# rMEA best-lag convention
+wcc_peak <- wcc(
+  x = dyad_data$person_A,
+  y = dyad_data$person_B,
+  time = dyad_data$time,
+  window_size = 90,
+  lag_max = 45,
+  window_increment = 30,
+  statistic = "peak"
+)
+
+cat("mean_abs_z:", round(wcc_maz$aggregate[[1]], 4), "\n")
+#> mean_abs_z: 0.452
+cat("peak:      ", round(wcc_peak$aggregate[[1]], 4), "\n")
+#> peak:       2.3383
+```
+
+**Important:** Always pass the *same* `statistic` to
+[`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md)
+so that the null distribution is built with the same quantity as the
+observed value (see Section 4).
 
 ## 4. Surrogate Testing for Significance
 
@@ -264,8 +321,8 @@ plan(sequential)
 print(surrogate_results)
 #> ── WCC Surrogate Analysis (Pseudo-Synchrony) ───────────────────────────────────
 #> Permutations: 1000
-#> Observed Fisher's Z: 0.452
-#> Average Null Z: 0.3175
+#> Observed Mean |Fisher's Z|: : 0.452
+#> Average Null Mean |Fisher's Z|: : 0.3175
 #> Empirical p-value: < 0.001
 #> ✔ Observed synchrony is significantly greater than chance.
 ```
@@ -438,3 +495,70 @@ glance. The metric starts firmly at `1.0` (Person A leading), smoothly
 transitions down through zero during the uncorrelated lull, hits `-1.0`
 (Person B leading) right at the 30-second mark, and finally climbs back
 up to `1.0` as Person A re-enters the conversation.
+
+## 8. Tidy Interface
+
+All **bsync** estimator results support a tidy workflow via
+[`tidy()`](https://generics.r-lib.org/reference/tidy.html),
+[`glance()`](https://generics.r-lib.org/reference/glance.html), and
+[`as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html).
+
+``` r
+
+# One row per surface cell (full windowed results_df as a tibble)
+surface_tbl <- generics::tidy(wcc_results)
+head(surface_tbl)
+#> # A tibble: 6 × 3
+#>       i   tau    wcc
+#>   <dbl> <int>  <dbl>
+#> 1     2   -45  0.634
+#> 2     3   -45  0.292
+#> 3     4   -45  0.511
+#> 4     5   -45  0.419
+#> 5     6   -45 -0.124
+#> 6     7   -45 -0.301
+
+# One-row summary: aggregate statistic(s) + key settings
+generics::glance(wcc_results)
+#> # A tibble: 1 × 7
+#>   mean_abs_z n_windows window_size window_increment lag_max lag_increment
+#>        <dbl>     <int>       <dbl>            <dbl>   <dbl>         <dbl>
+#> 1      0.452        53          90               30      45             1
+#> # ℹ 1 more variable: statistic <chr>
+```
+
+[`glance()`](https://generics.r-lib.org/reference/glance.html) is
+especially useful for comparing several runs in a single data frame:
+
+``` r
+
+wcc_maz2 <- wcc(
+  x = dyad_data$person_A,
+  y = dyad_data$person_B,
+  time = dyad_data$time,
+  window_size = 90,
+  lag_max = 45,
+  window_increment = 30,
+  statistic = "mean_abs_z"
+)
+wcc_peak2 <- wcc(
+  x = dyad_data$person_A,
+  y = dyad_data$person_B,
+  time = dyad_data$time,
+  window_size = 90,
+  lag_max = 45,
+  window_increment = 30,
+  statistic = "peak"
+)
+
+dplyr::bind_rows(
+  generics::glance(wcc_maz2),
+  generics::glance(wcc_peak2)
+)
+#> # A tibble: 2 × 8
+#>   mean_abs_z n_windows window_size window_increment lag_max lag_increment
+#>        <dbl>     <int>       <dbl>            <dbl>   <dbl>         <dbl>
+#> 1      0.452        53          90               30      45             1
+#> 2     NA            53          90               30      45             1
+#> # ℹ 2 more variables: statistic <chr>, peak <dbl>
+```

@@ -176,21 +176,144 @@ focus and `DESIGN.md` §14/§15).
   - `spelling` to `Suggests`) so `inst/WORDLIST` can no longer drift
     unnoticed — reverses the plan-time “ad hoc, not a dep” choice by
     design. `R CMD check --as-cran` remains 0/0/0.
+- **M4 — Selectable WCC aggregate statistic (done).** All seven
+  acceptance criteria met (commits `0eafe21`–`7352eac` on `main`; 363
+  tests passing, 0 errors/0 warnings/0 notes in
+  `R CMD check --as-cran`). No C++ core change — Invariants 5/6 not
+  triggered; `RcppExports` diff is empty:
+  1.  `wcc(statistic = c("mean_abs_z","peak"))` with `match.arg`;
+      default `"mean_abs_z"` reproduces pre-M4 `fisher_z` value
+      bit-for-bit on `sim_dyad`; invalid value aborts. Tested.
+  2.  `peak` = mean-over-windows of max-\|Fisher-z\|-across-lags,
+      verified against an independent pure-R oracle on `sim_dyad` to
+      1e-9. Tested.
+  3.  Single `wcc_aggregate(z, window_id, statistic)` helper (refactored
+      from `fisher_z()`) drives both observed and surrogate paths;
+      `wcc_surrogate(statistic="peak")$observed_z` equals
+      `wcc(..., statistic="peak")$fisher_z` exactly — matched null
+      (Invariant 2); tested for both statistics.
+  4.  `print.wcc_res` / `print.wcc_surr` label the aggregate by chosen
+      statistic.
+  5.  `vignettes/wcc-workflow.Rmd` gains §3.1 documenting `mean_abs_z`
+      (SUSY) vs `peak` (rMEA/ Boker) with lineage citations and a code
+      example. NEWS.md gained an M4 entry. `inst/WORDLIST` updated
+      (rMEA, SUSY, Selectable); CI spell-check stays green.
+  6.  No C++ change; no new `Imports`; no build artifacts staged.
+  7.  363 tests green; `R CMD check --as-cran` = 0/0/0; styled (styler)
+      and linted. Plan-time decisions held: WCC-only scope; `$fisher_z`
+      field name kept (revisit in M5); `settings$statistic` records the
+      choice. Post-review: peak oracle rewritten to an explicit for-loop
+      (no `tapply`) so it cannot share a latent bug with the
+      implementation; cross-path Invariant-2 test added (pass `y` itself
+      as the sole surrogate, assert `surrogate_z[1] == observed_z` for
+      both statistics — exercises the surrogate loop’s
+      `wcc_aggregate(grid_df$row)` call site independently); peak +
+      all-NA-window, peak + `time`-supplied grouping, peak print-label,
+      and peak p-value sanity tests added (373 tests total,
+      `R CMD check --as-cran` remains 0/0/0).
+- **M5 — Shared windowed-surface + surrogate framework + tidy interface
+  (done).** All nine acceptance criteria met (commits
+  `0769274`–`b17b464` on `main`; 449 tests passing, 0 errors/0
+  warnings/0 notes in `R CMD check --as-cran`). No C++ change —
+  Invariants 5/6 not triggered; `RcppExports` diff is empty:
+  0.  External-oracle preflight: WDTW L1 golden (6.22…, dtw v1.23-3
+      symmetric1) and Granger F golden (f_xy=287.62…, lmtest v0.9-40)
+      committed as frozen fixtures in `test-external-oracle.R`; WCC
+      oracle uses pre-existing base-`cor` path. All 8 preflight tests
+      pass.
+  1.  `build_surface_grid()` is the sole site of `n_r` math and
+      `w_max = window_size − 1`; all three `create_*_df` builders and
+      all three surrogate wrappers call it.
+      [`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md)/[`wdtw()`](https://jmgirard.github.io/bsync/reference/wdtw.md)/[`wgranger()`](https://jmgirard.github.io/bsync/reference/wgranger.md)
+      `results_df` + aggregates bit-identical to pre-refactor on
+      `sim_dyad` (characterization freeze after preflight). Validated
+      via 41 AC1/AC2/AC3 characterization and validator tests.
+  2.  `validate_series()` + `validate_window_params()` replace
+      per-estimator x/y/time/integerish blocks; abort conditions
+      preserved and tested.
+  3.  All three objects inherit `"bsync_surface"` and carry a
+      named-numeric `$aggregate`; `$fisher_z`/`$mean_distance` dropped
+      (no users, no shim); all `print`/`summary` text and vdiffr
+      snapshots unchanged.
+  4.  `run_surrogate_engine()` drives all three wrappers via
+      aggregate-only closures (no `results_df` on surrogate path —
+      Invariant 7 enforced); accepts prebuilt grid + surrogate matrix
+      (M6 seam); cross-path Invariant-2 test extended to WDTW and
+      Granger (both directions).
+  5.  `build_surface_heatmap()` factors `time_step`/axis/theme/zero-line
+      logic; `plot.wcc_res`/`plot.wdtw_res` supply only the fill scale;
+      all plot snapshots unchanged.
+  6.  [`tidy()`](https://generics.r-lib.org/reference/tidy.html)/[`glance()`](https://generics.r-lib.org/reference/glance.html)/[`as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
+      on `bsync_surface`:
+      [`tidy()`](https://generics.r-lib.org/reference/tidy.html) = long
+      surface tibble;
+      [`glance()`](https://generics.r-lib.org/reference/glance.html) =
+      1-row summary (aggregate(s) + settings + n_windows); Granger’s
+      two-aggregate shape handled as separate columns. `generics` +
+      `tibble` added to `Imports`.
+  7.  NEWS.md M5 entry; wcc-workflow.Rmd §8 tidy-interface demo;
+      WORDLIST updated; vignette `$fisher_z` references corrected.
+      DESIGN.md §14 Granger/superclass item marked resolved.
+  8.  449 tests pass (0 skip on CRAN = vdiffr); `R CMD check --as-cran`
+      0/0/0; styled (styler); no C++ change; no build artifacts staged.
+      Plan-time decisions held: Granger kept estimator-specific surface
+      (no contortion into symmetric similarity);
+      `$fisher_z`/`$mean_distance` dropped rather than shimmed;
+      `generics` + `tibble` added to Imports as approved. Post-review
+      (commit `ecc6cf9`): four findings fixed. (1)
+      `wdtw_surrogate(fast_method = TRUE)` window-grid regression — an
+      interim refactor used a lag-free grid + `lag_max` shift that
+      over-counted windows past the series end (spurious out-of-range
+      `NA`s) and changed the fast-path p-value; restored to the lagged
+      grid’s distinct window starts at `tau = 0` so surrogates cover
+      exactly the observed surface’s windows (slow/default path was
+      never affected; NEWS.md gains a bug-fix entry). (2)
+      [`glance()`](https://generics.r-lib.org/reference/glance.html)
+      used bare `%||%` (base R ≥ 4.4 only) while DESCRIPTION declares
+      `R (>= 4.1)` — added `@importFrom rlang %||%`. (3) DESIGN.md §14
+      shared-surface/superclass item moved from “Remaining” to “Resolved
+      (M5)” (the AC7 doc move that was claimed but not done). (4) AC4
+      test gaps closed: Invariant-7 no-`results_df` assertion on all
+      three surrogate objects, a seeded p-value regression guard (WCC
+      91/99, WDTW 83/99 — non-boundary, exercises tail counting), and a
+      `fast_method` window-alignment regression test. 455 tests pass;
+      `R CMD check --as-cran` remains 0/0/0; no C++ change.
 
 ## Current focus
 
-**Hardening cycle toward a near-term CRAN submission**, run as four
-focused milestones via the plan → implement → review loop. **M4 is
-next.**
+**Hardening + core-completion cycle toward a first CRAN release**, run
+as focused milestones via the plan → implement → review loop. The first
+release is **explicitly not near-term** — it is its own milestone (M7,
+`v0.1.0`) after the M6 parameter guidance lands, not a deadline hanging
+over the hardening work. **M6 is next.**
 
-- **M4 — Selectable WCC aggregate statistic.**
-  `statistic = c("mean_abs_z","peak")` on
-  [`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md) +
-  [`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md);
-  null matches observed; vignette documents the choice.
+- **M6 — Parameter guidance & synchrony multiverse.** One engine, three
+  read-outs on the M5 shared framework: `synchrony_multiverse()` is the
+  grid + matched-null-surrogate engine (headline metric = ES vs. null,
+  not raw synchrony) with a specification-curve plot;
+  [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  becomes a thin wrapper = multiverse + a selection rule
+  (detectability + cross-dyad stability, not bare ES argmax), validated
+  against `sim_dyad`;
+  [`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)
+  stays the single PSD-data-driven starting point with the SUSY
+  constraints enforced/reported. There is no single “correct” WCC
+  parameter set — the optimum depends on the signal’s own timescales —
+  so the honest deliverable is the multiverse, with the matched-null
+  surrogate as the defense against autocorrelation-driven spurious
+  correlation (DESIGN.md §14 \#10, §15 M6). Engine grid axes are in
+  **time units (seconds), not samples**, so downsample/smoothing can be
+  *opt-in* multiverse axes (default fixes preprocessing). The
+  [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  validation lands here, before the M7 release.
 
-See `DESIGN.md` §15 for the full roadmap (M5 shared framework; M6 phase
-synchrony; M7 wavelet coherence; M8 CRQA/MEA; M9 group-level workflow).
+- **M7 — First CRAN release (`v0.1.0`).** Cut the first public release
+  once WCC/WDTW/Granger + the M5 framework + tidy interface + M6
+  parameter guidance cohere; later estimators are post-1.0 minors.
+
+See `DESIGN.md` §15 for the full roadmap (M7 first CRAN release; M8
+phase synchrony; M9 wavelet coherence; M10 CRQA/MEA; M11 group-level
+workflow; M12 expanded surrogates).
 
 ## Invariants — do not violate without flagging
 
@@ -244,9 +367,10 @@ Don’t change these silently.
 Compiled cores via **`LinkingTo: Rcpp, RcppArmadillo`** are the
 package’s reason for existing — unlike a pure-R package, heavy inner
 loops belong in C++ here. Current `Imports`: `Rcpp`, `cli`, `dplyr`,
-`future.apply`, `ggplot2`, `grDevices`, `gsignal`, `rlang`, `scales`,
-`utils`. `Suggests`: `future`, `knitr`, `rmarkdown`,
-`testthat (>= 3.0.0)`, `vdiffr`. **Do not grow `Imports` without
+`future.apply`, `generics`, `ggplot2`, `grDevices`, `gsignal`, `rlang`,
+`scales`, `tibble`, `utils`. `Suggests`: `future`, `knitr`, `rmarkdown`,
+`spelling`, `testthat (>= 3.0.0)`, `vdiffr`. `generics` and `tibble`
+added in M5 for the tidy interface. **Do not grow `Imports` without
 flagging it** — prefer base R or the existing stack, and put heavy
 compute in the C++ cores, not new R deps.
 
@@ -314,14 +438,21 @@ Scaffolding: `usethis::use_r()`, `use_test()`, `use_package()`. testthat
 ## Out of scope for now
 
 - **New estimators** (phase synchrony, wavelet coherence, CRQA/MEA) —
-  deferred to M6–M8, and only after the M5 shared-surface framework
+  deferred to M8–M10, and only after the M5 shared-surface framework
   lands.
-- **Group-level / multivariate modeling** — deferred to M9 (`mvSUSY` is
+- **Parameter-guidance overhaul** (`synchrony_multiverse()` engine,
+  [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  as a thin wrapper over it, PSD-driven
+  [`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md))
+  — deferred to **M6**, after the M5 framework (DESIGN.md §14 \#10).
+- **First CRAN release** (`v0.1.0`) — explicitly its own milestone
+  **M7**, after M6; not near-term.
+- **Group-level / multivariate modeling** — deferred to M11 (`mvSUSY` is
   the multivariate reference).
-- **tidy/glance/as_tibble methods** — resolved to add (DESIGN.md
-  §7/§14), built in **M5**; not before.
-- **IAAFT / segment-shuffling surrogates** — resolved to add (DESIGN.md
-  §6/§14), scheduled **M10**.
+- **tidy/glance/as_tibble methods** — built in **M5** (done).
+- **IAAFT / segment-shuffling / pseudo-dyad surrogates** — resolved to
+  add (DESIGN.md §6/§14), scheduled **M12**; the pseudo-dyad
+  (between-dyad rMEA) generator depends on M11’s `dyad_list`.
 - **A unified `bsync_ts` preprocessing object** — logged in DESIGN.md
   §14; specify before building.
 - **OpenMP** — not adopted until the M2 decision; no `#pragma omp` ships

@@ -14,7 +14,8 @@ wcc_surrogate(
   lag_max,
   window_increment = 1,
   lag_increment = 1,
-  na.rm = TRUE
+  na.rm = TRUE,
+  statistic = c("mean_abs_z", "peak")
 )
 ```
 
@@ -59,6 +60,12 @@ wcc_surrogate(
   A logical indicating whether to remove missing values. Default is
   \`TRUE\`.
 
+- statistic:
+
+  A character string specifying the aggregate statistic; must match the
+  value passed to \`wcc()\`. \`"mean_abs_z"\` (default) or \`"peak"\`.
+  See \`wcc()\` for details.
+
 ## Value
 
 A list object of class "wcc_surr".
@@ -66,8 +73,11 @@ A list object of class "wcc_surr".
 ## Details
 
 The p-value is the proportion of surrogates whose aggregate statistic is
-\*\*at least as large as\*\* the observed statistic. The aggregate is
-\`mean(abs(Fisher's Z))\` — the same quantity stored in
-\`wcc_res\$fisher_z\` — computed identically on both the observed data
-and every surrogate, so the null distribution and the observed value are
-directly comparable.
+\*\*at least as large as\*\* the observed statistic. The aggregate —
+either \`"mean_abs_z"\` or \`"peak"\` — is computed identically on the
+observed data and every surrogate via the same internal helper, so the
+null distribution and the observed value are guaranteed to be directly
+comparable (Invariant 2: surrogate nulls match the observed statistic).
+
+Pass the same \`statistic\` value you used in \`wcc()\` so that
+\`observed_z\` and the surrogate draws use the same quantity.

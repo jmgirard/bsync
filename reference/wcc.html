@@ -61,7 +61,8 @@
 <span>  <span class="va">lag_max</span>,</span>
 <span>  window_increment <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  lag_increment <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  na.rm <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  na.rm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  statistic <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean_abs_z"</span>, <span class="st">"peak"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -123,11 +124,22 @@ increment that still results in related change between successive columns.
 <dd><p>A logical indicating whether to remove missing values from the
 windows when calculating windowed cross-correlations. (default = `TRUE`)</p></dd>
 
+
+<dt id="arg-statistic">statistic<a class="anchor" aria-label="anchor" href="#arg-statistic"></a></dt>
+<dd><p>A character string specifying how to aggregate the WCC
+surface into a single number. `"mean_abs_z"` (default) takes the mean of
+absolute Fisher's Z values over **all** windows and lags — the SUSY *mean
+absolute Z* (Tschacher &amp; Meier, 2020). `"peak"` takes the maximum absolute
+Fisher's Z across lags **within each window**, then averages those per-window
+peaks — the rMEA *best-lag* convention (Boker et al., 2002). Both are
+larger-is-more-synchrony quantities. Pass the same value to
+`wcc_surrogate()` so the null distribution matches (see Invariant 2).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list object of class "wcc" containing the results matrix and useful
-  summaries of it.</p>
+    <p>A list object of class "wcc_res" containing the results matrix and
+  useful summaries of it.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

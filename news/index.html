@@ -49,6 +49,41 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9000" id="bsync-0009000">bsync 0.0.0.9000<a class="anchor" aria-label="anchor" href="#bsync-0009000"></a></h2>
 <div class="section level3">
+<h3 id="m5--shared-windowed-surface--surrogate-framework--tidy-interface-0-0-0-9000">M5 — Shared windowed-surface + surrogate framework + tidy interface<a class="anchor" aria-label="anchor" href="#m5--shared-windowed-surface--surrogate-framework--tidy-interface-0-0-0-9000"></a></h3>
+<ul><li><p><strong>Unified <code>$aggregate</code> slot.</strong> All three estimators (<code><a href="../reference/wcc.html">wcc()</a></code>, <code><a href="../reference/wdtw.html">wdtw()</a></code>, <code><a href="../reference/wgranger.html">wgranger()</a></code>) now return a named numeric <code>$aggregate</code> in place of the old per-estimator <code>$fisher_z</code> / <code>$mean_distance</code> scalar. WCC returns <code>c(mean_abs_z = ...)</code> or <code>c(peak = ...)</code> depending on <code>statistic</code>; WDTW returns <code>c(mean_distance = ...)</code>; Granger returns <code>c(f_xy = ..., f_yx = ...)</code>.</p></li>
+<li><p><strong><code>bsync_surface</code> superclass.</strong> All three result objects now inherit <code>"bsync_surface"</code> in addition to their leaf class (<code>"wcc_res"</code>, <code>"wdtw_res"</code>, <code>"wgranger_res"</code>). This enables dispatch of shared methods.</p></li>
+<li>
+<p><strong>Shared infrastructure.</strong></p>
+<ul><li>
+<code>build_surface_grid()</code>: single source of truth for grid math and the <code>w_max = window_size - 1</code> boundary (Invariant 4); replaces per-estimator copy-paste.</li>
+<li>
+<code>validate_series()</code> / <code>validate_window_params()</code>: shared input validators.</li>
+<li>
+<code>run_surrogate_engine()</code>: shared surrogate loop used by all three <code>*_surrogate()</code> wrappers; accepts a prebuilt grid and surrogate matrix and an aggregate-only compute function (no <code>results_df</code> on the surrogate path, Invariant 7); M6-multiverse seam.</li>
+<li>
+<code>build_surface_heatmap()</code>: shared heatmap scaffold for <code>plot.wcc_res</code> and <code>plot.wdtw_res</code> (axis labels, time_step scaling, zero-lag line, theme).</li>
+</ul></li>
+<li>
+<p><strong>Tidy interface.</strong> <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">generics::tidy()</a></code>, <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">generics::glance()</a></code>, and <code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">tibble::as_tibble()</a></code> methods for <code>bsync_surface</code> objects:</p>
+<ul><li>
+<code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> returns one row per cell of <code>results_df</code>.</li>
+<li>
+<code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> returns a one-row tibble with aggregate(s) + key settings (<code>n_windows</code>, <code>window_size</code>, <code>lag_max</code>, etc.).</li>
+<li>
+<code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble()</a></code> is an alias for <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>.</li>
+<li>Two <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> rows can be bound with <code><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">dplyr::bind_rows()</a></code> for comparison.</li>
+</ul></li>
+<li><p><strong>External oracle validation (AC0 preflight).</strong> Frozen golden values from <code>dtw</code> (v1.23-3, symmetric1 step pattern, L1 cost) and <code>lmtest</code> (v0.9-40, full-series Granger F-statistics) are committed in <code>test-external-oracle.R</code> and checked on every run without introducing live test dependencies.</p></li>
+<li><p><strong>Bug fix — <code>wdtw_surrogate(fast_method = TRUE)</code> window alignment.</strong> The fast path now evaluates surrogates over exactly the windows of the observed lagged surface (edges reserved at both ends), at lag 0. A regression in an interim refactor had it use a lag-free grid that shifted windows past the series end, over-counting windows and producing spurious out-of-range <code>NA</code>s. The slow (default) path was unaffected.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="m4--selectable-wcc-aggregate-statistic-0-0-0-9000">M4 — Selectable WCC aggregate statistic<a class="anchor" aria-label="anchor" href="#m4--selectable-wcc-aggregate-statistic-0-0-0-9000"></a></h3>
+<ul><li><p><strong><code><a href="../reference/wcc.html">wcc()</a></code> gains a <code>statistic</code> argument</strong> (<code>"mean_abs_z"</code> | <code>"peak"</code>, default <code>"mean_abs_z"</code>). <code>"mean_abs_z"</code> is the SUSY <em>mean absolute Z</em> (Tschacher &amp; Meier, 2020) — the mean of |Fisher’s Z| over all windows and lags — and reproduces the pre-M4 behavior exactly. <code>"peak"</code> is the rMEA <em>best-lag</em> convention (Boker et al., 2002): per window, the maximum |Fisher’s Z| across lags; then mean across windows.</p></li>
+<li><p><strong><code><a href="../reference/wcc_surrogate.html">wcc_surrogate()</a></code> gains the same <code>statistic</code> argument.</strong> The null distribution is always built with the same statistic as the observed value (Invariant 2). Pass the same value to both functions.</p></li>
+<li><p><strong>Shared internal helper.</strong> Both functions now call <code>wcc_aggregate()</code>, a single internal helper, guaranteeing the observed and surrogate aggregates are numerically identical.</p></li>
+<li><p><strong>Print methods updated.</strong> <code>print.wcc_res</code> and <code>print.wcc_surr</code> label the aggregate line according to the chosen statistic.</p></li>
+</ul></div>
+<div class="section level3">
 <h3 id="m3--cran-readiness-0-0-0-9000">M3 — CRAN readiness<a class="anchor" aria-label="anchor" href="#m3--cran-readiness-0-0-0-9000"></a></h3>
 <ul><li><p><strong>Build artifacts removed from version control.</strong> <code>src/*.o</code>, <code>src/bsync.{so,dll}</code>, <code>.DS_Store</code>, and <code>tests/testthat/Rplots.pdf</code> were untracked via <code>git rm --cached</code>; <code>.gitignore</code> now carries <code>*.o</code>, <code>*.so</code>, <code>*.dll</code>, <code>*.dylib</code>, and <code>Rplots.pdf</code> patterns.</p></li>
 <li><p><strong>Documentation complete.</strong> Added <code>@return</code> to all 18 exported <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> methods (<code>print.wcc_res</code>, <code>summary.wcc_res</code>, <code>print.wdtw_res</code>, <code>print/summary.wgranger_res</code>, <code>print/summary.wcc_optima</code>, <code>print/summary.wdtw_optima</code>, <code>print.bsync_lai</code>, <code>plot.bsync_lai</code>, <code>plot.wcc_res</code>, <code>plot.wdtw_res</code>, <code>plot.wgranger_res</code>, <code>plot_optima_overlay</code>, <code>print.wcc_surr</code>, <code>print.wdtw_surr</code>, <code>print.wgranger_surr</code>). <code>R CMD check --as-cran</code> now reports 0 errors / 0 warnings / 0 notes.</p></li>

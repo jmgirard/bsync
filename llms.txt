@@ -281,6 +281,8 @@ computed using standard finite difference kinematics:
 
 - [`aggregate_by_time()`](https://jmgirard.github.io/bsync/reference/aggregate_by_time.md)
   : Aggregate Time Series Data by Time Bins
+- [`as_tibble(`*`<bsync_surface>`*`)`](https://jmgirard.github.io/bsync/reference/as_tibble.bsync_surface.md)
+  : Convert a bsync_surface object to a tibble
 - [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
   : Auto-Tune WCC Parameters for a Dataset
 - [`calc_speed_1d()`](https://jmgirard.github.io/bsync/reference/calc_speed_1d.md)
@@ -301,6 +303,8 @@ computed using standard finite difference kinematics:
   : Generate Circular Shift Surrogates
 - [`generate_surrogate_phase()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md)
   : Generate Phase-Randomized Surrogates (Fourier Transform)
+- [`glance(`*`<bsync_surface>`*`)`](https://jmgirard.github.io/bsync/reference/glance.bsync_surface.md)
+  : One-row summary of a bsync_surface object
 - [`impute_ts_gaps()`](https://jmgirard.github.io/bsync/reference/impute_ts_gaps.md)
   : Impute Missing Values in Continuous Time Series with Metadata
 - [`leadership_asymmetry()`](https://jmgirard.github.io/bsync/reference/leadership_asymmetry.md)
@@ -351,6 +355,8 @@ computed using standard finite difference kinematics:
   : Summary method for wdtw_optima objects
 - [`summary(`*`<wgranger_res>`*`)`](https://jmgirard.github.io/bsync/reference/summary.wgranger_res.md)
   : Summary method for wgranger_res objects
+- [`tidy(`*`<bsync_surface>`*`)`](https://jmgirard.github.io/bsync/reference/tidy.bsync_surface.md)
+  : Tidy a bsync_surface object into a tibble of per-cell results
 - [`trim_edges()`](https://jmgirard.github.io/bsync/reference/trim_edges.md)
   : Trim Edge Effects from Data
 - [`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md) :

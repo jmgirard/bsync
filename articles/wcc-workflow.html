@@ -257,7 +257,7 @@ frames (1 second) to allow for overlap and smooth transitions.</p>
 <span><span class="co">#&gt; Total Lags Tested: 91</span></span>
 <span><span class="co">#&gt; Window Size: 90</span></span>
 <span><span class="co">#&gt; Max Lag: 45</span></span>
-<span><span class="co">#&gt; Overall Fisher's Z: 0.452</span></span>
+<span><span class="co">#&gt; Mean |Fisher's Z|: 0.452</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Cross-Correlation Value Distribution</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -278,6 +278,61 @@ correlation (synchrony) and deep red indicates strong negative
 correlation. You can already see a clear track of high correlation
 shifting across the zero-lag line over time alongside a washed-out
 period of low correlation in the middle.</p>
+<div class="section level3">
+<h3 id="choosing-the-aggregate-statistic">3.1 Choosing the aggregate statistic<a class="anchor" aria-label="anchor" href="#choosing-the-aggregate-statistic"></a>
+</h3>
+<p><code><a href="../reference/wcc.html">wcc()</a></code> reduces the full WCC surface to a single number
+via the <code>statistic</code> argument. Two conventions are
+available:</p>
+<ul>
+<li><p><strong><code>"mean_abs_z"</code> (default):</strong> The mean of
+|Fisher’s Z| over <em>every</em> (window × lag) cell in the surface.
+This is the <em>mean absolute Z</em> from the SUSY toolbox (Tschacher
+&amp; Meier, 2020) and reflects the average strength of coupling across
+the entire lag range tested.</p></li>
+<li><p><strong><code>"peak"</code>:</strong> Within each window, the
+<em>maximum</em> |Fisher’s Z| across all lags is identified (the
+strongest lead–lag coupling in that moment). These per-window peaks are
+then averaged across the recording. This is the <em>best-lag</em>
+convention used in rMEA and introduced by Boker et al. (2002).</p></li>
+</ul>
+<p>The two statistics answer slightly different questions.
+<code>"mean_abs_z"</code> captures average coupling strength over the
+full lag range; <code>"peak"</code> highlights the <em>strongest</em>
+lag coupling in each window and will always be ≥
+<code>"mean_abs_z"</code>. Choose based on your research question.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Default: SUSY mean absolute Z</span></span>
+<span><span class="va">wcc_maz</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wcc.html">wcc</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_A</span>,</span>
+<span>  y <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_B</span>,</span>
+<span>  time <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">time</span>,</span>
+<span>  window_size <span class="op">=</span> <span class="fl">90</span>,</span>
+<span>  lag_max <span class="op">=</span> <span class="fl">45</span>,</span>
+<span>  window_increment <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>  statistic <span class="op">=</span> <span class="st">"mean_abs_z"</span> <span class="co"># the default</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># rMEA best-lag convention</span></span>
+<span><span class="va">wcc_peak</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wcc.html">wcc</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_A</span>,</span>
+<span>  y <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_B</span>,</span>
+<span>  time <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">time</span>,</span>
+<span>  window_size <span class="op">=</span> <span class="fl">90</span>,</span>
+<span>  lag_max <span class="op">=</span> <span class="fl">45</span>,</span>
+<span>  window_increment <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>  statistic <span class="op">=</span> <span class="st">"peak"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"mean_abs_z:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">wcc_maz</span><span class="op">$</span><span class="va">aggregate</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; mean_abs_z: 0.452</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"peak:      "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">wcc_peak</span><span class="op">$</span><span class="va">aggregate</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; peak:       2.3383</span></span></code></pre></div>
+<p><strong>Important:</strong> Always pass the <em>same</em>
+<code>statistic</code> to <code><a href="../reference/wcc_surrogate.html">wcc_surrogate()</a></code> so that the null
+distribution is built with the same quantity as the observed value (see
+Section 4).</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="surrogate-testing-for-significance">4. Surrogate Testing for Significance<a class="anchor" aria-label="anchor" href="#surrogate-testing-for-significance"></a>
@@ -301,7 +356,7 @@ built to seamlessly support parallel processing via the
 <code><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan()</a></code> before running your analysis, the workload is
 distributed across multiple CPU cores, drastically reducing computation
 time.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 1. Set up a parallel plan (e.g., using 4 CPU cores)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
@@ -331,8 +386,8 @@ time.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">surrogate_results</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">WCC Surrogate Analysis (Pseudo-Synchrony)</span> <span style="color: #00BBBB;">───────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; Permutations: 1000</span></span>
-<span><span class="co">#&gt; Observed Fisher's Z: 0.452</span></span>
-<span><span class="co">#&gt; Average Null Z: 0.3175</span></span>
+<span><span class="co">#&gt; Observed Mean |Fisher's Z|: : 0.452</span></span>
+<span><span class="co">#&gt; Average Null Mean |Fisher's Z|: : 0.3175</span></span>
 <span><span class="co">#&gt; Empirical p-value: &lt; 0.001</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Observed synchrony is significantly greater than chance.</span></span></code></pre></div>
 <p>The output provides an empirical p-value by calculating the
@@ -359,7 +414,7 @@ line from wildly jumping around during this lull, we can pass a
 <p>Setting <code>threshold = 0.55</code> ensures that any optimum with
 an absolute correlation weaker than r = 0.55 is overwritten with
 <code>NA</code>.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Extract optima using a local search size of 9 and a threshold of 0.55</span></span>
 <span><span class="va">wcc_optima_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pick_optima.html">pick_optima</a></span><span class="op">(</span><span class="va">wcc_results</span>, L_size <span class="op">=</span> <span class="fl">9</span>, threshold <span class="op">=</span> <span class="fl">0.55</span><span class="op">)</span></span>
 <span></span>
@@ -445,7 +500,7 @@ experimenting with several values and visually comparing the plots.</p>
 </h2>
 <p>We can visually confirm our optima extraction by overlaying the
 tracking path directly onto the WCC heatmap.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_optima_overlay.html">plot_optima_overlay</a></span><span class="op">(</span></span>
 <span>  surface_obj <span class="op">=</span> <span class="va">wcc_results</span>,</span>
 <span>  optima_df <span class="op">=</span> <span class="va">wcc_optima_df</span>,</span>
@@ -487,7 +542,7 @@ optima into a bounded Leadership Asymmetry Index (LAI) ranging from -1
 <p>Because <strong>bsync</strong> is designed around a consistent class
 structure, you can seamlessly chain the entire analytical process
 together using the native R pipe (<code>|&gt;</code>):</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run the complete pipeline from WCC results to LAI visualization</span></span>
 <span><span class="va">wcc_results</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/pick_optima.html">pick_optima</a></span><span class="op">(</span>L_size <span class="op">=</span> <span class="fl">9</span>, threshold <span class="op">=</span> <span class="fl">0.55</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -504,6 +559,66 @@ smoothly transitions down through zero during the uncorrelated lull,
 hits <code>-1.0</code> (Person B leading) right at the 30-second mark,
 and finally climbs back up to <code>1.0</code> as Person A re-enters the
 conversation.</p>
+</div>
+<div class="section level2">
+<h2 id="tidy-interface">8. Tidy Interface<a class="anchor" aria-label="anchor" href="#tidy-interface"></a>
+</h2>
+<p>All <strong>bsync</strong> estimator results support a tidy workflow
+via <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>, <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code>, and
+<code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble()</a></code>.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># One row per surface cell (full windowed results_df as a tibble)</span></span>
+<span><span class="va">surface_tbl</span> <span class="op">&lt;-</span> <span class="fu">generics</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">wcc_results</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">surface_tbl</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 3</span></span></span>
+<span><span class="co">#&gt;       i   tau    wcc</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     2   -<span style="color: #BB0000;">45</span>  0.634</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     3   -<span style="color: #BB0000;">45</span>  0.292</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     4   -<span style="color: #BB0000;">45</span>  0.511</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     5   -<span style="color: #BB0000;">45</span>  0.419</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     6   -<span style="color: #BB0000;">45</span> -<span style="color: #BB0000;">0.124</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     7   -<span style="color: #BB0000;">45</span> -<span style="color: #BB0000;">0.301</span></span></span>
+<span></span>
+<span><span class="co"># One-row summary: aggregate statistic(s) + key settings</span></span>
+<span><span class="fu">generics</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">wcc_results</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 7</span></span></span>
+<span><span class="co">#&gt;   mean_abs_z n_windows window_size window_increment lag_max lag_increment</span></span>
+<span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      0.452        53          90               30      45             1</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: statistic &lt;chr&gt;</span></span></span></code></pre></div>
+<p><code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> is especially useful for comparing several runs
+in a single data frame:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">wcc_maz2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wcc.html">wcc</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_A</span>,</span>
+<span>  y <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_B</span>,</span>
+<span>  time <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">time</span>,</span>
+<span>  window_size <span class="op">=</span> <span class="fl">90</span>,</span>
+<span>  lag_max <span class="op">=</span> <span class="fl">45</span>,</span>
+<span>  window_increment <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>  statistic <span class="op">=</span> <span class="st">"mean_abs_z"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">wcc_peak2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wcc.html">wcc</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_A</span>,</span>
+<span>  y <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">person_B</span>,</span>
+<span>  time <span class="op">=</span> <span class="va">dyad_data</span><span class="op">$</span><span class="va">time</span>,</span>
+<span>  window_size <span class="op">=</span> <span class="fl">90</span>,</span>
+<span>  lag_max <span class="op">=</span> <span class="fl">45</span>,</span>
+<span>  window_increment <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>  statistic <span class="op">=</span> <span class="st">"peak"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
+<span>  <span class="fu">generics</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">wcc_maz2</span><span class="op">)</span>,</span>
+<span>  <span class="fu">generics</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">wcc_peak2</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 8</span></span></span>
+<span><span class="co">#&gt;   mean_abs_z n_windows window_size window_increment lag_max lag_increment</span></span>
+<span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      0.452        53          90               30      45             1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     <span style="color: #BB0000;">NA</span>            53          90               30      45             1</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: statistic &lt;chr&gt;, peak &lt;dbl&gt;</span></span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

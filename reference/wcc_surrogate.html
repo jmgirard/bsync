@@ -62,7 +62,8 @@
 <span>  <span class="va">lag_max</span>,</span>
 <span>  window_increment <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  lag_increment <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  na.rm <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  na.rm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  statistic <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean_abs_z"</span>, <span class="st">"peak"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -105,6 +106,11 @@
 <dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
 <dd><p>A logical indicating whether to remove missing values. Default is `TRUE`.</p></dd>
 
+
+<dt id="arg-statistic">statistic<a class="anchor" aria-label="anchor" href="#arg-statistic"></a></dt>
+<dd><p>A character string specifying the aggregate statistic; must match the value
+passed to `wcc()`. `"mean_abs_z"` (default) or `"peak"`. See `wcc()` for details.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -113,10 +119,12 @@
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The p-value is the proportion of surrogates whose aggregate statistic is **at least as
-large as** the observed statistic. The aggregate is `mean(abs(Fisher's Z))` — the same
-quantity stored in `wcc_res$fisher_z` — computed identically on both the observed data
-and every surrogate, so the null distribution and the observed value are directly
-comparable.</p>
+large as** the observed statistic. The aggregate — either `"mean_abs_z"` or `"peak"` —
+is computed identically on the observed data and every surrogate via the same internal
+helper, so the null distribution and the observed value are guaranteed to be directly
+comparable (Invariant 2: surrogate nulls match the observed statistic).</p>
+<p>Pass the same `statistic` value you used in `wcc()` so that `observed_z` and the
+surrogate draws use the same quantity.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

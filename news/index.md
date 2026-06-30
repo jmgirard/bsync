@@ -2,6 +2,95 @@
 
 ## bsync 0.0.0.9000
 
+### M5 — Shared windowed-surface + surrogate framework + tidy interface
+
+- **Unified `$aggregate` slot.** All three estimators
+  ([`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md),
+  [`wdtw()`](https://jmgirard.github.io/bsync/reference/wdtw.md),
+  [`wgranger()`](https://jmgirard.github.io/bsync/reference/wgranger.md))
+  now return a named numeric `$aggregate` in place of the old
+  per-estimator `$fisher_z` / `$mean_distance` scalar. WCC returns
+  `c(mean_abs_z = ...)` or `c(peak = ...)` depending on `statistic`;
+  WDTW returns `c(mean_distance = ...)`; Granger returns
+  `c(f_xy = ..., f_yx = ...)`.
+
+- **`bsync_surface` superclass.** All three result objects now inherit
+  `"bsync_surface"` in addition to their leaf class (`"wcc_res"`,
+  `"wdtw_res"`, `"wgranger_res"`). This enables dispatch of shared
+  methods.
+
+- **Shared infrastructure.**
+
+  - `build_surface_grid()`: single source of truth for grid math and the
+    `w_max = window_size - 1` boundary (Invariant 4); replaces
+    per-estimator copy-paste.
+  - `validate_series()` / `validate_window_params()`: shared input
+    validators.
+  - `run_surrogate_engine()`: shared surrogate loop used by all three
+    `*_surrogate()` wrappers; accepts a prebuilt grid and surrogate
+    matrix and an aggregate-only compute function (no `results_df` on
+    the surrogate path, Invariant 7); M6-multiverse seam.
+  - `build_surface_heatmap()`: shared heatmap scaffold for
+    `plot.wcc_res` and `plot.wdtw_res` (axis labels, time_step scaling,
+    zero-lag line, theme).
+
+- **Tidy interface.**
+  [`generics::tidy()`](https://generics.r-lib.org/reference/tidy.html),
+  [`generics::glance()`](https://generics.r-lib.org/reference/glance.html),
+  and
+  [`tibble::as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
+  methods for `bsync_surface` objects:
+
+  - [`tidy()`](https://generics.r-lib.org/reference/tidy.html) returns
+    one row per cell of `results_df`.
+  - [`glance()`](https://generics.r-lib.org/reference/glance.html)
+    returns a one-row tibble with aggregate(s) + key settings
+    (`n_windows`, `window_size`, `lag_max`, etc.).
+  - [`as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
+    is an alias for
+    [`tidy()`](https://generics.r-lib.org/reference/tidy.html).
+  - Two [`glance()`](https://generics.r-lib.org/reference/glance.html)
+    rows can be bound with
+    [`dplyr::bind_rows()`](https://dplyr.tidyverse.org/reference/bind_rows.html)
+    for comparison.
+
+- **External oracle validation (AC0 preflight).** Frozen golden values
+  from `dtw` (v1.23-3, symmetric1 step pattern, L1 cost) and `lmtest`
+  (v0.9-40, full-series Granger F-statistics) are committed in
+  `test-external-oracle.R` and checked on every run without introducing
+  live test dependencies.
+
+- **Bug fix — `wdtw_surrogate(fast_method = TRUE)` window alignment.**
+  The fast path now evaluates surrogates over exactly the windows of the
+  observed lagged surface (edges reserved at both ends), at lag 0. A
+  regression in an interim refactor had it use a lag-free grid that
+  shifted windows past the series end, over-counting windows and
+  producing spurious out-of-range `NA`s. The slow (default) path was
+  unaffected.
+
+### M4 — Selectable WCC aggregate statistic
+
+- **[`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md) gains a
+  `statistic` argument** (`"mean_abs_z"` \| `"peak"`, default
+  `"mean_abs_z"`). `"mean_abs_z"` is the SUSY *mean absolute Z*
+  (Tschacher & Meier, 2020) — the mean of \|Fisher’s Z\| over all
+  windows and lags — and reproduces the pre-M4 behavior exactly.
+  `"peak"` is the rMEA *best-lag* convention (Boker et al., 2002): per
+  window, the maximum \|Fisher’s Z\| across lags; then mean across
+  windows.
+
+- **[`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md)
+  gains the same `statistic` argument.** The null distribution is always
+  built with the same statistic as the observed value (Invariant 2).
+  Pass the same value to both functions.
+
+- **Shared internal helper.** Both functions now call `wcc_aggregate()`,
+  a single internal helper, guaranteeing the observed and surrogate
+  aggregates are numerically identical.
+
+- **Print methods updated.** `print.wcc_res` and `print.wcc_surr` label
+  the aggregate line according to the chosen statistic.
+
 ### M3 — CRAN readiness
 
 - **Build artifacts removed from version control.** `src/*.o`,
