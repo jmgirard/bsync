@@ -1,5 +1,17 @@
 # bsync 0.0.0.9000
 
+## M2 — Efficiency
+
+* **WCC core rewritten to an NA-aware prefix-sum algorithm.** `calc_wcc_cpp()` now
+  preprocesses six masked prefix-sum arrays per lag in O(n) and evaluates each window
+  in O(1), replacing the prior O(w\_max) inner loop. Both `na.rm` modes are preserved
+  exactly. Speedup on typical configurations: 5–25× depending on `window_size` and
+  `lag_max`; see `bench/RESULTS.md` for measured timings.
+
+* **OpenMP removed.** The prefix-sum speedup makes OpenMP unnecessary for the WCC core.
+  `SHLIB_OPENMP_CXXFLAGS` has been stripped from `src/Makevars` and `src/Makevars.win`;
+  the package is serial-by-default and fully reproducible on all platforms.
+
 * M1: `na.rm` is now honored in WCC. `calc_wcc_cpp()` gains an `na_rm` parameter;
   `na.rm = FALSE` in `wcc()` / `wcc_surrogate()` now returns `NA` for any window
   containing a missing value instead of silently using pairwise-complete pairs.
