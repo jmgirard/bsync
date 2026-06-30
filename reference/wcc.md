@@ -91,3 +91,33 @@ wcc(
 
 A list object of class "wcc_res" containing the results matrix and
 useful summaries of it.
+
+## Examples
+
+``` r
+# Windowed cross-correlation on the bundled simulated dyad
+wcc_res <- wcc(
+  x = sim_dyad$x_A,
+  y = sim_dyad$x_B,
+  window_size = 96,
+  lag_max = 10
+)
+wcc_res
+#> 
+#> ── Windowed Cross-Correlation Analysis ─────────────────────────────────────────
+#> Total Windows: 2285
+#> Total Lags Tested: 21
+#> Window Size: 96
+#> Max Lag: 10
+#> Mean Abs. Fisher's Z: 0.09
+
+# Use the rMEA best-lag "peak" aggregate instead of the SUSY mean
+wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10, statistic = "peak")
+#> 
+#> ── Windowed Cross-Correlation Analysis ─────────────────────────────────────────
+#> Total Windows: 2285
+#> Total Lags Tested: 21
+#> Window Size: 96
+#> Max Lag: 10
+#> Mean Peak Abs. Fisher's Z: 0.2369
+```

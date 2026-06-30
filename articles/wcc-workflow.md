@@ -509,7 +509,7 @@ All **bsync** estimator results support a tidy workflow via
 ``` r
 
 # One row per surface cell (full windowed results_df as a tibble)
-surface_tbl <- generics::tidy(wcc_results)
+surface_tbl <- tidy(wcc_results)
 head(surface_tbl)
 #> # A tibble: 6 × 3
 #>       i   tau    wcc
@@ -522,7 +522,7 @@ head(surface_tbl)
 #> 6     7   -45 -0.301
 
 # One-row summary: aggregate statistic(s) + key settings
-generics::glance(wcc_results)
+glance(wcc_results)
 #> # A tibble: 1 × 7
 #>   mean_abs_z n_windows window_size window_increment lag_max lag_increment
 #>        <dbl>     <int>       <dbl>            <dbl>   <dbl>         <dbl>
@@ -555,8 +555,8 @@ wcc_peak2 <- wcc(
 )
 
 dplyr::bind_rows(
-  generics::glance(wcc_maz2),
-  generics::glance(wcc_peak2)
+  glance(wcc_maz2),
+  glance(wcc_peak2)
 )
 #> # A tibble: 2 × 8
 #>   mean_abs_z n_windows window_size window_increment lag_max lag_increment

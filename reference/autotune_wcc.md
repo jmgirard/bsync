@@ -84,7 +84,8 @@ autotune_wcc(
 
 ## Value
 
-A named list with:
+An object of class \`bsync_autotune\` (a named list with a tidy
+\[print()\]\[print.bsync_autotune()\] method) containing:
 
 - \`window_size\`:
 
@@ -161,3 +162,37 @@ random sample of \`n_tune_dyads\` dyads is used for speed; call
 
 \[synchrony_multiverse()\], \[suggest_wcc_params()\],
 \[select_specification()\]
+
+## Examples
+
+``` r
+# \donttest{
+# Tune across a small multi-dyad list (here three copies of one dyad).
+# Small surrogate count for a fast example; use >= 1000 for reporting.
+dyads <- replicate(
+  3,
+  list(x = sim_dyad$x_A, y = sim_dyad$x_B),
+  simplify = FALSE
+)
+tuned <- autotune_wcc(
+  dyad_list = dyads,
+  sample_rate = 80,
+  window_sec = c(1, 2, 4),
+  lag_sec = 1,
+  n_surrogates = 30
+)
+#> Running synchrony_multiverse() on 3 dyad(s) (3 window x 1 lag cells each)...
+#> Warning: No specification passed the detectability gate (0.5 significance rate). Falling
+#> back to highest median ES.
+tuned
+#> 
+#> ── Auto-Tune Result ──
+#> 
+#> Window size: 320 samples (4 s)
+#> Max lag: 80 samples (1 s)
+#> Increment: 32 samples
+#> Sig. rate: 33.3% of dyads
+#> Median ES: 1.473 (IQR = 0.232)
+#> ℹ Tuned over 3 dyads; 3 cells passed the detectability gate. Per-dyad multiverses in $dyad_multiverses.
+# }
+```

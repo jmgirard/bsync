@@ -33,3 +33,12 @@ trim_edges(x, trim_length, pad_na = FALSE)
 ## Value
 
 An object of the same class as \`x\` with the edges removed or masked.
+
+## Examples
+
+``` r
+# Drop the first and last 50 samples (e.g. filter warm-up artifacts)
+trimmed <- trim_edges(sim_dyad$x_A, trim_length = 50)
+length(trimmed)
+#> [1] 2300
+```

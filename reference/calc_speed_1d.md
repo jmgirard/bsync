@@ -44,3 +44,12 @@ calc_speed_1d(
 ## Value
 
 A numeric vector of speeds the same length as the input vectors.
+
+## Examples
+
+``` r
+# Unsigned 1D speed (absolute rate of change)
+s <- calc_speed_1d(t = sim_dyad$time, x = sim_dyad$x_A)
+head(s)
+#> [1] 0.255938088 0.030495365 0.079562193 0.064443356 0.194426175 0.005478291
+```

@@ -26,3 +26,12 @@ generate_surrogate_phase(y, n_surrogates = 100, trim_odd = FALSE)
 ## Value
 
 A matrix where each column is a surrogate time series.
+
+## Examples
+
+``` r
+# Build 100 phase-randomized surrogates (preserves the power spectrum)
+surr <- generate_surrogate_phase(sim_dyad$x_B, n_surrogates = 100)
+dim(surr)
+#> [1] 2400  100
+```

@@ -47,7 +47,51 @@
   renames the label from `Mean |Fisher's Z|` to `Mean Abs. Fisher's Z`
   to avoid the cli markup ambiguity.
 
-### M6 — Parameter guidance & synchrony multiverse
+- **[`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  now returns a classed `bsync_autotune` object** with a tidy
+  [`print()`](https://rdrr.io/r/base/print.html) method. Previously the
+  result was an unclassed list, so inspecting it at the console dumped
+  the entire object (including the per-dyad `bsync_multiverse` list).
+  Printing now shows only the selected parameters and detectability
+  summary; the per-dyad multiverses remain available in
+  `$dyad_multiverses`.
+
+- **Documentation polish**: the pkgdown navbar again exposes the “Get
+  started”
+  ([`vignette("bsync")`](https://jmgirard.github.io/bsync/articles/bsync.md))
+  link; vignettes call the re-exported
+  [`tidy()`](https://generics.r-lib.org/reference/tidy.html) /
+  [`glance()`](https://generics.r-lib.org/reference/glance.html) verbs
+  directly instead of the `generics::` prefix. The downsampling vignette
+  now calls [`plot()`](https://rdrr.io/r/graphics/plot.default.html) on
+  the
+  [`evaluate_signal_power()`](https://jmgirard.github.io/bsync/reference/evaluate_signal_power.md)
+  result (the stale `$plot` list access rendered no figure), and a
+  [`wdtw_surrogate()`](https://jmgirard.github.io/bsync/reference/wdtw_surrogate.md)
+  doc reference to the removed `$mean_distance` field was corrected to
+  `$aggregate[["mean_distance"]]`.
+
+- **Runnable examples** added to all exported functions, all using the
+  bundled `sim_dyad` dataset. Compute-heavy examples (WDTW, surrogate
+  testing, the multiverse, and autotune) are wrapped in `\donttest{}`
+  and use modest subsets or surrogate counts so they run quickly.
+
+- **Plot axis labels** now spell out “Lag (tau)” instead of using the
+  Greek letter, so the estimator-surface and optima-overlay plots render
+  on graphics devices without UTF-8 support (the non-ASCII label could
+  otherwise fail when rendering examples on some platforms).
+
+- **[`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)
+  documentation clarified.** The helper derives its timescale from the
+  PSD *power cutoff* (the frequency below which 95% of the signal’s
+  power lies), not the single largest spectral peak — a deliberate,
+  now-documented choice that is robust to the low-frequency / DC power
+  that dominates raw movement spectra. Behavior is unchanged; the
+  roxygen and the console message no longer call this the “dominant”
+  cycle. The `choosing-parameters` vignette’s worked numbers were
+  corrected to match (the PSD path yields a 256-sample window here; the
+  640-sample figure belongs to the `event_duration_sec = 2` theory
+  override).
 
 #### Phase B — autotune_wcc rewrite + vignette
 

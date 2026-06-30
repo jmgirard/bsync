@@ -25,10 +25,13 @@ and 0 indicates equal leading or simultaneous behavior."></head><body>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/bsync.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Get started</h6></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Core estimators</h6></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
@@ -100,6 +103,26 @@ the asymmetry score. Positions where fewer than `min_valid` non-`NA` optima
 fall inside the window receive `NA` in the output.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">wcc_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="wcc.html">wcc</a></span><span class="op">(</span><span class="va">sim_dyad</span><span class="op">$</span><span class="va">x_A</span>, <span class="va">sim_dyad</span><span class="op">$</span><span class="va">x_B</span>, window_size <span class="op">=</span> <span class="fl">96</span>, lag_max <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">optima</span> <span class="op">&lt;-</span> <span class="fu"><a href="pick_optima.html">pick_optima</a></span><span class="op">(</span><span class="va">wcc_res</span>, L_size <span class="op">=</span> <span class="fl">9</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">lai</span> <span class="op">&lt;-</span> <span class="fu">leadership_asymmetry</span><span class="op">(</span><span class="va">optima</span>, epoch_size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">lai</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Leadership Asymmetry Index (LAI)</span> <span style="color: #00BBBB;">────────────────────────────────────────────</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Valid Epochs Computed: 6 out of 6</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Overall Mean LAI: -0.754</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Overall Dynamics: y predominantly leads</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Showing the first 5 results:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   i x_leads_n y_leads_n asymmetry_index</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  11         1         5      -0.6666667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  12         1         6      -0.7142857</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  13         1         7      -0.7500000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  14         1         8      -0.7777778</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  15         1         9      -0.8000000</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

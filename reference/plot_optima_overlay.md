@@ -65,3 +65,11 @@ plot_optima_overlay(
 ## Value
 
 A \`ggplot2\` plot object.
+
+## Examples
+
+``` r
+wcc_res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+optima <- pick_optima(wcc_res, L_size = 9)
+plot_optima_overlay(wcc_res, optima)
+```

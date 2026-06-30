@@ -23,10 +23,13 @@ time bins. This is a high-level, data frame-based pipeline function."></head><bo
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/bsync.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Get started</h6></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Core estimators</h6></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
@@ -118,6 +121,27 @@ calculating the aggregate. Default is `TRUE`.</p></dd>
   fast for clean, pre-processed data.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Aggregate the dyad into 0.5-second bins by the median</span></span></span>
+<span class="r-in"><span><span class="va">binned</span> <span class="op">&lt;-</span> <span class="fu">aggregate_by_time</span><span class="op">(</span><span class="va">sim_dyad</span>, time_var <span class="op">=</span> <span class="va">time</span>, bin_width <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">binned</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   time           x_A           y_A         z_A           x_B           y_B</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.25 -3.654198e-05  1.258303e-04  0.01755618 -3.369233e-04 -6.753525e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0.75 -4.049888e-04  6.429244e-05  0.05283492 -9.101645e-05  1.007204e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 1.25 -6.293527e-04  4.994968e-04 -0.09101961  2.880562e-04 -9.402914e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 1.75  7.104979e-04  7.502840e-04 -0.12817631 -2.970780e-04  2.097257e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 2.25  1.100113e-04 -2.720645e-05  0.16352097 -1.801977e-04 -3.462351e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 2.75 -5.013178e-05  2.892379e-04  0.20258062  6.315624e-05  7.454427e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           z_B</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 -0.01160438</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  0.05875119</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  0.08180088</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 -0.14807526</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 -0.12357705</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  0.24560688</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

@@ -27,10 +27,13 @@ downsampling factor that yields a clean sampling rate."></head><body>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/bsync.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Get started</h6></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Core estimators</h6></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
@@ -98,6 +101,64 @@ proportion of power to capture. Default is 0.95 (95 percent).</p></dd>
   target frequency. Call `plot()` on the result to visualize cumulative power.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># PSD-based downsampling guidance for one signal</span></span></span>
+<span class="r-in"><span><span class="va">ps</span> <span class="op">&lt;-</span> <span class="fu">evaluate_signal_power</span><span class="op">(</span><span class="va">sim_dyad</span><span class="op">$</span><span class="va">x_A</span>, sample_rate <span class="op">=</span> <span class="fl">80</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Signal Power Evaluation</span> <span style="color: #00BBBB;">─────────────────────────────────────────────────────</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 95% of signal power is captured below 37.5 Hz.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> The signal contains high frequencies requiring a sampling rate near or above the original 80 Hz. Downsampling is not recommended.</span>
+<span class="r-in"><span><span class="va">ps</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $primary_cutoff_freq</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 37.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $theoretical_min_rate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 75</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $recommended_downsample_factor</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $recommended_target_rate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 80</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $recommended_bin_width_sec</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.0125</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $psd_results</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $psd_results$Signal</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $psd_results$Signal$freqs</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  0.00  1.25  2.50  3.75  5.00  6.25  7.50  8.75 10.00 11.25 12.50 13.75</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] 15.00 16.25 17.50 18.75 20.00 21.25 22.50 23.75 25.00 26.25 27.50 28.75</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [25] 30.00 31.25 32.50 33.75 35.00 36.25 37.50 38.75 40.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $psd_results$Signal$cum_power</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 0.01620053 0.04958386 0.08454863 0.11660403 0.14602443 0.17519644</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] 0.20487554 0.23914563 0.27603913 0.30862085 0.34001340 0.37043402</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] 0.39612303 0.42035764 0.45326666 0.48300307 0.51645049 0.54991972</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [19] 0.58168552 0.61274681 0.64645507 0.67680178 0.70488481 0.73634007</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [25] 0.76685499 0.79762077 0.83093059 0.86523770 0.89838799 0.92772000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [31] 0.95681182 0.98523634 1.00000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $psd_results$Signal$cutoff</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 37.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $threshold</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $is_multi</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "signal_power_res" "list"            </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Visualize the cumulative power spectrum</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ps</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="evaluate_signal_power-1.png" alt="" width="700" height="433"></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

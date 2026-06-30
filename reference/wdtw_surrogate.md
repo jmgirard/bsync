@@ -82,12 +82,42 @@ The p-value is the proportion of surrogates whose aggregate statistic is
 \*\*at most as large as\*\* the observed statistic (lower DTW distance =
 better alignment). The aggregate is \`mean(dtw_dist)\` over all window ×
 lag combinations — the same quantity stored in
-\`wdtw_res\$mean_distance\` — computed identically on both the observed
-data and every surrogate, so the null distribution and the observed
-value are directly comparable.
+\`wdtw_res\$aggregate\[\["mean_distance"\]\]\` — computed identically on
+both the observed data and every surrogate, so the null distribution and
+the observed value are directly comparable.
 
 \*\*\`fast_method\` warning:\*\* when \`fast_method = TRUE\`, surrogates
 are evaluated at lag 0 only, while the observed statistic is computed
 over all lags. The null and observed aggregates therefore cover
 different lag ranges, making the resulting p-value approximate. Use only
 for quick exploratory checks, never for reporting.
+
+## Examples
+
+``` r
+# \donttest{
+# DTW runs n_surrogates + 1 times, so this example uses a short subset and a
+# small surrogate count for speed; use the full series and
+# n_surrogates >= 1000 for reporting.
+xs <- sim_dyad$x_A[1:250]
+ys <- sim_dyad$x_B[1:250]
+y_surr <- generate_surrogate_circular(ys, n_surrogates = 19)
+res <- wdtw_surrogate(
+  x = xs,
+  y = ys,
+  y_surrogates = y_surr,
+  window_size = 50,
+  lag_max = 5
+)
+res
+#> 
+#> ── WDTW Surrogate Analysis (Pseudo-Synchrony) ──────────────────────────────────
+#> Permutations: 19
+#> Observed Mean Cost: 27.8222
+#> Average Null Cost: 30.1765
+#> Empirical p-value: < 0.0526315789473684
+#> ✔ Observed cost is significantly lower than chance (stronger alignment).
+#> ℹ Note: 19 permutations may be too few for stable p-values.
+#> Consider setting `n_surrogates >= 1000` for final reporting.
+# }
+```

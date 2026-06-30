@@ -35,11 +35,14 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="../articles/bsync.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Get started</h6></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Core estimators</h6></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
@@ -145,8 +148,8 @@ sampling rate to prevent aliasing.</p>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Recommended downsampling factor: 6 (Target: 5 Hz | Bin Width: 0.2 sec).</span></span>
 <span></span>
 <span><span class="co"># View the diagnostic plot</span></span>
-<span><span class="va">single_eval</span><span class="op">$</span><span class="va">plot</span></span>
-<span><span class="co">#&gt; NULL</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">single_eval</span><span class="op">)</span></span></code></pre></div>
+<p><img src="determine-downsampling_files/figure-html/eval-single-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="best-practice-dataset-level-evaluation">Best Practice: Dataset-Level Evaluation<a class="anchor" aria-label="anchor" href="#best-practice-dataset-level-evaluation"></a>
@@ -174,8 +177,8 @@ frames, making this process completely automated.</p>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Recommended downsampling factor: 6 (Target: 5 Hz | Bin Width: 0.2 sec).</span></span>
 <span></span>
 <span><span class="co"># View the dataset-level diagnostic plot</span></span>
-<span><span class="va">multi_eval</span><span class="op">$</span><span class="va">plot</span></span>
-<span><span class="co">#&gt; NULL</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">multi_eval</span><span class="op">)</span></span></code></pre></div>
+<p><img src="determine-downsampling_files/figure-html/eval-multi-1.png" class="r-plt" alt="" width="672"></p>
 <p>When provided with multiple signals, the function calculates the
 cutoff for each individual and then conservatively recommends the
 <strong>95th percentile</strong> of those cutoffs. This ensures you

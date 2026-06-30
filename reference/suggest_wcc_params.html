@@ -6,8 +6,8 @@
     }
   };
 </script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Suggest WCC Hyperparameters — suggest_wcc_params"><meta name="description" content="Derives principled starting values for Windowed Cross-Correlation parameters
-from the **measured signal** via PSD-based dominant timescale estimation."><meta property="og:description" content="Derives principled starting values for Windowed Cross-Correlation parameters
-from the **measured signal** via PSD-based dominant timescale estimation."></head><body>
+from the **measured signal** via PSD-based timescale estimation."><meta property="og:description" content="Derives principled starting values for Windowed Cross-Correlation parameters
+from the **measured signal** via PSD-based timescale estimation."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -23,10 +23,13 @@ from the **measured signal** via PSD-based dominant timescale estimation."></hea
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/bsync.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Get started</h6></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Core estimators</h6></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
@@ -55,7 +58,7 @@ from the **measured signal** via PSD-based dominant timescale estimation."></hea
 
     <div class="ref-description section level2">
     <p>Derives principled starting values for Windowed Cross-Correlation parameters
-from the **measured signal** via PSD-based dominant timescale estimation.</p>
+from the **measured signal** via PSD-based timescale estimation.</p>
     </div>
 
     <div class="section level2">
@@ -88,9 +91,9 @@ from the **measured signal** via PSD-based dominant timescale estimation.</p>
 
 
 <dt id="arg-event-duration-sec">event_duration_sec<a class="anchor" aria-label="anchor" href="#arg-event-duration-sec"></a></dt>
-<dd><p>Optional numeric override for the dominant
-behavioral cycle duration in seconds. Default `NULL` derives it from the
-PSD of `x` and `y` via [evaluate_signal_power()].</p></dd>
+<dd><p>Optional numeric override for the characteristic
+event timescale in seconds. Default `NULL` derives it from the power-cutoff
+frequency of `x` and `y` via [evaluate_signal_power()].</p></dd>
 
 
 <dt id="arg-max-delay-sec">max_delay_sec<a class="anchor" aria-label="anchor" href="#arg-max-delay-sec"></a></dt>
@@ -115,10 +118,17 @@ a stable correlation. Default is `20`.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>**Dominant timescale.** When `event_duration_sec` is `NULL` (default), the
-function estimates the dominant behavioral cycle from the measured signal via
-[evaluate_signal_power()]: `event_duration_sec = 1 / primary_cutoff_freq`.
-Pass a numeric value to override with your own theoretical estimate.</p>
+    <p>**Signal timescale (PSD power cutoff).** When `event_duration_sec` is `NULL`
+(default), the function estimates a characteristic timescale from the measured
+signal via [evaluate_signal_power()]: `event_duration_sec = 1 /
+primary_cutoff_freq`, where `primary_cutoff_freq` is the frequency below which
+`threshold` (default 95<!-- %) of the signal's power lies. This *power-cutoff* -->
+frequency – the fastest behaviorally relevant timescale – is used
+deliberately rather than the single largest spectral peak: raw movement
+spectra are dominated by low-frequency / DC components (a slow drift can hold
+most of the power), so a spectral-peak estimate would collapse toward 0 Hz and
+an unusably long window. The power cutoff is robust to that. Pass a numeric
+value to override with your own theoretical estimate.</p>
 <p>**Window size (4-cycles heuristic).** `window_size = round(event_duration_sec
 * 4 * sample_rate)` (Boker et al., 2002). Four cycles yields a stable
 within-window correlation across the range of lead-lag relationships; two
@@ -133,6 +143,40 @@ cycles (the Nyquist minimum) is too noisy.</p>
 </ul><p>All violations produce informative messages, not silent changes.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Derive starting parameters from the signal's own power-cutoff timescale.</span></span></span>
+<span class="r-in"><span><span class="co"># (The default max delay exceeds window/2 here, so the SUSY rule caps</span></span></span>
+<span class="r-in"><span><span class="co"># lag_max -- an example of the loud, non-destructive constraint messages.)</span></span></span>
+<span class="r-in"><span><span class="va">params</span> <span class="op">&lt;-</span> <span class="fu">suggest_wcc_params</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  x <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">z_A</span>,</span></span>
+<span class="r-in"><span>  y <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">z_B</span>,</span></span>
+<span class="r-in"><span>  sample_rate <span class="op">=</span> <span class="fl">80</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> PSD power-cutoff timescale: 0.8 s (cutoff 1.25 Hz).</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Requested `max_delay_sec` (3 s = 240 samples) exceeds window_size/2 (128).</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Capping `lag_max` at 128 (= 1.6 s).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Suggested WCC Parameters</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> window_size: 256 (3.2 s)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> lag_max: 128 (1.6 s)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> window_increment: 128 (50% overlap)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> lag_increment: 1</span>
+<span class="r-in"><span><span class="va">params</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $window_size</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 256</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $lag_max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 128</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $window_increment</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 128</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $lag_increment</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

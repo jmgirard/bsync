@@ -42,3 +42,24 @@ series boundaries). Within that neighborhood the fraction of positive
 vs. negative optimum lags determines the asymmetry score. Positions
 where fewer than \`min_valid\` non-\`NA\` optima fall inside the window
 receive \`NA\` in the output.
+
+## Examples
+
+``` r
+wcc_res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+optima <- pick_optima(wcc_res, L_size = 9)
+lai <- leadership_asymmetry(optima, epoch_size = 10)
+head(lai)
+#> 
+#> ── Leadership Asymmetry Index (LAI) ────────────────────────────────────────────
+#> Valid Epochs Computed: 6 out of 6
+#> Overall Mean LAI: -0.754
+#> Overall Dynamics: y predominantly leads
+#> Showing the first 5 results:
+#>   i x_leads_n y_leads_n asymmetry_index
+#>  11         1         5      -0.6666667
+#>  12         1         6      -0.7142857
+#>  13         1         7      -0.7500000
+#>  14         1         8      -0.7777778
+#>  15         1         9      -0.8000000
+```

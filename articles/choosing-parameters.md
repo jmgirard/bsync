@@ -31,12 +31,12 @@ the selection rule directly to a list of multiverse results.
 > **Note:** Steps 1 and 3 are WCC-specific helpers.
 > [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
 > in step 2 supports all three estimators (`"wcc"`, `"wdtw"`,
-> `"granger"`), so you can run a parameter sweep for any estimator.
+> `"wgranger"`), so you can run a parameter sweep for any estimator.
 
 ## 1. Data-Driven Starting Values: `suggest_wcc_params()`
 
 When you have a representative series in hand, let the signal tell you
-its own dominant timescale via power spectral density (PSD):
+its own characteristic timescale via power spectral density (PSD):
 
 ``` r
 
@@ -47,7 +47,7 @@ params <- suggest_wcc_params(
   y           = sim_dyad$z_B,
   sample_rate = fs
 )
-#> ℹ PSD dominant cycle: 0.8 s (cutoff 1.25 Hz).
+#> ℹ PSD power-cutoff timescale: 0.8 s (cutoff 1.25 Hz).
 #> Warning: Requested `max_delay_sec` (3 s = 240 samples) exceeds window_size/2 (128).
 #> ℹ Capping `lag_max` at 128 (= 1.6 s).
 #> 
@@ -70,18 +70,24 @@ params
 #> [1] 1
 ```
 
-The PSD identifies the 0.5 Hz dominant cycle (~2 s period). The
-4-cycles-per-window heuristic (Boker et al., 2002) then gives
-`window_size = round(2 * 4 * 80) = 640 samples`, subject to the hard
-constraints (see
+The PSD-based cutoff captures 95% of the signal’s power below ~1.25 Hz
+(a 0.8 s timescale). The 4-cycles-per-window heuristic (Boker et al.,
+2002) then gives `window_size = round(0.8 * 4 * 80) = 256 samples`.
+Because the default `max_delay_sec` (3 s = 240 samples) exceeds
+`window_size / 2`, the SUSY lag-cap rule caps `lag_max` at 128 samples
+and announces it – one of three hard constraints that are applied and
+reported, never silently (see
 [`?suggest_wcc_params`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)):
 
-- `window_size >= 2 * lag_max` (SUSY lag-cap rule)
+- `lag_max <= window_size / 2` (SUSY lag-cap rule)
 - `window_size <= length(x) / 2` (series-length ceiling)
 - Minimum-samples floor for a stable *r*
 
-If you already know the behavioral timescale from theory, pass it
-directly as an override:
+The data-driven cutoff reflects all of the signal’s power, including
+higher-frequency content, so it favors a shorter window. If you already
+know the behavioral timescale from theory – here, the 0.5 Hz interaction
+cycle that `sim_dyad` was built from – pass it directly as an override,
+which yields a longer 640-sample window:
 
 ``` r
 
@@ -125,7 +131,7 @@ results <- wcc(
   window_increment = params$window_increment,
   lag_increment    = params$lag_increment
 )
-generics::glance(results)
+glance(results)
 #> # A tibble: 1 × 7
 #>   mean_abs_z n_windows window_size window_increment lag_max lag_increment
 #>        <dbl>     <int>       <dbl>            <dbl>   <int>         <int>
@@ -181,7 +187,7 @@ mv
 
 ``` r
 
-generics::glance(mv)
+glance(mv)
 #> # A tibble: 1 × 9
 #>   estimator n_cells n_valid n_significant pct_significant median_es iqr_es
 #>   <chr>       <int>   <int>         <int>           <dbl>     <dbl>  <dbl>
@@ -207,7 +213,7 @@ The full specification grid is available as a tibble via
 
 ``` r
 
-head(generics::tidy(mv))
+head(tidy(mv))
 #> # A tibble: 6 × 15
 #>   estimator window_sec lag_sec increment_pct surrogate_method statistic 
 #>   <chr>          <dbl>   <dbl>         <dbl> <chr>            <chr>     
@@ -239,11 +245,11 @@ mv_g <- synchrony_multiverse(
   estimator    = "wgranger",
   sample_rate  = 80,
   window_sec   = c(1, 2, 4),
-  lag_sec      = 0,      # ignored for Granger; ar_order used instead
+  lag_sec      = 0, # ignored for Granger; ar_order used instead
   n_surrogates = 100L
 )
 
-generics::glance(mv_g)
+glance(mv_g)
 #> # A tibble: 1 × 9
 #>   estimator n_cells n_valid n_significant pct_significant median_es iqr_es
 #>   <chr>       <int>   <int>         <int>           <dbl>     <dbl>  <dbl>
@@ -276,87 +282,19 @@ best <- autotune_wcc(
   lag_sec      = c(0.5, 1),
   n_surrogates = 100L
 )
-#> Running synchrony_multiverse() on 3 dyad(s) (3 window x 2 lag cells each)...
-#> 
+#> Running synchrony_multiverse() on 3 dyad(s) (3 window x 2 lag cells
+#> each)...
+
+best
 #> 
 #> ── Auto-Tune Result ──
 #> 
-#> 
-#> 
 #> Window size: 160 samples (2 s)
-#> 
 #> Max lag: 80 samples (1 s)
-#> 
 #> Increment: 16 samples
-#> 
 #> Sig. rate: 100% of dyads
-#> 
 #> Median ES: 2.305 (IQR = 0.102)
-
-best
-#> $window_size
-#> [1] 160
-#> 
-#> $lag_max
-#> [1] 80
-#> 
-#> $window_increment
-#> [1] 16
-#> 
-#> $lag_increment
-#> [1] 1
-#> 
-#> $window_sec
-#> [1] 2
-#> 
-#> $lag_sec
-#> [1] 1
-#> 
-#> $sig_rate
-#> [1] 1
-#> 
-#> $median_es
-#> [1] 2.305021
-#> 
-#> $iqr_es
-#> [1] 0.1019227
-#> 
-#> $score
-#> [1] 2.25406
-#> 
-#> $n_dyads
-#> [1] 3
-#> 
-#> $n_cells_gated
-#> [1] 2
-#> 
-#> $dyad_multiverses
-#> $dyad_multiverses[[1]]
-#> 
-#> ── Synchrony Multiverse Analysis (wcc) ─────────────────────────────────────────
-#> Specifications: 6 (6 computable)
-#> Surrogates per cell: 100
-#> Significant (p < .05): 2 of 6 (33.3%)
-#> Median ES: 2.146 [IQR: 0.186]
-#> Sign-consistent (sig. cells): 100%
-#> 
-#> $dyad_multiverses[[2]]
-#> 
-#> ── Synchrony Multiverse Analysis (wcc) ─────────────────────────────────────────
-#> Specifications: 6 (6 computable)
-#> Surrogates per cell: 100
-#> Significant (p < .05): 2 of 6 (33.3%)
-#> Median ES: 2.322 [IQR: 0.412]
-#> Sign-consistent (sig. cells): 100%
-#> 
-#> $dyad_multiverses[[3]]
-#> 
-#> ── Synchrony Multiverse Analysis (wcc) ─────────────────────────────────────────
-#> Specifications: 6 (6 computable)
-#> Surrogates per cell: 100
-#> Significant (p < .05): 4 of 6 (66.7%)
-#> Median ES: 2.006 [IQR: 0.124]
-#> Sign-consistent (sig. cells): 100%
+#> ℹ Tuned over 3 dyads; 2 cells passed the detectability gate. Per-dyad multiverses in $dyad_multiverses.
 ```
 
 Plug the result directly into
@@ -372,7 +310,7 @@ results_tuned <- wcc(
   window_increment = best$window_increment,
   lag_increment    = best$lag_increment
 )
-generics::glance(results_tuned)
+glance(results_tuned)
 #> # A tibble: 1 × 7
 #>   mean_abs_z n_windows window_size window_increment lag_max lag_increment
 #>        <dbl>     <int>       <dbl>            <dbl>   <int>         <int>
@@ -473,7 +411,7 @@ params2 <- suggest_wcc_params(
   y           = sim_dyad$z_B,
   sample_rate = 80
 )
-#> ℹ PSD dominant cycle: 0.8 s (cutoff 1.25 Hz).
+#> ℹ PSD power-cutoff timescale: 0.8 s (cutoff 1.25 Hz).
 #> Warning: Requested `max_delay_sec` (3 s = 240 samples) exceeds window_size/2 (128).
 #> ℹ Capping `lag_max` at 128 (= 1.6 s).
 #> 
@@ -484,9 +422,9 @@ params2 <- suggest_wcc_params(
 #> lag_increment: 1
 
 # Step 2: build a grid around that starting point
-w_base       <- params2$window_size / 80 # convert to seconds
+w_base <- params2$window_size / 80 # convert to seconds
 grid_windows <- unique(round(w_base * c(0.5, 1, 2), 1))
-grid_lags    <- unique(round(grid_windows / 2, 1))
+grid_lags <- unique(round(grid_windows / 2, 1))
 
 cat("window_sec:", grid_windows, "\n")
 #> window_sec: 1.6 3.2 6.4
@@ -504,87 +442,19 @@ best2 <- autotune_wcc(
   lag_sec      = grid_lags,
   n_surrogates = 100L
 )
-#> Running synchrony_multiverse() on 3 dyad(s) (3 window x 3 lag cells each)...
-#> 
+#> Running synchrony_multiverse() on 3 dyad(s) (3 window x 3 lag cells
+#> each)...
+
+best2
 #> 
 #> ── Auto-Tune Result ──
 #> 
-#> 
-#> 
 #> Window size: 512 samples (6.4 s)
-#> 
 #> Max lag: 256 samples (3.2 s)
-#> 
 #> Increment: 51 samples
-#> 
 #> Sig. rate: 100% of dyads
-#> 
 #> Median ES: 1.601 (IQR = 0.105)
-
-best2
-#> $window_size
-#> [1] 512
-#> 
-#> $lag_max
-#> [1] 256
-#> 
-#> $window_increment
-#> [1] 51
-#> 
-#> $lag_increment
-#> [1] 1
-#> 
-#> $window_sec
-#> [1] 6.4
-#> 
-#> $lag_sec
-#> [1] 3.2
-#> 
-#> $sig_rate
-#> [1] 1
-#> 
-#> $median_es
-#> [1] 1.600661
-#> 
-#> $iqr_es
-#> [1] 0.105206
-#> 
-#> $score
-#> [1] 1.548058
-#> 
-#> $n_dyads
-#> [1] 3
-#> 
-#> $n_cells_gated
-#> [1] 1
-#> 
-#> $dyad_multiverses
-#> $dyad_multiverses[[1]]
-#> 
-#> ── Synchrony Multiverse Analysis (wcc) ─────────────────────────────────────────
-#> Specifications: 9 (9 computable)
-#> Surrogates per cell: 100
-#> Significant (p < .05): 1 of 9 (11.1%)
-#> Median ES: 1.232 [IQR: 0.321]
-#> Sign-consistent (sig. cells): 100%
-#> 
-#> $dyad_multiverses[[2]]
-#> 
-#> ── Synchrony Multiverse Analysis (wcc) ─────────────────────────────────────────
-#> Specifications: 9 (9 computable)
-#> Surrogates per cell: 100
-#> Significant (p < .05): 1 of 9 (11.1%)
-#> Median ES: 1.3 [IQR: 0.107]
-#> Sign-consistent (sig. cells): 100%
-#> 
-#> $dyad_multiverses[[3]]
-#> 
-#> ── Synchrony Multiverse Analysis (wcc) ─────────────────────────────────────────
-#> Specifications: 9 (9 computable)
-#> Surrogates per cell: 100
-#> Significant (p < .05): 1 of 9 (11.1%)
-#> Median ES: 1.227 [IQR: 0.233]
-#> Sign-consistent (sig. cells): 100%
+#> ℹ Tuned over 3 dyads; 1 cell passed the detectability gate. Per-dyad multiverses in $dyad_multiverses.
 ```
 
 ## References

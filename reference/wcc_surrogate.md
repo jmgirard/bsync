@@ -81,3 +81,29 @@ comparable (Invariant 2: surrogate nulls match the observed statistic).
 
 Pass the same \`statistic\` value you used in \`wcc()\` so that
 \`observed_z\` and the surrogate draws use the same quantity.
+
+## Examples
+
+``` r
+# \donttest{
+# Two-step pipeline: generate a null matrix, then test the observed WCC
+y_surr <- generate_surrogate_circular(sim_dyad$x_B, n_surrogates = 100)
+res <- wcc_surrogate(
+  x = sim_dyad$x_A,
+  y = sim_dyad$x_B,
+  y_surrogates = y_surr,
+  window_size = 96,
+  lag_max = 10
+)
+res
+#> 
+#> ── WCC Surrogate Analysis (Pseudo-Synchrony) ───────────────────────────────────
+#> Permutations: 100
+#> Observed Mean Abs. Fisher's Z: 0.09
+#> Average Null Mean Abs. Fisher's Z: 0.0826
+#> Empirical p-value: < 0.01
+#> ✔ Observed synchrony is significantly greater than chance.
+#> ℹ Note: 100 permutations may be too few for stable p-values.
+#> Consider setting `n_surrogates >= 1000` for final reporting.
+# }
+```

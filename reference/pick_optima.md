@@ -56,3 +56,28 @@ pick_optima(
 ## Value
 
 A data frame of class "wcc_optima" or "wdtw_optima".
+
+## Examples
+
+``` r
+wcc_res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
+optima <- pick_optima(wcc_res, L_size = 9)
+head(optima)
+#> 
+#> ── WCC Optima Results ──────────────────────────────────────────────────────────
+#> Total Windows Analyzed: 6
+#> Valid Optima Found: 6 (100%)
+#> Search Method: local
+#> Search Mode: Peaks (Maxima)
+#> Threshold Applied: None
+#> Local Search Size: 9
+#> Strict Monotonic: FALSE
+#> Showing the first 5 results:
+#>   i optimum_lag optimum_value
+#>  11          -4     0.1454372
+#>  12          -4     0.1496750
+#>  13          -4     0.1502625
+#>  14          -4     0.1434978
+#>  15          -4     0.1506591
+#> # ... with 1 more row
+```

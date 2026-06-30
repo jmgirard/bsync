@@ -279,11 +279,11 @@ focus and `DESIGN.md` §14/§15).
       `fast_method` window-alignment regression test. 455 tests pass;
       `R CMD check --as-cran` remains 0/0/0; no C++ change.
 - **M7 — First CRAN release (`v0.1.0`) (done).** All nine acceptance
-  criteria met (commits `633d58d`–`dcd9ef0` on `main`; 556 tests
-  passing, 0 errors/0 warnings/0 notes in `R CMD check --as-cran`). No
-  C++ change — Invariants 5/6 not triggered; `RcppExports` diff empty.
-  Run as two phases under M7 number: **Phase A** (docs/messaging): 6 ACs
-  met.
+  criteria met (commits `633d58d`–`dcd9ef0` on `main`, plus post-review
+  polish through `7d848c6`; 564 tests passing pre-polish, 0 errors/0
+  warnings/0 notes in `R CMD check --as-cran`). No C++ change —
+  Invariants 5/6 not triggered; `RcppExports` diff empty. Run as two
+  phases under M7 number: **Phase A** (docs/messaging): 6 ACs met.
   1.  `_pkgdown.yml` restructured with grouped `articles:` (3 groups)
       and `reference:` (8 groups);
       [`pkgdown::check_pkgdown()`](https://pkgdown.r-lib.org/reference/check_pkgdown.html)
@@ -316,15 +316,69 @@ focus and `DESIGN.md` §14/§15).
       `# bsync 0.1.0`; lifecycle badge promoted `experimental` →
       `stable` in README.
   8.  `cran-comments.md` written (0/0/0 local; cross-platform
-      win-builder/R-hub pre-submission checklist; pkgdown-deploy note
-      for two README article URLs not yet live). `urlchecker` reports
-      two 404s for the new `articles/bsync.html` URL (not yet deployed);
-      all other checks clean. `spelling` +
+      win-builder/R-hub pre-submission checklist). `spelling` +
       [`pkgdown::check_pkgdown()`](https://pkgdown.r-lib.org/reference/check_pkgdown.html)
-      clean. cran-comments.md added to `.Rbuildignore`.
+      clean. cran-comments.md added to `.Rbuildignore`. (The pkgdown
+      site has since been deployed: `articles/bsync.html` is live and
+      `urlchecker::url_check()` reports all URLs correct — the original
+      “two 404s pending deploy” caveat is resolved; `cran-comments.md`
+      updated to reflect it.)
   9.  Plan stops at “ready to submit”; `print.wcc_surr` label regression
-      test added (556 tests). Actual CRAN upload is the user’s action;
-      pre-submission checklist in `cran-comments.md`.
+      test added. Actual CRAN upload is the user’s action;
+      pre-submission checklist in `cran-comments.md`. Post-review polish
+      (commits `5c4a97c`–`7d848c6`, 564 tests, `R CMD check --as-cran`
+      remains 0/0/0): (1)
+      [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+      now returns a classed `bsync_autotune` object with a tidy
+      [`print()`](https://rdrr.io/r/base/print.html) method (was an
+      unclassed list that dumped the per-dyad multiverse list to the
+      console); regression test added. (2) pkgdown navbar `intro`
+      component restored so the Get-started
+      [`vignette("bsync")`](https://jmgirard.github.io/bsync/articles/bsync.md)
+      link reappears; the “Get started” articles group given a navbar
+      heading. (3) `determine-downsampling.Rmd` corrected to call
+      [`plot()`](https://rdrr.io/r/graphics/plot.default.html) on the
+      [`evaluate_signal_power()`](https://jmgirard.github.io/bsync/reference/evaluate_signal_power.md)
+      result (the stale `$plot` list access rendered no figure);
+      [`wdtw_surrogate()`](https://jmgirard.github.io/bsync/reference/wdtw_surrogate.md)
+      `@details` reference to the M5-removed `$mean_distance` field
+      corrected to `$aggregate[["mean_distance"]]`. (4) vignettes call
+      the re-exported
+      [`tidy()`](https://generics.r-lib.org/reference/tidy.html)/[`glance()`](https://generics.r-lib.org/reference/glance.html)
+      verbs directly instead of the `generics::` prefix. (5) root-level
+      `Rplots.pdf` added to `.gitignore`. Second post-review pass
+      (commits `4def838`–`575295f`, 564 tests / 171 blocks,
+      `R CMD check --as-cran` remains 0/0/0): (a) `cran-comments.md` +
+      this M7 entry reconciled to the now-deployed pkgdown site (live
+      `articles/bsync.html`, `urlchecker` clean), and the stale “6,000
+      rows” note fixed to 2,400. (b) Test suite sped up ~4x (285s -\>
+      73s) by hoisting the shared full-series estimator surfaces in
+      `test-surface.R` to file-scope read-only fixtures (one WDTW build,
+      not five) and slicing the three length-independent WDTW
+      Invariant-2/structure tests in `test-surrogate.R` to 600 samples;
+      the frozen numeric anchors (AC1 characterization, the 91/99 &
+      83/99 reproducibility guard, external-oracle goldens) are
+      untouched. (c) Runnable `@examples` on `sim_dyad` added to every
+      exported function (closing the long-standing “examples … NONE”);
+      heavy ones (`wdtw`, the three `*_surrogate` wrappers,
+      `synchrony_multiverse`, `autotune_wcc`, `select_specification`)
+      wrapped in `\donttest{}` and trimmed to short subsets / small
+      surrogate counts so each runs in a few seconds under
+      `--run-donttest`. (d) Example rendering surfaced a real
+      portability bug: the non-ASCII “Lag (tau)” surface-plot axis label
+      (`τ`) *errors* in grid’s text-bounds on a non-UTF-8 graphics
+      device; relabeled to ASCII “Lag (tau)” with the 6 label assertions
+      and 3 vdiffr snapshots regenerated. (e)
+      [`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)
+      example switched to `sim_dyad$z_A`/`z_B` (the coupled channel; the
+      `x` channel floored to the 20-sample minimum with two warnings),
+      and its docs/console message corrected to describe the PSD
+      *power-cutoff* timescale (not “dominant” cycle) — a deliberate
+      robustness choice documented with its rationale; the
+      `choosing-parameters` vignette’s worked numbers were corrected to
+      match (PSD path -\> 256-sample window; the 640 figure is the
+      `event_duration_sec = 2` theory override). No estimator numerics
+      changed in any of this.
 - **M6 — Parameter guidance & synchrony multiverse (done).** All nine
   acceptance criteria met (commits `026b2f4`–`bb5f6bc` on `main`; 542
   tests passing, 0 errors/0 warnings/0 notes in

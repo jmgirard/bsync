@@ -21,10 +21,13 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/bsync.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Get started</h6></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Core estimators</h6></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
@@ -113,6 +116,39 @@ aggregate (`mean(f_xy)` and `mean(f_yx)`) as the observed statistics stored in
 `wgranger_res$results_df`, so the null and observed values are directly comparable.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">y_surr</span> <span class="op">&lt;-</span> <span class="fu"><a href="generate_surrogate_circular.html">generate_surrogate_circular</a></span><span class="op">(</span><span class="va">sim_dyad</span><span class="op">$</span><span class="va">x_B</span>, n_surrogates <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">wgranger_surrogate</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  x <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">x_A</span>,</span></span>
+<span class="r-in"><span>  y <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">x_B</span>,</span></span>
+<span class="r-in"><span>  y_surrogates <span class="op">=</span> <span class="va">y_surr</span>,</span></span>
+<span class="r-in"><span>  window_size <span class="op">=</span> <span class="fl">96</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Windowed Granger Surrogate Analysis</span> <span style="color: #00BBBB;">─────────────────────────────────────────</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Direction: x -&gt; y</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Permutations: 100</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Observed Mean F-statistic: 1.0923</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Average Null F-statistic: 1.0091</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Empirical p-value: 0.33</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Predictive power (x -&gt; y) is not significantly different from chance.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Direction: y -&gt; x</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Observed Mean F-statistic: 1.8485</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Average Null F-statistic: 1.0021</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Empirical p-value: &lt; 0.01</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Predictive power (y -&gt; x) is significantly greater than chance.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Note: 100 permutations may be too few for stable p-values.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Consider setting `n_surrogates &gt;= 1000` for final reporting.</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

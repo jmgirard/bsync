@@ -42,3 +42,20 @@ wgranger(x, y, time = NULL, window_size, ar_order = 1, window_increment = 1)
 ## Value
 
 A list object of class "wgranger_res".
+
+## Examples
+
+``` r
+# Windowed Granger causality (no lag axis; directional F-statistics)
+wgc_res <- wgranger(
+  x = sim_dyad$x_A,
+  y = sim_dyad$x_B,
+  window_size = 96
+)
+wgc_res
+#> 
+#> ── Windowed Granger Causality Analysis ─────────────────────────────────────────
+#> Total Windows: 2305
+#> Window Size: 96
+#> AR Order (Lags): 1
+```

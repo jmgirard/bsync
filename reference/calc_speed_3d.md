@@ -54,3 +54,14 @@ calc_speed_3d(
 ## Value
 
 A numeric vector of speeds the same length as the input vectors.
+
+## Examples
+
+``` r
+# 3D speed from x/y/z coordinate channels
+s <- calc_speed_3d(
+  t = sim_dyad$time, x = sim_dyad$x_A, y = sim_dyad$y_A, z = sim_dyad$z_A
+)
+head(s)
+#> [1] 0.40447985 0.04907835 0.25211593 0.18896803 0.27919165 0.26524432
+```

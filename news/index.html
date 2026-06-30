@@ -21,10 +21,13 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/bsync.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Get started</h6></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Core estimators</h6></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
@@ -60,10 +63,12 @@
 <li><p><strong>Cross-linking</strong>: <code>wdtw-workflow</code>, <code>wgranger-workflow</code>, and <code>determine-downsampling</code> vignettes now carry “See also / Next steps” footers consistent with <code>wcc-workflow</code>.</p></li>
 <li><p><strong>README refreshed</strong>: Granger causality added to the headline scope sentence; parameter-guidance tools (<code><a href="../reference/suggest_wcc_params.html">suggest_wcc_params()</a></code>, <code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code>, <code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code>) mentioned in the overview; “Where to go next” article table added; canned output regenerated to reflect current (M4/M5) labels.</p></li>
 <li><p><strong>Bug fix</strong>: <code>print.wcc_res</code> and <code>print.wcc_surr</code> no longer display a spurious double colon in the Fisher’s Z aggregate label. The fix also renames the label from <code>Mean |Fisher's Z|</code> to <code>Mean Abs. Fisher's Z</code> to avoid the cli markup ambiguity.</p></li>
-</ul></div>
-<div class="section level3">
-<h3 id="m6--parameter-guidance--synchrony-multiverse-0-1-0">M6 — Parameter guidance &amp; synchrony multiverse<a class="anchor" aria-label="anchor" href="#m6--parameter-guidance--synchrony-multiverse-0-1-0"></a></h3>
-<div class="section level4">
+<li><p><strong><code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code> now returns a classed <code>bsync_autotune</code> object</strong> with a tidy <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> method. Previously the result was an unclassed list, so inspecting it at the console dumped the entire object (including the per-dyad <code>bsync_multiverse</code> list). Printing now shows only the selected parameters and detectability summary; the per-dyad multiverses remain available in <code>$dyad_multiverses</code>.</p></li>
+<li><p><strong>Documentation polish</strong>: the pkgdown navbar again exposes the “Get started” (<code><a href="../articles/bsync.html">vignette("bsync")</a></code>) link; vignettes call the re-exported <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> / <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> verbs directly instead of the <code>generics::</code> prefix. The downsampling vignette now calls <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> on the <code><a href="../reference/evaluate_signal_power.html">evaluate_signal_power()</a></code> result (the stale <code>$plot</code> list access rendered no figure), and a <code><a href="../reference/wdtw_surrogate.html">wdtw_surrogate()</a></code> doc reference to the removed <code>$mean_distance</code> field was corrected to <code>$aggregate[["mean_distance"]]</code>.</p></li>
+<li><p><strong>Runnable examples</strong> added to all exported functions, all using the bundled <code>sim_dyad</code> dataset. Compute-heavy examples (WDTW, surrogate testing, the multiverse, and autotune) are wrapped in <code>\donttest{}</code> and use modest subsets or surrogate counts so they run quickly.</p></li>
+<li><p><strong>Plot axis labels</strong> now spell out “Lag (tau)” instead of using the Greek letter, so the estimator-surface and optima-overlay plots render on graphics devices without UTF-8 support (the non-ASCII label could otherwise fail when rendering examples on some platforms).</p></li>
+<li><p><strong><code><a href="../reference/suggest_wcc_params.html">suggest_wcc_params()</a></code> documentation clarified.</strong> The helper derives its timescale from the PSD <em>power cutoff</em> (the frequency below which 95% of the signal’s power lies), not the single largest spectral peak — a deliberate, now-documented choice that is robust to the low-frequency / DC power that dominates raw movement spectra. Behavior is unchanged; the roxygen and the console message no longer call this the “dominant” cycle. The <code>choosing-parameters</code> vignette’s worked numbers were corrected to match (the PSD path yields a 256-sample window here; the 640-sample figure belongs to the <code>event_duration_sec = 2</code> theory override).</p></li>
+</ul><div class="section level4">
 <h4 id="phase-b--autotune_wcc-rewrite--vignette-0-1-0">Phase B — autotune_wcc rewrite + vignette<a class="anchor" aria-label="anchor" href="#phase-b--autotune_wcc-rewrite--vignette-0-1-0"></a></h4>
 <ul><li>
 <p><strong><code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code> rewritten</strong> as a thin wrapper over <code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code></p>

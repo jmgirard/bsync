@@ -38,3 +38,50 @@ cell.
 ## See also
 
 \[autotune_wcc()\], \[synchrony_multiverse()\]
+
+## Examples
+
+``` r
+# \donttest{
+# Build one multiverse per dyad, then pick the most robust specification.
+# Small surrogate count for a fast example; use >= 1000 for reporting.
+mv_list <- lapply(seq_len(3), function(i) {
+  synchrony_multiverse(
+    x = sim_dyad$x_A,
+    y = sim_dyad$x_B,
+    estimator = "wcc",
+    sample_rate = 80,
+    window_sec = c(1, 2, 4),
+    lag_sec = 1,
+    n_surrogates = 30
+  )
+})
+select_specification(mv_list)
+#> Warning: No specification passed the detectability gate (0.5 significance rate). Falling
+#> back to highest median ES.
+#> $best_row
+#> # A tibble: 1 × 15
+#>   estimator window_sec lag_sec increment_pct surrogate_method statistic 
+#>   <chr>          <dbl>   <dbl>         <dbl> <chr>            <chr>     
+#> 1 wcc                2       1           0.1 phase            mean_abs_z
+#> # ℹ 9 more variables: window_size <dbl>, lag_max <int>, window_increment <dbl>,
+#> #   n_windows <dbl>, observed <dbl>, null_mean <dbl>, null_sd <dbl>, es <dbl>,
+#> #   p <dbl>
+#> 
+#> $sig_rate
+#> [1] 0
+#> 
+#> $median_es
+#> [1] 1.329649
+#> 
+#> $iqr_es
+#> [1] 0.324802
+#> 
+#> $score
+#> [1] 1.167248
+#> 
+#> $n_gated
+#> [1] 3
+#> 
+# }
+```

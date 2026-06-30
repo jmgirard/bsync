@@ -70,3 +70,13 @@ smooth_signal(
 
 A numeric vector containing the smoothed signal, of the same length as
 \`x\`.
+
+## Examples
+
+``` r
+# Zero-phase Savitzky-Golay smoothing (order 3, 11-sample window)
+smoothed <- smooth_signal(sim_dyad$x_A, method = "sgolay", window = 11)
+head(smoothed)
+#> [1]  0.0006510771 -0.0003340847 -0.0010701011 -0.0015766966 -0.0018735955
+#> [6] -0.0019805223
+```

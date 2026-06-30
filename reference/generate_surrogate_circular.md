@@ -26,3 +26,12 @@ generate_surrogate_circular(y, n_surrogates = 100, lag_max = NULL)
 ## Value
 
 A matrix where each column is a surrogate time series.
+
+## Examples
+
+``` r
+# Build 100 circular-shift surrogates of one partner's signal
+surr <- generate_surrogate_circular(sim_dyad$x_B, n_surrogates = 100)
+dim(surr)
+#> [1] 2400  100
+```

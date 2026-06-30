@@ -21,10 +21,13 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/bsync.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Get started</h6></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Core estimators</h6></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
@@ -110,6 +113,30 @@ optima with a distance above this threshold are set to NA. Default is `NULL`.</p
     <p>A data frame of class "wcc_optima" or "wdtw_optima".</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">wcc_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="wcc.html">wcc</a></span><span class="op">(</span><span class="va">sim_dyad</span><span class="op">$</span><span class="va">x_A</span>, <span class="va">sim_dyad</span><span class="op">$</span><span class="va">x_B</span>, window_size <span class="op">=</span> <span class="fl">96</span>, lag_max <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">optima</span> <span class="op">&lt;-</span> <span class="fu">pick_optima</span><span class="op">(</span><span class="va">wcc_res</span>, L_size <span class="op">=</span> <span class="fl">9</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">optima</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">WCC Optima Results</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Total Windows Analyzed: 6</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Valid Optima Found: 6 (100%)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Search Method: local</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Search Mode: Peaks (Maxima)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Threshold Applied: None</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Local Search Size: 9</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Strict Monotonic: FALSE</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Showing the first 5 results:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   i optimum_lag optimum_value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  11          -4     0.1454372</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  12          -4     0.1496750</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  13          -4     0.1502625</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  14          -4     0.1434978</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  15          -4     0.1506591</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #555555;"># ... with 1 more row</span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

@@ -62,3 +62,25 @@ ideal for processing multiple numeric columns simultaneously. \* Use
 vector that has guaranteed regular intervals and no missing frames. That
 function relies on matrix reshaping and vector math, making it
 exceptionally fast for clean, pre-processed data.
+
+## Examples
+
+``` r
+# Aggregate the dyad into 0.5-second bins by the median
+binned <- aggregate_by_time(sim_dyad, time_var = time, bin_width = 0.5)
+head(binned)
+#>   time           x_A           y_A         z_A           x_B           y_B
+#> 1 0.25 -3.654198e-05  1.258303e-04  0.01755618 -3.369233e-04 -6.753525e-04
+#> 2 0.75 -4.049888e-04  6.429244e-05  0.05283492 -9.101645e-05  1.007204e-04
+#> 3 1.25 -6.293527e-04  4.994968e-04 -0.09101961  2.880562e-04 -9.402914e-05
+#> 4 1.75  7.104979e-04  7.502840e-04 -0.12817631 -2.970780e-04  2.097257e-04
+#> 5 2.25  1.100113e-04 -2.720645e-05  0.16352097 -1.801977e-04 -3.462351e-04
+#> 6 2.75 -5.013178e-05  2.892379e-04  0.20258062  6.315624e-05  7.454427e-05
+#>           z_B
+#> 1 -0.01160438
+#> 2  0.05875119
+#> 3  0.08180088
+#> 4 -0.14807526
+#> 5 -0.12357705
+#> 6  0.24560688
+```

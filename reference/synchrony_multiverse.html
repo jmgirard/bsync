@@ -27,10 +27,13 @@ autocorrelation inflates."></head><body>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/bsync.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Get started</h6></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Core estimators</h6></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
@@ -201,6 +204,37 @@ x -&gt; y; additional columns `es_yx` and `p_yx` give y -&gt; x.</p>
   [tidy.bsync_multiverse()], [glance.bsync_multiverse()]</p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Sweep a seconds-specified window/lag grid and test each cell vs. a null.</span></span></span>
+<span class="r-in"><span><span class="co"># A small surrogate count keeps the example fast; use &gt;= 1000 for reporting.</span></span></span>
+<span class="r-in"><span><span class="va">mv</span> <span class="op">&lt;-</span> <span class="fu">synchrony_multiverse</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  x <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">x_A</span>,</span></span>
+<span class="r-in"><span>  y <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">x_B</span>,</span></span>
+<span class="r-in"><span>  estimator <span class="op">=</span> <span class="st">"wcc"</span>,</span></span>
+<span class="r-in"><span>  sample_rate <span class="op">=</span> <span class="fl">80</span>,</span></span>
+<span class="r-in"><span>  window_sec <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  lag_sec <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>  n_surrogates <span class="op">=</span> <span class="fl">50</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">mv</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Synchrony Multiverse Analysis (wcc)</span> <span style="color: #00BBBB;">─────────────────────────────────────────</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Specifications: 3 (3 computable)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Surrogates per cell: 50</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Significant (p &lt; .05): 1 of 3 (33.3%)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Median ES: 1.532 [IQR: 0.378]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Sign-consistent (sig. cells): 100%</span>
+<span class="r-in"><span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mv</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 9</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   estimator n_cells n_valid n_significant pct_significant median_es iqr_es</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> wcc             3       3             1           0.333      1.53  0.378</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2 more variables: sign_consistent &lt;dbl&gt;, n_surrogates &lt;dbl&gt;</span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

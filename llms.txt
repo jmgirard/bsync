@@ -397,6 +397,8 @@ is the underlying selection rule for advanced use.
   : Auto-Tune WCC Parameters for a Multi-Dyad Dataset
 - [`select_specification()`](https://jmgirard.github.io/bsync/reference/select_specification.md)
   : Select the Best Specification from a Multi-Dyad Multiverse
+- [`print(`*`<bsync_autotune>`*`)`](https://jmgirard.github.io/bsync/reference/print.bsync_autotune.md)
+  : Print method for bsync_autotune objects
 - [`print(`*`<bsync_multiverse>`*`)`](https://jmgirard.github.io/bsync/reference/print.bsync_multiverse.md)
   : Print method for bsync_multiverse objects
 - [`summary(`*`<bsync_multiverse>`*`)`](https://jmgirard.github.io/bsync/reference/summary.bsync_multiverse.md)

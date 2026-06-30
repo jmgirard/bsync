@@ -146,3 +146,35 @@ statistics are returned: primary (\`observed\`, \`null_mean\`,
 \[autotune_wcc()\], \[suggest_wcc_params()\],
 \[plot.bsync_multiverse()\], \[tidy.bsync_multiverse()\],
 \[glance.bsync_multiverse()\]
+
+## Examples
+
+``` r
+# \donttest{
+# Sweep a seconds-specified window/lag grid and test each cell vs. a null.
+# A small surrogate count keeps the example fast; use >= 1000 for reporting.
+mv <- synchrony_multiverse(
+  x = sim_dyad$x_A,
+  y = sim_dyad$x_B,
+  estimator = "wcc",
+  sample_rate = 80,
+  window_sec = c(1, 2, 4),
+  lag_sec = 1,
+  n_surrogates = 50
+)
+mv
+#> 
+#> ── Synchrony Multiverse Analysis (wcc) ─────────────────────────────────────────
+#> Specifications: 3 (3 computable)
+#> Surrogates per cell: 50
+#> Significant (p < .05): 1 of 3 (33.3%)
+#> Median ES: 1.532 [IQR: 0.378]
+#> Sign-consistent (sig. cells): 100%
+glance(mv)
+#> # A tibble: 1 × 9
+#>   estimator n_cells n_valid n_significant pct_significant median_es iqr_es
+#>   <chr>       <int>   <int>         <int>           <dbl>     <dbl>  <dbl>
+#> 1 wcc             3       3             1           0.333      1.53  0.378
+#> # ℹ 2 more variables: sign_consistent <dbl>, n_surrogates <dbl>
+# }
+```

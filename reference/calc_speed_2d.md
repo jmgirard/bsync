@@ -49,3 +49,12 @@ calc_speed_2d(
 ## Value
 
 A numeric vector of speeds the same length as the input vectors.
+
+## Examples
+
+``` r
+# 2D speed from a pair of coordinate channels
+s <- calc_speed_2d(t = sim_dyad$time, x = sim_dyad$x_A, y = sim_dyad$y_A)
+head(s)
+#> [1] 0.28973189 0.04514464 0.17020106 0.17601102 0.24260702 0.18542514
+```

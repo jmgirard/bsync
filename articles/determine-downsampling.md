@@ -73,9 +73,10 @@ single_eval <- evaluate_signal_power(
 #> ✔ Recommended downsampling factor: 6 (Target: 5 Hz | Bin Width: 0.2 sec).
 
 # View the diagnostic plot
-single_eval$plot
-#> NULL
+plot(single_eval)
 ```
+
+![](determine-downsampling_files/figure-html/eval-single-1.png)
 
 ## Best Practice: Dataset-Level Evaluation
 
@@ -106,9 +107,10 @@ multi_eval <- evaluate_signal_power(
 #> ✔ Recommended downsampling factor: 6 (Target: 5 Hz | Bin Width: 0.2 sec).
 
 # View the dataset-level diagnostic plot
-multi_eval$plot
-#> NULL
+plot(multi_eval)
 ```
+
+![](determine-downsampling_files/figure-html/eval-multi-1.png)
 
 When provided with multiple signals, the function calculates the cutoff
 for each individual and then conservatively recommends the **95th
