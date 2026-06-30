@@ -319,3 +319,64 @@ test_that("M1: na.rm = FALSE returns NA for any window containing NA", {
   clean_false <- dplyr::filter(res_false$results_df, tau == 0, i >= 11)
   expect_false(any(is.na(clean_false$wcc)))
 })
+
+# M4 acceptance-criteria tests ------------------------------------------------
+
+test_that("M4: statistic arg is validated and recorded in settings", {
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+
+  # Default is mean_abs_z
+  res_default <- wcc(x, y, window_size = 96, lag_max = 10)
+  expect_equal(res_default$settings$statistic, "mean_abs_z")
+
+  # Explicit "peak" is accepted and recorded
+  res_peak <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "peak")
+  expect_equal(res_peak$settings$statistic, "peak")
+
+  # Invalid value aborts
+  expect_error(
+    wcc(x, y, window_size = 96, lag_max = 10, statistic = "bad"),
+    "should be one of"
+  )
+})
+
+test_that("M4: mean_abs_z default reproduces pre-M4 fisher_z behaviour on sim_dyad", {
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  res <- wcc(x, y, window_size = 96, lag_max = 10)
+
+  # Independent oracle: mean(abs(atanh(clamp(r)))) over all surface cells
+  r <- res$results_df$wcc
+  r_clamped <- pmax(pmin(r, 0.9999), -0.9999)
+  expected <- mean(abs(atanh(r_clamped)), na.rm = TRUE)
+
+  expect_equal(res$fisher_z, expected, tolerance = 1e-15)
+})
+
+test_that("M4: peak statistic matches pure-R oracle on sim_dyad", {
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  res <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "peak")
+
+  # Oracle: per window take max |Fisher-z| across lags, then mean across windows
+  df <- res$results_df
+  r_clamped <- pmax(pmin(df$wcc, 0.9999), -0.9999)
+  az <- abs(atanh(r_clamped))
+  window_peaks <- tapply(az, df$i, function(v) {
+    if (all(is.na(v))) NA_real_ else max(v, na.rm = TRUE)
+  })
+  oracle_peak <- mean(window_peaks, na.rm = TRUE)
+
+  expect_equal(res$fisher_z, oracle_peak, tolerance = 1e-9)
+})
+
+test_that("M4: peak > mean_abs_z (peak is an upper bound on mean)", {
+  # Per window max |z| >= any individual |z|, so mean of peaks >= mean of all
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  res_maz <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "mean_abs_z")
+  res_peak <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "peak")
+
+  expect_gte(res_peak$fisher_z, res_maz$fisher_z)
+})

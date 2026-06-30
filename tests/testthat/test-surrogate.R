@@ -238,3 +238,57 @@ test_that("Print methods return silently and output text", {
   expect_message(print(mock_wdtw_obj), "not significantly different")
   expect_message(print(mock_wcc_obj), "too few for stable p-values")
 })
+
+# M4 acceptance-criteria tests ------------------------------------------------
+
+test_that("M4: wcc_surrogate observed_z matches wcc() fisher_z exactly (Invariant 2)", {
+  set.seed(1)
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  y_surr <- generate_surrogate_circular(y, n_surrogates = 5, lag_max = 10)
+
+  # mean_abs_z path
+  res_wcc_maz <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "mean_abs_z")
+  res_surr_maz <- wcc_surrogate(
+    x, y,
+    y_surrogates = y_surr,
+    window_size = 96, lag_max = 10,
+    statistic = "mean_abs_z"
+  )
+  expect_equal(res_surr_maz$observed_z, res_wcc_maz$fisher_z)
+
+  # peak path
+  res_wcc_peak <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "peak")
+  res_surr_peak <- wcc_surrogate(
+    x, y,
+    y_surrogates = y_surr,
+    window_size = 96, lag_max = 10,
+    statistic = "peak"
+  )
+  expect_equal(res_surr_peak$observed_z, res_wcc_peak$fisher_z)
+})
+
+test_that("M4: wcc_surrogate statistic arg is validated and recorded", {
+  set.seed(2)
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  y_surr <- generate_surrogate_circular(y, n_surrogates = 3, lag_max = 10)
+
+  res_peak <- wcc_surrogate(
+    x, y,
+    y_surrogates = y_surr,
+    window_size = 96, lag_max = 10,
+    statistic = "peak"
+  )
+  expect_equal(res_peak$settings$statistic, "peak")
+
+  expect_error(
+    wcc_surrogate(
+      x, y,
+      y_surrogates = y_surr,
+      window_size = 96, lag_max = 10,
+      statistic = "bad"
+    ),
+    "should be one of"
+  )
+})
