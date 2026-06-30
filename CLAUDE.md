@@ -168,6 +168,18 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
   Plan-time decisions held: Granger kept estimator-specific surface (no contortion into symmetric
   similarity); `$fisher_z`/`$mean_distance` dropped rather than shimmed; `generics` + `tibble`
   added to Imports as approved.
+  Post-review (commit `ecc6cf9`): four findings fixed. (1) `wdtw_surrogate(fast_method = TRUE)`
+  window-grid regression — an interim refactor used a lag-free grid + `lag_max` shift that
+  over-counted windows past the series end (spurious out-of-range `NA`s) and changed the fast-path
+  p-value; restored to the lagged grid's distinct window starts at `tau = 0` so surrogates cover
+  exactly the observed surface's windows (slow/default path was never affected; NEWS.md gains a
+  bug-fix entry). (2) `glance()` used bare `%||%` (base R ≥ 4.4 only) while DESCRIPTION declares
+  `R (>= 4.1)` — added `@importFrom rlang %||%`. (3) DESIGN.md §14 shared-surface/superclass item
+  moved from "Remaining" to "Resolved (M5)" (the AC7 doc move that was claimed but not done). (4)
+  AC4 test gaps closed: Invariant-7 no-`results_df` assertion on all three surrogate objects, a
+  seeded p-value regression guard (WCC 91/99, WDTW 83/99 — non-boundary, exercises tail counting),
+  and a `fast_method` window-alignment regression test. 455 tests pass; `R CMD check --as-cran`
+  remains 0/0/0; no C++ change.
 
 ## Current focus
 
