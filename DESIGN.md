@@ -280,13 +280,36 @@ reproducible; result objects stay light; supplied `time` maps windows to real ti
 ## 13. Testing & infrastructure
 
 - testthat 3e; `vdiffr` snapshots for every plot method.
-- **Numerical regression oracle (Invariant 5).** Any C++ optimization ships with a test asserting
-  output equals the prior implementation within tolerance on `sim_dyad` (and a constructed
-  NA-laden case). This is the C++ analogue of an algebra-vs-scores cross-check.
+- **Layered validation (four modes, distinct failure types).** Unit tests catch *implementation*
+  bugs but cannot catch a *definitional* one: a pure-R oracle written from the same mental model as
+  the C++ core agrees with it and is wrong in the same way. The four layers close different gaps:
+  1. **Atomic numerical oracle (internal).** Pure-R recomputation of one window/lag against base
+     `stats::cor`/`ccf`, matched to ~1e-9 (e.g. the WCC oracle). Catches implementation bugs.
+  2. **Convention oracle (external, one-time, *frozen*).** Each *named* method is pinned once,
+     during development, against its reference package on a tiny fixed input — WCC/mean\|Z\| vs
+     **SUSY**, best-lag vs **rMEA** (`MEAccf`), DTW distance vs **`dtw`** (Giorgino), Granger F vs
+     **`lmtest::grangertest`**; future estimators vs their §2 sibling (phase-locking; wavelet
+     coherence vs **`biwavelet`/`WaveletComp`**; CRQA vs **`crqa`**). The numbers the external
+     package produced are committed as a **static golden fixture** with a provenance comment
+     (package + version + exact call); tests run against the frozen vector, **not** the live
+     package. **The §2 sibling packages are validation oracles, not just positioning.** Discipline:
+     do **not** add these packages as test dependencies (CI/version fragility, convention drift);
+     where conventions differ (SUSY segments vs sliding windows), validate the shared kernel
+     configured to match. This is the only layer that catches a misunderstanding of the field's
+     definition.
+  3. **Statistical calibration (simulation, not matching).** The surrogate spine is validated by
+     *properties*, not by matching another RNG: under an independent pair the p-value is ~uniform
+     (Type-I), under a coupled pair it has power, and each generator preserves its invariant
+     (circular shift → autocorrelation; phase randomization → power spectrum, within tolerance).
+     Tolerance-banded Monte-Carlo, `skip_on_cran` if slow.
+  4. **Regression oracle (Invariant 5).** Any C++ optimization ships with a test asserting output
+     equals the prior implementation within tolerance on `sim_dyad` (and a constructed NA-laden
+     case). The C++ analogue of an algebra-vs-scores cross-check. **A Layer-2 check must precede a
+     Layer-4 freeze** — otherwise a characterization/regression baseline silently locks in a
+     definitional bug.
 - **Benchmark tracking.** Efficiency milestones record before/after timings via a `bench/` script
   (not a test); acceptance criteria cite measured speedups, not "it's faster."
 - Short-series and degenerate-parameter guards tested (the `seq_len`/abort path).
-- Surrogate sanity: a coupled signal yields a small p-value; an independent pair does not.
 - CI: `R CMD check --as-cran` clean (0/0/0 target); styler/air + lintr clean; no tracked build
   artifacts.
 

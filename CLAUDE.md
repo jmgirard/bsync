@@ -163,13 +163,22 @@ hanging over the hardening work. **M5 is the active milestone.**
   (4) **`generics` + `tibble` → Imports** (tibble already transitive via dplyr; no new footprint).
 
   *Acceptance criteria:*
+  0. **Preflight — external-oracle validation before the freeze (DESIGN §13 Layer 2 → Layer 4
+     ordering).** Before capturing any characterization reference, pin each estimator's numerics to
+     its external reference on a tiny fixed input and **fix any mismatch first**: WDTW vs the `dtw`
+     package, Granger F vs `lmtest::grangertest`, WCC against its existing base-`cor` oracle. Freeze
+     the resulting numbers as committed golden fixtures with provenance comments (package + version
+     + exact call); the tests run against the frozen vector, not the live package. `dtw`/`lmtest`
+     go in `Suggests` *only* as the one-time source of the numbers — no CI dependency on them, no
+     `Imports` growth. This guarantees AC1's characterization freeze locks in *validated* numbers,
+     not merely *current* ones.
   1. **One grid builder.** `build_surface_grid()` (in `R/surface.R`) is the sole site of the `n_r`
      math, the `w_max = window_size - 1` boundary (Inv 4), the lag sequence, and the short-series
      abort; all three `create_*_df` builders **and** all three surrogate wrappers call it (the
      surrogate wrappers currently re-derive the grid a fourth time — that copy dies). `grep` finds
      the `floor((n_x - w_max ...))` arithmetic in exactly one place. `wcc()`/`wdtw()`/`wgranger()`
      `results_df` + aggregates are bit-identical to pre-refactor on `sim_dyad` (characterization
-     test captured before the refactor).
+     test captured *after* the AC0 preflight).
   2. **One validator.** A shared validation path replaces the per-estimator x/y/time/integerish
      blocks; abort conditions/messages preserved and tested.
   3. **`bsync_surface` superclass + uniform `$aggregate`.** All three objects inherit
