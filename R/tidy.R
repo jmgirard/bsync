@@ -59,6 +59,7 @@ tidy.bsync_surface <- function(x, ...) {
 #' @param ... Additional arguments (not used).
 #' @return A one-row [tibble::tibble()].
 #' @seealso [tidy.bsync_surface()], [as_tibble.bsync_surface()]
+#' @importFrom rlang %||%
 #' @exportS3Method generics::glance bsync_surface
 glance.bsync_surface <- function(x, ...) {
   agg <- as.list(x$aggregate) # names preserved; scalar or two-element list
@@ -74,7 +75,7 @@ glance.bsync_surface <- function(x, ...) {
   # Common fields available on every surface
   common <- list(
     n_windows        = n_unique_i,
-    window_size      = cfg$window_size %||% NA_integer_,   # rlang::`%||%`
+    window_size      = cfg$window_size %||% NA_integer_,
     window_increment = cfg$window_increment %||% NA_integer_
   )
 

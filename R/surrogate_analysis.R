@@ -194,30 +194,30 @@ wdtw_surrogate <- function(
   }
 
   # 2. Build grid (hoistable in M6 multiverse)
+  grid <- build_surface_grid(
+    n_x = length(x),
+    window_size = window_size,
+    window_increment = window_increment,
+    lag_max = lag_max,
+    lag_increment = lag_increment,
+    lagged = TRUE
+  )
+
   if (fast_method) {
-    # Fast path: surrogates evaluated at lag=0 only (approximate — see @details)
-    grid_fast <- build_surface_grid(
-      n_x = length(x),
-      window_size = window_size,
-      window_increment = window_increment,
-      lagged = FALSE
+    # Fast path: evaluate surrogates at lag 0 only, but over the *same* windows
+    # the observed lagged surface uses (edges reserved at both ends). Take the
+    # distinct window starts from the lagged grid — the col == 1 block, where
+    # `row` varies fastest, so the first n_r entries are the unique positions —
+    # and force tau = 0. (Using a lag-free grid here would shift windows past
+    # the series end and over-count vs. the observed surface; see @details.)
+    grid <- list(
+      i_vals   = grid$i_vals[seq_len(grid$n_r)],
+      tau_vals = rep(0L, grid$n_r),
+      w_max    = grid$w_max,
+      n_r      = grid$n_r
     )
-    # The lag-free grid starts at i=1; shift by lag_max so windows align with
-    # the observed surface which reserves lag_max samples at each edge.
-    grid_fast$i_vals <- grid_fast$i_vals + lag_max
-    grid_fast$tau_vals <- rep(0L, grid_fast$n_r)
-    grid <- grid_fast
     cli::cli_alert_info(
       "Running fast method: Evaluating surrogates at lag 0 only."
-    )
-  } else {
-    grid <- build_surface_grid(
-      n_x = length(x),
-      window_size = window_size,
-      window_increment = window_increment,
-      lag_max = lag_max,
-      lag_increment = lag_increment,
-      lagged = TRUE
     )
   }
 

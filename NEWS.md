@@ -37,6 +37,13 @@
   full-series Granger F-statistics) are committed in `test-external-oracle.R`
   and checked on every run without introducing live test dependencies.
 
+* **Bug fix — `wdtw_surrogate(fast_method = TRUE)` window alignment.** The fast
+  path now evaluates surrogates over exactly the windows of the observed lagged
+  surface (edges reserved at both ends), at lag 0. A regression in an interim
+  refactor had it use a lag-free grid that shifted windows past the series end,
+  over-counting windows and producing spurious out-of-range `NA`s. The slow
+  (default) path was unaffected.
+
 ## M4 — Selectable WCC aggregate statistic
 
 * **`wcc()` gains a `statistic` argument** (`"mean_abs_z"` | `"peak"`, default

@@ -382,6 +382,66 @@ test_that("AC4: run_surrogate_engine returns correct shape", {
   expect_false(is.data.frame(result)) # aggregate-only: no results_df
 })
 
+test_that("AC4: surrogate result objects carry no results_df (Invariant 7)", {
+  # The aggregate-only path must never materialize a per-cell results_df, even
+  # in the returned object. Assert all three surrogate objects omit it.
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  y_surr <- generate_surrogate_circular(y, n_surrogates = 3, lag_max = 10)
+
+  res_wcc <- wcc_surrogate(x, y, y_surrogates = y_surr, window_size = 96, lag_max = 10)
+  res_wdtw <- wdtw_surrogate(x, y, y_surrogates = y_surr, window_size = 96, lag_max = 10)
+  res_wg <- wgranger_surrogate(x, y, y_surrogates = y_surr, window_size = 96)
+
+  expect_null(res_wcc$results_df)
+  expect_null(res_wdtw$results_df)
+  expect_null(res_wg$results_df)
+})
+
+test_that("AC4: seeded surrogate p-values are reproducible (regression guard)", {
+  # Frozen against the current implementation on a fixed seed; guards against a
+  # tail-direction flip or off-by-one in the empirical p-value count. AR(1)
+  # series give a non-boundary p-value that actually exercises tail counting.
+  set.seed(20260629)
+  n <- 120
+  x <- as.numeric(stats::arima.sim(list(ar = 0.5), n))
+  y <- as.numeric(stats::arima.sim(list(ar = 0.5), n))
+
+  y_surr <- generate_surrogate_circular(y, n_surrogates = 99, lag_max = 5)
+  res_wcc <- wcc_surrogate(x, y, y_surrogates = y_surr, window_size = 30, lag_max = 5)
+  expect_equal(res_wcc$p_value, 91 / 99, tolerance = 1e-12)
+
+  res_wdtw <- wdtw_surrogate(x, y, y_surrogates = y_surr, window_size = 30, lag_max = 5)
+  expect_equal(res_wdtw$p_value, 83 / 99, tolerance = 1e-12)
+})
+
+test_that("AC4: WDTW fast_method evaluates observed windows at lag 0 (no over-count)", {
+  # Regression guard for the fast-path grid: surrogates must cover exactly the
+  # observed lagged surface's window positions, evaluated at tau = 0 — not a
+  # lag-free grid that shifts windows past the series end and over-counts.
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  y_self <- matrix(y, ncol = 1)
+
+  obs <- wdtw(x, y, window_size = 96, lag_max = 10, scale_method = "none")
+  obs_lag0_mean <- mean(
+    obs$results_df$dtw_dist[obs$results_df$tau == 0],
+    na.rm = TRUE
+  )
+
+  res_fast <- wdtw_surrogate(
+    x, y,
+    y_surrogates = y_self,
+    window_size = 96, lag_max = 10, scale_method = "none",
+    fast_method = TRUE
+  )
+
+  # y is its own surrogate ⇒ fast cost == observed mean over the same windows
+  # at lag 0. If the fast grid over-counted (extra out-of-range windows), this
+  # would diverge.
+  expect_equal(res_fast$surrogate_cost[[1]], obs_lag0_mean, tolerance = 1e-12)
+})
+
 test_that("AC4: run_surrogate_engine supports named-numeric return (Granger-like)", {
   x <- sim_dyad$x_A
   y <- sim_dyad$x_B

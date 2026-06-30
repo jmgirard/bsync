@@ -359,9 +359,16 @@ reproducible; result objects stay light; supplied `time` maps windows to real ti
     parameter grid. The heavy inner compute remains the M2 prefix-sum C++ core; M5/M6 add only R
     orchestration over it, parallelized via `future.apply`.
 
+11. **Shared-surface refactor shape** → **resolved (M5).** Granger joins the *shared machinery*
+    (validator, `build_surface_grid()`, `run_surrogate_engine()`, `bsync_surface` superclass, tidy
+    layer) but keeps its *estimator-specific surface* — lag-free `results_df` with directional
+    `f_xy/p_xy/f_yx/p_yx` and its own line plot — rather than being contorted into a symmetric,
+    `tau`-indexed similarity. The **`bsync_surface` superclass** is exposed: `wcc_res`/`wdtw_res`/
+    `wgranger_res` inherit it, shared/tidy methods dispatch on it, estimator-specifics on the leaf.
+    The per-estimator `$fisher_z`/`$mean_distance` slots were dropped for a uniform named-numeric
+    `$aggregate` (`mean_abs_z`/`peak`, `mean_distance`, `c(f_xy, f_yx)`).
+
 **Remaining / to resolve at the named milestone:**
-- **Shared-surface refactor shape** (M5) — how far to merge Granger (directional, no `tau`) into the
-  common contract without contorting it; whether to expose a `bsync_surface` superclass.
 - A unified **`bsync_ts` preprocessing object** (§5) — future; specify before building.
 
 ## 15. Milestone roadmap
