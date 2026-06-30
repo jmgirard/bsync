@@ -20,13 +20,17 @@ behavioral contexts (such as interpersonal conversation or synchronized
 movement), the lead-lag relationship between individuals is highly
 dynamic. **bsync** allows researchers to quantify these nonstationary
 associations using highly optimized windowed cross-correlation (WCC),
-windowed dynamic time warping (WDTW), and optima-extraction algorithms.
+windowed dynamic time warping (WDTW), windowed Granger causality (WGC),
+and optima-extraction algorithms.
 
 Furthermore, the package provides a complete analytical pipeline for
 behavioral time series. This includes robust preprocessing functions for
 time-bin aggregation, zero-phase signal smoothing, and kinematic
-velocity/speed calculations, as well as rigorous hypothesis testing via
-circular-shift surrogate data generation (pseudo-synchrony testing).
+velocity/speed calculations; rigorous hypothesis testing via surrogate
+null distributions (pseudo-synchrony testing); and data-driven parameter
+guidance tools (`suggest_wcc_params()`, `synchrony_multiverse()`,
+`autotune_wcc()`) that match analysis hyperparameters to your signal’s
+own timescales.
 
 ## Installation
 
@@ -40,9 +44,13 @@ pak::pak("jmgirard/bsync")
 
 ## Example Workflow
 
-The following example demonstrates a Quick Start WCC pipeline. For a
-deeper dive into WCC or to learn about Windowed Dynamic Time Warping
-(WDTW), please see the included package vignettes.
+The following example demonstrates a Quick Start WCC pipeline. **New to
+bsync?** Start with the [Get started
+vignette](https://jmgirard.github.io/bsync/articles/bsync.html) for a
+full workflow walkthrough, an estimator decision table, and links to
+every deep-dive article. For parameter selection guidance (choosing
+`window_size` and `lag_max`), see [Choosing Analysis
+Parameters](https://jmgirard.github.io/bsync/articles/choosing-parameters.html).
 
 We will use the included `sim_dyad` dataset, which contains 30 seconds
 of simulated 3D motion tracking data for two individuals. In this
@@ -95,7 +103,7 @@ summary(wcc_results)
 #> Total Lags Tested: 151
 #> Window Size: 150
 #> Max Lag: 75
-#> Overall Fisher's Z: 1.071
+#> Mean Abs. Fisher's Z: 1.071
 #> 
 #> ── Cross-Correlation Value Distribution ──
 #> 
@@ -187,13 +195,25 @@ surrogate_results <- wcc_surrogate(
 surrogate_results
 #> ── WCC Surrogate Analysis (Pseudo-Synchrony) ───────────────────────────────────
 #> Permutations: 100
-#> Observed Fisher's Z: 1.071
-#> Average Null Z: 1.007
+#> Observed Mean Abs. Fisher's Z: 1.071
+#> Average Null Mean Abs. Fisher's Z: 1.007
 #> Empirical p-value: 0.06
 #> ! Observed synchrony is not significantly different from chance.
 #> ℹ Note: 100 permutations may be too few for stable p-values.
 #> Consider setting `n_surrogates >= 1000` for final reporting.
 ```
+
+## Where to go next
+
+| Article | What you will learn |
+|----|----|
+| [Get started](https://jmgirard.github.io/bsync/articles/bsync.html) | Full workflow arc, estimator decision table, reading map |
+| [WCC workflow](https://jmgirard.github.io/bsync/articles/wcc-workflow.html) | WCC pipeline: optima, LAI, tidy interface, aggregate statistics |
+| [WDTW workflow](https://jmgirard.github.io/bsync/articles/wdtw-workflow.html) | WDTW pipeline: time-warped alignment, optima extraction |
+| [WGC workflow](https://jmgirard.github.io/bsync/articles/wgranger-workflow.html) | Windowed Granger Causality: directional F-statistic and p-value plots |
+| [Choosing parameters](https://jmgirard.github.io/bsync/articles/choosing-parameters.html) | `suggest_wcc_params()`, `synchrony_multiverse()`, `autotune_wcc()` |
+| [Surrogate testing](https://jmgirard.github.io/bsync/articles/surrogate-testing.html) | Circular-shift vs. phase-randomization; best practices |
+| [Downsampling](https://jmgirard.github.io/bsync/articles/determine-downsampling.html) | PSD-based guidance for choosing a biologically appropriate sample rate |
 
 ## Citation
 

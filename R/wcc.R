@@ -267,9 +267,9 @@ print.wcc_res <- function(x, ...) {
   n_lags <- length(unique(x$results_df$tau))
 
   agg_label <- if (s$statistic == "peak") {
-    "Mean Peak |Fisher's Z|"
+    "Mean Peak Abs. Fisher's Z"
   } else {
-    "Mean |Fisher's Z|"
+    "Mean Abs. Fisher's Z"
   }
 
   cli::cli_h1("Windowed Cross-Correlation Analysis")

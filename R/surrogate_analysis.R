@@ -378,16 +378,24 @@ print.wcc_surr <- function(x, ...) {
   }
 
   agg_label <- if (x$settings$statistic == "peak") {
-    "Mean Peak |Fisher's Z|"
+    "Mean Peak Abs. Fisher's Z"
   } else {
-    "Mean |Fisher's Z|"
+    "Mean Abs. Fisher's Z"
   }
 
-  cli::cli_dl(c(
-    "Permutations" = "{x$n_surrogates}",
-    "Observed {agg_label}" = "{round(x$observed_z, 4)}",
-    "Average Null {agg_label}" = "{round(mean(x$surrogate_z), 4)}",
-    "Empirical p-value" = "{p_disp}"
+  cli::cli_dl(stats::setNames(
+    c(
+      "{x$n_surrogates}",
+      "{round(x$observed_z, 4)}",
+      "{round(mean(x$surrogate_z), 4)}",
+      "{p_disp}"
+    ),
+    c(
+      "Permutations",
+      paste0("Observed ", agg_label),
+      paste0("Average Null ", agg_label),
+      "Empirical p-value"
+    )
   ))
 
   if (x$p_value < 0.05) {

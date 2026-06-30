@@ -423,6 +423,6 @@ test_that("M4: print.wcc_res labels aggregate by chosen statistic", {
   res_maz <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "mean_abs_z")
   res_peak <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "peak")
 
-  expect_message(print(res_maz), "Mean \\|Fisher")
-  expect_message(print(res_peak), "Mean Peak \\|Fisher")
+  expect_message(print(res_maz), "Mean Abs\\. Fisher")
+  expect_message(print(res_peak), "Mean Peak Abs\\. Fisher")
 })
