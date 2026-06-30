@@ -137,76 +137,44 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
   peak + all-NA-window, peak + `time`-supplied grouping, peak print-label, and peak
   p-value sanity tests added (373 tests total, `R CMD check --as-cran` remains 0/0/0).
 
+- **M5 — Shared windowed-surface + surrogate framework + tidy interface (done).** All nine
+  acceptance criteria met (commits `0769274`–`b17b464` on `main`; 449 tests passing, 0 errors/0
+  warnings/0 notes in `R CMD check --as-cran`). No C++ change — Invariants 5/6 not triggered;
+  `RcppExports` diff is empty:
+  0. External-oracle preflight: WDTW L1 golden (6.22…, dtw v1.23-3 symmetric1) and Granger F
+     golden (f_xy=287.62…, lmtest v0.9-40) committed as frozen fixtures in `test-external-oracle.R`;
+     WCC oracle uses pre-existing base-`cor` path. All 8 preflight tests pass.
+  1. `build_surface_grid()` is the sole site of `n_r` math and `w_max = window_size − 1`; all three
+     `create_*_df` builders and all three surrogate wrappers call it. `wcc()`/`wdtw()`/`wgranger()`
+     `results_df` + aggregates bit-identical to pre-refactor on `sim_dyad` (characterization freeze
+     after preflight). Validated via 41 AC1/AC2/AC3 characterization and validator tests.
+  2. `validate_series()` + `validate_window_params()` replace per-estimator x/y/time/integerish
+     blocks; abort conditions preserved and tested.
+  3. All three objects inherit `"bsync_surface"` and carry a named-numeric `$aggregate`;
+     `$fisher_z`/`$mean_distance` dropped (no users, no shim); all `print`/`summary` text and
+     vdiffr snapshots unchanged.
+  4. `run_surrogate_engine()` drives all three wrappers via aggregate-only closures (no `results_df`
+     on surrogate path — Invariant 7 enforced); accepts prebuilt grid + surrogate matrix (M6 seam);
+     cross-path Invariant-2 test extended to WDTW and Granger (both directions).
+  5. `build_surface_heatmap()` factors `time_step`/axis/theme/zero-line logic;
+     `plot.wcc_res`/`plot.wdtw_res` supply only the fill scale; all plot snapshots unchanged.
+  6. `tidy()`/`glance()`/`as_tibble()` on `bsync_surface`: `tidy()` = long surface tibble;
+     `glance()` = 1-row summary (aggregate(s) + settings + n_windows); Granger's two-aggregate
+     shape handled as separate columns. `generics` + `tibble` added to `Imports`.
+  7. NEWS.md M5 entry; wcc-workflow.Rmd §8 tidy-interface demo; WORDLIST updated; vignette
+     `$fisher_z` references corrected. DESIGN.md §14 Granger/superclass item marked resolved.
+  8. 449 tests pass (0 skip on CRAN = vdiffr); `R CMD check --as-cran` 0/0/0; styled (styler);
+     no C++ change; no build artifacts staged.
+  Plan-time decisions held: Granger kept estimator-specific surface (no contortion into symmetric
+  similarity); `$fisher_z`/`$mean_distance` dropped rather than shimmed; `generics` + `tibble`
+  added to Imports as approved.
+
 ## Current focus
 
 **Hardening + core-completion cycle toward a first CRAN release**, run as focused milestones via the
 plan → implement → review loop. The first release is **explicitly not near-term** — it is its own
-milestone (M7, `v0.1.0`) after the M5 framework and M6 parameter guidance land, not a deadline
-hanging over the hardening work. **M5 is the active milestone.**
-
-- **M5 — Shared windowed-surface + surrogate framework + tidy interface (active).** Factor the
-  duplicated grid-builder, validation, surrogate engine, and plot scaffold into one shared layer so
-  new estimators plug in cheaply, and add the broom-style tidy interface. **No C++ change**
-  (RcppExports diff must be empty); the refactor is output-preserving (the no-C++ analogue of
-  Invariant 5) — observed numerics, `results_df` schema, `print`/`summary` text, and all vdiffr
-  snapshots stay byte-identical.
-
-  *Resolved at plan time:* (1) **Granger → shared machinery, estimator-specific surface.** All three
-  estimators share the validator, grid builder, surrogate engine, `bsync_surface` superclass, and
-  tidy layer, but keep their own `results_df` columns (WCC/WDTW lagged with `tau`; Granger lag-free,
-  directional `f_xy/p_xy/f_yx/p_yx`) and their own plot geometry (WCC/WDTW share the heatmap
-  scaffold; Granger keeps its line plot). Granger is *not* contorted into a symmetric similarity
-  (resolves DESIGN.md §14 "remaining"). (2) **`bsync_surface` superclass** — `wcc_res`/`wdtw_res`/
-  `wgranger_res` inherit it; shared/tidy methods dispatch on it, estimator-specifics on the leaf.
-  (3) **Uniform `$aggregate` slot** — drop `$fisher_z`/`$mean_distance` (no users, no shim); all
-  surface objects carry a named-numeric `$aggregate` (`mean_abs_z`/`mean_distance`/`c(f_xy, f_yx)`).
-  (4) **`generics` + `tibble` → Imports** (tibble already transitive via dplyr; no new footprint).
-
-  *Acceptance criteria:*
-  0. **Preflight — external-oracle validation before the freeze (DESIGN §13 Layer 2 → Layer 4
-     ordering).** Before capturing any characterization reference, pin each estimator's numerics to
-     its external reference on a tiny fixed input and **fix any mismatch first**: WDTW vs the `dtw`
-     package, Granger F vs `lmtest::grangertest`, WCC against its existing base-`cor` oracle. Freeze
-     the resulting numbers as committed golden fixtures with provenance comments (package + version
-     + exact call); the tests run against the frozen vector, not the live package. `dtw`/`lmtest`
-     go in `Suggests` *only* as the one-time source of the numbers — no CI dependency on them, no
-     `Imports` growth. This guarantees AC1's characterization freeze locks in *validated* numbers,
-     not merely *current* ones.
-  1. **One grid builder.** `build_surface_grid()` (in `R/surface.R`) is the sole site of the `n_r`
-     math, the `w_max = window_size - 1` boundary (Inv 4), the lag sequence, and the short-series
-     abort; all three `create_*_df` builders **and** all three surrogate wrappers call it (the
-     surrogate wrappers currently re-derive the grid a fourth time — that copy dies). `grep` finds
-     the `floor((n_x - w_max ...))` arithmetic in exactly one place. `wcc()`/`wdtw()`/`wgranger()`
-     `results_df` + aggregates are bit-identical to pre-refactor on `sim_dyad` (characterization
-     test captured *after* the AC0 preflight).
-  2. **One validator.** A shared validation path replaces the per-estimator x/y/time/integerish
-     blocks; abort conditions/messages preserved and tested.
-  3. **`bsync_surface` superclass + uniform `$aggregate`.** All three objects inherit
-     `"bsync_surface"` and carry `$aggregate`; existing `print`/`summary` text and all vdiffr
-     snapshots unchanged.
-  4. **One surrogate engine.** `run_surrogate_engine()` drives all three wrappers; observed and
-     surrogate statistics flow through the same grid builder + aggregate fn (Inv 2/4); tail
-     direction parameterized once (upper WCC/Granger, lower WDTW). The M4 cross-path Inv-2 test
-     (pass `y` as its sole surrogate ⇒ null draw == observed) is extended to WDTW and Granger (both
-     directions). p-values bit-identical to pre-refactor for a fixed seed. **M6-enabling seams
-     (contractual, not incidental):** the engine accepts a **prebuilt grid** and a **prebuilt
-     surrogate matrix**, and exposes an **aggregate-only path** (core → aggregate, no per-cell
-     `results_df`), so the M6 multiverse can hoist surrogate generation and grid construction out
-     of its inner loop and reuse one surrogate matrix across every parameter cell sharing a
-     `surrogate_method`. A test asserts the engine never materializes a full `results_df` on the
-     surrogate path.
-  5. **One heatmap scaffold.** `build_surface_heatmap()` factors the `time_step`/axis/theme/
-     zero-line scaffold; `plot.wcc_res`/`plot.wdtw_res` supply only the fill scale; all plot
-     snapshots unchanged. Granger retains its line plot.
-  6. **Tidy interface.** `tidy()`/`glance()`/`as_tibble()` registered on `bsync_surface` for all
-     three estimators; `tidy()` = long surface, `glance()` = one-row run meta (estimator,
-     window/lag/ar settings, aggregate(s), n_windows[, n_lags]), `as_tibble()` ≡ `tidy()`; Granger's
-     tau-less / two-aggregate shape handled. `generics` + `tibble` in Imports; NAMESPACE
-     regenerated. Tested for all three.
-  7. **Docs & DESIGN.** NEWS.md M5 entry; tidy-interface vignette/section on `sim_dyad`; WORDLIST
-     updated; DESIGN.md §14 Granger/superclass item moved from "remaining" to "resolved".
-  8. **Gates.** Full suite green (current 373 + new); `R CMD check --as-cran` 0/0/0; styler + lintr
-     clean; **no C++ change** (RcppExports regenerated, diff empty); no build artifacts staged.
+milestone (M7, `v0.1.0`) after the M6 parameter guidance lands, not a deadline hanging over the
+hardening work. **M6 is next.**
 
 - **M6 — Parameter guidance & synchrony multiverse.** One engine, three read-outs on the M5 shared
   framework: `synchrony_multiverse()` is the grid + matched-null-surrogate engine (headline metric =
@@ -265,10 +233,11 @@ order 3 · downsample/aggregate = median · `impute maxgap = 5`, no extrapolatio
 
 Compiled cores via **`LinkingTo: Rcpp, RcppArmadillo`** are the package's reason for existing —
 unlike a pure-R package, heavy inner loops belong in C++ here. Current `Imports`: `Rcpp`, `cli`,
-`dplyr`, `future.apply`, `ggplot2`, `grDevices`, `gsignal`, `rlang`, `scales`, `utils`. `Suggests`:
-`future`, `knitr`, `rmarkdown`, `testthat (>= 3.0.0)`, `vdiffr`. **Do not grow `Imports` without
-flagging it** — prefer base R or the existing stack, and put heavy compute in the C++ cores, not new
-R deps.
+`dplyr`, `future.apply`, `generics`, `ggplot2`, `grDevices`, `gsignal`, `rlang`, `scales`,
+`tibble`, `utils`. `Suggests`: `future`, `knitr`, `rmarkdown`, `spelling`, `testthat (>= 3.0.0)`,
+`vdiffr`. `generics` and `tibble` added in M5 for the tidy interface. **Do not grow `Imports`
+without flagging it** — prefer base R or the existing stack, and put heavy compute in the C++ cores,
+not new R deps.
 
 ## Dev workflow
 
@@ -330,7 +299,7 @@ snapshots; roxygen2 for every exported function (document the *why* of each defa
   (DESIGN.md §14 #10).
 - **First CRAN release** (`v0.1.0`) — explicitly its own milestone **M7**, after M6; not near-term.
 - **Group-level / multivariate modeling** — deferred to M11 (`mvSUSY` is the multivariate reference).
-- **tidy/glance/as_tibble methods** — resolved to add (DESIGN.md §7/§14), built in **M5**; not before.
+- **tidy/glance/as_tibble methods** — built in **M5** (done).
 - **IAAFT / segment-shuffling / pseudo-dyad surrogates** — resolved to add (DESIGN.md §6/§14),
   scheduled **M12**; the pseudo-dyad (between-dyad rMEA) generator depends on M11's `dyad_list`.
 - **A unified `bsync_ts` preprocessing object** — logged in DESIGN.md §14; specify before building.
