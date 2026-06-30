@@ -20,3 +20,4 @@ src/*.dll
 src/*.dylib
 Rplots.pdf
 tests/testthat/Rplots.pdf
+tests/vdiffr.Rout.fail
