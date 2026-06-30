@@ -182,9 +182,9 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
   remains 0/0/0; no C++ change.
 
 - **M7 — First CRAN release (`v0.1.0`) (done).** All nine acceptance criteria met (commits
-  `633d58d`–`dcd9ef0` on `main`; 556 tests passing, 0 errors/0 warnings/0 notes in
-  `R CMD check --as-cran`). No C++ change — Invariants 5/6 not triggered; `RcppExports` diff empty.
-  Run as two phases under M7 number:
+  `633d58d`–`dcd9ef0` on `main`, plus post-review polish through `7d848c6`; 564 tests passing
+  pre-polish, 0 errors/0 warnings/0 notes in `R CMD check --as-cran`). No C++ change — Invariants
+  5/6 not triggered; `RcppExports` diff empty. Run as two phases under M7 number:
   **Phase A** (docs/messaging): 6 ACs met.
   1. `_pkgdown.yml` restructured with grouped `articles:` (3 groups) and `reference:` (8 groups);
      `pkgdown::check_pkgdown()` clean.
@@ -206,11 +206,22 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
   7. Version bump `0.0.0.9000` → `0.1.0`; NEWS.md header → `# bsync 0.1.0`; lifecycle badge
      promoted `experimental` → `stable` in README.
   8. `cran-comments.md` written (0/0/0 local; cross-platform win-builder/R-hub pre-submission
-     checklist; pkgdown-deploy note for two README article URLs not yet live). `urlchecker` reports
-     two 404s for the new `articles/bsync.html` URL (not yet deployed); all other checks clean.
-     `spelling` + `pkgdown::check_pkgdown()` clean. cran-comments.md added to `.Rbuildignore`.
-  9. Plan stops at "ready to submit"; `print.wcc_surr` label regression test added (556 tests).
+     checklist). `spelling` + `pkgdown::check_pkgdown()` clean. cran-comments.md added to
+     `.Rbuildignore`. (The pkgdown site has since been deployed: `articles/bsync.html` is live and
+     `urlchecker::url_check()` reports all URLs correct — the original "two 404s pending deploy"
+     caveat is resolved; `cran-comments.md` updated to reflect it.)
+  9. Plan stops at "ready to submit"; `print.wcc_surr` label regression test added.
   Actual CRAN upload is the user's action; pre-submission checklist in `cran-comments.md`.
+  Post-review polish (commits `5c4a97c`–`7d848c6`, 564 tests, `R CMD check --as-cran` remains
+  0/0/0): (1) `autotune_wcc()` now returns a classed `bsync_autotune` object with a tidy `print()`
+  method (was an unclassed list that dumped the per-dyad multiverse list to the console);
+  regression test added. (2) pkgdown navbar `intro` component restored so the Get-started
+  `vignette("bsync")` link reappears; the "Get started" articles group given a navbar heading. (3)
+  `determine-downsampling.Rmd` corrected to call `plot()` on the `evaluate_signal_power()` result
+  (the stale `$plot` list access rendered no figure); `wdtw_surrogate()` `@details` reference to
+  the M5-removed `$mean_distance` field corrected to `$aggregate[["mean_distance"]]`. (4) vignettes
+  call the re-exported `tidy()`/`glance()` verbs directly instead of the `generics::` prefix. (5)
+  root-level `Rplots.pdf` added to `.gitignore`.
 
 - **M6 — Parameter guidance & synchrony multiverse (done).** All nine acceptance criteria met
   (commits `026b2f4`–`bb5f6bc` on `main`; 542 tests passing, 0 errors/0 warnings/0 notes in

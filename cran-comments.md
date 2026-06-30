@@ -20,7 +20,7 @@ This is the first CRAN submission of bsync. There are no reverse dependencies.
 
 * Vignette build times: the most expensive vignette (`choosing-parameters`)
   runs a surrogate analysis with `n_surrogates = 100` on `sim_dyad` (a
-  bundled synthetic dataset of 6,000 rows). All six vignettes build in
+  bundled synthetic dataset of 2,400 rows). All six vignettes build in
   under 2 minutes total on the test machine. Tests marked `skip_on_cran()`
   are the heavy surrogate runs (1,000+ permutations).
 
@@ -31,10 +31,15 @@ This is the first CRAN submission of bsync. There are no reverse dependencies.
 
 ## Pre-submission checklist (complete before uploading)
 
-- [ ] **Deploy pkgdown site**: run `pkgdown::deploy_to_branch()` (or trigger
-  the GitHub Actions pkgdown workflow) so that the `articles/bsync.html` URL
-  referenced in README is live. `urlchecker::url_check()` currently reports
-  two 404s for this new article; they will resolve after deployment.
+- [x] **Deploy pkgdown site**: the site is deployed; the `articles/bsync.html`
+  URL referenced in README is live (HTTP 200) and `urlchecker::url_check()`
+  reports all URLs correct.
+
+- [x] **urlchecker clean**: `urlchecker::url_check()` — all URLs correct.
+
+- [x] **spelling clean**: `spelling::spell_check_package()` — no errors.
+
+- [x] **pkgdown clean**: `pkgdown::check_pkgdown()` — no problems found.
 
 - [ ] **win-builder check**: submit to `devtools::check_win_devel()` and
   `devtools::check_win_release()`; confirm 0/0/0.
@@ -43,11 +48,5 @@ This is the first CRAN submission of bsync. There are no reverse dependencies.
   builders; confirm 0/0/0.
 
 - [ ] **Final local check**: `devtools::check(args = '--as-cran')` = 0/0/0.
-
-- [ ] **urlchecker clean** (after pkgdown deploy): `urlchecker::url_check()`.
-
-- [ ] **spelling clean**: `spelling::spell_check_package()`.
-
-- [ ] **pkgdown clean**: `pkgdown::check_pkgdown()`.
 
 - [ ] Submit via `devtools::submit_cran()`.
