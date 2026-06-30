@@ -1,4 +1,4 @@
-# bsync (development version)
+# bsync 0.0.0.9000
 
 * M1: `na.rm` is now honored in WCC. `calc_wcc_cpp()` gains an `na_rm` parameter;
   `na.rm = FALSE` in `wcc()` / `wcc_surrogate()` now returns `NA` for any window
