@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="index.html">bsync</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,12 +24,16 @@
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/choosing-parameters.html">Choosing WCC Parameters</a></li>
-    <li><a class="dropdown-item" href="articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
-    <li><a class="dropdown-item" href="articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Core estimators</h6></li>
     <li><a class="dropdown-item" href="articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
     <li><a class="dropdown-item" href="articles/wgranger-workflow.html">Windowed Granger Causality</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Going deeper</h6></li>
+    <li><a class="dropdown-item" href="articles/choosing-parameters.html">Choosing Analysis Parameters</a></li>
+    <li><a class="dropdown-item" href="articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
+    <li><a class="dropdown-item" href="articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json"></form></li>
@@ -146,6 +150,21 @@
 <li>449 tests pass (0 skip on CRAN = vdiffr); <code>R CMD check --as-cran</code> 0/0/0; styled (styler); no C++ change; no build artifacts staged. Plan-time decisions held: Granger kept estimator-specific surface (no contortion into symmetric similarity); <code>$fisher_z</code>/<code>$mean_distance</code> dropped rather than shimmed; <code>generics</code> + <code>tibble</code> added to Imports as approved. Post-review (commit <code>ecc6cf9</code>): four findings fixed. (1) <code>wdtw_surrogate(fast_method = TRUE)</code> window-grid regression — an interim refactor used a lag-free grid + <code>lag_max</code> shift that over-counted windows past the series end (spurious out-of-range <code>NA</code>s) and changed the fast-path p-value; restored to the lagged grid’s distinct window starts at <code>tau = 0</code> so surrogates cover exactly the observed surface’s windows (slow/default path was never affected; NEWS.md gains a bug-fix entry). (2) <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> used bare <code>%||%</code> (base R &gt;= 4.4 only) while DESCRIPTION declares <code>R (&gt;= 4.1)</code> — added <code>@importFrom rlang %||%</code>. (3) DESIGN.md §14 shared-surface/superclass item moved from “Remaining” to “Resolved (M5)” (the AC7 doc move that was claimed but not done). (4) AC4 test gaps closed: Invariant-7 no-<code>results_df</code> assertion on all three surrogate objects, a seeded p-value regression guard (WCC 91/99, WDTW 83/99 — non-boundary, exercises tail counting), and a <code>fast_method</code> window-alignment regression test. 455 tests pass; <code>R CMD check --as-cran</code> remains 0/0/0; no C++ change.</li>
 </ol></li>
 <li>
+<strong>M7 — First CRAN release (<code>v0.1.0</code>) (done).</strong> All nine acceptance criteria met (commits <code>633d58d</code>–<code>dcd9ef0</code> on <code>main</code>; 556 tests passing, 0 errors/0 warnings/0 notes in <code>R CMD check --as-cran</code>). No C++ change — Invariants 5/6 not triggered; <code>RcppExports</code> diff empty. Run as two phases under M7 number: <strong>Phase A</strong> (docs/messaging): 6 ACs met.
+<ol style="list-style-type: decimal"><li>
+<code>_pkgdown.yml</code> restructured with grouped <code>articles:</code> (3 groups) and <code>reference:</code> (8 groups); <code><a href="https://pkgdown.r-lib.org/reference/check_pkgdown.html" class="external-link">pkgdown::check_pkgdown()</a></code> clean.</li>
+<li>New <code>vignettes/bsync.Rmd</code> “Get started” — end-to-end <code>sim_dyad</code> arc, WCC/WDTW/WGC decision table, reading map into 6 deep-dives.</li>
+<li>
+<code>choosing-parameters.Rmd</code> retitled “Choosing Analysis Parameters”; all multiverse/autotune chunks now run on <code>sim_dyad</code> (<code>n_surrogates = 100L</code>); <code><a href="reference/select_specification.html">select_specification()</a></code> taught; <code>wgranger</code> estimator example added; <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>/<code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> shown.</li>
+<li>README regenerated: Granger added to headline; “Where to go next” article table; param-guidance pointer; output regenerated. Bug fix: <code>print.wcc_res</code>/<code>print.wcc_surr</code> no longer display a spurious double colon in the aggregate label; label renamed <code>Mean |Fisher's Z|</code> → <code>Mean Abs. Fisher's Z</code> to avoid cli glue-in-key-name interpolation.</li>
+<li>See-also footers added to <code>wdtw-workflow</code>, <code>wgranger-workflow</code>, <code>determine-downsampling</code>.</li>
+<li>No new <code>Imports</code>; <code>inst/WORDLIST</code> updated; spell-check green; <code>R CMD check --as-cran</code> 0/0/0. Post-plan deviation: AC6 stated “no R/ change” but the cli double-colon bugfix (a pre-existing display defect since M4) required touching <code>R/wcc.R</code> and <code>R/surrogate_analysis.R</code> — purely cosmetic print-method fix, no numeric/behavioral change, no C++ touched, no NAMESPACE change. <strong>Phase B</strong> (release cut): 3 ACs met.</li>
+<li>Version bump <code>0.0.0.9000</code> → <code>0.1.0</code>; NEWS.md header → <code># bsync 0.1.0</code>; lifecycle badge promoted <code>experimental</code> → <code>stable</code> in README.</li>
+<li>
+<code>cran-comments.md</code> written (0/0/0 local; cross-platform win-builder/R-hub pre-submission checklist; pkgdown-deploy note for two README article URLs not yet live). <code>urlchecker</code> reports two 404s for the new <code>articles/bsync.html</code> URL (not yet deployed); all other checks clean. <code>spelling</code> + <code><a href="https://pkgdown.r-lib.org/reference/check_pkgdown.html" class="external-link">pkgdown::check_pkgdown()</a></code> clean. cran-comments.md added to <code>.Rbuildignore</code>.</li>
+<li>Plan stops at “ready to submit”; <code>print.wcc_surr</code> label regression test added (556 tests). Actual CRAN upload is the user’s action; pre-submission checklist in <code>cran-comments.md</code>.</li>
+</ol></li>
+<li>
 <strong>M6 — Parameter guidance &amp; synchrony multiverse (done).</strong> All nine acceptance criteria met (commits <code>026b2f4</code>–<code>bb5f6bc</code> on <code>main</code>; 542 tests passing, 0 errors/0 warnings/0 notes in <code>R CMD check --as-cran</code>). No C++ change — Invariants 5/6 not triggered; <code>RcppExports</code> diff empty. Run as two phases under M6 number; no new <code>Imports</code>:
 <ol style="list-style-type: decimal"><li>
 <code>synchrony_multiverse(x, y, estimator, sample_rate, window_sec, lag_sec, ...)</code> sweeps a seconds-specified parameter grid (converted to samples per cell; <code>lag_max</code> hard-capped at <code>floor(window_size/2)</code>), runs matched-null surrogate test per cell, and returns a light <code>bsync_multiverse</code> (tidy grid + settings + robustness summary; Invariant 7). All three estimators supported (WCC/WDTW/Granger); Granger has two ES/p columns (es_xy/es_yx). Tested.</li>
@@ -165,10 +184,10 @@
 </ul></div>
 <div class="section level2">
 <h2 id="current-focus">Current focus<a class="anchor" aria-label="anchor" href="#current-focus"></a></h2>
-<p><strong>Hardening + core-completion cycle toward a first CRAN release</strong>, run as focused milestones via the plan → implement → review loop. The first release is <strong>explicitly not near-term</strong> — it is its own milestone (M7, <code>v0.1.0</code>) after the M6 parameter guidance lands, not a deadline hanging over the hardening work. <strong>M7 is next.</strong></p>
+<p><strong>Post-release maintenance and next-estimator work.</strong> M7 (<code>v0.1.0</code>) is complete and ready to submit to CRAN (human-gated — see <code>cran-comments.md</code> pre-submission checklist). The next milestone is M8.</p>
 <ul><li>
-<strong>M7 — First CRAN release (<code>v0.1.0</code>).</strong> Cut the first public release once WCC/WDTW/Granger + the M5 framework + tidy interface + M6 parameter guidance cohere; later estimators are post-1.0 minors.</li>
-</ul><p>See <code>DESIGN.md</code> §15 for the full roadmap (M7 first CRAN release; M8 phase synchrony; M9 wavelet coherence; M10 CRQA/MEA; M11 group-level workflow; M12 expanded surrogates).</p>
+<strong>M8 — Phase synchrony estimator (next).</strong> Add a windowed phase-synchrony estimator to the <code>bsync_surface</code> framework established in M5. See <code>DESIGN.md</code> §15 for scope.</li>
+</ul><p>See <code>DESIGN.md</code> §15 for the full roadmap (M8 phase synchrony; M9 wavelet coherence; M10 CRQA/MEA; M11 group-level workflow; M12 expanded surrogates).</p>
 </div>
 <div class="section level2">
 <h2 id="invariants--do-not-violate-without-flagging">Invariants — do not violate without flagging<a class="anchor" aria-label="anchor" href="#invariants--do-not-violate-without-flagging"></a></h2>

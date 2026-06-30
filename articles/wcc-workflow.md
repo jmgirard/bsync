@@ -182,7 +182,7 @@ summary(wcc_results)
 #> Total Lags Tested: 91
 #> Window Size: 90
 #> Max Lag: 45
-#> Mean |Fisher's Z|: 0.452
+#> Mean Abs. Fisher's Z: 0.452
 #> 
 #> ── Cross-Correlation Value Distribution ──
 #> 
@@ -324,8 +324,8 @@ plan(sequential)
 print(surrogate_results)
 #> ── WCC Surrogate Analysis (Pseudo-Synchrony) ───────────────────────────────────
 #> Permutations: 1000
-#> Observed Mean |Fisher's Z|: : 0.452
-#> Average Null Mean |Fisher's Z|: : 0.3175
+#> Observed Mean Abs. Fisher's Z: 0.452
+#> Average Null Mean Abs. Fisher's Z: 0.3175
 #> Empirical p-value: < 0.001
 #> ✔ Observed synchrony is significantly greater than chance.
 ```

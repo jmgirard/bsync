@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">bsync</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,12 +24,16 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/choosing-parameters.html">Choosing WCC Parameters</a></li>
-    <li><a class="dropdown-item" href="../articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
-    <li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Core estimators</h6></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
     <li><a class="dropdown-item" href="../articles/wgranger-workflow.html">Windowed Granger Causality</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Going deeper</h6></li>
+    <li><a class="dropdown-item" href="../articles/choosing-parameters.html">Choosing Analysis Parameters</a></li>
+    <li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
+    <li><a class="dropdown-item" href="../articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -46,9 +50,9 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="estimators">Estimators<a class="anchor" aria-label="anchor" href="#estimators"></a></h2>
 
-
+      <div class="section-desc"><p>Windowed estimators of nonstationary lead-lag synchrony. All three return a <code>bsync_surface</code> object with a shared <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -57,24 +61,240 @@
 
       <dl><dt>
 
-          <code><a href="aggregate_by_time.html">aggregate_by_time()</a></code>
+          <code><a href="wcc.html">wcc()</a></code>
 
         </dt>
-        <dd>Aggregate Time Series Data by Time Bins</dd>
+        <dd>Windowed Cross-Correlation</dd>
 
         <dt>
 
-          <code><a href="as_tibble.bsync_multiverse.html">as_tibble(<i>&lt;bsync_multiverse&gt;</i>)</a></code>
+          <code><a href="wdtw.html">wdtw()</a></code>
 
         </dt>
-        <dd>Convert a bsync_multiverse object to a tibble</dd>
+        <dd>Windowed Dynamic Time Warping</dd>
 
         <dt>
 
-          <code><a href="as_tibble.bsync_surface.html">as_tibble(<i>&lt;bsync_surface&gt;</i>)</a></code>
+          <code><a href="wgranger.html">wgranger()</a></code>
 
         </dt>
-        <dd>Convert a bsync_surface object to a tibble</dd>
+        <dd>Windowed Granger Causality</dd>
+
+        <dt>
+
+          <code><a href="print.wcc_res.html">print(<i>&lt;wcc_res&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for wcc_res objects</dd>
+
+        <dt>
+
+          <code><a href="print.wdtw_res.html">print(<i>&lt;wdtw_res&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for wdtw_res objects</dd>
+
+        <dt>
+
+          <code><a href="print.wgranger_res.html">print(<i>&lt;wgranger_res&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for wgranger_res objects</dd>
+
+        <dt>
+
+          <code><a href="summary.wcc_res.html">summary(<i>&lt;wcc_res&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Summary method for wcc_res objects</dd>
+
+        <dt>
+
+          <code><a href="summary.wgranger_res.html">summary(<i>&lt;wgranger_res&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Summary method for wgranger_res objects</dd>
+
+        <dt>
+
+          <code><a href="plot.wcc_res.html">plot(<i>&lt;wcc_res&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot wcc_res object</dd>
+
+        <dt>
+
+          <code><a href="plot.wdtw_res.html">plot(<i>&lt;wdtw_res&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot wdtw_res object</dd>
+
+        <dt>
+
+          <code><a href="plot.wgranger_res.html">plot(<i>&lt;wgranger_res&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot wgranger_res object</dd>
+      </dl></div><div class="section level2">
+      <h2 id="surrogate-testing">Surrogate testing<a class="anchor" aria-label="anchor" href="#surrogate-testing"></a></h2>
+
+      <div class="section-desc"><p>Generate null distributions (pseudo-synchrony) and compare observed statistics against them. Two-step pipeline: generate a surrogate matrix, then pass it to the matched surrogate wrapper.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="generate_surrogate_circular.html">generate_surrogate_circular()</a></code>
+
+        </dt>
+        <dd>Generate Circular Shift Surrogates</dd>
+
+        <dt>
+
+          <code><a href="generate_surrogate_phase.html">generate_surrogate_phase()</a></code>
+
+        </dt>
+        <dd>Generate Phase-Randomized Surrogates (Fourier Transform)</dd>
+
+        <dt>
+
+          <code><a href="wcc_surrogate.html">wcc_surrogate()</a></code>
+
+        </dt>
+        <dd>Calculate Surrogate Windowed Cross-Correlations</dd>
+
+        <dt>
+
+          <code><a href="wdtw_surrogate.html">wdtw_surrogate()</a></code>
+
+        </dt>
+        <dd>Calculate Surrogate Windowed Dynamic Time Warping (WDTW)</dd>
+
+        <dt>
+
+          <code><a href="wgranger_surrogate.html">wgranger_surrogate()</a></code>
+
+        </dt>
+        <dd>Calculate Surrogate Windowed Granger Causality</dd>
+
+        <dt>
+
+          <code><a href="print.wcc_surr.html">print(<i>&lt;wcc_surr&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for wcc_surr objects</dd>
+
+        <dt>
+
+          <code><a href="print.wdtw_surr.html">print(<i>&lt;wdtw_surr&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for wdtw_surr objects</dd>
+
+        <dt>
+
+          <code><a href="print.wgranger_surr.html">print(<i>&lt;wgranger_surr&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for wgranger_surr objects</dd>
+      </dl></div><div class="section level2">
+      <h2 id="optima-extraction-leadership">Optima extraction &amp; leadership<a class="anchor" aria-label="anchor" href="#optima-extraction-leadership"></a></h2>
+
+      <div class="section-desc"><p>Extract lag optima from an estimator surface and derive a continuous Leadership Asymmetry Index (LAI).</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="pick_optima.html">pick_optima()</a></code>
+
+        </dt>
+        <dd>Find Optimum (Peak or Valley) in Windowed Analyses</dd>
+
+        <dt>
+
+          <code><a href="leadership_asymmetry.html">leadership_asymmetry()</a></code>
+
+        </dt>
+        <dd>Calculate Leadership Asymmetry Index</dd>
+
+        <dt>
+
+          <code><a href="plot_optima_overlay.html">plot_optima_overlay()</a></code>
+
+        </dt>
+        <dd>Plot Surface with Optima Overlay</dd>
+
+        <dt>
+
+          <code><a href="print.wcc_optima.html">print(<i>&lt;wcc_optima&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for wcc_optima objects</dd>
+
+        <dt>
+
+          <code><a href="print.wdtw_optima.html">print(<i>&lt;wdtw_optima&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for wdtw_optima objects</dd>
+
+        <dt>
+
+          <code><a href="summary.wcc_optima.html">summary(<i>&lt;wcc_optima&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Summary method for wcc_optima objects</dd>
+
+        <dt>
+
+          <code><a href="summary.wdtw_optima.html">summary(<i>&lt;wdtw_optima&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Summary method for wdtw_optima objects</dd>
+
+        <dt>
+
+          <code><a href="print.bsync_lai.html">print(<i>&lt;bsync_lai&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for bsync_lai objects</dd>
+
+        <dt>
+
+          <code><a href="plot.bsync_lai.html">plot(<i>&lt;bsync_lai&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot bsync_lai object</dd>
+      </dl></div><div class="section level2">
+      <h2 id="parameter-guidance">Parameter guidance<a class="anchor" aria-label="anchor" href="#parameter-guidance"></a></h2>
+
+      <div class="section-desc"><p>Tools for choosing and evaluating analysis hyperparameters. Start with <code><a href="../reference/suggest_wcc_params.html">suggest_wcc_params()</a></code> for a single dyad, use <code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code> to visualize the specification curve, and <code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code> for multi-dyad datasets. <code><a href="../reference/select_specification.html">select_specification()</a></code> is the underlying selection rule for advanced use.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="suggest_wcc_params.html">suggest_wcc_params()</a></code>
+
+        </dt>
+        <dd>Suggest WCC Hyperparameters</dd>
+
+        <dt>
+
+          <code><a href="synchrony_multiverse.html">synchrony_multiverse()</a></code>
+
+        </dt>
+        <dd>Synchrony Multiverse Analysis</dd>
 
         <dt>
 
@@ -82,6 +302,64 @@
 
         </dt>
         <dd>Auto-Tune WCC Parameters for a Multi-Dyad Dataset</dd>
+
+        <dt>
+
+          <code><a href="select_specification.html">select_specification()</a></code>
+
+        </dt>
+        <dd>Select the Best Specification from a Multi-Dyad Multiverse</dd>
+
+        <dt>
+
+          <code><a href="print.bsync_multiverse.html">print(<i>&lt;bsync_multiverse&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for bsync_multiverse objects</dd>
+
+        <dt>
+
+          <code><a href="summary.bsync_multiverse.html">summary(<i>&lt;bsync_multiverse&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Summary method for bsync_multiverse objects</dd>
+
+        <dt>
+
+          <code><a href="plot.bsync_multiverse.html">plot(<i>&lt;bsync_multiverse&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot a synchrony multiverse specification curve</dd>
+      </dl></div><div class="section level2">
+      <h2 id="preprocessing-signal-kinematics">Preprocessing — signal &amp; kinematics<a class="anchor" aria-label="anchor" href="#preprocessing-signal-kinematics"></a></h2>
+
+      <div class="section-desc"><p>Smooth, trim, and compute kinematic derivatives on continuous signals before running a synchrony estimator.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="smooth_signal.html">smooth_signal()</a></code>
+
+        </dt>
+        <dd>Smooth a Time Series Signal</dd>
+
+        <dt>
+
+          <code><a href="trim_edges.html">trim_edges()</a></code>
+
+        </dt>
+        <dd>Trim Edge Effects from Data</dd>
+
+        <dt>
+
+          <code><a href="calc_velocity_1d.html">calc_velocity_1d()</a></code>
+
+        </dt>
+        <dd>Calculate 1D Velocity</dd>
 
         <dt>
 
@@ -106,10 +384,40 @@
 
         <dt>
 
-          <code><a href="calc_velocity_1d.html">calc_velocity_1d()</a></code>
+          <code><a href="evaluate_signal_power.html">evaluate_signal_power()</a></code>
 
         </dt>
-        <dd>Calculate 1D Velocity</dd>
+        <dd>Evaluate Signal Power and Suggest Downsampling Rate</dd>
+
+        <dt>
+
+          <code><a href="plot.signal_power_res.html">plot(<i>&lt;signal_power_res&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot method for signal_power_res objects</dd>
+      </dl></div><div class="section level2">
+      <h2 id="preprocessing-resampling-gaps">Preprocessing — resampling &amp; gaps<a class="anchor" aria-label="anchor" href="#preprocessing-resampling-gaps"></a></h2>
+
+      <div class="section-desc"><p>Resample continuous signals and diagnose or repair time-series gaps.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="downsample_signal.html">downsample_signal()</a></code>
+
+        </dt>
+        <dd>Downsample a Time Series Signal via Rolling Aggregation</dd>
+
+        <dt>
+
+          <code><a href="aggregate_by_time.html">aggregate_by_time()</a></code>
+
+        </dt>
+        <dd>Aggregate Time Series Data by Time Bins</dd>
 
         <dt>
 
@@ -120,262 +428,26 @@
 
         <dt>
 
-          <code><a href="downsample_signal.html">downsample_signal()</a></code>
-
-        </dt>
-        <dd>Downsample a Time Series Signal via Rolling Aggregation</dd>
-
-        <dt>
-
-          <code><a href="evaluate_signal_power.html">evaluate_signal_power()</a></code>
-
-        </dt>
-        <dd>Evaluate Signal Power and Suggest Downsampling Rate</dd>
-
-        <dt>
-
-          <code><a href="generate_surrogate_circular.html">generate_surrogate_circular()</a></code>
-
-        </dt>
-        <dd>Generate Circular Shift Surrogates</dd>
-
-        <dt>
-
-          <code><a href="generate_surrogate_phase.html">generate_surrogate_phase()</a></code>
-
-        </dt>
-        <dd>Generate Phase-Randomized Surrogates (Fourier Transform)</dd>
-
-        <dt>
-
-          <code><a href="glance.bsync_multiverse.html">glance(<i>&lt;bsync_multiverse&gt;</i>)</a></code>
-
-        </dt>
-        <dd>One-row robustness summary of a bsync_multiverse object</dd>
-
-        <dt>
-
-          <code><a href="glance.bsync_surface.html">glance(<i>&lt;bsync_surface&gt;</i>)</a></code>
-
-        </dt>
-        <dd>One-row summary of a bsync_surface object</dd>
-
-        <dt>
-
           <code><a href="impute_ts_gaps.html">impute_ts_gaps()</a></code>
 
         </dt>
         <dd>Impute Missing Values in Continuous Time Series with Metadata</dd>
+      </dl></div><div class="section level2">
+      <h2 id="tidy-interface">Tidy interface<a class="anchor" aria-label="anchor" href="#tidy-interface"></a></h2>
 
-        <dt>
+      <div class="section-desc"><p><code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>, <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code>, and <code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble()</a></code> methods for <code>bsync_surface</code> and <code>bsync_multiverse</code> objects, enabling integration with tidyverse workflows.</p></div>
 
-          <code><a href="leadership_asymmetry.html">leadership_asymmetry()</a></code>
+      <dl></dl></div><div class="section level2">
 
-        </dt>
-        <dd>Calculate Leadership Asymmetry Index</dd>
 
-        <dt>
 
-          <code><a href="pick_optima.html">pick_optima()</a></code>
 
-        </dt>
-        <dd>Find Optimum (Peak or Valley) in Windowed Analyses</dd>
+      <dl><dt>
 
-        <dt>
-
-          <code><a href="plot.bsync_lai.html">plot(<i>&lt;bsync_lai&gt;</i>)</a></code>
+          <code><a href="reexports.html">reexports</a></code> <code><a href="reexports.html">tidy</a></code> <code><a href="reexports.html">glance</a></code> <code><a href="reexports.html">as_tibble</a></code>
 
         </dt>
-        <dd>Plot bsync_lai object</dd>
-
-        <dt>
-
-          <code><a href="plot.bsync_multiverse.html">plot(<i>&lt;bsync_multiverse&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Plot a synchrony multiverse specification curve</dd>
-
-        <dt>
-
-          <code><a href="plot.signal_power_res.html">plot(<i>&lt;signal_power_res&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Plot method for signal_power_res objects</dd>
-
-        <dt>
-
-          <code><a href="plot.wcc_res.html">plot(<i>&lt;wcc_res&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Plot wcc_res object</dd>
-
-        <dt>
-
-          <code><a href="plot.wdtw_res.html">plot(<i>&lt;wdtw_res&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Plot wdtw_res object</dd>
-
-        <dt>
-
-          <code><a href="plot.wgranger_res.html">plot(<i>&lt;wgranger_res&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Plot wgranger_res object</dd>
-
-        <dt>
-
-          <code><a href="plot_optima_overlay.html">plot_optima_overlay()</a></code>
-
-        </dt>
-        <dd>Plot Surface with Optima Overlay</dd>
-
-        <dt>
-
-          <code><a href="print.bsync_lai.html">print(<i>&lt;bsync_lai&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Print method for bsync_lai objects</dd>
-
-        <dt>
-
-          <code><a href="print.bsync_multiverse.html">print(<i>&lt;bsync_multiverse&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Print method for bsync_multiverse objects</dd>
-
-        <dt>
-
-          <code><a href="print.wcc_optima.html">print(<i>&lt;wcc_optima&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Print method for wcc_optima objects</dd>
-
-        <dt>
-
-          <code><a href="print.wcc_res.html">print(<i>&lt;wcc_res&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Print method for wcc_res objects</dd>
-
-        <dt>
-
-          <code><a href="print.wcc_surr.html">print(<i>&lt;wcc_surr&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Print method for wcc_surr objects</dd>
-
-        <dt>
-
-          <code><a href="print.wdtw_optima.html">print(<i>&lt;wdtw_optima&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Print method for wdtw_optima objects</dd>
-
-        <dt>
-
-          <code><a href="print.wdtw_res.html">print(<i>&lt;wdtw_res&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Print method for wdtw_res objects</dd>
-
-        <dt>
-
-          <code><a href="print.wdtw_surr.html">print(<i>&lt;wdtw_surr&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Print method for wdtw_surr objects</dd>
-
-        <dt>
-
-          <code><a href="print.wgranger_res.html">print(<i>&lt;wgranger_res&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Print method for wgranger_res objects</dd>
-
-        <dt>
-
-          <code><a href="print.wgranger_surr.html">print(<i>&lt;wgranger_surr&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Print method for wgranger_surr objects</dd>
-
-        <dt>
-
-          <code><a href="select_specification.html">select_specification()</a></code>
-
-        </dt>
-        <dd>Select the Best Specification from a Multi-Dyad Multiverse</dd>
-
-        <dt>
-
-          <code><a href="sim_dyad.html">sim_dyad</a></code>
-
-        </dt>
-        <dd>Simulated Dyadic 3D Positional Data</dd>
-
-        <dt>
-
-          <code><a href="smooth_signal.html">smooth_signal()</a></code>
-
-        </dt>
-        <dd>Smooth a Time Series Signal</dd>
-
-        <dt>
-
-          <code><a href="suggest_wcc_params.html">suggest_wcc_params()</a></code>
-
-        </dt>
-        <dd>Suggest WCC Hyperparameters</dd>
-
-        <dt>
-
-          <code><a href="summary.bsync_multiverse.html">summary(<i>&lt;bsync_multiverse&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Summary method for bsync_multiverse objects</dd>
-
-        <dt>
-
-          <code><a href="summary.wcc_optima.html">summary(<i>&lt;wcc_optima&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Summary method for wcc_optima objects</dd>
-
-        <dt>
-
-          <code><a href="summary.wcc_res.html">summary(<i>&lt;wcc_res&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Summary method for wcc_res objects</dd>
-
-        <dt>
-
-          <code><a href="summary.wdtw_optima.html">summary(<i>&lt;wdtw_optima&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Summary method for wdtw_optima objects</dd>
-
-        <dt>
-
-          <code><a href="summary.wgranger_res.html">summary(<i>&lt;wgranger_res&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Summary method for wgranger_res objects</dd>
-
-        <dt>
-
-          <code><a href="synchrony_multiverse.html">synchrony_multiverse()</a></code>
-
-        </dt>
-        <dd>Synchrony Multiverse Analysis</dd>
-
-        <dt>
-
-          <code><a href="tidy.bsync_multiverse.html">tidy(<i>&lt;bsync_multiverse&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Tidy a bsync_multiverse object into the specification grid</dd>
+        <dd>Objects exported from other packages</dd>
 
         <dt>
 
@@ -386,54 +458,57 @@
 
         <dt>
 
-          <code><a href="trim_edges.html">trim_edges()</a></code>
+          <code><a href="tidy.bsync_multiverse.html">tidy(<i>&lt;bsync_multiverse&gt;</i>)</a></code>
 
         </dt>
-        <dd>Trim Edge Effects from Data</dd>
+        <dd>Tidy a bsync_multiverse object into the specification grid</dd>
 
         <dt>
 
-          <code><a href="wcc.html">wcc()</a></code>
+          <code><a href="glance.bsync_surface.html">glance(<i>&lt;bsync_surface&gt;</i>)</a></code>
 
         </dt>
-        <dd>Windowed Cross-Correlation</dd>
+        <dd>One-row summary of a bsync_surface object</dd>
 
         <dt>
 
-          <code><a href="wcc_surrogate.html">wcc_surrogate()</a></code>
+          <code><a href="glance.bsync_multiverse.html">glance(<i>&lt;bsync_multiverse&gt;</i>)</a></code>
 
         </dt>
-        <dd>Calculate Surrogate Windowed Cross-Correlations</dd>
+        <dd>One-row robustness summary of a bsync_multiverse object</dd>
 
         <dt>
 
-          <code><a href="wdtw.html">wdtw()</a></code>
+          <code><a href="as_tibble.bsync_surface.html">as_tibble(<i>&lt;bsync_surface&gt;</i>)</a></code>
 
         </dt>
-        <dd>Windowed Dynamic Time Warping</dd>
+        <dd>Convert a bsync_surface object to a tibble</dd>
 
         <dt>
 
-          <code><a href="wdtw_surrogate.html">wdtw_surrogate()</a></code>
+          <code><a href="as_tibble.bsync_multiverse.html">as_tibble(<i>&lt;bsync_multiverse&gt;</i>)</a></code>
 
         </dt>
-        <dd>Calculate Surrogate Windowed Dynamic Time Warping (WDTW)</dd>
+        <dd>Convert a bsync_multiverse object to a tibble</dd>
+      </dl></div><div class="section level2">
+      <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a></h2>
 
-        <dt>
 
-          <code><a href="wgranger.html">wgranger()</a></code>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="sim_dyad.html">sim_dyad</a></code>
 
         </dt>
-        <dd>Windowed Granger Causality</dd>
-
-        <dt>
-
-          <code><a href="wgranger_surrogate.html">wgranger_surrogate()</a></code>
-
-        </dt>
-        <dd>Calculate Surrogate Windowed Granger Causality</dd>
+        <dd>Simulated Dyadic 3D Positional Data</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

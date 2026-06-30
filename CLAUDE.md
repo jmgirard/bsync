@@ -278,6 +278,53 @@ focus and `DESIGN.md` §14/§15).
       91/99, WDTW 83/99 — non-boundary, exercises tail counting), and a
       `fast_method` window-alignment regression test. 455 tests pass;
       `R CMD check --as-cran` remains 0/0/0; no C++ change.
+- **M7 — First CRAN release (`v0.1.0`) (done).** All nine acceptance
+  criteria met (commits `633d58d`–`dcd9ef0` on `main`; 556 tests
+  passing, 0 errors/0 warnings/0 notes in `R CMD check --as-cran`). No
+  C++ change — Invariants 5/6 not triggered; `RcppExports` diff empty.
+  Run as two phases under M7 number: **Phase A** (docs/messaging): 6 ACs
+  met.
+  1.  `_pkgdown.yml` restructured with grouped `articles:` (3 groups)
+      and `reference:` (8 groups);
+      [`pkgdown::check_pkgdown()`](https://pkgdown.r-lib.org/reference/check_pkgdown.html)
+      clean.
+  2.  New `vignettes/bsync.Rmd` “Get started” — end-to-end `sim_dyad`
+      arc, WCC/WDTW/WGC decision table, reading map into 6 deep-dives.
+  3.  `choosing-parameters.Rmd` retitled “Choosing Analysis Parameters”;
+      all multiverse/autotune chunks now run on `sim_dyad`
+      (`n_surrogates = 100L`);
+      [`select_specification()`](https://jmgirard.github.io/bsync/reference/select_specification.md)
+      taught; `wgranger` estimator example added;
+      [`tidy()`](https://generics.r-lib.org/reference/tidy.html)/[`glance()`](https://generics.r-lib.org/reference/glance.html)
+      shown.
+  4.  README regenerated: Granger added to headline; “Where to go next”
+      article table; param-guidance pointer; output regenerated. Bug
+      fix: `print.wcc_res`/`print.wcc_surr` no longer display a spurious
+      double colon in the aggregate label; label renamed
+      `Mean |Fisher's Z|` → `Mean Abs. Fisher's Z` to avoid cli
+      glue-in-key-name interpolation.
+  5.  See-also footers added to `wdtw-workflow`, `wgranger-workflow`,
+      `determine-downsampling`.
+  6.  No new `Imports`; `inst/WORDLIST` updated; spell-check green;
+      `R CMD check --as-cran` 0/0/0. Post-plan deviation: AC6 stated “no
+      R/ change” but the cli double-colon bugfix (a pre-existing display
+      defect since M4) required touching `R/wcc.R` and
+      `R/surrogate_analysis.R` — purely cosmetic print-method fix, no
+      numeric/behavioral change, no C++ touched, no NAMESPACE change.
+      **Phase B** (release cut): 3 ACs met.
+  7.  Version bump `0.0.0.9000` → `0.1.0`; NEWS.md header →
+      `# bsync 0.1.0`; lifecycle badge promoted `experimental` →
+      `stable` in README.
+  8.  `cran-comments.md` written (0/0/0 local; cross-platform
+      win-builder/R-hub pre-submission checklist; pkgdown-deploy note
+      for two README article URLs not yet live). `urlchecker` reports
+      two 404s for the new `articles/bsync.html` URL (not yet deployed);
+      all other checks clean. `spelling` +
+      [`pkgdown::check_pkgdown()`](https://pkgdown.r-lib.org/reference/check_pkgdown.html)
+      clean. cran-comments.md added to `.Rbuildignore`.
+  9.  Plan stops at “ready to submit”; `print.wcc_surr` label regression
+      test added (556 tests). Actual CRAN upload is the user’s action;
+      pre-submission checklist in `cran-comments.md`.
 - **M6 — Parameter guidance & synchrony multiverse (done).** All nine
   acceptance criteria met (commits `026b2f4`–`bb5f6bc` on `main`; 542
   tests passing, 0 errors/0 warnings/0 notes in
@@ -357,19 +404,17 @@ focus and `DESIGN.md` §14/§15).
 
 ## Current focus
 
-**Hardening + core-completion cycle toward a first CRAN release**, run
-as focused milestones via the plan → implement → review loop. The first
-release is **explicitly not near-term** — it is its own milestone (M7,
-`v0.1.0`) after the M6 parameter guidance lands, not a deadline hanging
-over the hardening work. **M7 is next.**
+**Post-release maintenance and next-estimator work.** M7 (`v0.1.0`) is
+complete and ready to submit to CRAN (human-gated — see
+`cran-comments.md` pre-submission checklist). The next milestone is M8.
 
-- **M7 — First CRAN release (`v0.1.0`).** Cut the first public release
-  once WCC/WDTW/Granger + the M5 framework + tidy interface + M6
-  parameter guidance cohere; later estimators are post-1.0 minors.
+- **M8 — Phase synchrony estimator (next).** Add a windowed
+  phase-synchrony estimator to the `bsync_surface` framework established
+  in M5. See `DESIGN.md` §15 for scope.
 
-See `DESIGN.md` §15 for the full roadmap (M7 first CRAN release; M8
-phase synchrony; M9 wavelet coherence; M10 CRQA/MEA; M11 group-level
-workflow; M12 expanded surrogates).
+See `DESIGN.md` §15 for the full roadmap (M8 phase synchrony; M9 wavelet
+coherence; M10 CRQA/MEA; M11 group-level workflow; M12 expanded
+surrogates).
 
 ## Invariants — do not violate without flagging
 

@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Choosing WCC Parameters • bsync</title>
+<title>Choosing Analysis Parameters • bsync</title>
 <!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
   window.MathJax = {
     chtml: {
@@ -16,7 +16,7 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Choosing WCC Parameters">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Choosing Analysis Parameters">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">bsync</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,12 +39,16 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/choosing-parameters.html">Choosing WCC Parameters</a></li>
-    <li><a class="dropdown-item" href="../articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
-    <li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Core estimators</h6></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
     <li><a class="dropdown-item" href="../articles/wgranger-workflow.html">Windowed Granger Causality</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Going deeper</h6></li>
+    <li><a class="dropdown-item" href="../articles/choosing-parameters.html">Choosing Analysis Parameters</a></li>
+    <li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
+    <li><a class="dropdown-item" href="../articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
   </ul>
 </li>
       </ul>
@@ -66,7 +70,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Choosing WCC Parameters</h1>
+      <h1>Choosing Analysis Parameters</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/jmgirard/bsync/blob/main/vignettes/choosing-parameters.Rmd" class="external-link"><code>vignettes/choosing-parameters.Rmd</code></a></small>
@@ -94,11 +98,21 @@ thorough-and-multi-dyad:</p>
 starting values for a single dyad.</li>
 <li>
 <strong><code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code></strong> — sweep the
-full parameter grid and see the specification curve.</li>
+full parameter grid and view the specification curve.</li>
 <li>
 <strong><code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code></strong> — automatically select
 parameters that generalize across a dyad dataset.</li>
 </ol>
+<p><code><a href="../reference/select_specification.html">select_specification()</a></code> underpins step 3 and is exported
+for advanced users who want to apply the selection rule directly to a
+list of multiverse results.</p>
+<blockquote>
+<p><strong>Note:</strong> Steps 1 and 3 are WCC-specific helpers.
+<code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code> in step 2 supports all three
+estimators (<code>"wcc"</code>, <code>"wdtw"</code>,
+<code>"granger"</code>), so you can run a parameter sweep for any
+estimator.</p>
+</blockquote>
 </div>
 <div class="section level2">
 <h2 id="data-driven-starting-values-suggest_wcc_params">1. Data-Driven Starting Values:
@@ -113,20 +127,69 @@ you its own dominant timescale via power spectral density (PSD):</p>
 <span>  x           <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">z_A</span>,</span>
 <span>  y           <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">z_B</span>,</span>
 <span>  sample_rate <span class="op">=</span> <span class="va">fs</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> PSD dominant cycle: 0.8 s (cutoff 1.25 Hz).</span></span>
+<span><span class="co">#&gt; Warning: Requested `max_delay_sec` (3 s = 240 samples) exceeds window_size/2 (128).</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Capping `lag_max` at 128 (= 1.6 s).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Suggested WCC Parameters</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; window_size: 256 (3.2 s)</span></span>
+<span><span class="co">#&gt; lag_max: 128 (1.6 s)</span></span>
+<span><span class="co">#&gt; window_increment: 128 (50% overlap)</span></span>
+<span><span class="co">#&gt; lag_increment: 1</span></span>
+<span><span class="va">params</span></span>
+<span><span class="co">#&gt; $window_size</span></span>
+<span><span class="co">#&gt; [1] 256</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $lag_max</span></span>
+<span><span class="co">#&gt; [1] 128</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $window_increment</span></span>
+<span><span class="co">#&gt; [1] 128</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $lag_increment</span></span>
+<span><span class="co">#&gt; [1] 1</span></span></code></pre></div>
 <p>The PSD identifies the 0.5 Hz dominant cycle (~2 s period). The
 4-cycles-per-window heuristic (Boker et al., 2002) then gives
 <code>window_size = round(2 * 4 * 80) = 640 samples</code>, subject to
-the hard constraints (see <code><a href="../reference/suggest_wcc_params.html">?suggest_wcc_params</a></code>).</p>
+the hard constraints (see <code><a href="../reference/suggest_wcc_params.html">?suggest_wcc_params</a></code>):</p>
+<ul>
+<li>
+<code>window_size &gt;= 2 * lag_max</code> (SUSY lag-cap rule)</li>
+<li>
+<code>window_size &lt;= length(x) / 2</code> (series-length
+ceiling)</li>
+<li>Minimum-samples floor for a stable <em>r</em>
+</li>
+</ul>
 <p>If you already know the behavioral timescale from theory, pass it
-directly:</p>
+directly as an override:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">params_expert</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/suggest_wcc_params.html">suggest_wcc_params</a></span><span class="op">(</span></span>
 <span>  x                  <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">z_A</span>,</span>
 <span>  y                  <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">z_B</span>,</span>
 <span>  sample_rate        <span class="op">=</span> <span class="va">fs</span>,</span>
 <span>  event_duration_sec <span class="op">=</span> <span class="fl">2</span> <span class="co"># 0.5 Hz cycle = 2 s</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Using supplied `event_duration_sec` = 2 s.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Suggested WCC Parameters</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; window_size: 640 (8 s)</span></span>
+<span><span class="co">#&gt; lag_max: 240 (3 s)</span></span>
+<span><span class="co">#&gt; window_increment: 320 (50% overlap)</span></span>
+<span><span class="co">#&gt; lag_increment: 1</span></span>
+<span><span class="va">params_expert</span></span>
+<span><span class="co">#&gt; $window_size</span></span>
+<span><span class="co">#&gt; [1] 640</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $lag_max</span></span>
+<span><span class="co">#&gt; [1] 240</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $window_increment</span></span>
+<span><span class="co">#&gt; [1] 320</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $lag_increment</span></span>
+<span><span class="co">#&gt; [1] 1</span></span></code></pre></div>
 <p>Either way, plug the result directly into <code><a href="../reference/wcc.html">wcc()</a></code>:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wcc.html">wcc</a></span><span class="op">(</span></span>
@@ -136,7 +199,13 @@ directly:</p>
 <span>  lag_max          <span class="op">=</span> <span class="va">params</span><span class="op">$</span><span class="va">lag_max</span>,</span>
 <span>  window_increment <span class="op">=</span> <span class="va">params</span><span class="op">$</span><span class="va">window_increment</span>,</span>
 <span>  lag_increment    <span class="op">=</span> <span class="va">params</span><span class="op">$</span><span class="va">lag_increment</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="fu">generics</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 7</span></span></span>
+<span><span class="co">#&gt;   mean_abs_z n_windows window_size window_increment lag_max lag_increment</span></span>
+<span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       1.05        14         256              128     128             1</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: statistic &lt;chr&gt;</span></span></span></code></pre></div>
 <div class="section level3">
 <h3 id="window-overlap-overlap_pct">Window overlap (<code>overlap_pct</code>)<a class="anchor" aria-label="anchor" href="#window-overlap-overlap_pct"></a>
 </h3>
@@ -146,10 +215,10 @@ controls how far the window shifts on each step:</p>
 <ul>
 <li>
 <strong>0% overlap</strong> (<code>overlap_pct = 0</code>): the
-window jumps completely forward – fastest, but lowest temporal
+window jumps completely forward — fastest, but lowest temporal
 resolution.</li>
 <li>
-<strong>50-75% overlap</strong> (the default <code>0.5</code>): a
+<strong>50–75% overlap</strong> (the default <code>0.5</code>): a
 balanced choice for exploratory analysis.</li>
 <li>
 <strong>Increment of 1</strong> (near-complete overlap): highest
@@ -168,23 +237,83 @@ defensible choices. The headline metric is <strong>effect size vs. the
 matched-null surrogate</strong>, not raw synchrony (which
 autocorrelation inflates).</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Sweep window sizes from 0.5 s to 4 s and lag from 0.5 s to 1 s</span></span>
+<code class="sourceCode R"><span><span class="co"># Sweep window sizes 0.5 s to 4 s and lag from 0.25 s to 1 s</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
 <span><span class="va">mv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synchrony_multiverse.html">synchrony_multiverse</a></span><span class="op">(</span></span>
 <span>  x            <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">z_A</span>,</span>
 <span>  y            <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">z_B</span>,</span>
 <span>  estimator    <span class="op">=</span> <span class="st">"wcc"</span>,</span>
 <span>  sample_rate  <span class="op">=</span> <span class="fl">80</span>,</span>
 <span>  window_sec   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span>,</span>
-<span>  lag_sec      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  lag_sec      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  n_surrogates <span class="op">=</span> <span class="fl">100L</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mv</span><span class="op">)</span> <span class="co"># robustness summary</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mv</span><span class="op">)</span> <span class="co"># specification curve</span></span></code></pre></div>
-<p>The specification curve (top panel) shows effect sizes sorted by
-magnitude; the choice dashboard (bottom panel) reveals which analytic
+<span><span class="va">mv</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Synchrony Multiverse Analysis (wcc)</span> <span style="color: #00BBBB;">─────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; Specifications: 12 (12 computable)</span></span>
+<span><span class="co">#&gt; Surrogates per cell: 100</span></span>
+<span><span class="co">#&gt; Significant (p &lt; .05): 6 of 12 (50%)</span></span>
+<span><span class="co">#&gt; Median ES: 1.881 [IQR: 1.345]</span></span>
+<span><span class="co">#&gt; Sign-consistent (sig. cells): 100%</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">generics</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mv</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 9</span></span></span>
+<span><span class="co">#&gt;   estimator n_cells n_valid n_significant pct_significant median_es iqr_es</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wcc            12      12             6             0.5      1.88   1.34</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: sign_consistent &lt;dbl&gt;, n_surrogates &lt;int&gt;</span></span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mv</span><span class="op">)</span></span></code></pre></div>
+<p><img src="choosing-parameters_files/figure-html/multiverse-plot-1.png" class="r-plt" alt="" width="672"></p>
+<p>The specification curve (top panel) sorts parameter specifications by
+effect size; the choice dashboard (bottom panel) reveals which analytic
 choices drive the result. If synchrony is robust, most cells should be
 significant regardless of the specific hyperparameters.</p>
+<p>The full specification grid is available as a tibble via
+<code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> or <code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble()</a></code>:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">generics</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">mv</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 15</span></span></span>
+<span><span class="co">#&gt;   estimator window_sec lag_sec increment_pct surrogate_method statistic </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wcc              0.5    0.25           0.1 phase            mean_abs_z</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> wcc              1      0.25           0.1 phase            mean_abs_z</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> wcc              2      0.25           0.1 phase            mean_abs_z</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> wcc              4      0.25           0.1 phase            mean_abs_z</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> wcc              0.5    0.5            0.1 phase            mean_abs_z</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> wcc              1      0.5            0.1 phase            mean_abs_z</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 9 more variables: window_size &lt;dbl&gt;, lag_max &lt;int&gt;, window_increment &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   n_windows &lt;dbl&gt;, observed &lt;dbl&gt;, null_mean &lt;dbl&gt;, null_sd &lt;dbl&gt;, es &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   p &lt;dbl&gt;</span></span></span></code></pre></div>
+<div class="section level3">
+<h3 id="running-a-multiverse-for-wdtw-or-granger">Running a multiverse for WDTW or Granger<a class="anchor" aria-label="anchor" href="#running-a-multiverse-for-wdtw-or-granger"></a>
+</h3>
+<p><code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code> is not WCC-only. Pass
+<code>estimator = "wdtw"</code> or <code>estimator = "wgranger"</code>
+to sweep the same grid for those estimators. For Granger, the result
+carries two effect-size columns (<code>es_xy</code> and
+<code>es_yx</code>, one per causal direction) and no lag axis:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
+<span><span class="va">mv_g</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synchrony_multiverse.html">synchrony_multiverse</a></span><span class="op">(</span></span>
+<span>  x            <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">z_A</span>,</span>
+<span>  y            <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">z_B</span>,</span>
+<span>  estimator    <span class="op">=</span> <span class="st">"wgranger"</span>,</span>
+<span>  sample_rate  <span class="op">=</span> <span class="fl">80</span>,</span>
+<span>  window_sec   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>  lag_sec      <span class="op">=</span> <span class="fl">0</span>,      <span class="co"># ignored for Granger; ar_order used instead</span></span>
+<span>  n_surrogates <span class="op">=</span> <span class="fl">100L</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">generics</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mv_g</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 9</span></span></span>
+<span><span class="co">#&gt;   estimator n_cells n_valid n_significant pct_significant median_es iqr_es</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wgranger        3       3             0               0     0.458  0.220</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: sign_consistent &lt;dbl&gt;, n_surrogates &lt;int&gt;</span></span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="multi-dyad-parameter-selection-autotune_wcc">3. Multi-Dyad Parameter Selection: <code>autotune_wcc()</code><a class="anchor" aria-label="anchor" href="#multi-dyad-parameter-selection-autotune_wcc"></a>
@@ -193,7 +322,7 @@ significant regardless of the specific hyperparameters.</p>
 <code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code> selects parameters that are both detectable
 (significant vs. the null in many dyads) and stable (consistent across
 dyads with different signal characteristics).</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Simulate a dataset: three dyads sharing the same 0.5 Hz synchrony structure</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">dyad_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">replicate</a></span><span class="op">(</span></span>
@@ -209,16 +338,103 @@ dyads with different signal characteristics).</p>
 <span>  lag_sec      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  n_surrogates <span class="op">=</span> <span class="fl">100L</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; Running synchrony_multiverse() on 3 dyad(s) (3 window x 2 lag cells each)...</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Auto-Tune Result</span> ──</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Window size: 160 samples (2 s)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Max lag: 80 samples (1 s)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Increment: 16 samples</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Sig. rate: 100% of dyads</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Median ES: 2.305 (IQR = 0.102)</span></span>
 <span></span>
-<span><span class="co"># Plug the result directly into wcc()</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wcc.html">wcc</a></span><span class="op">(</span></span>
+<span><span class="va">best</span></span>
+<span><span class="co">#&gt; $window_size</span></span>
+<span><span class="co">#&gt; [1] 160</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $lag_max</span></span>
+<span><span class="co">#&gt; [1] 80</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $window_increment</span></span>
+<span><span class="co">#&gt; [1] 16</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $lag_increment</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $window_sec</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $lag_sec</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $sig_rate</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $median_es</span></span>
+<span><span class="co">#&gt; [1] 2.305021</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $iqr_es</span></span>
+<span><span class="co">#&gt; [1] 0.1019227</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $score</span></span>
+<span><span class="co">#&gt; [1] 2.25406</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $n_dyads</span></span>
+<span><span class="co">#&gt; [1] 3</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $n_cells_gated</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $dyad_multiverses</span></span>
+<span><span class="co">#&gt; $dyad_multiverses[[1]]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Synchrony Multiverse Analysis (wcc)</span> <span style="color: #00BBBB;">─────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; Specifications: 6 (6 computable)</span></span>
+<span><span class="co">#&gt; Surrogates per cell: 100</span></span>
+<span><span class="co">#&gt; Significant (p &lt; .05): 2 of 6 (33.3%)</span></span>
+<span><span class="co">#&gt; Median ES: 2.146 [IQR: 0.186]</span></span>
+<span><span class="co">#&gt; Sign-consistent (sig. cells): 100%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $dyad_multiverses[[2]]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Synchrony Multiverse Analysis (wcc)</span> <span style="color: #00BBBB;">─────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; Specifications: 6 (6 computable)</span></span>
+<span><span class="co">#&gt; Surrogates per cell: 100</span></span>
+<span><span class="co">#&gt; Significant (p &lt; .05): 2 of 6 (33.3%)</span></span>
+<span><span class="co">#&gt; Median ES: 2.322 [IQR: 0.412]</span></span>
+<span><span class="co">#&gt; Sign-consistent (sig. cells): 100%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $dyad_multiverses[[3]]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Synchrony Multiverse Analysis (wcc)</span> <span style="color: #00BBBB;">─────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; Specifications: 6 (6 computable)</span></span>
+<span><span class="co">#&gt; Surrogates per cell: 100</span></span>
+<span><span class="co">#&gt; Significant (p &lt; .05): 4 of 6 (66.7%)</span></span>
+<span><span class="co">#&gt; Median ES: 2.006 [IQR: 0.124]</span></span>
+<span><span class="co">#&gt; Sign-consistent (sig. cells): 100%</span></span></code></pre></div>
+<p>Plug the result directly into <code><a href="../reference/wcc.html">wcc()</a></code>:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">results_tuned</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wcc.html">wcc</a></span><span class="op">(</span></span>
 <span>  x                <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">z_A</span>,</span>
 <span>  y                <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">z_B</span>,</span>
 <span>  window_size      <span class="op">=</span> <span class="va">best</span><span class="op">$</span><span class="va">window_size</span>,</span>
 <span>  lag_max          <span class="op">=</span> <span class="va">best</span><span class="op">$</span><span class="va">lag_max</span>,</span>
 <span>  window_increment <span class="op">=</span> <span class="va">best</span><span class="op">$</span><span class="va">window_increment</span>,</span>
 <span>  lag_increment    <span class="op">=</span> <span class="va">best</span><span class="op">$</span><span class="va">lag_increment</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="fu">generics</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">results_tuned</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 7</span></span></span>
+<span><span class="co">#&gt;   mean_abs_z n_windows window_size window_increment lag_max lag_increment</span></span>
+<span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       1.12       130         160               16      80             1</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: statistic &lt;chr&gt;</span></span></span></code></pre></div>
 <div class="section level3">
 <h3 id="how-the-selection-rule-works">How the selection rule works<a class="anchor" aria-label="anchor" href="#how-the-selection-rule-works"></a>
 </h3>
@@ -239,31 +455,182 @@ a warning is issued and the highest-median-ES cell is returned as a
 fallback.</p>
 </div>
 <div class="section level3">
+<h3 id="advanced-select_specification-directly">Advanced: <code>select_specification()</code> directly<a class="anchor" aria-label="anchor" href="#advanced-select_specification-directly"></a>
+</h3>
+<p><code><a href="../reference/select_specification.html">select_specification()</a></code> is the exported building block
+that <code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code> wraps. You can call it directly if you
+have already run <code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code> per dyad and want
+to apply the selection rule yourself — for example, to experiment with
+different <code>sig_pct</code> or <code>iqr_penalty</code> values
+without re-running the full sweep:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Run synchrony_multiverse() for each dyad</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">mv_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">dyad_list</span>, <span class="kw">function</span><span class="op">(</span><span class="va">d</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="../reference/synchrony_multiverse.html">synchrony_multiverse</a></span><span class="op">(</span></span>
+<span>    x            <span class="op">=</span> <span class="va">d</span><span class="op">$</span><span class="va">x</span>,</span>
+<span>    y            <span class="op">=</span> <span class="va">d</span><span class="op">$</span><span class="va">y</span>,</span>
+<span>    estimator    <span class="op">=</span> <span class="st">"wcc"</span>,</span>
+<span>    sample_rate  <span class="op">=</span> <span class="fl">80</span>,</span>
+<span>    window_sec   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>    lag_sec      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>    n_surrogates <span class="op">=</span> <span class="fl">100L</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Apply the selection rule directly</span></span>
+<span><span class="va">best_adv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/select_specification.html">select_specification</a></span><span class="op">(</span></span>
+<span>  mv_list     <span class="op">=</span> <span class="va">mv_list</span>,</span>
+<span>  sig_pct     <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  iqr_penalty <span class="op">=</span> <span class="fl">0.5</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">best_adv</span></span>
+<span><span class="co">#&gt; $best_row</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 15</span></span></span>
+<span><span class="co">#&gt;   estimator window_sec lag_sec increment_pct surrogate_method statistic </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wcc                2       1           0.1 phase            mean_abs_z</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 9 more variables: window_size &lt;dbl&gt;, lag_max &lt;int&gt;, window_increment &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   n_windows &lt;dbl&gt;, observed &lt;dbl&gt;, null_mean &lt;dbl&gt;, null_sd &lt;dbl&gt;, es &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   p &lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $sig_rate</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $median_es</span></span>
+<span><span class="co">#&gt; [1] 2.305021</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $iqr_es</span></span>
+<span><span class="co">#&gt; [1] 0.1019227</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $score</span></span>
+<span><span class="co">#&gt; [1] 2.25406</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $n_gated</span></span>
+<span><span class="co">#&gt; [1] 2</span></span></code></pre></div>
+</div>
+<div class="section level3">
 <h3 id="choosing-the-grid-to-sweep">Choosing the grid to sweep<a class="anchor" aria-label="anchor" href="#choosing-the-grid-to-sweep"></a>
 </h3>
 <p>Start with a range informed by <code><a href="../reference/suggest_wcc_params.html">suggest_wcc_params()</a></code> on a
 representative dyad. A practical workflow:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Step 1: get a data-driven starting point</span></span>
-<span><span class="va">params</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/suggest_wcc_params.html">suggest_wcc_params</a></span><span class="op">(</span></span>
+<span><span class="va">params2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/suggest_wcc_params.html">suggest_wcc_params</a></span><span class="op">(</span></span>
 <span>  x           <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">z_A</span>,</span>
 <span>  y           <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">z_B</span>,</span>
 <span>  sample_rate <span class="op">=</span> <span class="fl">80</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> PSD dominant cycle: 0.8 s (cutoff 1.25 Hz).</span></span>
+<span><span class="co">#&gt; Warning: Requested `max_delay_sec` (3 s = 240 samples) exceeds window_size/2 (128).</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Capping `lag_max` at 128 (= 1.6 s).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Suggested WCC Parameters</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; window_size: 256 (3.2 s)</span></span>
+<span><span class="co">#&gt; lag_max: 128 (1.6 s)</span></span>
+<span><span class="co">#&gt; window_increment: 128 (50% overlap)</span></span>
+<span><span class="co">#&gt; lag_increment: 1</span></span>
 <span></span>
 <span><span class="co"># Step 2: build a grid around that starting point</span></span>
-<span><span class="va">w_base</span> <span class="op">&lt;-</span> <span class="va">params</span><span class="op">$</span><span class="va">window_size</span> <span class="op">/</span> <span class="fl">80</span> <span class="co"># convert to seconds</span></span>
+<span><span class="va">w_base</span>       <span class="op">&lt;-</span> <span class="va">params2</span><span class="op">$</span><span class="va">window_size</span> <span class="op">/</span> <span class="fl">80</span> <span class="co"># convert to seconds</span></span>
 <span><span class="va">grid_windows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">w_base</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">grid_lags</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">grid_windows</span> <span class="op">/</span> <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">grid_lags</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">grid_windows</span> <span class="op">/</span> <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Step 3: autotune across dyads</span></span>
-<span><span class="va">best</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autotune_wcc.html">autotune_wcc</a></span><span class="op">(</span></span>
-<span>  dyad_list <span class="op">=</span> <span class="va">dyad_list</span>,</span>
-<span>  sample_rate <span class="op">=</span> <span class="fl">80</span>,</span>
-<span>  window_sec <span class="op">=</span> <span class="va">grid_windows</span>,</span>
-<span>  lag_sec <span class="op">=</span> <span class="va">grid_lags</span>,</span>
-<span>  n_surrogates <span class="op">=</span> <span class="fl">200L</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"window_sec:"</span>, <span class="va">grid_windows</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; window_sec: 1.6 3.2 6.4</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"lag_sec:   "</span>, <span class="va">grid_lags</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; lag_sec:    0.8 1.6 3.2</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">best2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autotune_wcc.html">autotune_wcc</a></span><span class="op">(</span></span>
+<span>  dyad_list    <span class="op">=</span> <span class="va">dyad_list</span>,</span>
+<span>  sample_rate  <span class="op">=</span> <span class="fl">80</span>,</span>
+<span>  window_sec   <span class="op">=</span> <span class="va">grid_windows</span>,</span>
+<span>  lag_sec      <span class="op">=</span> <span class="va">grid_lags</span>,</span>
+<span>  n_surrogates <span class="op">=</span> <span class="fl">100L</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Running synchrony_multiverse() on 3 dyad(s) (3 window x 3 lag cells each)...</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Auto-Tune Result</span> ──</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Window size: 512 samples (6.4 s)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Max lag: 256 samples (3.2 s)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Increment: 51 samples</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Sig. rate: 100% of dyads</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Median ES: 1.601 (IQR = 0.105)</span></span>
+<span></span>
+<span><span class="va">best2</span></span>
+<span><span class="co">#&gt; $window_size</span></span>
+<span><span class="co">#&gt; [1] 512</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $lag_max</span></span>
+<span><span class="co">#&gt; [1] 256</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $window_increment</span></span>
+<span><span class="co">#&gt; [1] 51</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $lag_increment</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $window_sec</span></span>
+<span><span class="co">#&gt; [1] 6.4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $lag_sec</span></span>
+<span><span class="co">#&gt; [1] 3.2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $sig_rate</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $median_es</span></span>
+<span><span class="co">#&gt; [1] 1.600661</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $iqr_es</span></span>
+<span><span class="co">#&gt; [1] 0.105206</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $score</span></span>
+<span><span class="co">#&gt; [1] 1.548058</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $n_dyads</span></span>
+<span><span class="co">#&gt; [1] 3</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $n_cells_gated</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $dyad_multiverses</span></span>
+<span><span class="co">#&gt; $dyad_multiverses[[1]]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Synchrony Multiverse Analysis (wcc)</span> <span style="color: #00BBBB;">─────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; Specifications: 9 (9 computable)</span></span>
+<span><span class="co">#&gt; Surrogates per cell: 100</span></span>
+<span><span class="co">#&gt; Significant (p &lt; .05): 1 of 9 (11.1%)</span></span>
+<span><span class="co">#&gt; Median ES: 1.232 [IQR: 0.321]</span></span>
+<span><span class="co">#&gt; Sign-consistent (sig. cells): 100%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $dyad_multiverses[[2]]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Synchrony Multiverse Analysis (wcc)</span> <span style="color: #00BBBB;">─────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; Specifications: 9 (9 computable)</span></span>
+<span><span class="co">#&gt; Surrogates per cell: 100</span></span>
+<span><span class="co">#&gt; Significant (p &lt; .05): 1 of 9 (11.1%)</span></span>
+<span><span class="co">#&gt; Median ES: 1.3 [IQR: 0.107]</span></span>
+<span><span class="co">#&gt; Sign-consistent (sig. cells): 100%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $dyad_multiverses[[3]]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Synchrony Multiverse Analysis (wcc)</span> <span style="color: #00BBBB;">─────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; Specifications: 9 (9 computable)</span></span>
+<span><span class="co">#&gt; Surrogates per cell: 100</span></span>
+<span><span class="co">#&gt; Significant (p &lt; .05): 1 of 9 (11.1%)</span></span>
+<span><span class="co">#&gt; Median ES: 1.227 [IQR: 0.233]</span></span>
+<span><span class="co">#&gt; Sign-consistent (sig. cells): 100%</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -272,10 +639,25 @@ representative dyad. A practical workflow:</p>
 <p>Boker, S. M., Xu, M., Rotondo, J. L., &amp; King, K. (2002). Windowed
 cross-correlation and peak picking for the analysis of variability in
 the association between behavioral time series. <em>Psychological
-Methods</em>, <em>7</em>(3), 338-355.</p>
+Methods</em>, <em>7</em>(3), 338–355.</p>
 <p>Tschacher, W., &amp; Meier, D. (2020). Physiological synchrony in
 psychotherapy sessions. <em>Psychotherapy Research</em>, <em>30</em>(5),
-558-573.</p>
+558–573.</p>
+</div>
+<div class="section level2">
+<h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a>
+</h2>
+<ul>
+<li>
+<code><a href="../articles/wcc-workflow.html">vignette("wcc-workflow")</a></code> for the full WCC analytical
+pipeline</li>
+<li>
+<code><a href="../articles/surrogate-testing.html">vignette("surrogate-testing")</a></code> for details on
+circular-shift vs. phase-randomization surrogates</li>
+<li>
+<code><a href="../articles/determine-downsampling.html">vignette("determine-downsampling")</a></code> for PSD-based
+guidance on choosing a sample rate</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

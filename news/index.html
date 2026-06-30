@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">bsync</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,12 +24,16 @@
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/choosing-parameters.html">Choosing WCC Parameters</a></li>
-    <li><a class="dropdown-item" href="../articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
-    <li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Core estimators</h6></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
     <li><a class="dropdown-item" href="../articles/wgranger-workflow.html">Windowed Granger Causality</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Going deeper</h6></li>
+    <li><a class="dropdown-item" href="../articles/choosing-parameters.html">Choosing Analysis Parameters</a></li>
+    <li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
+    <li><a class="dropdown-item" href="../articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -47,11 +51,20 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.0.0.9000" id="bsync-0009000">bsync 0.0.0.9000<a class="anchor" aria-label="anchor" href="#bsync-0009000"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.1.0" id="bsync-010">bsync 0.1.0<a class="anchor" aria-label="anchor" href="#bsync-010"></a></h2>
 <div class="section level3">
-<h3 id="m6--parameter-guidance--synchrony-multiverse-0-0-0-9000">M6 — Parameter guidance &amp; synchrony multiverse<a class="anchor" aria-label="anchor" href="#m6--parameter-guidance--synchrony-multiverse-0-0-0-9000"></a></h3>
+<h3 id="m7--documentation--messaging-overhaul-phase-a-0-1-0">M7 — Documentation &amp; messaging overhaul (Phase A)<a class="anchor" aria-label="anchor" href="#m7--documentation--messaging-overhaul-phase-a-0-1-0"></a></h3>
+<ul><li><p><strong>New <code><a href="../articles/bsync.html">vignette("bsync")</a></code></strong> (“Get started”) provides a full end-to-end workflow walkthrough using <code>sim_dyad</code>, a WCC / WDTW / WGC estimator-choice decision table, and a reading map into the six deep-dive articles. This is now the recommended entry point for new users.</p></li>
+<li><p><strong>Structured pkgdown site</strong>: articles are now grouped into “Get started”, “Core estimators”, and “Going deeper” sections; the function reference index is organized into eight thematic groups (Estimators, Surrogate testing, Optima &amp; leadership, Parameter guidance, Preprocessing x2, Tidy interface, Data).</p></li>
+<li><p><strong><code>choosing-parameters</code> vignette reworked</strong> — retitled “Choosing Analysis Parameters” (was WCC-only); the <code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code> / <code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code> / <code><a href="../reference/select_specification.html">select_specification()</a></code> examples now run on <code>sim_dyad</code> so the Simonsohn specification-curve plot and <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> robustness summary render; WDTW and Granger <code>estimator=</code> support shown.</p></li>
+<li><p><strong>Cross-linking</strong>: <code>wdtw-workflow</code>, <code>wgranger-workflow</code>, and <code>determine-downsampling</code> vignettes now carry “See also / Next steps” footers consistent with <code>wcc-workflow</code>.</p></li>
+<li><p><strong>README refreshed</strong>: Granger causality added to the headline scope sentence; parameter-guidance tools (<code><a href="../reference/suggest_wcc_params.html">suggest_wcc_params()</a></code>, <code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code>, <code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code>) mentioned in the overview; “Where to go next” article table added; canned output regenerated to reflect current (M4/M5) labels.</p></li>
+<li><p><strong>Bug fix</strong>: <code>print.wcc_res</code> and <code>print.wcc_surr</code> no longer display a spurious double colon in the Fisher’s Z aggregate label. The fix also renames the label from <code>Mean |Fisher's Z|</code> to <code>Mean Abs. Fisher's Z</code> to avoid the cli markup ambiguity.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="m6--parameter-guidance--synchrony-multiverse-0-1-0">M6 — Parameter guidance &amp; synchrony multiverse<a class="anchor" aria-label="anchor" href="#m6--parameter-guidance--synchrony-multiverse-0-1-0"></a></h3>
 <div class="section level4">
-<h4 id="phase-b--autotune_wcc-rewrite--vignette-0-0-0-9000">Phase B — autotune_wcc rewrite + vignette<a class="anchor" aria-label="anchor" href="#phase-b--autotune_wcc-rewrite--vignette-0-0-0-9000"></a></h4>
+<h4 id="phase-b--autotune_wcc-rewrite--vignette-0-1-0">Phase B — autotune_wcc rewrite + vignette<a class="anchor" aria-label="anchor" href="#phase-b--autotune_wcc-rewrite--vignette-0-1-0"></a></h4>
 <ul><li>
 <p><strong><code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code> rewritten</strong> as a thin wrapper over <code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code></p>
 <ul><li>a gated stability-penalized selection rule. Takes a <code>dyad_list</code>, sweeps a seconds-specified grid, and selects the parameter cell that is (a) significant vs. the matched-null surrogate in at least <code>sig_pct</code> (default 50%) of dyads, and (b) maximizes <code>median(ES) - iqr_penalty * IQR(ES)</code> across dyads. Interface change: <code>window_sec</code>/<code>lag_sec</code> replace the old <code>window_multipliers</code>/ <code>lag_multipliers</code> arguments.</li>
@@ -61,7 +74,7 @@
 <li><p><code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> on a <code>bsync_multiverse</code> now reports both <code>n_cells</code> (total specifications in the grid) and <code>n_valid</code> (cells that produced a computable effect size); <code>pct_significant</code> is taken over <code>n_valid</code>. This disambiguates the grid total from the number of cells actually evaluated.</p></li>
 </ul></div>
 <div class="section level4">
-<h4 id="phase-a--synchrony-multiverse--suggest_wcc_params-rework-0-0-0-9000">Phase A — Synchrony multiverse + suggest_wcc_params rework<a class="anchor" aria-label="anchor" href="#phase-a--synchrony-multiverse--suggest_wcc_params-rework-0-0-0-9000"></a></h4>
+<h4 id="phase-a--synchrony-multiverse--suggest_wcc_params-rework-0-1-0">Phase A — Synchrony multiverse + suggest_wcc_params rework<a class="anchor" aria-label="anchor" href="#phase-a--synchrony-multiverse--suggest_wcc_params-rework-0-1-0"></a></h4>
 <ul><li><p><strong><code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code></strong> — new function that sweeps a seconds-specified parameter grid across analytic choices (window size, max lag, increment, surrogate method, WCC statistic) and evaluates each specification with a matched-null surrogate test (Invariant 2). The headline metric is effect size vs. the null, not raw synchrony. Supports all three estimators (<code>"wcc"</code>, <code>"wdtw"</code>, <code>"wgranger"</code>). Surrogates are generated once per method and reused across every cell sharing that method (efficiency seam). Returns a <code>bsync_multiverse</code> object (<code>$grid</code>, <code>$settings</code>, <code>$robustness</code>).</p></li>
 <li><p><strong><code><a href="../reference/plot.bsync_multiverse.html">plot.bsync_multiverse()</a></code></strong> — Simonsohn-style specification curve: top panel shows effect sizes sorted by magnitude with significance highlighting; bottom panel is a choice dashboard showing which analytic choices each specification used. Uses pure ggplot2 + base <code>grid</code> package; no new dependencies.</p></li>
 <li><p><strong>Tidy interface for <code>bsync_multiverse</code>.</strong> <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> returns the full specification grid tibble; <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> returns a one-row robustness summary (n_cells, significance rate, median ES, IQR, sign-consistency); <code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble()</a></code> aliases <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>.</p></li>
@@ -69,7 +82,7 @@
 </ul></div>
 </div>
 <div class="section level3">
-<h3 id="m5--shared-windowed-surface--surrogate-framework--tidy-interface-0-0-0-9000">M5 — Shared windowed-surface + surrogate framework + tidy interface<a class="anchor" aria-label="anchor" href="#m5--shared-windowed-surface--surrogate-framework--tidy-interface-0-0-0-9000"></a></h3>
+<h3 id="m5--shared-windowed-surface--surrogate-framework--tidy-interface-0-1-0">M5 — Shared windowed-surface + surrogate framework + tidy interface<a class="anchor" aria-label="anchor" href="#m5--shared-windowed-surface--surrogate-framework--tidy-interface-0-1-0"></a></h3>
 <ul><li><p><strong>Unified <code>$aggregate</code> slot.</strong> All three estimators (<code><a href="../reference/wcc.html">wcc()</a></code>, <code><a href="../reference/wdtw.html">wdtw()</a></code>, <code><a href="../reference/wgranger.html">wgranger()</a></code>) now return a named numeric <code>$aggregate</code> in place of the old per-estimator <code>$fisher_z</code> / <code>$mean_distance</code> scalar. WCC returns <code>c(mean_abs_z = ...)</code> or <code>c(peak = ...)</code> depending on <code>statistic</code>; WDTW returns <code>c(mean_distance = ...)</code>; Granger returns <code>c(f_xy = ..., f_yx = ...)</code>.</p></li>
 <li><p><strong><code>bsync_surface</code> superclass.</strong> All three result objects now inherit <code>"bsync_surface"</code> in addition to their leaf class (<code>"wcc_res"</code>, <code>"wdtw_res"</code>, <code>"wgranger_res"</code>). This enables dispatch of shared methods.</p></li>
 <li>
@@ -97,14 +110,14 @@
 <li><p><strong>Bug fix — <code>wdtw_surrogate(fast_method = TRUE)</code> window alignment.</strong> The fast path now evaluates surrogates over exactly the windows of the observed lagged surface (edges reserved at both ends), at lag 0. A regression in an interim refactor had it use a lag-free grid that shifted windows past the series end, over-counting windows and producing spurious out-of-range <code>NA</code>s. The slow (default) path was unaffected.</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="m4--selectable-wcc-aggregate-statistic-0-0-0-9000">M4 — Selectable WCC aggregate statistic<a class="anchor" aria-label="anchor" href="#m4--selectable-wcc-aggregate-statistic-0-0-0-9000"></a></h3>
+<h3 id="m4--selectable-wcc-aggregate-statistic-0-1-0">M4 — Selectable WCC aggregate statistic<a class="anchor" aria-label="anchor" href="#m4--selectable-wcc-aggregate-statistic-0-1-0"></a></h3>
 <ul><li><p><strong><code><a href="../reference/wcc.html">wcc()</a></code> gains a <code>statistic</code> argument</strong> (<code>"mean_abs_z"</code> | <code>"peak"</code>, default <code>"mean_abs_z"</code>). <code>"mean_abs_z"</code> is the SUSY <em>mean absolute Z</em> (Tschacher &amp; Meier, 2020) — the mean of |Fisher’s Z| over all windows and lags — and reproduces the pre-M4 behavior exactly. <code>"peak"</code> is the rMEA <em>best-lag</em> convention (Boker et al., 2002): per window, the maximum |Fisher’s Z| across lags; then mean across windows.</p></li>
 <li><p><strong><code><a href="../reference/wcc_surrogate.html">wcc_surrogate()</a></code> gains the same <code>statistic</code> argument.</strong> The null distribution is always built with the same statistic as the observed value (Invariant 2). Pass the same value to both functions.</p></li>
 <li><p><strong>Shared internal helper.</strong> Both functions now call <code>wcc_aggregate()</code>, a single internal helper, guaranteeing the observed and surrogate aggregates are numerically identical.</p></li>
 <li><p><strong>Print methods updated.</strong> <code>print.wcc_res</code> and <code>print.wcc_surr</code> label the aggregate line according to the chosen statistic.</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="m3--cran-readiness-0-0-0-9000">M3 — CRAN readiness<a class="anchor" aria-label="anchor" href="#m3--cran-readiness-0-0-0-9000"></a></h3>
+<h3 id="m3--cran-readiness-0-1-0">M3 — CRAN readiness<a class="anchor" aria-label="anchor" href="#m3--cran-readiness-0-1-0"></a></h3>
 <ul><li><p><strong>Build artifacts removed from version control.</strong> <code>src/*.o</code>, <code>src/bsync.{so,dll}</code>, <code>.DS_Store</code>, and <code>tests/testthat/Rplots.pdf</code> were untracked via <code>git rm --cached</code>; <code>.gitignore</code> now carries <code>*.o</code>, <code>*.so</code>, <code>*.dll</code>, <code>*.dylib</code>, and <code>Rplots.pdf</code> patterns.</p></li>
 <li><p><strong>Documentation complete.</strong> Added <code>@return</code> to all 18 exported <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> methods (<code>print.wcc_res</code>, <code>summary.wcc_res</code>, <code>print.wdtw_res</code>, <code>print/summary.wgranger_res</code>, <code>print/summary.wcc_optima</code>, <code>print/summary.wdtw_optima</code>, <code>print.bsync_lai</code>, <code>plot.bsync_lai</code>, <code>plot.wcc_res</code>, <code>plot.wdtw_res</code>, <code>plot.wgranger_res</code>, <code>plot_optima_overlay</code>, <code>print.wcc_surr</code>, <code>print.wdtw_surr</code>, <code>print.wgranger_surr</code>). <code>R CMD check --as-cran</code> now reports 0 errors / 0 warnings / 0 notes.</p></li>
 <li><p><strong>DESCRIPTION updated.</strong> Description field refreshed to cover all three windowed estimators (WCC, WDTW, Granger), surrogate significance testing (circular-shift and phase-randomization generators), optima picking, leadership asymmetry index, and the full preprocessing pipeline. <code>Language: en-US</code> field added.</p></li>
@@ -112,7 +125,7 @@
 <li><p><strong>README corrected.</strong> The surrogate example chunk now uses the correct two-step API: <code><a href="../reference/generate_surrogate_circular.html">generate_surrogate_circular()</a></code> to build the null matrix, then <code><a href="../reference/wcc_surrogate.html">wcc_surrogate()</a></code> with <code>y_surrogates</code>. <code><a href="https://pkgdown.r-lib.org/reference/check_pkgdown.html" class="external-link">pkgdown::check_pkgdown()</a></code> passes.</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="m2--efficiency-0-0-0-9000">M2 — Efficiency<a class="anchor" aria-label="anchor" href="#m2--efficiency-0-0-0-9000"></a></h3>
+<h3 id="m2--efficiency-0-1-0">M2 — Efficiency<a class="anchor" aria-label="anchor" href="#m2--efficiency-0-1-0"></a></h3>
 <ul><li><p><strong>WCC core rewritten to an NA-aware prefix-sum algorithm.</strong> <code>calc_wcc_cpp()</code> now preprocesses six masked prefix-sum arrays per lag in O(n) and evaluates each window in O(1), replacing the prior O(w_max) inner loop. Both <code>na.rm</code> modes are preserved exactly. Speedup on typical configurations: 5–25× depending on <code>window_size</code> and <code>lag_max</code>; see <code>bench/RESULTS.md</code> for measured timings.</p></li>
 <li><p><strong>OpenMP removed.</strong> The prefix-sum speedup makes OpenMP unnecessary for the WCC core. <code>SHLIB_OPENMP_CXXFLAGS</code> has been stripped from <code>src/Makevars</code> and <code>src/Makevars.win</code>; the package is serial-by-default and fully reproducible on all platforms.</p></li>
 <li><p>M1: <code>na.rm</code> is now honored in WCC. <code>calc_wcc_cpp()</code> gains an <code>na_rm</code> parameter; <code>na.rm = FALSE</code> in <code><a href="../reference/wcc.html">wcc()</a></code> / <code><a href="../reference/wcc_surrogate.html">wcc_surrogate()</a></code> now returns <code>NA</code> for any window containing a missing value instead of silently using pairwise-complete pairs.</p></li>

@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">bsync</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,12 +39,16 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/choosing-parameters.html">Choosing WCC Parameters</a></li>
-    <li><a class="dropdown-item" href="../articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
-    <li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Core estimators</h6></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
     <li><a class="dropdown-item" href="../articles/wgranger-workflow.html">Windowed Granger Causality</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Going deeper</h6></li>
+    <li><a class="dropdown-item" href="../articles/choosing-parameters.html">Choosing Analysis Parameters</a></li>
+    <li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
+    <li><a class="dropdown-item" href="../articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
   </ul>
 </li>
       </ul>
@@ -259,7 +263,7 @@ frames (1 second) to allow for overlap and smooth transitions.</p>
 <span><span class="co">#&gt; Total Lags Tested: 91</span></span>
 <span><span class="co">#&gt; Window Size: 90</span></span>
 <span><span class="co">#&gt; Max Lag: 45</span></span>
-<span><span class="co">#&gt; Mean |Fisher's Z|: 0.452</span></span>
+<span><span class="co">#&gt; Mean Abs. Fisher's Z: 0.452</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Cross-Correlation Value Distribution</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -388,8 +392,8 @@ time.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">surrogate_results</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">WCC Surrogate Analysis (Pseudo-Synchrony)</span> <span style="color: #00BBBB;">───────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; Permutations: 1000</span></span>
-<span><span class="co">#&gt; Observed Mean |Fisher's Z|: : 0.452</span></span>
-<span><span class="co">#&gt; Average Null Mean |Fisher's Z|: : 0.3175</span></span>
+<span><span class="co">#&gt; Observed Mean Abs. Fisher's Z: 0.452</span></span>
+<span><span class="co">#&gt; Average Null Mean Abs. Fisher's Z: 0.3175</span></span>
 <span><span class="co">#&gt; Empirical p-value: &lt; 0.001</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Observed synchrony is significantly greater than chance.</span></span></code></pre></div>
 <p>The output provides an empirical p-value by calculating the

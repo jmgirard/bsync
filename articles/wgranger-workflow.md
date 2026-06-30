@@ -274,3 +274,17 @@ This visualization confirms our simulation perfectly.
 By applying Windowed Granger Causality, we have successfully extracted a
 rigorous, directional statistical inference from continuous behavioral
 data.
+
+## See also
+
+- [`vignette("choosing-parameters")`](https://jmgirard.github.io/bsync/articles/choosing-parameters.md)
+  for tools to choose and validate `window_size` and `ar_order`,
+  including a
+  [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
+  parameter sweep that works with WGC
+- [`vignette("surrogate-testing")`](https://jmgirard.github.io/bsync/articles/surrogate-testing.md)
+  for a deeper treatment of circular-shift vs. phase-randomization
+  surrogate methods and best practices for permutation count
+- [`vignette("wcc-workflow")`](https://jmgirard.github.io/bsync/articles/wcc-workflow.md)
+  for the Windowed Cross-Correlation workflow, which shares the same
+  surrogate pipeline and tidy interface

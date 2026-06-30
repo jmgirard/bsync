@@ -131,3 +131,12 @@ We can now safely proceed to downsample our entire dataset using
 or
 [`bsync::downsample_signal()`](https://jmgirard.github.io/bsync/reference/downsample_signal.md)
 before running our synchrony analyses.
+
+## See also
+
+- [`vignette("choosing-parameters")`](https://jmgirard.github.io/bsync/articles/choosing-parameters.md)
+  for the next step: choosing `window_size` and `lag_max` parameters
+  that are appropriate for your (possibly resampled) signal
+- [`vignette("wcc-workflow")`](https://jmgirard.github.io/bsync/articles/wcc-workflow.md)
+  for the full Windowed Cross-Correlation pipeline, which builds on
+  preprocessed data prepared with the tools shown here

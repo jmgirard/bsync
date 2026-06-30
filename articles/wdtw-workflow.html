@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">bsync</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,12 +39,16 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/choosing-parameters.html">Choosing WCC Parameters</a></li>
-    <li><a class="dropdown-item" href="../articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
-    <li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Core estimators</h6></li>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
     <li><a class="dropdown-item" href="../articles/wgranger-workflow.html">Windowed Granger Causality</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Going deeper</h6></li>
+    <li><a class="dropdown-item" href="../articles/choosing-parameters.html">Choosing Analysis Parameters</a></li>
+    <li><a class="dropdown-item" href="../articles/surrogate-testing.html">Surrogate Testing for Significance</a></li>
+    <li><a class="dropdown-item" href="../articles/determine-downsampling.html">Determining the Downsampling Rate</a></li>
   </ul>
 </li>
       </ul>
@@ -388,6 +392,24 @@ together using the native R pipe (<code>|&gt;</code>):</p>
 over momentary frame-by-frame jitter to reveal the broader structural
 periods of dominance. The resulting plot makes the continuous transition
 of leadership from Person A to Person B perfectly clear.</p>
+</div>
+<div class="section level2">
+<h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a>
+</h2>
+<ul>
+<li>
+<code><a href="../articles/choosing-parameters.html">vignette("choosing-parameters")</a></code> for tools to choose and
+validate <code>window_size</code> and <code>lag_max</code> for any
+estimator, including a parameter-sweep specification curve</li>
+<li>
+<code><a href="../articles/surrogate-testing.html">vignette("surrogate-testing")</a></code> for a deeper treatment of
+circular-shift vs. phase-randomization surrogate methods and best
+practices for permutation count</li>
+<li>
+<code><a href="../articles/wcc-workflow.html">vignette("wcc-workflow")</a></code> for the Windowed
+Cross-Correlation workflow, which shares the same optima and leadership
+pipeline</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -332,3 +332,15 @@ By grouping the windows into local epochs, the LAI function smooths over
 momentary frame-by-frame jitter to reveal the broader structural periods
 of dominance. The resulting plot makes the continuous transition of
 leadership from Person A to Person B perfectly clear.
+
+## See also
+
+- [`vignette("choosing-parameters")`](https://jmgirard.github.io/bsync/articles/choosing-parameters.md)
+  for tools to choose and validate `window_size` and `lag_max` for any
+  estimator, including a parameter-sweep specification curve
+- [`vignette("surrogate-testing")`](https://jmgirard.github.io/bsync/articles/surrogate-testing.md)
+  for a deeper treatment of circular-shift vs. phase-randomization
+  surrogate methods and best practices for permutation count
+- [`vignette("wcc-workflow")`](https://jmgirard.github.io/bsync/articles/wcc-workflow.md)
+  for the Windowed Cross-Correlation workflow, which shares the same
+  optima and leadership pipeline
