@@ -105,6 +105,10 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
      optima/leadership.
   7. 353 tests green; vdiffr snapshots unchanged; styler applied across tests + vignettes; NEWS.md
      gained an M3 entry.
+  Post-review: deprecated `context()` removed from `test-impute.R` (suite now 0 warnings);
+  spell-check enforced in CI via `usethis::use_spell_check()` (adds `tests/spelling.R` skip-on-cran
+  + `spelling` to `Suggests`) so `inst/WORDLIST` can no longer drift unnoticed — reverses the
+  plan-time "ad hoc, not a dep" choice by design. `R CMD check --as-cran` remains 0/0/0.
 
 ## Current focus
 
