@@ -62,33 +62,26 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
   surrogate `@details` document null-statistic semantics and `fast_method` caveat; surrogate
   robustness and p-value sanity tests added (349 total).
 
+- **M2 — Efficiency (done).** All five acceptance criteria met (commits `ce385b1`–`b31d60d`
+  on `main`; 352 tests passing, 0 errors/0 warnings/2 notes in `R CMD check`):
+  1. `calc_wcc_cpp` rewritten to an NA-aware prefix-sum algorithm (loops over distinct lags,
+     builds six masked prefix arrays in O(n) per τ, evaluates each window in O(1)). Both `na_rm`
+     modes, bounds-check→NA, and variance-zero guard preserved. Signature unchanged; `RcppExports`
+     regenerates with no diff.
+  2. Pure-R `stats::cor` oracle matches new core at 1e-9 on `sim_dyad` for clean, NA na.rm=TRUE,
+     and NA na.rm=FALSE cases (`test-wcc.R`). Oracle was first validated against the pre-rewrite
+     core, proving it correct before the optimization.
+  3. `bench/bench_wcc.R` + `bench/RESULTS.md` record 5.4×–24.9× speedup across four configs
+     (sim_dyad narrow/wide, n=10000 narrow/wide). Speedup grows with w_max as expected.
+  4. OpenMP removed: no `SHLIB_OPENMP` flags in `Makevars`/`Makevars.win`, no `#pragma omp`
+     in any source file. Decision logged in `DESIGN.md §14`; core is serial and reproducible.
+  5. 352 tests green; vdiffr snapshots unchanged; no build artifacts staged.
+
 ## Current focus
 
 **Hardening cycle toward a near-term CRAN submission**, run as four focused milestones via the
-plan → implement → review loop. **M2 is active.**
+plan → implement → review loop. **M3 is next.**
 
-- **M2 — Efficiency (active).** WCC-core prefix-sum optimization, serial, OpenMP removed.
-  Acceptance criteria:
-  1. `calc_wcc_cpp` rewritten to an **NA-aware prefix-sum** algorithm: loop over distinct lags `τ`,
-     build masked per-position prefix sums (mask, `x·m`, `y·m`, `x²·m`, `y²·m`, cross-term
-     `x·y·m`), so per-`(i, τ)` work is `O(1)` after `O(n)` per-`τ` preprocessing. Both `na_rm`
-     modes reproduce the prior pairwise (`TRUE`) / any-NA→NA (`FALSE`) semantics; the
-     bounds-check→`NA` behavior is preserved. **Signature unchanged** — `compileAttributes()`
-     regenerates `RcppExports` with no diff.
-  2. **Numerical-regression oracle** (Invariant 5): a pure-R per-window Pearson reference
-     (`stats::cor`, independent of the C++) matches `calc_wcc_cpp` within `1e-9` on `sim_dyad` for
-     three cases — clean, NA-injected `na_rm = TRUE` (pairwise), NA-injected `na_rm = FALSE`
-     (any-NA→NA). Written against the pre-rewrite core first (proves the oracle), then must stay
-     green after the rewrite.
-  3. `bench/bench_wcc.R` + `bench/RESULTS.md` record before/after timings on `sim_dyad` and a
-     larger synthetic series across a couple `(window_size, lag_max)` configs; the **measured**
-     speedup is cited (no hard threshold — correctness is the gate, speed is the report).
-  4. **OpenMP removed:** no `SHLIB_OPENMP` flags in `Makevars`/`Makevars.win`, no
-     `#pragma omp`/`_OPENMP` in `src/`; the resolved decision is logged in `DESIGN.md` §14; the
-     core stays serial and reproducible.
-  5. Full suite green; existing WCC tests and `vdiffr` snapshots still pass (floating-point shift
-     below render/test tolerance — investigate before re-accepting, never blindly); no build
-     artifacts staged.
 - **M3 — CRAN readiness.** Untrack build artifacts; clean `.gitignore`/`.Rbuildignore`; regenerate
   `RcppExports`; `R CMD check --as-cran` → 0/0/0; README/pkgdown pass.
 - **M4 — Selectable WCC aggregate statistic.** `statistic = c("mean_abs_z","peak")` on `wcc()` +
