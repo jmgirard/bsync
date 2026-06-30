@@ -359,14 +359,17 @@ test_that("M4: peak statistic matches pure-R oracle on sim_dyad", {
   y <- sim_dyad$x_B
   res <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "peak")
 
-  # Oracle: per window take max |Fisher-z| across lags, then mean across windows
+  # Oracle: explicit for-loop (no tapply) — per window max |Fisher-z|, then mean
   df <- res$results_df
-  r_clamped <- pmax(pmin(df$wcc, 0.9999), -0.9999)
-  az <- abs(atanh(r_clamped))
-  window_peaks <- tapply(az, df$i, function(v) {
-    if (all(is.na(v))) NA_real_ else max(v, na.rm = TRUE)
-  })
-  oracle_peak <- mean(window_peaks, na.rm = TRUE)
+  windows <- unique(df$i)
+  peaks <- numeric(length(windows))
+  for (k in seq_along(windows)) {
+    r_win <- df$wcc[df$i == windows[k]]
+    r_clamped <- pmax(pmin(r_win, 0.9999), -0.9999)
+    az <- abs(atanh(r_clamped))
+    peaks[k] <- if (all(is.na(az))) NA_real_ else max(az, na.rm = TRUE)
+  }
+  oracle_peak <- mean(peaks, na.rm = TRUE)
 
   expect_equal(res$fisher_z, oracle_peak, tolerance = 1e-9)
 })
@@ -379,4 +382,39 @@ test_that("M4: peak > mean_abs_z (peak is an upper bound on mean)", {
   res_peak <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "peak")
 
   expect_gte(res_peak$fisher_z, res_maz$fisher_z)
+})
+
+test_that("M4: peak handles all-NA windows (wcc_aggregate NA branch)", {
+  # Constant x -> all correlations NA; wcc_aggregate peak must not return -Inf
+  x_const <- rep(5, 30)
+  y <- rnorm(30)
+  res <- wcc(x_const, y, window_size = 8, lag_max = 3, statistic = "peak")
+
+  expect_true(all(is.na(res$results_df$wcc)))
+  expect_true(is.nan(res$fisher_z) || is.na(res$fisher_z))
+})
+
+test_that("M4: peak statistic is unaffected by time remapping", {
+  # The peak aggregate groups by window; supplying time= relabels groups but the
+  # partition is identical, so fisher_z must be unchanged.
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  t_vec <- seq(0, by = 1 / 30, length.out = length(x))
+
+  res_no_time <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "peak")
+  res_with_time <- wcc(x, y, time = t_vec, window_size = 96, lag_max = 10,
+    statistic = "peak")
+
+  expect_equal(res_with_time$fisher_z, res_no_time$fisher_z)
+})
+
+test_that("M4: print.wcc_res labels aggregate by chosen statistic", {
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+
+  res_maz <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "mean_abs_z")
+  res_peak <- wcc(x, y, window_size = 96, lag_max = 10, statistic = "peak")
+
+  expect_message(print(res_maz), "Mean \\|Fisher")
+  expect_message(print(res_peak), "Mean Peak \\|Fisher")
 })

@@ -268,6 +268,30 @@ test_that("M4: wcc_surrogate observed_z matches wcc() fisher_z exactly (Invarian
   expect_equal(res_surr_peak$observed_z, res_wcc_peak$fisher_z)
 })
 
+test_that("M4: surrogate loop aggregate equals observed path (cross-path Invariant 2)", {
+  # Pass y itself as the sole surrogate; surrogate_z[1] must equal observed_z.
+  # This exercises the surrogate loop's wcc_aggregate(grid_df$row) call site
+  # independently from the observed wcc_aggregate(results_df$i) call site —
+  # the two code paths use different group labels but the same partition.
+  x <- sim_dyad$x_A
+  y <- sim_dyad$x_B
+  y_self <- matrix(y, ncol = 1)
+
+  for (stat in c("mean_abs_z", "peak")) {
+    res_obs <- wcc(x, y, window_size = 96, lag_max = 10, statistic = stat)
+    res_surr <- wcc_surrogate(
+      x, y,
+      y_surrogates = y_self,
+      window_size = 96, lag_max = 10,
+      statistic = stat
+    )
+    expect_equal(
+      res_surr$surrogate_z[[1]], res_obs$fisher_z,
+      label = paste0("surrogate loop == observed for statistic='", stat, "'")
+    )
+  }
+})
+
 test_that("M4: wcc_surrogate statistic arg is validated and recorded", {
   set.seed(2)
   x <- sim_dyad$x_A
@@ -291,4 +315,36 @@ test_that("M4: wcc_surrogate statistic arg is validated and recorded", {
     ),
     "should be one of"
   )
+})
+
+test_that("M4: peak p-value is small for coupled series, large for independent", {
+  set.seed(123)
+  n <- 100
+  x_coupled <- sin(seq(0, 4 * pi, length.out = n))
+  y_coupled <- x_coupled + rnorm(n, sd = 0.05)
+  y_surr_coupled <- generate_surrogate_circular(y_coupled, n_surrogates = 50,
+    lag_max = 5)
+
+  res_coupled <- wcc_surrogate(
+    x_coupled, y_coupled,
+    y_surrogates = y_surr_coupled,
+    window_size = 20, lag_max = 5,
+    statistic = "peak"
+  )
+  expect_true(res_coupled$observed_z > mean(res_coupled$surrogate_z))
+  expect_true(res_coupled$p_value <= 0.10)
+
+  set.seed(456)
+  x_indep <- rnorm(n)
+  y_indep <- rnorm(n)
+  y_surr_indep <- generate_surrogate_circular(y_indep, n_surrogates = 50,
+    lag_max = 5)
+
+  res_indep <- wcc_surrogate(
+    x_indep, y_indep,
+    y_surrogates = y_surr_indep,
+    window_size = 20, lag_max = 5,
+    statistic = "peak"
+  )
+  expect_true(res_indep$p_value > 0.05)
 })
