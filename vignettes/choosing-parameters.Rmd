@@ -41,8 +41,8 @@ selection rule directly to a list of multiverse results.
 
 ## 1. Data-Driven Starting Values: `suggest_wcc_params()`
 
-When you have a representative series in hand, let the signal tell you its own dominant timescale
-via power spectral density (PSD):
+When you have a representative series in hand, let the signal tell you its own characteristic
+timescale via power spectral density (PSD):
 
 ```{r suggest}
 fs <- 80 # sampling rate of sim_dyad (Hz)

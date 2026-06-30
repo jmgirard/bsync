@@ -116,13 +116,20 @@ wcc <- function(
 #' Suggest WCC Hyperparameters
 #'
 #' Derives principled starting values for Windowed Cross-Correlation parameters
-#' from the **measured signal** via PSD-based dominant timescale estimation.
+#' from the **measured signal** via PSD-based timescale estimation.
 #'
 #' @details
-#' **Dominant timescale.** When `event_duration_sec` is `NULL` (default), the
-#' function estimates the dominant behavioral cycle from the measured signal via
-#' [evaluate_signal_power()]: `event_duration_sec = 1 / primary_cutoff_freq`.
-#' Pass a numeric value to override with your own theoretical estimate.
+#' **Signal timescale (PSD power cutoff).** When `event_duration_sec` is `NULL`
+#' (default), the function estimates a characteristic timescale from the measured
+#' signal via [evaluate_signal_power()]: `event_duration_sec = 1 /
+#' primary_cutoff_freq`, where `primary_cutoff_freq` is the frequency below which
+#' `threshold` (default 95%) of the signal's power lies. This *power-cutoff*
+#' frequency -- the fastest behaviorally relevant timescale -- is used
+#' deliberately rather than the single largest spectral peak: raw movement
+#' spectra are dominated by low-frequency / DC components (a slow drift can hold
+#' most of the power), so a spectral-peak estimate would collapse toward 0 Hz and
+#' an unusably long window. The power cutoff is robust to that. Pass a numeric
+#' value to override with your own theoretical estimate.
 #'
 #' **Window size (4-cycles heuristic).** `window_size = round(event_duration_sec
 #' * 4 * sample_rate)` (Boker et al., 2002). Four cycles yields a stable
@@ -144,9 +151,9 @@ wcc <- function(
 #' @param x Numeric vector; the reference time series.
 #' @param y Numeric vector; the query time series (same length as `x`).
 #' @param sample_rate A numeric value indicating the sampling rate in Hertz.
-#' @param event_duration_sec Optional numeric override for the dominant
-#'   behavioral cycle duration in seconds. Default `NULL` derives it from the
-#'   PSD of `x` and `y` via [evaluate_signal_power()].
+#' @param event_duration_sec Optional numeric override for the characteristic
+#'   event timescale in seconds. Default `NULL` derives it from the power-cutoff
+#'   frequency of `x` and `y` via [evaluate_signal_power()].
 #' @param max_delay_sec The maximum plausible reaction time between participants
 #'   in seconds, used to set the initial `lag_max`. Default is `3`.
 #' @param overlap_pct The desired proportion of overlap between consecutive
@@ -156,7 +163,7 @@ wcc <- function(
 #' @return A named list with `window_size`, `lag_max`, `window_increment`, and
 #'   `lag_increment`, ready to pass to [wcc()].
 #' @examples
-#' # Derive starting parameters from the signal's own dominant timescale.
+#' # Derive starting parameters from the signal's own power-cutoff timescale.
 #' # (The default max delay exceeds window/2 here, so the SUSY rule caps
 #' # lag_max -- an example of the loud, non-destructive constraint messages.)
 #' params <- suggest_wcc_params(
@@ -200,7 +207,7 @@ suggest_wcc_params <- function(
 
   n <- length(x)
 
-  # --- Derive dominant timescale from PSD if not supplied ---------------
+  # --- Derive timescale from PSD power cutoff if not supplied -----------
   if (is.null(event_duration_sec)) {
     psd_res <- evaluate_signal_power(
       x           = list(x = x, y = y),
@@ -209,7 +216,7 @@ suggest_wcc_params <- function(
     )
     cycle_sec <- 1 / psd_res$primary_cutoff_freq
     cli::cli_alert_info(
-      "PSD dominant cycle: {round(cycle_sec, 2)} s \\
+      "PSD power-cutoff timescale: {round(cycle_sec, 2)} s \\
        (cutoff {round(psd_res$primary_cutoff_freq, 2)} Hz)."
     )
   } else {

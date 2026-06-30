@@ -52,7 +52,15 @@
   devices without UTF-8 support (the non-ASCII label could otherwise fail when
   rendering examples on some platforms).
 
-## M6 — Parameter guidance & synchrony multiverse
+* **`suggest_wcc_params()` documentation clarified.** The helper derives its
+  timescale from the PSD *power cutoff* (the frequency below which 95% of the
+  signal's power lies), not the single largest spectral peak — a deliberate,
+  now-documented choice that is robust to the low-frequency / DC power that
+  dominates raw movement spectra. Behavior is unchanged; the roxygen and the
+  console message no longer call this the "dominant" cycle. The
+  `choosing-parameters` vignette's worked numbers were corrected to match
+  (the PSD path yields a 256-sample window here; the 640-sample figure belongs
+  to the `event_duration_sec = 2` theory override).
 
 ### Phase B — autotune_wcc rewrite + vignette
 

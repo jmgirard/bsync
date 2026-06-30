@@ -21,9 +21,9 @@ suggest_wcc_params(
 
 \item{sample_rate}{A numeric value indicating the sampling rate in Hertz.}
 
-\item{event_duration_sec}{Optional numeric override for the dominant
-behavioral cycle duration in seconds. Default `NULL` derives it from the
-PSD of `x` and `y` via [evaluate_signal_power()].}
+\item{event_duration_sec}{Optional numeric override for the characteristic
+event timescale in seconds. Default `NULL` derives it from the power-cutoff
+frequency of `x` and `y` via [evaluate_signal_power()].}
 
 \item{max_delay_sec}{The maximum plausible reaction time between participants
 in seconds, used to set the initial `lag_max`. Default is `3`.}
@@ -40,13 +40,20 @@ A named list with `window_size`, `lag_max`, `window_increment`, and
 }
 \description{
 Derives principled starting values for Windowed Cross-Correlation parameters
-from the **measured signal** via PSD-based dominant timescale estimation.
+from the **measured signal** via PSD-based timescale estimation.
 }
 \details{
-**Dominant timescale.** When `event_duration_sec` is `NULL` (default), the
-function estimates the dominant behavioral cycle from the measured signal via
-[evaluate_signal_power()]: `event_duration_sec = 1 / primary_cutoff_freq`.
-Pass a numeric value to override with your own theoretical estimate.
+**Signal timescale (PSD power cutoff).** When `event_duration_sec` is `NULL`
+(default), the function estimates a characteristic timescale from the measured
+signal via [evaluate_signal_power()]: `event_duration_sec = 1 /
+primary_cutoff_freq`, where `primary_cutoff_freq` is the frequency below which
+`threshold` (default 95%) of the signal's power lies. This *power-cutoff*
+frequency -- the fastest behaviorally relevant timescale -- is used
+deliberately rather than the single largest spectral peak: raw movement
+spectra are dominated by low-frequency / DC components (a slow drift can hold
+most of the power), so a spectral-peak estimate would collapse toward 0 Hz and
+an unusably long window. The power cutoff is robust to that. Pass a numeric
+value to override with your own theoretical estimate.
 
 **Window size (4-cycles heuristic).** `window_size = round(event_duration_sec
 * 4 * sample_rate)` (Boker et al., 2002). Four cycles yields a stable
@@ -66,7 +73,7 @@ cycles (the Nyquist minimum) is too noisy.
 All violations produce informative messages, not silent changes.
 }
 \examples{
-# Derive starting parameters from the signal's own dominant timescale.
+# Derive starting parameters from the signal's own power-cutoff timescale.
 # (The default max delay exceeds window/2 here, so the SUSY rule caps
 # lag_max -- an example of the loud, non-destructive constraint messages.)
 params <- suggest_wcc_params(
