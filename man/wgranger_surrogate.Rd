@@ -35,3 +35,10 @@ A list object of class "wgranger_surr".
 \description{
 Calculate Surrogate Windowed Granger Causality
 }
+\details{
+Two p-values are returned: one for x → y and one for y → x. Each is the proportion of
+surrogates whose mean F-statistic across windows is **at least as large as** the
+corresponding observed mean F-statistic. Both null distributions are built with the same
+aggregate (`mean(f_xy)` and `mean(f_yx)`) as the observed statistics stored in
+`wgranger_res$results_df`, so the null and observed values are directly comparable.
+}
