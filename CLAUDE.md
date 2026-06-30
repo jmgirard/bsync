@@ -62,8 +62,9 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
   surrogate `@details` document null-statistic semantics and `fast_method` caveat; surrogate
   robustness and p-value sanity tests added (349 total).
 
-- **M2 — Efficiency (done).** All five acceptance criteria met (commits `ce385b1`–`b31d60d`
-  on `main`; 352 tests passing, 0 errors/0 warnings/2 notes in `R CMD check`):
+- **M2 — Efficiency (done).** All five acceptance criteria met; post-review fixes applied
+  (commits `ce385b1`–`644d140` on `main`; 353 tests passing, 0 errors/0 warnings/0 notes in
+  `R CMD check`):
   1. `calc_wcc_cpp` rewritten to an NA-aware prefix-sum algorithm (loops over distinct lags,
      builds six masked prefix arrays in O(n) per τ, evaluates each window in O(1)). Both `na_rm`
      modes, bounds-check→NA, and variance-zero guard preserved. Signature unchanged; `RcppExports`
@@ -75,7 +76,11 @@ A read of the baseline surfaced the defects M1–M3 address (see Current focus a
      (sim_dyad narrow/wide, n=10000 narrow/wide). Speedup grows with w_max as expected.
   4. OpenMP removed: no `SHLIB_OPENMP` flags in `Makevars`/`Makevars.win`, no `#pragma omp`
      in any source file. Decision logged in `DESIGN.md §14`; core is serial and reproducible.
-  5. 352 tests green; vdiffr snapshots unchanged; no build artifacts staged.
+  5. 353 tests green; vdiffr snapshots unchanged; no build artifacts staged.
+  Post-review: explicit C++ stdlib includes added (`<algorithm>`, `<unordered_map>`, etc.) for
+  CRAN portability; large-mean oracle test added documenting ~2e-6 prefix-sum cancellation loss
+  (tolerance 1e-5 catches real bugs); `.Rbuildignore` gains `^\.claude$`, `^CLAUDE\.md$`,
+  `^DESIGN\.md$`, `^bench$` — `R CMD check` is now 0/0/0.
 
 ## Current focus
 
