@@ -30,6 +30,12 @@ carries only the one-line index below. To avoid redundancy, each kind of note ha
 - **Design-contract changes** → `DESIGN.md` §1–14 (its §15 is the forward roadmap plus a pointer to
   `MILESTONES.md`, **not** a second copy of the log).
 
+**User-facing docs must not reference milestone numbers.** README, vignettes, roxygen (and the
+generated `man/*.Rd`), and `NEWS.md` describe features in plain terms — never `M<n>`. `NEWS.md` is
+organized by release/theme, not by milestone. Internal `#` code comments in `R/` *may* carry
+milestone tags for dev provenance. `tests/testthat/test-doc-hygiene.R` enforces this (scans the
+user-facing docs, skips `R/`).
+
 ## Completed milestones
 
 One line each; full detail in [`MILESTONES.md`](MILESTONES.md).
