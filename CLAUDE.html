@@ -72,7 +72,8 @@
 <strong>User-facing changes</strong> → <code>NEWS.md</code>.</li>
 <li>
 <strong>Design-contract changes</strong> → <code>DESIGN.md</code> §1–14 (its §15 is the forward roadmap plus a pointer to <code>MILESTONES.md</code>, <strong>not</strong> a second copy of the log).</li>
-</ul></div>
+</ul><p><strong>User-facing docs must not reference milestone numbers.</strong> README, vignettes, roxygen (and the generated <code>man/*.Rd</code>), and <code>NEWS.md</code> describe features in plain terms — never <code>M&lt;n&gt;</code>. <code>NEWS.md</code> is organized by release/theme, not by milestone. Internal <code>#</code> code comments in <code>R/</code> <em>may</em> carry milestone tags for dev provenance. <code>tests/testthat/test-doc-hygiene.R</code> enforces this (scans the user-facing docs, skips <code>R/</code>).</p>
+</div>
 <div class="section level2">
 <h2 id="completed-milestones">Completed milestones<a class="anchor" aria-label="anchor" href="#completed-milestones"></a></h2>
 <p>One line each; full detail in <a href="MILESTONES.html"><code>MILESTONES.md</code></a>.</p>
