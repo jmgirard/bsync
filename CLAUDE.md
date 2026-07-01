@@ -24,437 +24,56 @@ The package must serve **newcomers** (safe, loud defaults + guidance)
 and **experts** (every hyperparameter exposed, raw surface accessible,
 full surrogate machinery) at once.
 
-## Baseline (pre-milestone)
+## Milestone bookkeeping (single source of truth)
 
-Substantial functionality predates formal milestone tracking; new
-milestones begin at **M1**. The baseline, as built:
+Detailed milestone history — the baseline and the full `M<N> (done)`
+narrative for every completed milestone — lives in **`MILESTONES.md`**
+(repo root), in numeric order with no gaps. This file carries only the
+one-line index below. To avoid redundancy, each kind of note has exactly
+one home:
 
-- **Estimators:**
-  [`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md),
-  [`wdtw()`](https://jmgirard.github.io/bsync/reference/wdtw.md),
-  [`wgranger()`](https://jmgirard.github.io/bsync/reference/wgranger.md)
-  with Rcpp/Armadillo cores (`calc_wcc_cpp`, `calc_wdtw_cpp`,
-  `calc_wgranger_cpp`) and S3 `print`/`summary`/`plot`.
-- **Optima & leadership:**
-  [`pick_optima()`](https://jmgirard.github.io/bsync/reference/pick_optima.md)
-  (+ `pick_optima_cpp`),
-  [`leadership_asymmetry()`](https://jmgirard.github.io/bsync/reference/leadership_asymmetry.md),
-  [`plot_optima_overlay()`](https://jmgirard.github.io/bsync/reference/plot_optima_overlay.md).
-- **Surrogates:**
-  [`generate_surrogate_circular()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.md),
-  [`generate_surrogate_phase()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md),
-  [`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md),
-  [`wdtw_surrogate()`](https://jmgirard.github.io/bsync/reference/wdtw_surrogate.md),
-  [`wgranger_surrogate()`](https://jmgirard.github.io/bsync/reference/wgranger_surrogate.md)
-  (parallel via `future.apply`).
-- **Preprocessing:**
-  [`evaluate_signal_power()`](https://jmgirard.github.io/bsync/reference/evaluate_signal_power.md),
-  [`downsample_signal()`](https://jmgirard.github.io/bsync/reference/downsample_signal.md),
-  [`aggregate_by_time()`](https://jmgirard.github.io/bsync/reference/aggregate_by_time.md),
-  [`smooth_signal()`](https://jmgirard.github.io/bsync/reference/smooth_signal.md),
-  [`trim_edges()`](https://jmgirard.github.io/bsync/reference/trim_edges.md),
-  [`calc_velocity_1d()`](https://jmgirard.github.io/bsync/reference/calc_velocity_1d.md),
-  `calc_speed_{1,2,3}d()`,
-  [`diagnose_ts_gaps()`](https://jmgirard.github.io/bsync/reference/diagnose_ts_gaps.md),
-  [`impute_ts_gaps()`](https://jmgirard.github.io/bsync/reference/impute_ts_gaps.md).
-- **Tuning:**
-  [`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md),
-  [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md).
-- **Data:** `sim_dyad` (simulated 3D dyadic positions with a shifting
-  lead–lag relationship).
-- **Infra:** testthat 3e suite, `vdiffr` plot snapshots, pkgdown config,
-  vignettes (WCC workflow, WDTW, Granger, surrogate testing,
-  downsampling, WCC params).
-
-A read of the baseline surfaced the defects M1–M3 address (see Current
-focus and `DESIGN.md` §14/§15).
+- **Detailed milestone narrative** → `MILESTONES.md`.
+- **One-line index per milestone** → “## Completed milestones” below.
+- **User-facing changes** → `NEWS.md`.
+- **Design-contract changes** → `DESIGN.md` §1–14 (its §15 is the
+  forward roadmap plus a pointer to `MILESTONES.md`, **not** a second
+  copy of the log).
 
 ## Completed milestones
 
-- **M1 — Correctness & robustness (done).** All six acceptance criteria
-  met; post-review fixes applied (commits `741bf7c`–`ed5960f` on `main`;
-  349 tests passing, 0 errors/0 warnings/2 notes in `R CMD check`; notes
-  are M3 scope):
-  1.  `na.rm` honored in WCC: `calc_wcc_cpp` gains `na_rm` bool;
-      `na.rm = FALSE` returns `NA` for any window containing `NA`;
-      forwarded through `create_wcc_df()` and
-      [`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md).
-      Both modes tested in `test-wcc.R`.
-  2.  Window-size semantics fixed to exactly `window_size` samples via
-      `w_max = window_size - 1` at the C++ boundary in all three
-      estimators and all three surrogate wrappers; `n_r` grid math
-      updated; a test asserts realized window count (33, not 32, for the
-      reference parameters).
-  3.  Short-series robustness:
-      [`seq_len()`](https://rdrr.io/r/base/seq.html) throughout;
-      [`cli::cli_abort()`](https://cli.r-lib.org/reference/cli_abort.html)
-      in all three `create_*_df()` builders and all three surrogate grid
-      builders; abort tested for all three estimators.
-  4.  [`evaluate_signal_power()`](https://jmgirard.github.io/bsync/reference/evaluate_signal_power.md)
-      no longer auto-prints: `plot=` arg removed;
-      [`plot.signal_power_res()`](https://jmgirard.github.io/bsync/reference/plot.signal_power_res.md)
-      S3 method added; no `Rplots.pdf` side effect; other compute
-      functions audited.
-  5.  Condition style unified to `cli` in `R/impute.R` and
-      `R/surrogate_generation.R`.
-  6.  [`leadership_asymmetry()`](https://jmgirard.github.io/bsync/reference/leadership_asymmetry.md)
-      roxygen states centered sliding-window semantics; `min_valid`
-      validated;
-      [`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)
-      4-cycles-per-window heuristic documented in `@details`.
-      Post-review: NEWS.md header fixed; OpenMP flags removed from
-      Makevars pending M2 decision; surrogate `@details` document
-      null-statistic semantics and `fast_method` caveat; surrogate
-      robustness and p-value sanity tests added (349 total).
-- **M2 — Efficiency (done).** All five acceptance criteria met;
-  post-review fixes applied (commits `ce385b1`–`644d140` on `main`; 353
-  tests passing, 0 errors/0 warnings/0 notes in `R CMD check`):
-  1.  `calc_wcc_cpp` rewritten to an NA-aware prefix-sum algorithm
-      (loops over distinct lags, builds six masked prefix arrays in O(n)
-      per τ, evaluates each window in O(1)). Both `na_rm` modes,
-      bounds-check→NA, and variance-zero guard preserved. Signature
-      unchanged; `RcppExports` regenerates with no diff.
-  2.  Pure-R [`stats::cor`](https://rdrr.io/r/stats/cor.html) oracle
-      matches new core at 1e-9 on `sim_dyad` for clean, NA na.rm=TRUE,
-      and NA na.rm=FALSE cases (`test-wcc.R`). Oracle was first
-      validated against the pre-rewrite core, proving it correct before
-      the optimization.
-  3.  `bench/bench_wcc.R` + `bench/RESULTS.md` record 5.4×–24.9× speedup
-      across four configs (sim_dyad narrow/wide, n=10000 narrow/wide).
-      Speedup grows with w_max as expected.
-  4.  OpenMP removed: no `SHLIB_OPENMP` flags in
-      `Makevars`/`Makevars.win`, no `#pragma omp` in any source file.
-      Decision logged in `DESIGN.md §14`; core is serial and
-      reproducible.
-  5.  353 tests green; vdiffr snapshots unchanged; no build artifacts
-      staged. Post-review: explicit C++ stdlib includes added
-      (`<algorithm>`, `<unordered_map>`, etc.) for CRAN portability;
-      large-mean oracle test added documenting ~2e-6 prefix-sum
-      cancellation loss (tolerance 1e-5 catches real bugs);
-      `.Rbuildignore` gains `^\.claude$`, `^CLAUDE\.md$`,
-      `^DESIGN\.md$`, `^bench$` — `R CMD check` is now 0/0/0.
-- **M3 — CRAN readiness (done).** All seven acceptance criteria met
-  (commits `184e874`–`69f1ca4` on `main`; 353 tests passing, 0 errors/0
-  warnings/0 notes in `R CMD check --as-cran`). No C++ core numerics
-  changed — only `RcppExports` regenerated to confirm zero diff, so
-  Invariant 5 was not triggered. Plan-time decisions held: version stays
-  `0.0.0.9000`; `cran-comments.md` deferred to actual submission;
-  DESCRIPTION Description refreshed:
-  1.  Build artifacts untracked via `git rm --cached` (`.DS_Store`,
-      `tests/.DS_Store`, six `src/*.o`, `src/bsync.{so,dll}`,
-      `tests/testthat/Rplots.pdf`); `.gitignore` extended with
-      `*.o`/`*.so`/`*.dll`/`*.dylib` + `tests/testthat/Rplots.pdf`.
-      `git ls-files` is artifact-free; `bsync.Rproj`/`LICENSE.md`
-      deliberately kept (already `.Rbuildignore`’d).
-  2.  [`Rcpp::compileAttributes()`](https://rdrr.io/pkg/Rcpp/man/compileAttributes.html)
-      produced zero diff in `src/RcppExports.cpp` / `R/RcppExports.R`.
-  3.  `@return` roxygen added to all 18 exported
-      `print`/`plot`/`summary` methods + `plot_optima_overlay`;
-      re-documented. Only `sim_dyad` (data) and `bsync-package`
-      (overview) omit `\value`, both legitimately.
-  4.  `R CMD check --as-cran` = 0/0/0 (verified twice during
-      implementation); examples needed no `\donttest{}` (check reports
-      “examples … NONE”).
-  5.  `urlchecker::url_check()` clean;
-      [`spelling::spell_check_package()`](https://docs.ropensci.org/spelling//reference/spell_check_package.html)
-      clean via new `inst/WORDLIST` and `Language: en-US` in DESCRIPTION
-      (neither tool added to deps).
-  6.  `devtools::build_readme()` regenerated `README.md` (and fixed a
-      broken
-      [`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md)
-      example that passed a non-existent `n_surrogates` arg instead of a
-      `y_surrogates` matrix);
-      [`pkgdown::check_pkgdown()`](https://pkgdown.r-lib.org/reference/check_pkgdown.html)
-      passes; DESCRIPTION Description now covers
-      WDTW/Granger/surrogates/ optima/leadership.
-  7.  353 tests green; vdiffr snapshots unchanged; styler applied across
-      tests + vignettes; NEWS.md gained an M3 entry. Post-review:
-      deprecated `context()` removed from `test-impute.R` (suite now 0
-      warnings); spell-check enforced in CI via
-      `usethis::use_spell_check()` (adds `tests/spelling.R` skip-on-cran
+One line each; full detail in
+[`MILESTONES.md`](https://jmgirard.github.io/bsync/MILESTONES.md).
 
-  - `spelling` to `Suggests`) so `inst/WORDLIST` can no longer drift
-    unnoticed — reverses the plan-time “ad hoc, not a dep” choice by
-    design. `R CMD check --as-cran` remains 0/0/0.
-- **M4 — Selectable WCC aggregate statistic (done).** All seven
-  acceptance criteria met (commits `0eafe21`–`7352eac` on `main`; 363
-  tests passing, 0 errors/0 warnings/0 notes in
-  `R CMD check --as-cran`). No C++ core change — Invariants 5/6 not
-  triggered; `RcppExports` diff is empty:
-  1.  `wcc(statistic = c("mean_abs_z","peak"))` with `match.arg`;
-      default `"mean_abs_z"` reproduces pre-M4 `fisher_z` value
-      bit-for-bit on `sim_dyad`; invalid value aborts. Tested.
-  2.  `peak` = mean-over-windows of max-\|Fisher-z\|-across-lags,
-      verified against an independent pure-R oracle on `sim_dyad` to
-      1e-9. Tested.
-  3.  Single `wcc_aggregate(z, window_id, statistic)` helper (refactored
-      from `fisher_z()`) drives both observed and surrogate paths;
-      `wcc_surrogate(statistic="peak")$observed_z` equals
-      `wcc(..., statistic="peak")$fisher_z` exactly — matched null
-      (Invariant 2); tested for both statistics.
-  4.  `print.wcc_res` / `print.wcc_surr` label the aggregate by chosen
-      statistic.
-  5.  `vignettes/wcc-workflow.Rmd` gains §3.1 documenting `mean_abs_z`
-      (SUSY) vs `peak` (rMEA/ Boker) with lineage citations and a code
-      example. NEWS.md gained an M4 entry. `inst/WORDLIST` updated
-      (rMEA, SUSY, Selectable); CI spell-check stays green.
-  6.  No C++ change; no new `Imports`; no build artifacts staged.
-  7.  363 tests green; `R CMD check --as-cran` = 0/0/0; styled (styler)
-      and linted. Plan-time decisions held: WCC-only scope; `$fisher_z`
-      field name kept (revisit in M5); `settings$statistic` records the
-      choice. Post-review: peak oracle rewritten to an explicit for-loop
-      (no `tapply`) so it cannot share a latent bug with the
-      implementation; cross-path Invariant-2 test added (pass `y` itself
-      as the sole surrogate, assert `surrogate_z[1] == observed_z` for
-      both statistics — exercises the surrogate loop’s
-      `wcc_aggregate(grid_df$row)` call site independently); peak +
-      all-NA-window, peak + `time`-supplied grouping, peak print-label,
-      and peak p-value sanity tests added (373 tests total,
-      `R CMD check --as-cran` remains 0/0/0).
-- **M5 — Shared windowed-surface + surrogate framework + tidy interface
-  (done).** All nine acceptance criteria met (commits
-  `0769274`–`b17b464` on `main`; 449 tests passing, 0 errors/0
-  warnings/0 notes in `R CMD check --as-cran`). No C++ change —
-  Invariants 5/6 not triggered; `RcppExports` diff is empty:
-  0.  External-oracle preflight: WDTW L1 golden (6.22…, dtw v1.23-3
-      symmetric1) and Granger F golden (f_xy=287.62…, lmtest v0.9-40)
-      committed as frozen fixtures in `test-external-oracle.R`; WCC
-      oracle uses pre-existing base-`cor` path. All 8 preflight tests
-      pass.
-  1.  `build_surface_grid()` is the sole site of `n_r` math and
-      `w_max = window_size − 1`; all three `create_*_df` builders and
-      all three surrogate wrappers call it.
-      [`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md)/[`wdtw()`](https://jmgirard.github.io/bsync/reference/wdtw.md)/[`wgranger()`](https://jmgirard.github.io/bsync/reference/wgranger.md)
-      `results_df` + aggregates bit-identical to pre-refactor on
-      `sim_dyad` (characterization freeze after preflight). Validated
-      via 41 AC1/AC2/AC3 characterization and validator tests.
-  2.  `validate_series()` + `validate_window_params()` replace
-      per-estimator x/y/time/integerish blocks; abort conditions
-      preserved and tested.
-  3.  All three objects inherit `"bsync_surface"` and carry a
-      named-numeric `$aggregate`; `$fisher_z`/`$mean_distance` dropped
-      (no users, no shim); all `print`/`summary` text and vdiffr
-      snapshots unchanged.
-  4.  `run_surrogate_engine()` drives all three wrappers via
-      aggregate-only closures (no `results_df` on surrogate path —
-      Invariant 7 enforced); accepts prebuilt grid + surrogate matrix
-      (M6 seam); cross-path Invariant-2 test extended to WDTW and
-      Granger (both directions).
-  5.  `build_surface_heatmap()` factors `time_step`/axis/theme/zero-line
-      logic; `plot.wcc_res`/`plot.wdtw_res` supply only the fill scale;
-      all plot snapshots unchanged.
-  6.  [`tidy()`](https://generics.r-lib.org/reference/tidy.html)/[`glance()`](https://generics.r-lib.org/reference/glance.html)/[`as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
-      on `bsync_surface`:
-      [`tidy()`](https://generics.r-lib.org/reference/tidy.html) = long
-      surface tibble;
-      [`glance()`](https://generics.r-lib.org/reference/glance.html) =
-      1-row summary (aggregate(s) + settings + n_windows); Granger’s
-      two-aggregate shape handled as separate columns. `generics` +
-      `tibble` added to `Imports`.
-  7.  NEWS.md M5 entry; wcc-workflow.Rmd §8 tidy-interface demo;
-      WORDLIST updated; vignette `$fisher_z` references corrected.
-      DESIGN.md §14 Granger/superclass item marked resolved.
-  8.  449 tests pass (0 skip on CRAN = vdiffr); `R CMD check --as-cran`
-      0/0/0; styled (styler); no C++ change; no build artifacts staged.
-      Plan-time decisions held: Granger kept estimator-specific surface
-      (no contortion into symmetric similarity);
-      `$fisher_z`/`$mean_distance` dropped rather than shimmed;
-      `generics` + `tibble` added to Imports as approved. Post-review
-      (commit `ecc6cf9`): four findings fixed. (1)
-      `wdtw_surrogate(fast_method = TRUE)` window-grid regression — an
-      interim refactor used a lag-free grid + `lag_max` shift that
-      over-counted windows past the series end (spurious out-of-range
-      `NA`s) and changed the fast-path p-value; restored to the lagged
-      grid’s distinct window starts at `tau = 0` so surrogates cover
-      exactly the observed surface’s windows (slow/default path was
-      never affected; NEWS.md gains a bug-fix entry). (2)
-      [`glance()`](https://generics.r-lib.org/reference/glance.html)
-      used bare `%||%` (base R \>= 4.4 only) while DESCRIPTION declares
-      `R (>= 4.1)` — added `@importFrom rlang %||%`. (3) DESIGN.md §14
-      shared-surface/superclass item moved from “Remaining” to “Resolved
-      (M5)” (the AC7 doc move that was claimed but not done). (4) AC4
-      test gaps closed: Invariant-7 no-`results_df` assertion on all
-      three surrogate objects, a seeded p-value regression guard (WCC
-      91/99, WDTW 83/99 — non-boundary, exercises tail counting), and a
-      `fast_method` window-alignment regression test. 455 tests pass;
-      `R CMD check --as-cran` remains 0/0/0; no C++ change.
-- **M7 — First CRAN release (`v0.1.0`) (done).** All nine acceptance
-  criteria met (commits `633d58d`–`dcd9ef0` on `main`, plus post-review
-  polish through `7d848c6`; 564 tests passing pre-polish, 0 errors/0
-  warnings/0 notes in `R CMD check --as-cran`). No C++ change —
-  Invariants 5/6 not triggered; `RcppExports` diff empty. Run as two
-  phases under M7 number: **Phase A** (docs/messaging): 6 ACs met.
-  1.  `_pkgdown.yml` restructured with grouped `articles:` (3 groups)
-      and `reference:` (8 groups);
-      [`pkgdown::check_pkgdown()`](https://pkgdown.r-lib.org/reference/check_pkgdown.html)
-      clean.
-  2.  New `vignettes/bsync.Rmd` “Get started” — end-to-end `sim_dyad`
-      arc, WCC/WDTW/WGC decision table, reading map into 6 deep-dives.
-  3.  `choosing-parameters.Rmd` retitled “Choosing Analysis Parameters”;
-      all multiverse/autotune chunks now run on `sim_dyad`
-      (`n_surrogates = 100L`);
-      [`select_specification()`](https://jmgirard.github.io/bsync/reference/select_specification.md)
-      taught; `wgranger` estimator example added;
-      [`tidy()`](https://generics.r-lib.org/reference/tidy.html)/[`glance()`](https://generics.r-lib.org/reference/glance.html)
-      shown.
-  4.  README regenerated: Granger added to headline; “Where to go next”
-      article table; param-guidance pointer; output regenerated. Bug
-      fix: `print.wcc_res`/`print.wcc_surr` no longer display a spurious
-      double colon in the aggregate label; label renamed
-      `Mean |Fisher's Z|` → `Mean Abs. Fisher's Z` to avoid cli
-      glue-in-key-name interpolation.
-  5.  See-also footers added to `wdtw-workflow`, `wgranger-workflow`,
-      `determine-downsampling`.
-  6.  No new `Imports`; `inst/WORDLIST` updated; spell-check green;
-      `R CMD check --as-cran` 0/0/0. Post-plan deviation: AC6 stated “no
-      R/ change” but the cli double-colon bugfix (a pre-existing display
-      defect since M4) required touching `R/wcc.R` and
-      `R/surrogate_analysis.R` — purely cosmetic print-method fix, no
-      numeric/behavioral change, no C++ touched, no NAMESPACE change.
-      **Phase B** (release cut): 3 ACs met.
-  7.  Version bump `0.0.0.9000` → `0.1.0`; NEWS.md header →
-      `# bsync 0.1.0`; lifecycle badge promoted `experimental` →
-      `stable` in README.
-  8.  `cran-comments.md` written (0/0/0 local; cross-platform
-      win-builder/R-hub pre-submission checklist). `spelling` +
-      [`pkgdown::check_pkgdown()`](https://pkgdown.r-lib.org/reference/check_pkgdown.html)
-      clean. cran-comments.md added to `.Rbuildignore`. (The pkgdown
-      site has since been deployed: `articles/bsync.html` is live and
-      `urlchecker::url_check()` reports all URLs correct — the original
-      “two 404s pending deploy” caveat is resolved; `cran-comments.md`
-      updated to reflect it.)
-  9.  Plan stops at “ready to submit”; `print.wcc_surr` label regression
-      test added. Actual CRAN upload is the user’s action;
-      pre-submission checklist in `cran-comments.md`. Post-review polish
-      (commits `5c4a97c`–`7d848c6`, 564 tests, `R CMD check --as-cran`
-      remains 0/0/0): (1)
-      [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
-      now returns a classed `bsync_autotune` object with a tidy
-      [`print()`](https://rdrr.io/r/base/print.html) method (was an
-      unclassed list that dumped the per-dyad multiverse list to the
-      console); regression test added. (2) pkgdown navbar `intro`
-      component restored so the Get-started
-      [`vignette("bsync")`](https://jmgirard.github.io/bsync/articles/bsync.md)
-      link reappears; the “Get started” articles group given a navbar
-      heading. (3) `determine-downsampling.Rmd` corrected to call
-      [`plot()`](https://rdrr.io/r/graphics/plot.default.html) on the
-      [`evaluate_signal_power()`](https://jmgirard.github.io/bsync/reference/evaluate_signal_power.md)
-      result (the stale `$plot` list access rendered no figure);
-      [`wdtw_surrogate()`](https://jmgirard.github.io/bsync/reference/wdtw_surrogate.md)
-      `@details` reference to the M5-removed `$mean_distance` field
-      corrected to `$aggregate[["mean_distance"]]`. (4) vignettes call
-      the re-exported
-      [`tidy()`](https://generics.r-lib.org/reference/tidy.html)/[`glance()`](https://generics.r-lib.org/reference/glance.html)
-      verbs directly instead of the `generics::` prefix. (5) root-level
-      `Rplots.pdf` added to `.gitignore`. Second post-review pass
-      (commits `4def838`–`575295f`, 564 tests / 171 blocks,
-      `R CMD check --as-cran` remains 0/0/0): (a) `cran-comments.md` +
-      this M7 entry reconciled to the now-deployed pkgdown site (live
-      `articles/bsync.html`, `urlchecker` clean), and the stale “6,000
-      rows” note fixed to 2,400. (b) Test suite sped up ~4x (285s -\>
-      73s) by hoisting the shared full-series estimator surfaces in
-      `test-surface.R` to file-scope read-only fixtures (one WDTW build,
-      not five) and slicing the three length-independent WDTW
-      Invariant-2/structure tests in `test-surrogate.R` to 600 samples;
-      the frozen numeric anchors (AC1 characterization, the 91/99 &
-      83/99 reproducibility guard, external-oracle goldens) are
-      untouched. (c) Runnable `@examples` on `sim_dyad` added to every
-      exported function (closing the long-standing “examples … NONE”);
-      heavy ones (`wdtw`, the three `*_surrogate` wrappers,
-      `synchrony_multiverse`, `autotune_wcc`, `select_specification`)
-      wrapped in `\donttest{}` and trimmed to short subsets / small
-      surrogate counts so each runs in a few seconds under
-      `--run-donttest`. (d) Example rendering surfaced a real
-      portability bug: the non-ASCII “Lag (tau)” surface-plot axis label
-      (`τ`) *errors* in grid’s text-bounds on a non-UTF-8 graphics
-      device; relabeled to ASCII “Lag (tau)” with the 6 label assertions
-      and 3 vdiffr snapshots regenerated. (e)
-      [`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)
-      example switched to `sim_dyad$z_A`/`z_B` (the coupled channel; the
-      `x` channel floored to the 20-sample minimum with two warnings),
-      and its docs/console message corrected to describe the PSD
-      *power-cutoff* timescale (not “dominant” cycle) — a deliberate
-      robustness choice documented with its rationale; the
-      `choosing-parameters` vignette’s worked numbers were corrected to
-      match (PSD path -\> 256-sample window; the 640 figure is the
-      `event_duration_sec = 2` theory override). No estimator numerics
-      changed in any of this.
-- **M6 — Parameter guidance & synchrony multiverse (done).** All nine
-  acceptance criteria met (commits `026b2f4`–`bb5f6bc` on `main`; 542
-  tests passing, 0 errors/0 warnings/0 notes in
-  `R CMD check --as-cran`). No C++ change — Invariants 5/6 not
-  triggered; `RcppExports` diff empty. Run as two phases under M6
-  number; no new `Imports`:
-  1.  `synchrony_multiverse(x, y, estimator, sample_rate, window_sec, lag_sec, ...)`
-      sweeps a seconds-specified parameter grid (converted to samples
-      per cell; `lag_max` hard-capped at `floor(window_size/2)`), runs
-      matched-null surrogate test per cell, and returns a light
-      `bsync_multiverse` (tidy grid + settings + robustness summary;
-      Invariant 7). All three estimators supported (WCC/WDTW/Granger);
-      Granger has two ES/p columns (es_xy/es_yx). Tested.
-  2.  ES polarity correct: WCC/Granger upper-tail
-      `(obs-null_mean)/null_sd`; WDTW lower-tail
-      `(null_mean-obs)/null_sd`. Cross-path Invariant-2 tests for all
-      three estimators.
-  3.  Surrogate-reuse seam: one `y_surrogates` matrix per
-      `surrogate_method` reused across all cells — asserted by spy tests
-      (`local_mocked_bindings`); per-method cost never multiplies by
-      grid size.
-  4.  Granger no-lag-axis and WDTW smoke + correctness tested.
-  5.  `print`/`summary`/`tidy`/`glance`/`as_tibble`/`plot` on
-      `bsync_multiverse`; `plot` is a Simonsohn-style spec curve (ES
-      panel + choice dashboard; pure ggplot2 + base `grid`); vdiffr
-      snapshot added.
-  6.  `suggest_wcc_params(x, y, sample_rate, ...)` reworked: derives
-      dominant timescale from PSD via
-      [`evaluate_signal_power()`](https://jmgirard.github.io/bsync/reference/evaluate_signal_power.md);
-      `event_duration_sec` optional override; three hard constraints
-      enforced and warned (SUSY lag cap, series-length ceiling,
-      min-samples floor). Signature change documented in NEWS.
-  7.  `autotune_wcc(dyad_list, ...)` rewritten as thin wrapper over
-      [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md) +
-      [`select_specification()`](https://jmgirard.github.io/bsync/reference/select_specification.md)
-      (gated stability-penalized score: detectability gate +
-      `median(ES) - iqr_penalty*IQR(ES)`);
-      [`select_specification()`](https://jmgirard.github.io/bsync/reference/select_specification.md)
-      exported for advanced users.
-  8.  `sim_dyad` regression test
-      ([`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
-      on 3-dyad list, median_es \> 0) and synthetic heterogeneous-dyad
-      stability test both pass. Gate-fallback warning tested explicitly.
-  9.  542 tests pass; `R CMD check --as-cran` 0/0/0; styled (styler); no
-      new `Imports`; no C++ change; all heavy tests `skip_on_cran`;
-      `vignettes/choosing-parameters.Rmd` builds;
-      NEWS.md/WORDLIST/DESIGN.md §14 \#10 updated. Post-plan
-      deviations: (a) `stability_flag`/`top-k` from AC7 simplified to
-      `sig_rate`, `iqr_es`, `n_cells_gated` — same information, cleaner
-      API; (b) uncoupled negative controls from AC8 replaced by
-      heterogeneous-noise synthetic dyads (positive-signal controls with
-      varying SNR). Non-ASCII characters in R code files (em-dash,
-      en-dash, math symbols from roxygen) were the main R CMD check
-      hurdle; `%` in multiline Rd `\item` content also required `\%`
-      escaping. Post-review fixes (550 tests; `R CMD check --as-cran`
-      remains 0/0/0): (1) AC2 cross-path Invariant-2 gap closed — the
-      WCC test had dead code (built a sole-`y` surrogate but never
-      asserted); replaced with real matched-null tests on
-      `.mv_wcc_cell`/`.mv_wdtw_cell`/ `.mv_granger_cell` (sole surrogate
-      = `y` ⇒ `null_mean == observed`, both Granger directions),
-      polarity tests retained. (2) AC8 validation strengthened —
-      `sim_dyad` regression now pins the recommendation to the recovered
-      0.5 Hz cycle (`window_sec == 2`, `window_size == 160`,
-      `sig_rate == 1`, `median_es > 1.5`); a true uncoupled negative
-      control (i.i.d. noise dyads) was added asserting the detectability
-      gate fails (warning fired, `sig_rate < 0.5`). (3) `n_cells` naming
-      disambiguated — `robustness` now carries `n_cells` (grid total)
-      **and** `n_valid` (computable cells); `print`/plot
-      title/[`glance()`](https://generics.r-lib.org/reference/glance.html)
-      updated (`glance` gains an `n_valid` column; `pct_significant` is
-      over `n_valid`). (4) `wcc-params` vignette dropped (superseded by
-      `choosing-parameters`; overlap discussion folded in,
-      `wcc-workflow` link redirected). (5) clean code-line wraps reduced
-      line-length lints; remaining lints are cli
-      strings/roxygen/idiomatic predicates (package-wide style) and
-      glue-variable `object_usage` false positives.
+- **M1 — Correctness & robustness.** `na.rm` honored in WCC; window-size
+  semantics fixed (`w_max = window_size - 1`); short-series aborts;
+  [`evaluate_signal_power()`](https://jmgirard.github.io/bsync/reference/evaluate_signal_power.md)
+  side-effect plotting removed; cli condition style;
+  [`leadership_asymmetry()`](https://jmgirard.github.io/bsync/reference/leadership_asymmetry.md)/[`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)
+  docs.
+- **M2 — Efficiency.** `calc_wcc_cpp` rewritten to an NA-aware
+  prefix-sum core (5.4×–24.9×); pure-R oracle regression test; OpenMP
+  removed (serial, reproducible).
+- **M3 — CRAN readiness.** Build artifacts untracked; `@return`
+  everywhere; `R CMD check --as-cran` 0/0/0; spell-check enforced in CI.
+- **M4 — Selectable WCC aggregate statistic.**
+  `wcc(statistic = c("mean_abs_z","peak"))`; single `wcc_aggregate()`
+  drives observed + surrogate paths (Invariant 2).
+- **M5 — Shared windowed-surface + surrogate framework + tidy
+  interface.** `build_surface_grid()` / `run_surrogate_engine()` /
+  `build_surface_heatmap()` factored; `bsync_surface` superclass;
+  [`tidy()`](https://generics.r-lib.org/reference/tidy.html)/[`glance()`](https://generics.r-lib.org/reference/glance.html)/[`as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
+  (`generics` + `tibble` added to Imports).
+- **M6 — Parameter guidance & synchrony multiverse.**
+  [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
+  engine + spec-curve plot;
+  [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  rebuilt as a thin wrapper + exported
+  [`select_specification()`](https://jmgirard.github.io/bsync/reference/select_specification.md);
+  PSD-driven
+  [`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md).
+- **M7 — First CRAN release (`v0.1.0`).** Docs/messaging pass
+  (get-started vignette, grouped pkgdown, README); version bump to
+  `0.1.0`; `cran-comments.md`; ready to submit (human-gated).
 
 ## Current focus
 
@@ -571,12 +190,34 @@ Scaffolding: `usethis::use_r()`, `use_test()`, `use_package()`. testthat
 ## Git
 
 - Default branch is **`main`**.
+- **Milestone work happens on a feature branch, merged via PR — not
+  committed directly to `main`.** `/plan-milestone` cuts `m<N>-<slug>`
+  off an up-to-date `main`; the planning commit (the “## Current focus”
+  update) and all implementation commits land there. `main` is updated
+  only by merging a reviewed PR once CI is green (see below). Trivial,
+  isolated doc-typo fixes may still go directly to `main` at the user’s
+  discretion; anything touching `R/`, `src/`, `tests/`, `DESCRIPTION`,
+  or vignettes goes through a PR.
+- **Commit / push cadence (respects “only when asked”):** the milestone
+  skills create the branch and make commits **locally**; **pushing the
+  branch and opening the PR happen only on the user’s request** — never
+  auto-pushed. Don’t force-push `main`.
+- **CI gate:** a milestone PR merges into `main` only after the three
+  GitHub Actions workflows go green — `R-CMD-check`, `test-coverage`,
+  `pkgdown`.
+- **R-hub (on demand, not a per-PR gate):** for milestones that touch
+  `src/` and before any actual CRAN submission, also run an on-demand
+  R-hub check (`rhub::rhub_check()`, workflow
+  `.github/workflows/rhub.yaml`) for sanitizers (ASAN/UBSAN), valgrind,
+  and the extra platforms the local macOS + `R-CMD-check` matrix can’t
+  see — the highest-value check for the C++/Armadillo cores. It is slow
+  and `workflow_dispatch`-triggered, so it is deliberately **not** part
+  of the per-PR gate.
 - Small, focused commits with imperative messages (e.g.,
   `Honor na.rm in calc_wcc_cpp`).
-- Don’t force-push `main`. **Don’t commit data, credentials, or build
-  artifacts** (`src/*.o`, `src/*.so`, `src/*.dll`, `.DS_Store`,
-  `Rplots.pdf`) — M3 untracks the ones currently slipped in.
-- Commit or push only when asked.
+- **Don’t commit data, credentials, or build artifacts** (`src/*.o`,
+  `src/*.so`, `src/*.dll`, `.DS_Store`, `Rplots.pdf`) — M3 untracks the
+  ones currently slipped in.
 
 ## Ask-first / guardrails
 
