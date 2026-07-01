@@ -371,92 +371,14 @@ reproducible; result objects stay light; supplied `time` maps windows to real ti
 
 ## 15. Milestone roadmap
 
-**Hardening cycle (current focus — see `CLAUDE.md`):**
+**Completed milestones (M1–M7) have their detailed log in `MILESTONES.md`** (repo root, the single
+source of truth), with a one-line index in `CLAUDE.md`. This section is the *forward* roadmap only;
+do not duplicate the completed-milestone narrative here. The hardening cycle (M1 correctness, M2
+efficiency, M3 CRAN readiness, M4 selectable WCC statistic), the M5 shared windowed-surface +
+surrogate + tidy framework, M6 parameter guidance / synchrony multiverse, and the M7 first CRAN
+release (`v0.1.0`) are all done; the later estimators (M8+) are post-1.0 minor releases and are
+listed below.
 
-1. **M1 — Correctness & robustness.** Honor `na.rm` (plumb through `calc_wcc_cpp`); reconcile
-   window-size semantics (`w_max = window_size - 1`, update `n_r` math + docs); short-series guards
-   (`seq_len`, explicit abort) across the three `create_*_df` builders and the three surrogate grid
-   builders; stop side-effect plotting in `evaluate_signal_power()`; unify condition style to cli in
-   `impute.R`/`surrogate_generation.R`; clarify `leadership_asymmetry()` (sliding-window) and
-   `suggest_wcc_params()` (4-cycle heuristic) docs + validate `min_valid`. Tests for each.
-
-2. **M2 — Efficiency.** Prefix-sum WCC core (NA-aware cumulative sums so per-(i, τ) work drops to
-   the cross-term), numeric-regression oracle vs. reference on `sim_dyad`. Decide OpenMP: adopt over
-   the index set (serial default, thread arg, `_OPENMP`-guarded, future-interaction documented) or
-   remove the dead flags. `bench/` script with before/after timings.
-
-3. **M3 — CRAN readiness.** Untrack `src/*.o`, `src/*.{so,dll}`, `**/.DS_Store`,
-   `tests/testthat/Rplots.pdf`; extend `.gitignore`/`.Rbuildignore`; regenerate `RcppExports`
-   cleanly; `R CMD check --as-cran` to 0/0/0 (examples runnable, no filesystem side effects,
-   `\value` everywhere, vignettes build, conditional `Suggests` use); README/pkgdown pass.
-
-4. **M4 — Selectable WCC aggregate statistic.** `statistic = c("mean_abs_z", "peak")` on `wcc()` and
-   `wcc_surrogate()`; refactor `fisher_z()` into a dispatch; null matches observed; document in the
-   WCC vignette.
-
-**Future methods (later cycles — build on the M5 shared framework):**
-
-5. **M5 — Shared windowed-surface + surrogate framework + tidy interface.** Factor the common
-   grid-builder, surrogate engine, optima, and plot layer so new estimators plug in cheaply; resolve
-   the Granger-into-the-contract question (§14). Add broom-style `tidy()`/`glance()`/`as_tibble()`
-   (§7) for all estimators from this shared layer (`generics` → Imports).
-6. **M6 — Parameter guidance & synchrony multiverse.** Resolve the parameter-selection problem with
-   **one engine and three read-outs**, built on the M5 shared surface + surrogate + tidy framework
-   so it generalizes across estimators (WCC, WDTW, Granger), not WCC alone. The core realization:
-   `suggest`, `autotune`, and the multiverse are not three implementations — `autotune` *is* the
-   multiverse plus a selection rule, so the grid-builder + per-cell surrogate evaluation + multi-dyad
-   aggregation are written once. The honest headline metric is **ES (vs. matched null), not raw
-   synchrony**, because raw mean|Z| rises mechanically with window length / autocorrelation while ES
-   is the robust quantity.
-   - (a) **`synchrony_multiverse()` (the engine + headline).** Run a windowed estimator across a grid
-     of analytic choices — `window_size`, `lag_max` (hard-capped at `window/2`), `window_increment`,
-     `statistic` (M4), `surrogate_method`; prewhitening is a documented *future* axis (it interacts
-     with the surrogate choice) — over a single dyad or a `dyad_list` (autotune's multi-dyad
-     convention). Per cell: observed aggregate + matched-null surrogate → ES + p (Inv. 2 reused).
-     Returns a light `bsync_multiverse` object (Inv. 7): a **tidy** grid (one row per cell × dyad:
-     window/lag/increment/statistic/method, observed, null_mean, null_sd, ES, p, n_windows) +
-     `settings` + a robustness summary (% specs significant, median ES [IQR], sign-consistency); no
-     raw surrogate draws, no raw input. `print`/`summary`/`tidy`/`as_tibble`/`glance` (M5 `generics`)
-     + a **specification-curve `plot`** (Simonsohn-style: specs sorted by ES with significance
-     shading over a choice-dashboard panel; pure ggplot2, no new dep).
-   - (a′) **Grid axes are specified in time units (seconds), not samples**, so cells stay comparable
-     across sample rates and **preprocessing becomes a legitimate axis**. Downsample rate and
-     smoothing are *opt-in* multiverse axes (the default fixes preprocessing at one principled
-     choice; full preprocessing × estimator sweeps are advanced, to avoid combinatorial blow-up);
-     the engine applies `raw → preprocess(cell) → surface → surrogate` per cell. This makes the
-     downsample/smoothing question — e.g. OpenFace AU at 5 Hz vs. higher-rate facial EMG — answerable
-     in the *same* framework: the two are different informative bandwidths (measure each via
-     `evaluate_signal_power()`), and the robustness check is whether a finding survives both the
-     matched-null surrogate and a small preprocessing sweep, not defending one sample rate.
-   - (b) **`autotune_wcc()` = multiverse + selection.** Rebuild as a thin wrapper that calls the
-     engine and applies a selection rule, *removing* the duplicated PSD-baseline logic. Reframe the
-     objective from bare surrogate-ES `which.max` (which autocorrelation can game) to *detectability
-     **and** cross-dyad stability*: return a recommended cell **plus a stability flag** and the
-     top-k, point the user at the multiverse plot, raise the noisy defaults (`n_surrogates`,
-     `n_tune_dyads`), and **pin it against `sim_dyad`'s known lead–lag with a regression test** (the
-     validation this currently-exported helper lacks).
-   - (c) **Rework `suggest_wcc_params()`** to derive the dominant timescale from the *measured*
-     signal via `evaluate_signal_power()` (PSD) rather than a user-guessed `event_duration_sec`
-     (kept as an expert override), and to apply/report the hard constraints — `window_size ≥
-     2·lag_max` (= SUSY's `segment ≥ 2·maxlag`), `window_size ≤ series/2`, and a min-samples floor
-     for a stable `r`. Stays the *newcomer* entry point: one principled starting point with stated
-     assumptions, not a claim of optimality.
-   - (d) **Vignette** "choosing parameters / the parameter multiverse," stating the contradiction in
-     the literature honestly and the timescale-matching + surrogate-defense logic. Lineage to cite:
-     Boker et al. (2002); Tschacher & Meier (2020, SUSY constraints); Kleinbub & Ramseyer (rMEA
-     conventions); the bioRxiv (2020) "statistical & theoretical considerations" paper (tie
-     parameters to the signal's biological boundaries); the Multiverse-IPS paper (2025, window ≫ lag
-     in influence; report the curve); Dean & Dunsmuir (2016) — autocorrelation inflates spurious
-     cross-correlation, for which bsync's matched-null surrogate is the principled defense (the
-     reason parameter advice "contradicts" across clean-oscillatory vs. noisy-biological regimes).
-   - No C++ change (Inv. 5/6 untouched); no new `Imports`. The `autotune_wcc()` validation lands here
-     in M6, which precedes the M7 first release — so the first CRAN submission never ships an
-     unverified tuner without any pre-release scramble.
-7. **M7 — First CRAN release (`v0.1.0`).** First public release once the core estimators (WCC/WDTW/
-   Granger) + the M5 shared framework + tidy interface + M6 parameter guidance form a coherent,
-   citable package. Version bump `0.0.0.9000` → `0.1.0`; `cran-comments.md`; final
-   `R CMD check --as-cran` across platforms (win-builder / R-hub); spell/url/pkgdown clean; submit.
-   The later estimators (M8+) become post-1.0 minor releases.
 8. **M8 — Phase synchrony (Hilbert).** Analytic-signal instantaneous phase; windowed phase-locking
    value / phase synchrony; relative-phase output.
 9. **M9 — Wavelet coherence.** Cross-wavelet / wavelet coherence for nonstationary time–frequency

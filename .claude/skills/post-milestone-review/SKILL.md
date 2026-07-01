@@ -5,18 +5,18 @@ allowed-tools: Read, Grep, Glob, Bash
 argument-hint: "[milestone-number]"
 ---
 
-0. Confirm $ARGUMENTS appears in CLAUDE.md's "## Completed milestones" section (e.g., look for
-   "M$ARGUMENTS (done)"). Do NOT rely on "## Current focus" — a finalized milestone should have been
-   moved to "Completed milestones" by /implement-milestone's finalize step. If it is NOT there, stop
-   and flag the *actual* state rather than guessing:
-   - Still listed as active/next in "## Current focus" **with** implementation commits on `main` →
-     it was implemented but never finalized (the finalize bookkeeping is missing). Say so and point
-     the user to finalize it first — this is the /implement-milestone finalize step, **not** a
-     re-implementation.
+0. Confirm $ARGUMENTS is recorded as done: it has a detailed `M$ARGUMENTS (done)` entry in
+   `MILESTONES.md` **and** a matching one-line entry in CLAUDE.md's "## Completed milestones" index.
+   Do NOT rely on "## Current focus" — a finalized milestone should have been moved out of it by
+   /implement-milestone's finalize step. If either record is missing, stop and flag the *actual*
+   state rather than guessing:
+   - Still listed as active/next in "## Current focus" **with** implementation commits on the branch
+     or `main` → it was implemented but never finalized (the finalize bookkeeping is missing). Say so
+     and point the user to finalize it first — this is the /implement-milestone finalize step,
+     **not** a re-implementation.
    - Absent everywhere **and** no implementation commits → not implemented yet; run
      /implement-milestone first.
-   - Present but numbered differently than the work actually on `main` → the milestone number is
-     wrong.
+   - Present but numbered differently than the work actually shipped → the milestone number is wrong.
 
 # Post-Milestone Review: Milestone $ARGUMENTS
 
@@ -49,7 +49,13 @@ This is a **read-only audit**. Do not edit, create, or fix any files — report 
 8. Roxygen check: does documentation explain *why* defaults were chosen (per CLAUDE.md's
    documentation standard), not just *what* — including the `suggest_wcc_params()` heuristic and the
    surrogate-null semantics.
-9. Output a single triaged list: **Blocking** (must fix before the next milestone) / **Should-fix** /
-   **Nice-to-have**. End with one line: **READY** or **NOT READY** for the next milestone, and why.
+9. Milestone-log hygiene: confirm `MILESTONES.md` is the only detailed log and is internally
+   consistent — entries run in numeric order with **no gaps** (M1..M$ARGUMENTS all present), the
+   CLAUDE.md "## Completed milestones" index has exactly one matching line per entry, and the
+   narrative is not duplicated into DESIGN.md §15 (which must remain the forward roadmap + a pointer).
+   Flag any missing, out-of-order, or duplicated entry — this is the class of drift that motivated
+   the single-log structure.
+10. Output a single triaged list: **Blocking** (must fix before the next milestone) / **Should-fix** /
+    **Nice-to-have**. End with one line: **READY** or **NOT READY** for the next milestone, and why.
 
 Do not rewrite, fix, or refactor anything during this review — that's a separate step.
