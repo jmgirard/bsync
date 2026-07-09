@@ -20,12 +20,24 @@ generate_surrogate_phase(y, n_surrogates = 100, trim_odd = FALSE)
 
 - trim_odd:
 
-  Logical. If TRUE, drops the final observation if the time series
-  length is odd.
+  Logical. Odd-length series are supported natively; when \`TRUE\`, the
+  final observation is dropped instead (legacy behavior). Default is
+  \`FALSE\`.
 
 ## Value
 
 A matrix where each column is a surrogate time series.
+
+## Details
+
+Randomizes the phases of the Fourier transform of \`y\` while preserving
+its amplitude spectrum (and therefore its autocovariance / power
+spectrum). The DC term and – for even-length series – the Nyquist term
+are real-valued components carrying a sign; they are preserved exactly
+(not just their modulus), so the surrogate mean and variance match the
+original for any signal, including negative-mean signals. Conjugate
+symmetry is enforced on the remaining bins so the inverse transform is
+real. Both even- and odd-length series are handled natively.
 
 ## Examples
 

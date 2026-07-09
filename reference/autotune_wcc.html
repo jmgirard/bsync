@@ -206,6 +206,28 @@ of `n_tune_dyads` dyads is used for speed; call `set.seed()` beforehand for
 reproducibility.</p>
     </div>
     <div class="section level2">
+    <h2 id="avoiding-circular-inference">Avoiding circular inference<a class="anchor" aria-label="anchor" href="#avoiding-circular-inference"></a></h2>
+
+
+<p>`autotune_wcc()` **selects** the parameters that maximize the stability-
+penalized effect size. If you then run a confirmatory synchrony test with
+those parameters **on the same dyads**, the reported effect size and p-value
+are inflated – the parameters were chosen to maximize exactly that quantity
+(a form of double-dipping / circular analysis). Treat the tuned parameters as
+a *hypothesis*, not a validated result. To draw defensible conclusions,
+choose one of:</p><ul><li><p>**Split the sample.** Tune on a pilot/exploratory subset of dyads and
+    confirm on a disjoint held-out subset that was not passed to
+    `autotune_wcc()`.</p></li>
+<li><p>**Report the multiverse, not the winner.** Instead of a single tuned
+    specification, report the robustness of synchrony across the whole grid
+    via [synchrony_multiverse()] (`pct_significant`, `sign_consistent`, the ES
+    distribution). A result that holds only at the single best-tuned cell is
+    weak evidence; one that holds across the grid is strong.</p></li>
+</ul><p>The per-dyad multiverses are returned in `$dyad_multiverses` precisely so you
+can inspect that full distribution rather than collapsing to the point
+estimate.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>[synchrony_multiverse()], [suggest_wcc_params()],
   [select_specification()]</p></div>
@@ -239,8 +261,9 @@ reproducibility.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Max lag: 80 samples (1 s)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Increment: 32 samples</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Sig. rate: 33.3% of dyads</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Median ES: 1.473 (IQR = 0.232)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Median ES: 1.493 (IQR = 0.232)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Tuned over 3 dyads; 3 cells passed the detectability gate. Per-dyad multiverses in <span style="color: #00BB00;">$dyad_multiverses</span>.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> These parameters were <span style="font-style: italic;">selected</span> to maximize effect size. Re-testing synchrony with them on the same dyads is circular; confirm on held-out dyads or report the multiverse robustness. See `?autotune_wcc()`.</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
@@ -253,7 +276,7 @@ reproducibility.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

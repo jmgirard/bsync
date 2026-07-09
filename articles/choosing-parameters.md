@@ -295,6 +295,7 @@ best
 #> Sig. rate: 100% of dyads
 #> Median ES: 2.305 (IQR = 0.102)
 #> ℹ Tuned over 3 dyads; 2 cells passed the detectability gate. Per-dyad multiverses in $dyad_multiverses.
+#> ! These parameters were selected to maximize effect size. Re-testing synchrony with them on the same dyads is circular; confirm on held-out dyads or report the multiverse robustness. See `?autotune_wcc()`.
 ```
 
 Plug the result directly into
@@ -455,6 +456,7 @@ best2
 #> Sig. rate: 100% of dyads
 #> Median ES: 1.601 (IQR = 0.105)
 #> ℹ Tuned over 3 dyads; 1 cell passed the detectability gate. Per-dyad multiverses in $dyad_multiverses.
+#> ! These parameters were selected to maximize effect size. Re-testing synchrony with them on the same dyads is circular; confirm on held-out dyads or report the multiverse robustness. See `?autotune_wcc()`.
 ```
 
 ## References

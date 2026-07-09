@@ -99,29 +99,103 @@ relevant deep-dive articles.</p>
 <div class="section level2">
 <h2 id="the-bsync-analysis-workflow">The bsync analysis workflow<a class="anchor" aria-label="anchor" href="#the-bsync-analysis-workflow"></a>
 </h2>
-<p>A complete behavioral synchrony analysis has five stages:</p>
+<p>A complete behavioral synchrony analysis moves through five
+stages:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Preprocess</strong> — smooth, trim, and compute kinematics
-from raw position data.</li>
+<strong>Condition the signal</strong> — diagnose gaps, put every
+signal on a common, behaviorally appropriate sample rate, and smooth out
+tracking jitter.</li>
 <li>
-<strong>Choose parameters</strong> — select window size and lag
-ceiling that match the signal’s timescales.</li>
+<strong>Fix the timescale</strong> — derive the dominant behavioral
+cycle <em>once, from the whole dataset</em>, and use it to center your
+window and lag choices.</li>
 <li>
-<strong>Estimate</strong> — run WCC, WDTW, or WGC on the prepared
-signals.</li>
+<strong>Decide parameters honestly</strong> — rather than trusting a
+single window, sweep a grid and report how robust the synchrony is to
+that choice (and avoid selecting parameters to maximize an effect you
+then re-test on the same data).</li>
 <li>
-<strong>Test significance</strong> — compare the observed statistic
-against a surrogate null distribution.</li>
+<strong>Estimate and test</strong> — run WCC, WDTW, or WGC and
+compare the observed statistic against a matched-null surrogate
+distribution.</li>
 <li>
-<strong>Quantify leadership</strong> — extract optima and compute
-the Leadership Asymmetry Index.</li>
+<strong>Characterize</strong> — extract optima and quantify the
+shifting lead–lag structure with the Leadership Asymmetry Index.</li>
 </ol>
-<p>The following example walks through all five stages using the
-built-in <code>sim_dyad</code> dataset, which contains 30 seconds of
+<p>If you remember one sentence, make it this one:</p>
+<blockquote>
+<p><strong>Clean → put on a common rate and smooth → set the timescale
+from the whole dataset → sweep a grid and report matched-null
+effect-size robustness (not a single tuned window) → confirm with ≥ 1000
+surrogates → characterize the lag structure and leadership.</strong></p>
+</blockquote>
+<div class="section level3">
+<h3 id="from-raw-data-to-a-result-the-full-recipe">From raw data to a result: the full recipe<a class="anchor" aria-label="anchor" href="#from-raw-data-to-a-result-the-full-recipe"></a>
+</h3>
+<p>With your own raw data (irregular timestamps, dropped frames, an
+arbitrary sample rate), the arc looks like this. It is shown here as a
+reference recipe; the runnable example below demonstrates the core of it
+on clean simulated data.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># 0. Condition each signal ---------------------------------------------------</span></span>
+<span><span class="fu"><a href="../reference/diagnose_ts_gaps.html">diagnose_ts_gaps</a></span><span class="op">(</span><span class="va">raw</span><span class="op">$</span><span class="va">x</span><span class="op">)</span>                       <span class="co"># how much is missing, and in what runs?</span></span>
+<span><span class="va">raw</span><span class="op">$</span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/impute_ts_gaps.html">impute_ts_gaps</a></span><span class="op">(</span><span class="va">raw</span><span class="op">$</span><span class="va">x</span>, maxgap <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>    <span class="co"># bridge only short gaps; long gaps stay NA</span></span>
+<span></span>
+<span><span class="co"># 1. Put signals on a common, behaviorally appropriate rate, then smooth ------</span></span>
+<span><span class="va">ps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_signal_power.html">evaluate_signal_power</a></span><span class="op">(</span><span class="va">raw</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span><span class="op">]</span>, sample_rate <span class="op">=</span> <span class="fl">240</span><span class="op">)</span>  <span class="co"># PSD downsampling guidance</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/aggregate_by_time.html">aggregate_by_time</a></span><span class="op">(</span><span class="va">raw</span>, time_var <span class="op">=</span> <span class="va">t</span>, bin_width <span class="op">=</span> <span class="va">ps</span><span class="op">$</span><span class="va">recommended_bin_width_sec</span><span class="op">)</span></span>
+<span><span class="va">df</span><span class="op">$</span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/smooth_signal.html">smooth_signal</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">x</span>, method <span class="op">=</span> <span class="st">"sgolay"</span>, window <span class="op">=</span> <span class="fl">11</span><span class="op">)</span>       <span class="co"># zero-phase; window ~ behavior</span></span>
+<span><span class="va">df</span><span class="op">$</span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/smooth_signal.html">smooth_signal</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">y</span>, method <span class="op">=</span> <span class="st">"sgolay"</span>, window <span class="op">=</span> <span class="fl">11</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 2. Fix the timescale from the WHOLE dataset, not one dyad -------------------</span></span>
+<span><span class="va">ps_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_signal_power.html">evaluate_signal_power</a></span><span class="op">(</span><span class="va">all_signals</span>, sample_rate <span class="op">=</span> <span class="va">fs</span><span class="op">)</span></span>
+<span><span class="va">params</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/suggest_wcc_params.html">suggest_wcc_params</a></span><span class="op">(</span></span>
+<span>  <span class="va">df</span><span class="op">$</span><span class="va">x</span>, <span class="va">df</span><span class="op">$</span><span class="va">y</span>,</span>
+<span>  sample_rate <span class="op">=</span> <span class="va">fs</span>,</span>
+<span>  event_duration_sec <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="va">ps_all</span><span class="op">$</span><span class="va">primary_cutoff_freq</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 3. Decide parameters honestly: sweep a grid, report robustness --------------</span></span>
+<span><span class="va">mv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synchrony_multiverse.html">synchrony_multiverse</a></span><span class="op">(</span></span>
+<span>  <span class="va">df</span><span class="op">$</span><span class="va">x</span>, <span class="va">df</span><span class="op">$</span><span class="va">y</span>,</span>
+<span>  estimator <span class="op">=</span> <span class="st">"wcc"</span>, sample_rate <span class="op">=</span> <span class="va">fs</span>,</span>
+<span>  window_sec <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span>, <span class="fl">6</span><span class="op">)</span>, lag_sec <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  surrogate_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"phase"</span>, <span class="st">"circular"</span><span class="op">)</span>,</span>
+<span>  n_surrogates <span class="op">=</span> <span class="fl">1000</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mv</span><span class="op">)</span>   <span class="co"># pct_significant, sign_consistent, median ES + IQR across the grid</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mv</span><span class="op">)</span>     <span class="co"># specification curve</span></span>
+<span></span>
+<span><span class="co"># 4. Confirmatory test with the chosen (not tuned-and-reused) parameters ------</span></span>
+<span><span class="va">null</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_surrogate_phase.html">generate_surrogate_phase</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">y</span>, n_surrogates <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/wcc_surrogate.html">wcc_surrogate</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">x</span>, <span class="va">df</span><span class="op">$</span><span class="va">y</span>, <span class="va">null</span>, window_size <span class="op">=</span> <span class="va">w</span>, lag_max <span class="op">=</span> <span class="va">l</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 5. Characterize the lead-lag structure --------------------------------------</span></span>
+<span><span class="fu"><a href="../reference/wcc.html">wcc</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">x</span>, <span class="va">df</span><span class="op">$</span><span class="va">y</span>, window_size <span class="op">=</span> <span class="va">w</span>, lag_max <span class="op">=</span> <span class="va">l</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/pick_optima.html">pick_optima</a></span><span class="op">(</span>L_size <span class="op">=</span> <span class="fl">9</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/leadership_asymmetry.html">leadership_asymmetry</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>smooth <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>A note on step 3 that matters for publishable claims:
+<code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code> <em>selects</em> the parameters that
+maximize the effect size, so testing significance with those same
+parameters on the same dyads is circular (double-dipping). Either tune
+on a pilot subset and confirm on held-out dyads, or — the simpler route
+for most users — report the multiverse robustness across the grid
+instead of a single tuned “winner.” See
+<code><a href="../articles/choosing-parameters.html">vignette("choosing-parameters")</a></code> for the full treatment.</p>
+</div>
+<div class="section level3">
+<h3 id="a-concrete-demonstration-on-sim_dyad">A concrete demonstration on <code>sim_dyad</code><a class="anchor" aria-label="anchor" href="#a-concrete-demonstration-on-sim_dyad"></a>
+</h3>
+<p>The following example walks through the core of this workflow using
+the built-in <code>sim_dyad</code> dataset, which contains 30 seconds of
 simulated 3D motion-tracking data (80 Hz) for two individuals. Person A
 leads a rhythmic movement early in the recording, they briefly
-synchronize, and Person B takes the lead by the end.</p>
+synchronize, and Person B takes the lead by the end. Because
+<code>sim_dyad</code> is already clean and regularly sampled, we start
+at the smoothing step.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="step-1-preprocess">Step 1: Preprocess<a class="anchor" aria-label="anchor" href="#step-1-preprocess"></a>
@@ -130,7 +204,7 @@ synchronize, and Person B takes the lead by the end.</p>
 High-frequency noise amplifies when derivatives are calculated,
 contaminating the cross-correlations. We apply a Savitzky-Golay filter
 and then compute the 1D velocity along the Z-axis.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
@@ -162,19 +236,24 @@ see <code><a href="../articles/determine-downsampling.html">vignette("determine-
 </h2>
 <p>The two key hyperparameters for WCC — <code>window_size</code>
 (samples per window) and <code>lag_max</code> (maximum temporal offset
-to test) — should be matched to the dominant behavioral timescale.
-<code>bsync</code> provides three complementary tools (detailed in
-<code><a href="../articles/choosing-parameters.html">vignette("choosing-parameters")</a></code>):</p>
+to test) — should be matched to the dominant behavioral timescale. There
+is no single “correct” window, so the honest goal is not to find one
+magic value but to check that your conclusion holds across a sensible
+range. <code>bsync</code> provides three complementary tools (detailed
+in <code><a href="../articles/choosing-parameters.html">vignette("choosing-parameters")</a></code>):</p>
 <ul>
 <li>
 <strong><code><a href="../reference/suggest_wcc_params.html">suggest_wcc_params()</a></code></strong> — PSD-driven
-starting values for a single dyad.</li>
+<em>starting center</em> for the sweep (derive the timescale from your
+whole dataset via <code>event_duration_sec</code>, not one dyad).</li>
 <li>
 <strong><code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code></strong> — sweep the
-full grid and view the specification curve.</li>
+full grid and report matched-null effect-size robustness; this is the
+recommended default for reporting.</li>
 <li>
-<strong><code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code></strong> — select parameters
-that generalize across a multi-dyad dataset.</li>
+<strong><code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code></strong> — select a single
+parameter set that generalizes across a multi-dyad dataset (mind the
+circularity caution above when you then report significance).</li>
 </ul>
 <p>For this quick-start we use hard-coded values that match the 0.5 Hz
 dominant cycle in <code>sim_dyad</code> (window ≈ 4 cycles at 80 Hz =
@@ -187,7 +266,7 @@ derive these from your own signal.</p>
 <p>With the data prepared and parameters chosen, run <code><a href="../reference/wcc.html">wcc()</a></code>.
 The function returns a <code>wcc_res</code> object that carries the full
 windowed surface, the aggregate Fisher’s Z, and all settings.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wcc_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wcc.html">wcc</a></span><span class="op">(</span></span>
 <span>  x                <span class="op">=</span> <span class="va">df</span><span class="op">$</span><span class="va">vel_A</span>,</span>
 <span>  y                <span class="op">=</span> <span class="va">df</span><span class="op">$</span><span class="va">vel_B</span>,</span>
@@ -211,7 +290,7 @@ windowed surface, the aggregate Fisher’s Z, and all settings.</p>
 <span><span class="co">#&gt;      0%     25%     50%     75%    100% </span></span>
 <span><span class="co">#&gt; -0.9755 -0.6768  0.0550  0.7400  0.9764</span></span></code></pre></div>
 <p>Plot the surface to see the shifting correlation landscape:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">wcc_res</span>, time_step <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="fl">80</span><span class="op">)</span> <span class="co"># time_step converts frames → seconds</span></span></code></pre></div>
 <p><img src="bsync_files/figure-html/plot-surface-1.png" class="r-plt" alt="" width="672"></p>
 <p>The <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>,
@@ -228,7 +307,7 @@ all three estimators.</p>
 cross-correlation can occur purely by chance. Surrogate testing builds
 an empirical null distribution by breaking the dyadic alignment while
 preserving each person’s individual signal characteristics.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Generate 200 circular-shift surrogates (use &gt;= 1000 for publication)</span></span>
@@ -264,7 +343,7 @@ each moment. To track <em>who is leading</em>, we extract the lag that
 maximizes correlation within each window (<code><a href="../reference/pick_optima.html">pick_optima()</a></code>),
 then summarize those lags into a continuous Leadership Asymmetry Index
 (<code><a href="../reference/leadership_asymmetry.html">leadership_asymmetry()</a></code>).</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wcc_res</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/pick_optima.html">pick_optima</a></span><span class="op">(</span>L_size <span class="op">=</span> <span class="fl">9</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/leadership_asymmetry.html">leadership_asymmetry</a></span><span class="op">(</span>epoch_size <span class="op">=</span> <span class="fl">3</span>, min_valid <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -277,7 +356,7 @@ the middle, and Person B leading by the end — exactly as simulated in
 <code>sim_dyad</code>.</p>
 <p>Visualize the optima overlaid on the surface with
 <code><a href="../reference/plot_optima_overlay.html">plot_optima_overlay()</a></code>:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">optima_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pick_optima.html">pick_optima</a></span><span class="op">(</span><span class="va">wcc_res</span>, L_size <span class="op">=</span> <span class="fl">9</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot_optima_overlay.html">plot_optima_overlay</a></span><span class="op">(</span><span class="va">wcc_res</span>, <span class="va">optima_df</span>, time_step <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="fl">80</span>, show_zero_lag <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="bsync_files/figure-html/overlay-1.png" class="r-plt" alt="" width="672"></p>
@@ -349,7 +428,52 @@ lag range</td>
 estimator in behavioral synchrony research and the one for which
 <code><a href="../reference/suggest_wcc_params.html">suggest_wcc_params()</a></code> and <code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code>
 provide the most direct guidance.</p>
+<div class="section level3">
+<h3 id="wcc-vs--wdtw-which-kind-of-similarity-do-you-mean">WCC vs. WDTW: which kind of similarity do you mean?<a class="anchor" aria-label="anchor" href="#wcc-vs--wdtw-which-kind-of-similarity-do-you-mean"></a>
+</h3>
+<p>WCC and WDTW both measure moment-to-moment similarity, but they
+answer different questions, and the right choice hinges on <strong>how
+the timing of the coordination behaves within a window</strong>.</p>
+<p><strong>WCC asks: “at a fixed time offset, do the two signals rise
+and fall together?”</strong> Inside each window it slides one signal by
+a <em>constant</em> lag and computes a linear (Pearson) correlation.
+This is the right model when the coupling is a roughly steady lead–lag
+over the window and the association is linear. Its great strengths are
+interpretability and direction: the sign of the optimal lag tells you
+<em>who leads</em>, which is exactly what <code><a href="../reference/pick_optima.html">pick_optima()</a></code> and
+<code><a href="../reference/leadership_asymmetry.html">leadership_asymmetry()</a></code> exploit. It is also cheap, so full
+surrogate testing and multiverse sweeps are affordable.</p>
+<p><strong>WDTW asks: “are the two signals the same shape if I’m allowed
+to locally stretch and compress time?”</strong> It finds the
+minimum-cost elastic alignment between the two window segments, so it
+can match the <em>same gesture performed at different or varying
+speeds</em> — one partner faster, a tempo that drifts, a lag that
+changes <em>within</em> the window. That flexibility is the point: use
+WDTW for mimicry and pattern recurrence when exact timing is not fixed.
+The costs are that it is <code>O(window²)</code> per cell (much
+heavier), returns a distance rather than a correlation, and gives a
+weaker read on directionality, because the warping itself blurs “who
+led.” On very noisy signals it can also over-align, finding warps that
+fit noise.</p>
+<p>Rules of thumb:</p>
+<ul>
+<li>
+<strong>Reach for WCC</strong> when the lag is roughly constant
+within a window, the relationship is linear, you want a clean leadership
+direction, or you have a lot of data.</li>
+<li>
+<strong>Reach for WDTW</strong> when partners perform the same
+behavior at <em>different or variable speeds</em> and you care about
+shape recurrence more than exact timing.</li>
+<li>
+<strong>They are complementary, not exclusive.</strong> Because
+<code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code> runs all three estimators, a
+robustness-minded analysis can check whether the same synchrony
+conclusion survives a change of estimator — strong evidence when it
+does.</li>
+</ul>
 <hr>
+</div>
 </div>
 <div class="section level2">
 <h2 id="where-to-go-next">Where to go next<a class="anchor" aria-label="anchor" href="#where-to-go-next"></a>
@@ -409,7 +533,7 @@ diagnostics</td>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

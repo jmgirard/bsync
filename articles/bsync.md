@@ -20,23 +20,97 @@ deep-dive articles.
 
 ## The bsync analysis workflow
 
-A complete behavioral synchrony analysis has five stages:
+A complete behavioral synchrony analysis moves through five stages:
 
-1.  **Preprocess** — smooth, trim, and compute kinematics from raw
-    position data.
-2.  **Choose parameters** — select window size and lag ceiling that
-    match the signal’s timescales.
-3.  **Estimate** — run WCC, WDTW, or WGC on the prepared signals.
-4.  **Test significance** — compare the observed statistic against a
-    surrogate null distribution.
-5.  **Quantify leadership** — extract optima and compute the Leadership
-    Asymmetry Index.
+1.  **Condition the signal** — diagnose gaps, put every signal on a
+    common, behaviorally appropriate sample rate, and smooth out
+    tracking jitter.
+2.  **Fix the timescale** — derive the dominant behavioral cycle *once,
+    from the whole dataset*, and use it to center your window and lag
+    choices.
+3.  **Decide parameters honestly** — rather than trusting a single
+    window, sweep a grid and report how robust the synchrony is to that
+    choice (and avoid selecting parameters to maximize an effect you
+    then re-test on the same data).
+4.  **Estimate and test** — run WCC, WDTW, or WGC and compare the
+    observed statistic against a matched-null surrogate distribution.
+5.  **Characterize** — extract optima and quantify the shifting lead–lag
+    structure with the Leadership Asymmetry Index.
 
-The following example walks through all five stages using the built-in
-`sim_dyad` dataset, which contains 30 seconds of simulated 3D
+If you remember one sentence, make it this one:
+
+> **Clean → put on a common rate and smooth → set the timescale from the
+> whole dataset → sweep a grid and report matched-null effect-size
+> robustness (not a single tuned window) → confirm with ≥ 1000
+> surrogates → characterize the lag structure and leadership.**
+
+### From raw data to a result: the full recipe
+
+With your own raw data (irregular timestamps, dropped frames, an
+arbitrary sample rate), the arc looks like this. It is shown here as a
+reference recipe; the runnable example below demonstrates the core of it
+on clean simulated data.
+
+``` r
+
+# 0. Condition each signal ---------------------------------------------------
+diagnose_ts_gaps(raw$x)                       # how much is missing, and in what runs?
+raw$x <- impute_ts_gaps(raw$x, maxgap = 5)    # bridge only short gaps; long gaps stay NA
+
+# 1. Put signals on a common, behaviorally appropriate rate, then smooth ------
+ps <- evaluate_signal_power(raw[c("x", "y")], sample_rate = 240)  # PSD downsampling guidance
+df <- aggregate_by_time(raw, time_var = t, bin_width = ps$recommended_bin_width_sec)
+df$x <- smooth_signal(df$x, method = "sgolay", window = 11)       # zero-phase; window ~ behavior
+df$y <- smooth_signal(df$y, method = "sgolay", window = 11)
+
+# 2. Fix the timescale from the WHOLE dataset, not one dyad -------------------
+ps_all <- evaluate_signal_power(all_signals, sample_rate = fs)
+params <- suggest_wcc_params(
+  df$x, df$y,
+  sample_rate = fs,
+  event_duration_sec = 1 / ps_all$primary_cutoff_freq
+)
+
+# 3. Decide parameters honestly: sweep a grid, report robustness --------------
+mv <- synchrony_multiverse(
+  df$x, df$y,
+  estimator = "wcc", sample_rate = fs,
+  window_sec = c(2, 4, 6), lag_sec = c(1, 2, 3),
+  surrogate_method = c("phase", "circular"),
+  n_surrogates = 1000
+)
+glance(mv)   # pct_significant, sign_consistent, median ES + IQR across the grid
+plot(mv)     # specification curve
+
+# 4. Confirmatory test with the chosen (not tuned-and-reused) parameters ------
+null <- generate_surrogate_phase(df$y, n_surrogates = 1000)
+wcc_surrogate(df$x, df$y, null, window_size = w, lag_max = l)
+
+# 5. Characterize the lead-lag structure --------------------------------------
+wcc(df$x, df$y, window_size = w, lag_max = l) |>
+  pick_optima(L_size = 9) |>
+  leadership_asymmetry() |>
+  plot(smooth = TRUE)
+```
+
+A note on step 3 that matters for publishable claims:
+[`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+*selects* the parameters that maximize the effect size, so testing
+significance with those same parameters on the same dyads is circular
+(double-dipping). Either tune on a pilot subset and confirm on held-out
+dyads, or — the simpler route for most users — report the multiverse
+robustness across the grid instead of a single tuned “winner.” See
+[`vignette("choosing-parameters")`](https://jmgirard.github.io/bsync/articles/choosing-parameters.md)
+for the full treatment.
+
+### A concrete demonstration on `sim_dyad`
+
+The following example walks through the core of this workflow using the
+built-in `sim_dyad` dataset, which contains 30 seconds of simulated 3D
 motion-tracking data (80 Hz) for two individuals. Person A leads a
 rhythmic movement early in the recording, they briefly synchronize, and
-Person B takes the lead by the end.
+Person B takes the lead by the end. Because `sim_dyad` is already clean
+and regularly sampled, we start at the smoothing step.
 
 ## Step 1: Preprocess
 
@@ -86,16 +160,22 @@ Other preprocessing helpers available in bsync:
 
 The two key hyperparameters for WCC — `window_size` (samples per window)
 and `lag_max` (maximum temporal offset to test) — should be matched to
-the dominant behavioral timescale. `bsync` provides three complementary
-tools (detailed in
+the dominant behavioral timescale. There is no single “correct” window,
+so the honest goal is not to find one magic value but to check that your
+conclusion holds across a sensible range. `bsync` provides three
+complementary tools (detailed in
 [`vignette("choosing-parameters")`](https://jmgirard.github.io/bsync/articles/choosing-parameters.md)):
 
 - **[`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md)**
-  — PSD-driven starting values for a single dyad.
+  — PSD-driven *starting center* for the sweep (derive the timescale
+  from your whole dataset via `event_duration_sec`, not one dyad).
 - **[`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)**
-  — sweep the full grid and view the specification curve.
+  — sweep the full grid and report matched-null effect-size robustness;
+  this is the recommended default for reporting.
 - **[`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)**
-  — select parameters that generalize across a multi-dyad dataset.
+  — select a single parameter set that generalizes across a multi-dyad
+  dataset (mind the circularity caution above when you then report
+  significance).
 
 For this quick-start we use hard-coded values that match the 0.5 Hz
 dominant cycle in `sim_dyad` (window ≈ 4 cycles at 80 Hz = 640 samples;
@@ -246,6 +326,51 @@ in behavioral synchrony research and the one for which
 and
 [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
 provide the most direct guidance.
+
+### WCC vs. WDTW: which kind of similarity do you mean?
+
+WCC and WDTW both measure moment-to-moment similarity, but they answer
+different questions, and the right choice hinges on **how the timing of
+the coordination behaves within a window**.
+
+**WCC asks: “at a fixed time offset, do the two signals rise and fall
+together?”** Inside each window it slides one signal by a *constant* lag
+and computes a linear (Pearson) correlation. This is the right model
+when the coupling is a roughly steady lead–lag over the window and the
+association is linear. Its great strengths are interpretability and
+direction: the sign of the optimal lag tells you *who leads*, which is
+exactly what
+[`pick_optima()`](https://jmgirard.github.io/bsync/reference/pick_optima.md)
+and
+[`leadership_asymmetry()`](https://jmgirard.github.io/bsync/reference/leadership_asymmetry.md)
+exploit. It is also cheap, so full surrogate testing and multiverse
+sweeps are affordable.
+
+**WDTW asks: “are the two signals the same shape if I’m allowed to
+locally stretch and compress time?”** It finds the minimum-cost elastic
+alignment between the two window segments, so it can match the *same
+gesture performed at different or varying speeds* — one partner faster,
+a tempo that drifts, a lag that changes *within* the window. That
+flexibility is the point: use WDTW for mimicry and pattern recurrence
+when exact timing is not fixed. The costs are that it is `O(window²)`
+per cell (much heavier), returns a distance rather than a correlation,
+and gives a weaker read on directionality, because the warping itself
+blurs “who led.” On very noisy signals it can also over-align, finding
+warps that fit noise.
+
+Rules of thumb:
+
+- **Reach for WCC** when the lag is roughly constant within a window,
+  the relationship is linear, you want a clean leadership direction, or
+  you have a lot of data.
+- **Reach for WDTW** when partners perform the same behavior at
+  *different or variable speeds* and you care about shape recurrence
+  more than exact timing.
+- **They are complementary, not exclusive.** Because
+  [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
+  runs all three estimators, a robustness-minded analysis can check
+  whether the same synchrony conclusion survives a change of estimator —
+  strong evidence when it does.
 
 ------------------------------------------------------------------------
 

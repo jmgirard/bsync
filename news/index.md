@@ -60,6 +60,16 @@ First public release.
   rule on a list of `bsync_multiverse` objects (one per dyad). Can be
   called directly by advanced users.
 
+- **Circular-inference guardrails on
+  [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md).**
+  Because auto-tuning *selects* the parameters that maximize the effect
+  size, re-testing synchrony with those parameters on the same dyads is
+  circular (double-dipping). The help page now documents this explicitly
+  and points to the two defensible remedies (split-sample tuning, or
+  reporting multiverse robustness instead of the tuned winner), and
+  [`print.bsync_autotune()`](https://jmgirard.github.io/bsync/reference/print.bsync_autotune.md)
+  emits a matching caution.
+
 - [`glance()`](https://generics.r-lib.org/reference/glance.html) on a
   `bsync_multiverse` reports both `n_cells` (total specifications in the
   grid) and `n_valid` (cells that produced a computable effect size);
@@ -166,6 +176,29 @@ First public release.
   serial-by-default and fully reproducible on all platforms.
 
 ### Correctness and robustness
+
+- **Phase-randomized surrogates preserve the sign of the mean.**
+  [`generate_surrogate_phase()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md)
+  previously took the modulus of the DC (and even-length Nyquist)
+  Fourier terms, which flipped the sign of the mean for negative-mean
+  signals in every surrogate. These real-valued terms are now preserved
+  exactly, so the surrogate mean and variance match the original for any
+  signal. This is inert for the mean-invariant correlation statistics
+  but matters for
+  [`wdtw()`](https://jmgirard.github.io/bsync/reference/wdtw.md) with
+  `scale_method = "none"`.
+
+- **Phase-randomized surrogates support odd-length series natively.**
+  [`generate_surrogate_phase()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md)
+  no longer aborts on an odd number of observations; it constructs a
+  valid conjugate-symmetric spectrum for both parities and always
+  returns a matrix with `length(y)` rows. This removes a crash in
+  [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
+  and
+  [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  (whose default `surrogate_method = "phase"` previously errored on any
+  odd-length input). The `trim_odd` argument is retained for backward
+  compatibility.
 
 - `na.rm` is honored in WCC. `calc_wcc_cpp()` gains an `na_rm`
   parameter; `na.rm = FALSE` in

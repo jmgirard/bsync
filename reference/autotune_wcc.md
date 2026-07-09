@@ -158,6 +158,31 @@ highest-median-ES cell is returned (soft fallback).
 random sample of \`n_tune_dyads\` dyads is used for speed; call
 \`set.seed()\` beforehand for reproducibility.
 
+## Avoiding circular inference
+
+\`autotune_wcc()\` \*\*selects\*\* the parameters that maximize the
+stability- penalized effect size. If you then run a confirmatory
+synchrony test with those parameters \*\*on the same dyads\*\*, the
+reported effect size and p-value are inflated – the parameters were
+chosen to maximize exactly that quantity (a form of double-dipping /
+circular analysis). Treat the tuned parameters as a \*hypothesis\*, not
+a validated result. To draw defensible conclusions, choose one of:
+
+- \*\*Split the sample.\*\* Tune on a pilot/exploratory subset of dyads
+  and confirm on a disjoint held-out subset that was not passed to
+  \`autotune_wcc()\`.
+
+- \*\*Report the multiverse, not the winner.\*\* Instead of a single
+  tuned specification, report the robustness of synchrony across the
+  whole grid via \[synchrony_multiverse()\] (\`pct_significant\`,
+  \`sign_consistent\`, the ES distribution). A result that holds only at
+  the single best-tuned cell is weak evidence; one that holds across the
+  grid is strong.
+
+The per-dyad multiverses are returned in \`\$dyad_multiverses\`
+precisely so you can inspect that full distribution rather than
+collapsing to the point estimate.
+
 ## See also
 
 \[synchrony_multiverse()\], \[suggest_wcc_params()\],
@@ -192,7 +217,8 @@ tuned
 #> Max lag: 80 samples (1 s)
 #> Increment: 32 samples
 #> Sig. rate: 33.3% of dyads
-#> Median ES: 1.473 (IQR = 0.232)
+#> Median ES: 1.493 (IQR = 0.232)
 #> ℹ Tuned over 3 dyads; 3 cells passed the detectability gate. Per-dyad multiverses in $dyad_multiverses.
+#> ! These parameters were selected to maximize effect size. Re-testing synchrony with them on the same dyads is circular; confirm on held-out dyads or report the multiverse robustness. See `?autotune_wcc()`.
 # }
 ```

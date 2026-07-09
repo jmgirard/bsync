@@ -86,12 +86,22 @@
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"jmgirard/bsync"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="the-workflow-at-a-glance">The workflow at a glance<a class="anchor" aria-label="anchor" href="#the-workflow-at-a-glance"></a>
+</h2>
+<pre class="mermaid"><code>flowchart LR
+  A[Condition&lt;br/&gt;gaps, common rate,&lt;br/&gt;smoothing] --&gt; B[Fix timescale&lt;br/&gt;from whole dataset]
+  B --&gt; C[Decide parameters&lt;br/&gt;sweep a grid,&lt;br/&gt;report robustness]
+  C --&gt; D[Estimate + test&lt;br/&gt;vs. matched-null&lt;br/&gt;surrogates]
+  D --&gt; E[Characterize&lt;br/&gt;optima &amp;&lt;br/&gt;leadership]</code></pre>
+<p>In one sentence: <strong>clean → put on a common rate and smooth → set the timescale from the whole dataset → sweep a grid and report matched-null effect-size robustness (not a single tuned window) → confirm with ≥ 1000 surrogates → characterize the lag structure and leadership.</strong></p>
+</div>
+<div class="section level2">
 <h2 id="example-workflow">Example Workflow<a class="anchor" aria-label="anchor" href="#example-workflow"></a>
 </h2>
 <p>The following example demonstrates a Quick Start WCC pipeline. <strong>New to bsync?</strong> Start with the <a href="https://jmgirard.github.io/bsync/articles/bsync.html">Get started vignette</a> for a full workflow walkthrough, an estimator decision table, and links to every deep-dive article. For parameter selection guidance (choosing <code>window_size</code> and <code>lag_max</code>), see <a href="https://jmgirard.github.io/bsync/articles/choosing-parameters.html">Choosing Analysis Parameters</a>.</p>
 <p>We will use the included <code>sim_dyad</code> dataset, which contains 30 seconds of simulated 3D motion tracking data for two individuals. In this simulation, Person A begins by leading a rhythmic movement, they synchronize in the middle, and Person B takes the lead by the end.</p>
 <p>First, we load the package and prepare the data. We highly recommend smoothing positional data before calculating velocities to prevent high-frequency noise from amplifying and skewing the cross-correlations. Here we apply a Savitzky-Golay filter and then calculate the 1D directional velocity on the Z-axis.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jmgirard.github.io/bsync/">bsync</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
@@ -106,7 +116,7 @@
 <span>    vel_B <span class="op">=</span> <span class="fu"><a href="reference/calc_velocity_1d.html">calc_velocity_1d</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">z_B_smooth</span>, fill_edges <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 <p>Next, we calculate the windowed cross-correlations. Calling <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> on the resulting object provides a clean, formatted overview of the analysis settings and the distribution of correlation values.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Step 2: Calculate Windowed Cross-Correlations</span></span>
 <span><span class="va">wcc_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wcc.html">wcc</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="va">df</span><span class="op">$</span><span class="va">vel_A</span>,</span>
@@ -133,7 +143,7 @@
 <span><span class="co">#&gt;      0%     25%     50%     75%    100% </span></span>
 <span><span class="co">#&gt; -0.9984 -0.6830  0.0338  0.7164  0.9986</span></span></code></pre></div>
 <p>Once the cross-correlations are calculated, we extract the specific lags that represent the optimal association within each time window. Summarizing the optima object displays the extraction metadata alongside an overview of results.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Step 3: Extract the Optima (Local Maxima)</span></span>
 <span><span class="va">optima</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/pick_optima.html">pick_optima</a></span><span class="op">(</span></span>
 <span>  obj <span class="op">=</span> <span class="va">wcc_results</span>,</span>
@@ -163,7 +173,7 @@
 <span><span class="co">#&gt;     0%    25%    50%    75%   100% </span></span>
 <span><span class="co">#&gt; 0.9739 0.9951 0.9971 0.9976 0.9986</span></span></code></pre></div>
 <p>Finally, we visualize the resulting correlation landscape. The underlying heatmap represents the cross-correlation values at each lag and elapsed time window. The overlaid points and connecting lines demonstrate the algorithm successfully tracking the shifting lag of optimum association over the course of the interaction.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Step 4: Plot the correlation landscape and overlay the shifting optima</span></span>
 <span><span class="fu"><a href="reference/plot_optima_overlay.html">plot_optima_overlay</a></span><span class="op">(</span></span>
 <span>  surface_obj <span class="op">=</span> <span class="va">wcc_results</span>,</span>
@@ -175,7 +185,7 @@
 </h3>
 <p>Psychological and behavioral time series are highly autocorrelated, which means random noise can sometimes look like genuine interaction. To verify that our observed synchronization is statistically significant, we can use the <code><a href="reference/wcc_surrogate.html">wcc_surrogate()</a></code> function.</p>
 <p>This function uses a circular shift method to misalign the two time series, generating a null distribution of “pseudo-synchrony” that preserves the natural autocorrelation of the data but breaks the dyadic interaction.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Step 5: Run surrogate analysis to calculate an empirical p-value</span></span>
 <span><span class="co"># First generate a null distribution via circular shift</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
@@ -253,7 +263,7 @@
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <p>If you use <strong>bsync</strong> in your research, please cite the package:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"bsync"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; To cite package 'bsync' in publications use:</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -376,7 +386,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

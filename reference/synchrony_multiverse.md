@@ -168,13 +168,13 @@ mv
 #> Specifications: 3 (3 computable)
 #> Surrogates per cell: 50
 #> Significant (p < .05): 1 of 3 (33.3%)
-#> Median ES: 1.532 [IQR: 0.378]
+#> Median ES: 1.521 [IQR: 0.366]
 #> Sign-consistent (sig. cells): 100%
 glance(mv)
 #> # A tibble: 1 × 9
 #>   estimator n_cells n_valid n_significant pct_significant median_es iqr_es
 #>   <chr>       <int>   <int>         <int>           <dbl>     <dbl>  <dbl>
-#> 1 wcc             3       3             1           0.333      1.53  0.378
+#> 1 wcc             3       3             1           0.333      1.52  0.366
 #> # ℹ 2 more variables: sign_consistent <dbl>, n_surrogates <dbl>
 # }
 ```
