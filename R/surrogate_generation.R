@@ -60,9 +60,21 @@ generate_surrogate_circular <- function(y, n_surrogates = 100, lag_max = NULL) {
 
 #' Generate Phase-Randomized Surrogates (Fourier Transform)
 #'
+#' @details
+#' Randomizes the phases of the Fourier transform of `y` while preserving its
+#' amplitude spectrum (and therefore its autocovariance / power spectrum). The
+#' DC term and -- for even-length series -- the Nyquist term are real-valued
+#' components carrying a sign; they are preserved exactly (not just their
+#' modulus), so the surrogate mean and variance match the original for any
+#' signal, including negative-mean signals. Conjugate symmetry is enforced on
+#' the remaining bins so the inverse transform is real. Both even- and
+#' odd-length series are handled natively.
+#'
 #' @param y A numeric vector containing a time series.
 #' @param n_surrogates Integer specifying the number of surrogates. Default is 100.
-#' @param trim_odd Logical. If TRUE, drops the final observation if the time series length is odd.
+#' @param trim_odd Logical. Odd-length series are supported natively; when
+#'   `TRUE`, the final observation is dropped instead (legacy behavior).
+#'   Default is `FALSE`.
 #' @return A matrix where each column is a surrogate time series.
 #' @examples
 #' # Build 100 phase-randomized surrogates (preserves the power spectrum)
@@ -72,45 +84,48 @@ generate_surrogate_circular <- function(y, n_surrogates = 100, lag_max = NULL) {
 generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
   n_y <- length(y)
 
-  # 1. Handle Odd Lengths Safely
-  if (n_y %% 2 != 0) {
-    if (trim_odd) {
-      y <- y[-n_y]
-      n_y <- length(y)
-      cli::cli_alert_warning(
-        "Odd length detected. Trimming the final observation to {n_y}."
-      )
-    } else {
-      cli::cli_abort(c(
-        "Phase randomization requires an even number of observations.",
-        "x" = "Current length is {n_y}.",
-        "i" = "Set {.arg trim_odd = TRUE} to automatically drop the last observation."
-      ))
-    }
+  # Legacy opt-in: drop the final observation on odd length (no longer needed
+  # for correctness -- odd lengths are handled natively below -- but retained
+  # for backward compatibility).
+  if (n_y %% 2 != 0 && trim_odd) {
+    y <- y[-n_y]
+    n_y <- length(y)
+    cli::cli_alert_warning(
+      "Odd length detected. Trimming the final observation to {n_y}."
+    )
   }
 
-  # 2. Fourier transform the original signal
+  # Fourier transform the original signal; keep amplitudes for randomized bins.
   y_fft <- stats::fft(y)
   amplitudes <- Mod(y_fft)
 
-  # 3. Setup indices to ensure Hermitian symmetry
+  n_even <- (n_y %% 2 == 0)
   half_n <- floor(n_y / 2)
 
-  # 4. Pre-allocate phase matrix for speed
-  phase_mat <- matrix(0, nrow = n_y, ncol = n_surrogates)
+  # Free positive-frequency bins whose phase we randomize (1-based indices).
+  # Even n: bins 2..half_n (bin half_n + 1 is the real-valued Nyquist term).
+  # Odd  n: bins 2..half_n + 1 (there is no Nyquist term).
+  n_free <- if (n_even) half_n - 1L else half_n
+  pos_idx <- 1L + seq_len(n_free)
+  neg_idx <- n_y + 2L - pos_idx # conjugate-symmetric mirror bins
 
-  for (j in seq_len(n_surrogates)) {
-    # Generate random phases uniformly from 0 to 2*pi
-    random_phases <- stats::runif(half_n - 1, 0, 2 * pi)
-
-    # Construct phases for an even-length signal
-    phases <- c(0, random_phases, 0, -rev(random_phases))
-    phase_mat[, j] <- phases
+  # Build the phase-randomized complex spectrum, one column per surrogate.
+  spec <- matrix(0 + 0i, nrow = n_y, ncol = n_surrogates)
+  spec[1, ] <- y_fft[1] # DC term preserved exactly (keeps its sign)
+  if (n_even) {
+    spec[half_n + 1L, ] <- y_fft[half_n + 1L] # Nyquist term preserved exactly
   }
 
-  # 5. Reconstruct complex signals and inverse FFT
-  complex_mat <- amplitudes * exp(1i * phase_mat)
-  surr_mat <- Re(stats::mvfft(complex_mat, inverse = TRUE)) / n_y
+  amp_pos <- amplitudes[pos_idx]
+  for (j in seq_len(n_surrogates)) {
+    random_phases <- stats::runif(n_free, 0, 2 * pi)
+    vals <- amp_pos * exp(1i * random_phases)
+    spec[pos_idx, j] <- vals
+    spec[neg_idx, j] <- Conj(vals)
+  }
+
+  # Inverse FFT; imaginary part is ~0 by construction.
+  surr_mat <- Re(stats::mvfft(spec, inverse = TRUE)) / n_y
 
   return(surr_mat)
 }

@@ -47,6 +47,13 @@ First public release.
   stability-penalized rule on a list of `bsync_multiverse` objects (one per
   dyad). Can be called directly by advanced users.
 
+* **Circular-inference guardrails on `autotune_wcc()`.** Because auto-tuning
+  *selects* the parameters that maximize the effect size, re-testing synchrony
+  with those parameters on the same dyads is circular (double-dipping). The help
+  page now documents this explicitly and points to the two defensible remedies
+  (split-sample tuning, or reporting multiverse robustness instead of the tuned
+  winner), and `print.bsync_autotune()` emits a matching caution.
+
 * `glance()` on a `bsync_multiverse` reports both `n_cells` (total
   specifications in the grid) and `n_valid` (cells that produced a computable
   effect size); `pct_significant` is taken over `n_valid`. This disambiguates
@@ -129,6 +136,22 @@ First public release.
   all platforms.
 
 ## Correctness and robustness
+
+* **Phase-randomized surrogates preserve the sign of the mean.**
+  `generate_surrogate_phase()` previously took the modulus of the DC (and
+  even-length Nyquist) Fourier terms, which flipped the sign of the mean for
+  negative-mean signals in every surrogate. These real-valued terms are now
+  preserved exactly, so the surrogate mean and variance match the original for
+  any signal. This is inert for the mean-invariant correlation statistics but
+  matters for `wdtw()` with `scale_method = "none"`.
+
+* **Phase-randomized surrogates support odd-length series natively.**
+  `generate_surrogate_phase()` no longer aborts on an odd number of
+  observations; it constructs a valid conjugate-symmetric spectrum for both
+  parities and always returns a matrix with `length(y)` rows. This removes a
+  crash in `synchrony_multiverse()` and `autotune_wcc()` (whose default
+  `surrogate_method = "phase"` previously errored on any odd-length input). The
+  `trim_odd` argument is retained for backward compatibility.
 
 * `na.rm` is honored in WCC. `calc_wcc_cpp()` gains an `na_rm` parameter;
   `na.rm = FALSE` in `wcc()` / `wcc_surrogate()` returns `NA` for any window
