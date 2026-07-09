@@ -42,6 +42,21 @@ You can install the development version of bsync from
 pak::pak("jmgirard/bsync")
 ```
 
+## The workflow at a glance
+
+``` mermaid
+flowchart LR
+  A[Condition<br/>gaps, common rate,<br/>smoothing] --> B[Fix timescale<br/>from whole dataset]
+  B --> C[Decide parameters<br/>sweep a grid,<br/>report robustness]
+  C --> D[Estimate + test<br/>vs. matched-null<br/>surrogates]
+  D --> E[Characterize<br/>optima &<br/>leadership]
+```
+
+In one sentence: **clean → put on a common rate and smooth → set the
+timescale from the whole dataset → sweep a grid and report matched-null
+effect-size robustness (not a single tuned window) → confirm with ≥ 1000
+surrogates → characterize the lag structure and leadership.**
+
 ## Example Workflow
 
 The following example demonstrates a Quick Start WCC pipeline. **New to

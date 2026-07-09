@@ -34,6 +34,53 @@ test_that("Phase randomization preserves mean and variance", {
   expect_equal(var(surr_phase[, 1]), var(y), tolerance = 1e-10)
 })
 
+test_that("Phase randomization preserves the sign of a negative mean", {
+  # Regression: taking Mod() of the DC term used to flip the sign of the mean
+  # for negative-mean signals. DC (and Nyquist) must be preserved exactly.
+  y <- rnorm(100, mean = -5, sd = 2)
+  surr_phase <- generate_surrogate_phase(y, n_surrogates = 5)
+
+  expect_equal(colMeans(surr_phase), rep(mean(y), 5), tolerance = 1e-10)
+  expect_equal(var(surr_phase[, 1]), var(y), tolerance = 1e-10)
+})
+
+test_that("Phase randomization handles odd-length series natively", {
+  # Regression: odd-length input used to abort unless trim_odd = TRUE, which
+  # broke the surrogate-matrix length contract in synchrony_multiverse().
+  y <- rnorm(101, mean = -2, sd = 1.5)
+  surr_phase <- generate_surrogate_phase(y, n_surrogates = 7)
+
+  expect_equal(dim(surr_phase), c(101L, 7L))
+  # Output is real and preserves the amplitude spectrum + mean/variance.
+  expect_equal(max(abs(Im(surr_phase))), 0)
+  expect_equal(Mod(fft(surr_phase[, 1])), Mod(fft(y)), tolerance = 1e-8)
+  expect_equal(mean(surr_phase[, 1]), mean(y), tolerance = 1e-10)
+  expect_equal(var(surr_phase[, 1]), var(y), tolerance = 1e-10)
+
+  # Legacy trim_odd path still drops the final observation.
+  expect_message(
+    trimmed <- generate_surrogate_phase(y, n_surrogates = 3, trim_odd = TRUE),
+    "Trimming the final observation"
+  )
+  expect_equal(nrow(trimmed), 100L)
+})
+
+test_that("synchrony_multiverse runs on odd-length series with phase surrogates", {
+  # Regression: the default surrogate_method = "phase" previously aborted the
+  # entire multiverse on odd-length input.
+  set.seed(42)
+  x <- rnorm(301)
+  y <- rnorm(301)
+  mv <- synchrony_multiverse(
+    x, y,
+    estimator = "wcc", sample_rate = 30,
+    window_sec = 1, lag_sec = 0.3,
+    n_surrogates = 10, surrogate_method = "phase"
+  )
+  expect_s3_class(mv, "bsync_multiverse")
+  expect_gte(mv$robustness$n_valid, 1L)
+})
+
 test_that("generate_surrogate_circular warns and errors correctly", {
   y <- 1:15
   expect_error(

@@ -96,6 +96,30 @@ cell is returned (soft fallback).
 of `n_tune_dyads` dyads is used for speed; call `set.seed()` beforehand for
 reproducibility.
 }
+\section{Avoiding circular inference}{
+
+`autotune_wcc()` **selects** the parameters that maximize the stability-
+penalized effect size. If you then run a confirmatory synchrony test with
+those parameters **on the same dyads**, the reported effect size and p-value
+are inflated -- the parameters were chosen to maximize exactly that quantity
+(a form of double-dipping / circular analysis). Treat the tuned parameters as
+a *hypothesis*, not a validated result. To draw defensible conclusions,
+choose one of:
+\itemize{
+  \item **Split the sample.** Tune on a pilot/exploratory subset of dyads and
+    confirm on a disjoint held-out subset that was not passed to
+    `autotune_wcc()`.
+  \item **Report the multiverse, not the winner.** Instead of a single tuned
+    specification, report the robustness of synchrony across the whole grid
+    via [synchrony_multiverse()] (`pct_significant`, `sign_consistent`, the ES
+    distribution). A result that holds only at the single best-tuned cell is
+    weak evidence; one that holds across the grid is strong.
+}
+The per-dyad multiverses are returned in `$dyad_multiverses` precisely so you
+can inspect that full distribution rather than collapsing to the point
+estimate.
+}
+
 \examples{
 \donttest{
 # Tune across a small multi-dyad list (here three copies of one dyad).
