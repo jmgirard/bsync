@@ -55,49 +55,16 @@
 
 <div id="claudemd--bsync" class="section level1">
 
-<p>Operating manual for AI-assisted development of this package. Read <code>DESIGN.md</code> (repo root) first and treat it as the <strong>source of truth</strong> for all design decisions; this file covers <em>how we work</em>, not <em>what we’re building</em>. When this file and <code>DESIGN.md</code> disagree, <code>DESIGN.md</code> wins for design and this file wins for process — and flag the conflict.</p>
+<p>Operating manual for AI-assisted development of this package. Read <code>cairn/DESIGN.md</code> first and treat it as the <strong>source of truth</strong> for all design decisions; this file covers <em>how we work</em>, not <em>what we’re building</em>. When this file and <code>DESIGN.md</code> disagree, <code>DESIGN.md</code> wins for design and this file wins for process — and flag the conflict.</p>
 <div class="section level2">
 <h2 id="what-this-is">What this is<a class="anchor" aria-label="anchor" href="#what-this-is"></a></h2>
-<p><code>bsync</code> is an R package for analyzing <strong>interpersonal / behavioral synchrony</strong> in continuous dyadic time series. It provides C++/Armadillo-accelerated windowed estimators of nonstationary lead–lag structure (windowed cross-correlation, windowed dynamic time warping, windowed Granger causality), a preprocessing pipeline (PSD-based downsampling guidance, zero-phase smoothing, kinematics, gap imputation, time-bin aggregation), surrogate (pseudo-synchrony) significance testing, peak/valley optima picking and leadership-asymmetry indices, and theory- and data-driven hyperparameter helpers. Full rationale, contracts, the surface object spec, and resolved defaults are in <code>DESIGN.md</code>.</p>
+<p><code>bsync</code> is an R package for analyzing <strong>interpersonal / behavioral synchrony</strong> in continuous dyadic time series. It provides C++/Armadillo-accelerated windowed estimators of nonstationary lead–lag structure (windowed cross-correlation, windowed dynamic time warping, windowed Granger causality), a preprocessing pipeline (PSD-based downsampling guidance, zero-phase smoothing, kinematics, gap imputation, time-bin aggregation), surrogate (pseudo-synchrony) significance testing, peak/valley optima picking and leadership-asymmetry indices, and theory- and data-driven hyperparameter helpers. Full rationale, contracts, the surface object spec, and resolved defaults are in <code>cairn/DESIGN.md</code>.</p>
 <p>The package must serve <strong>newcomers</strong> (safe, loud defaults + guidance) and <strong>experts</strong> (every hyperparameter exposed, raw surface accessible, full surrogate machinery) at once.</p>
 </div>
 <div class="section level2">
-<h2 id="milestone-bookkeeping-single-source-of-truth">Milestone bookkeeping (single source of truth)<a class="anchor" aria-label="anchor" href="#milestone-bookkeeping-single-source-of-truth"></a></h2>
-<p>Detailed milestone history — the baseline and the full <code>M&lt;N&gt; (done)</code> narrative for every completed milestone — lives in <strong><code>MILESTONES.md</code></strong> (repo root), in numeric order with no gaps. This file carries only the one-line index below. To avoid redundancy, each kind of note has exactly one home:</p>
-<ul><li>
-<strong>Detailed milestone narrative</strong> → <code>MILESTONES.md</code>.</li>
-<li>
-<strong>One-line index per milestone</strong> → “## Completed milestones” below.</li>
-<li>
-<strong>User-facing changes</strong> → <code>NEWS.md</code>.</li>
-<li>
-<strong>Design-contract changes</strong> → <code>DESIGN.md</code> §1–14 (its §15 is the forward roadmap plus a pointer to <code>MILESTONES.md</code>, <strong>not</strong> a second copy of the log).</li>
-</ul><p><strong>User-facing docs must not reference milestone numbers.</strong> README, vignettes, roxygen (and the generated <code>man/*.Rd</code>), and <code>NEWS.md</code> describe features in plain terms — never <code>M&lt;n&gt;</code>. <code>NEWS.md</code> is organized by release/theme, not by milestone. Internal <code>#</code> code comments in <code>R/</code> <em>may</em> carry milestone tags for dev provenance. <code>tests/testthat/test-doc-hygiene.R</code> enforces this (scans the user-facing docs, skips <code>R/</code>).</p>
-</div>
-<div class="section level2">
-<h2 id="completed-milestones">Completed milestones<a class="anchor" aria-label="anchor" href="#completed-milestones"></a></h2>
-<p>One line each; full detail in <a href="MILESTONES.html"><code>MILESTONES.md</code></a>.</p>
-<ul><li>
-<strong>M1 — Correctness &amp; robustness.</strong> <code>na.rm</code> honored in WCC; window-size semantics fixed (<code>w_max = window_size - 1</code>); short-series aborts; <code><a href="reference/evaluate_signal_power.html">evaluate_signal_power()</a></code> side-effect plotting removed; cli condition style; <code><a href="reference/leadership_asymmetry.html">leadership_asymmetry()</a></code>/<code><a href="reference/suggest_wcc_params.html">suggest_wcc_params()</a></code> docs.</li>
-<li>
-<strong>M2 — Efficiency.</strong> <code>calc_wcc_cpp</code> rewritten to an NA-aware prefix-sum core (5.4×–24.9×); pure-R oracle regression test; OpenMP removed (serial, reproducible).</li>
-<li>
-<strong>M3 — CRAN readiness.</strong> Build artifacts untracked; <code>@return</code> everywhere; <code>R CMD check --as-cran</code> 0/0/0; spell-check enforced in CI.</li>
-<li>
-<strong>M4 — Selectable WCC aggregate statistic.</strong> <code>wcc(statistic = c("mean_abs_z","peak"))</code>; single <code>wcc_aggregate()</code> drives observed + surrogate paths (Invariant 2).</li>
-<li>
-<strong>M5 — Shared windowed-surface + surrogate framework + tidy interface.</strong> <code>build_surface_grid()</code> / <code>run_surrogate_engine()</code> / <code>build_surface_heatmap()</code> factored; <code>bsync_surface</code> superclass; <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>/<code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code>/<code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble()</a></code> (<code>generics</code> + <code>tibble</code> added to Imports).</li>
-<li>
-<strong>M6 — Parameter guidance &amp; synchrony multiverse.</strong> <code><a href="reference/synchrony_multiverse.html">synchrony_multiverse()</a></code> engine + spec-curve plot; <code><a href="reference/autotune_wcc.html">autotune_wcc()</a></code> rebuilt as a thin wrapper + exported <code><a href="reference/select_specification.html">select_specification()</a></code>; PSD-driven <code><a href="reference/suggest_wcc_params.html">suggest_wcc_params()</a></code>.</li>
-<li>
-<strong>M7 — First CRAN release (<code>v0.1.0</code>).</strong> Docs/messaging pass (get-started vignette, grouped pkgdown, README); version bump to <code>0.1.0</code>; <code>cran-comments.md</code>; ready to submit (human-gated).</li>
-</ul></div>
-<div class="section level2">
-<h2 id="current-focus">Current focus<a class="anchor" aria-label="anchor" href="#current-focus"></a></h2>
-<p><strong>Post-release maintenance and next-estimator work.</strong> M7 (<code>v0.1.0</code>) is complete and ready to submit to CRAN (human-gated — see <code>cran-comments.md</code> pre-submission checklist). The next milestone is M8.</p>
-<ul><li>
-<strong>M8 — Phase synchrony estimator (next).</strong> Add a windowed phase-synchrony estimator to the <code>bsync_surface</code> framework established in M5. See <code>DESIGN.md</code> §15 for scope.</li>
-</ul><p>See <code>DESIGN.md</code> §15 for the full roadmap (M8 phase synchrony; M9 wavelet coherence; M10 CRQA/MEA; M11 group-level workflow; M12 expanded surrogates).</p>
+<h2 id="milestone-history-pre-cairn">Milestone history (pre-cairn)<a class="anchor" aria-label="anchor" href="#milestone-history-pre-cairn"></a></h2>
+<p>Milestones M1–M7 (through the v0.1.0 CRAN-ready release) were tracked in a precursor system; their full narrative is entombed verbatim in <code>cairn/legacy/MILESTONES.md</code>. Status and the forward roadmap now live in <code>cairn/ROADMAP.md</code> (see “Project tracking (cairn)” below).</p>
+<p><strong>User-facing docs must not reference milestone numbers.</strong> README, vignettes, roxygen (and the generated <code>man/*.Rd</code>), and <code>NEWS.md</code> describe features in plain terms — never <code>M&lt;n&gt;</code>. <code>NEWS.md</code> is organized by release/theme, not by milestone. Internal <code>#</code> code comments in <code>R/</code> <em>may</em> carry milestone tags for dev provenance. <code>tests/testthat/test-doc-hygiene.R</code> enforces this (scans the user-facing docs, skips <code>R/</code>).</p>
 </div>
 <div class="section level2">
 <h2 id="invariants--do-not-violate-without-flagging">Invariants — do not violate without flagging<a class="anchor" aria-label="anchor" href="#invariants--do-not-violate-without-flagging"></a></h2>
@@ -120,11 +87,11 @@
 <strong>Time integrity.</strong> When <code>time</code> is supplied, window positions map to real timestamps; edge trimming preserves the true timeline (the documented reason <code>time</code> exists).</li>
 </ol></div>
 <div class="section level2">
-<h2 id="resolved-defaults-see-designmd-9">Resolved defaults (see <code>DESIGN.md</code> §9)<a class="anchor" aria-label="anchor" href="#resolved-defaults-see-designmd-9"></a></h2>
+<h2 id="resolved-defaults-see-cairndesignmd-9">Resolved defaults (see <code>cairn/DESIGN.md</code> §9)<a class="anchor" aria-label="anchor" href="#resolved-defaults-see-cairndesignmd-9"></a></h2>
 <p><code>window_size</code>/<code>lag_max</code> <strong>required</strong> · window length = exactly <code>window_size</code> samples · increments = <code>1</code>/<code>1</code> · WCC <code>na.rm = TRUE</code> (pairwise; honored — <code>FALSE</code> ⇒ NA window) · WDTW <code>scale_method = "global"</code>, <code>distance_metric = "L2"</code> · Granger <code>ar_order = 1</code> · WCC aggregate statistic selectable, default <code>"mean_abs_z"</code> (M4) · surrogate method user-chosen (phase = spectrum, circular = autocorrelation) · <code>n_surrogates = 100</code> (≥ 1000 advised for reporting) · smoothing = Savitzky–Golay order 3 · downsample/aggregate = median · <code>impute maxgap = 5</code>, no extrapolation · PSD <code>threshold = 0.95</code>. Don’t change these silently.</p>
 </div>
 <div class="section level2">
-<h2 id="dependencies-see-designmd-10">Dependencies (see <code>DESIGN.md</code> §10)<a class="anchor" aria-label="anchor" href="#dependencies-see-designmd-10"></a></h2>
+<h2 id="dependencies-see-cairndesignmd-10">Dependencies (see <code>cairn/DESIGN.md</code> §10)<a class="anchor" aria-label="anchor" href="#dependencies-see-cairndesignmd-10"></a></h2>
 <p>Compiled cores via <strong><code>LinkingTo: Rcpp, RcppArmadillo</code></strong> are the package’s reason for existing — unlike a pure-R package, heavy inner loops belong in C++ here. Current <code>Imports</code>: <code>Rcpp</code>, <code>cli</code>, <code>dplyr</code>, <code>future.apply</code>, <code>generics</code>, <code>ggplot2</code>, <code>grDevices</code>, <code>gsignal</code>, <code>rlang</code>, <code>scales</code>, <code>tibble</code>, <code>utils</code>. <code>Suggests</code>: <code>future</code>, <code>knitr</code>, <code>rmarkdown</code>, <code>spelling</code>, <code>testthat (&gt;= 3.0.0)</code>, <code>vdiffr</code>. <code>generics</code> and <code>tibble</code> added in M5 for the tidy interface. <strong>Do not grow <code>Imports</code> without flagging it</strong> — prefer base R or the existing stack, and put heavy compute in the C++ cores, not new R deps.</p>
 </div>
 <div class="section level2">
@@ -157,10 +124,7 @@
 <div class="section level2">
 <h2 id="git">Git<a class="anchor" aria-label="anchor" href="#git"></a></h2>
 <ul><li>Default branch is <strong><code>main</code></strong>.</li>
-<li>
-<strong>Milestone work happens on a feature branch, merged via PR — not committed directly to <code>main</code>.</strong> <code>/plan-milestone</code> cuts <code>m&lt;N&gt;-&lt;slug&gt;</code> off an up-to-date <code>main</code>; the planning commit (the “## Current focus” update) and all implementation commits land there. <code>main</code> is updated only by merging a reviewed PR once CI is green (see below). Trivial, isolated doc-typo fixes may still go directly to <code>main</code> at the user’s discretion; anything touching <code>R/</code>, <code>src/</code>, <code>tests/</code>, <code>DESCRIPTION</code>, or vignettes goes through a PR.</li>
-<li>
-<strong>Commit / push cadence (respects “only when asked”):</strong> the milestone skills create the branch and make commits <strong>locally</strong>; <strong>pushing the branch and opening the PR happen only on the user’s request</strong> — never auto-pushed. Don’t force-push <code>main</code>.</li>
+<li>Branching, commits, merge approval, and push cadence follow the cairn git model (see “Project tracking (cairn)” below): milestone work on <code>m&lt;nnn&gt;-&lt;slug&gt;</code> branches merged via PR at the review gate, never directly to <code>main</code>.</li>
 <li>
 <strong>CI gate:</strong> a milestone PR merges into <code>main</code> only after the three GitHub Actions workflows go green — <code>R-CMD-check</code>, <code>test-coverage</code>, <code>pkgdown</code>.</li>
 <li>
@@ -171,7 +135,7 @@
 </ul></div>
 <div class="section level2">
 <h2 id="ask-first--guardrails">Ask-first / guardrails<a class="anchor" aria-label="anchor" href="#ask-first--guardrails"></a></h2>
-<ul><li>Ambiguity in <code>DESIGN.md</code> → ask; don’t invent a design decision.</li>
+<ul><li>Ambiguity in <code>cairn/DESIGN.md</code> → ask; don’t invent a design decision.</li>
 <li>Adding an <code>Imports</code> dependency, changing a resolved default, or changing the numeric output of a C++ core (beyond the deliberate M1 window-semantics fix) → flag for approval first.</li>
 <li>Adopting OpenMP / introducing C-level parallelism (M2) → flag; default must stay serial and reproducible.</li>
 <li>Touching git history, tags, or anything destructive → confirm first.</li>
@@ -182,7 +146,7 @@
 <ul><li>
 <strong>New estimators</strong> (phase synchrony, wavelet coherence, CRQA/MEA) — deferred to M8–M10, and only after the M5 shared-surface framework lands.</li>
 <li>
-<strong>Parameter-guidance overhaul</strong> (<code><a href="reference/synchrony_multiverse.html">synchrony_multiverse()</a></code> engine, <code><a href="reference/autotune_wcc.html">autotune_wcc()</a></code> as a thin wrapper over it, PSD-driven <code><a href="reference/suggest_wcc_params.html">suggest_wcc_params()</a></code>) — deferred to <strong>M6</strong>, after the M5 framework (DESIGN.md §14 #10).</li>
+<strong>Parameter-guidance overhaul</strong> (<code><a href="reference/synchrony_multiverse.html">synchrony_multiverse()</a></code> engine, <code><a href="reference/autotune_wcc.html">autotune_wcc()</a></code> as a thin wrapper over it, PSD-driven <code><a href="reference/suggest_wcc_params.html">suggest_wcc_params()</a></code>) — deferred to <strong>M6</strong>, after the M5 framework (cairn/DESIGN.md §14 #10).</li>
 <li>
 <strong>First CRAN release</strong> (<code>v0.1.0</code>) — explicitly its own milestone <strong>M7</strong>, after M6; not near-term.</li>
 <li>
@@ -190,12 +154,27 @@
 <li>
 <strong>tidy/glance/as_tibble methods</strong> — built in <strong>M5</strong> (done).</li>
 <li>
-<strong>IAAFT / segment-shuffling / pseudo-dyad surrogates</strong> — resolved to add (DESIGN.md §6/§14), scheduled <strong>M12</strong>; the pseudo-dyad (between-dyad rMEA) generator depends on M11’s <code>dyad_list</code>.</li>
+<strong>IAAFT / segment-shuffling / pseudo-dyad surrogates</strong> — resolved to add (cairn/DESIGN.md §6/§14), scheduled <strong>M12</strong>; the pseudo-dyad (between-dyad rMEA) generator depends on M11’s <code>dyad_list</code>.</li>
 <li>
-<strong>A unified <code>bsync_ts</code> preprocessing object</strong> — logged in DESIGN.md §14; specify before building.</li>
+<strong>A unified <code>bsync_ts</code> preprocessing object</strong> — logged in cairn/DESIGN.md §14; specify before building.</li>
 <li>
 <strong>OpenMP</strong> — not adopted until the M2 decision; no <code>#pragma omp</code> ships before then.</li>
 </ul></div>
+<div class="section level2">
+<h2 id="project-tracking-cairn">Project tracking (cairn)<a class="anchor" aria-label="anchor" href="#project-tracking-cairn"></a></h2>
+<p>This repo uses the cairn plugin. <strong>Before acting on any request, classify it and route</strong> — the tracking rulebook only loads once a cairn skill fires, so starting work in plain conversation silently bypasses the work tiers and the git model. Classify first:</p>
+<ul><li>
+<strong>Trivial</strong> (no runtime surface — typo, comment, tracking edit): commit directly to the default branch.</li>
+<li>
+<strong>User-visible bug</strong>: invoke <code>/hotfix</code>.</li>
+<li>
+<strong>New work, a design decision, or more than one sitting</strong>: invoke <code>/milestone-plan</code> (then <code>/milestone-implement</code> → <code>/milestone-review</code>).</li>
+<li>
+<strong>Status, “what’s next”, or unsure which tier</strong>: invoke <code>/milestone</code>.</li>
+<li>
+<strong>Never implement code on the default branch</strong> outside a milestone/hotfix branch; nothing reaches it without the user’s explicit approval at the review gate.</li>
+</ul><p>Whenever the request is anything but trivial, invoke the skill <em>first</em> so the full rulebook (the plugin’s <code>skills/shared/tracking-rules.md</code>) and its conduct load — do not reconstruct the rules here from memory. All project state lives under <code>cairn/</code> (<strong>Architecture → DESIGN · Status → ROADMAP · Tasks → milestone files · Decisions → DECISIONS · Lessons → LESSONS · History → archive + git</strong>); never record status or TODOs in this file. Claude’s persistent memory never holds project state; <code>cairn/</code> files win any conflict.</p>
+</div>
 </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
