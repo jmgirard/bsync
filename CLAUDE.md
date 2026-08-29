@@ -1,6 +1,6 @@
 # CLAUDE.md — `bsync`
 
-Operating manual for AI-assisted development of this package. Read `DESIGN.md` (repo root) first and
+Operating manual for AI-assisted development of this package. Read `cairn/DESIGN.md` first and
 treat it as the **source of truth** for all design decisions; this file covers *how we work*, not
 *what we're building*. When this file and `DESIGN.md` disagree, `DESIGN.md` wins for design and this
 file wins for process — and flag the conflict.
@@ -13,61 +13,24 @@ structure (windowed cross-correlation, windowed dynamic time warping, windowed G
 preprocessing pipeline (PSD-based downsampling guidance, zero-phase smoothing, kinematics, gap
 imputation, time-bin aggregation), surrogate (pseudo-synchrony) significance testing, peak/valley
 optima picking and leadership-asymmetry indices, and theory- and data-driven hyperparameter helpers.
-Full rationale, contracts, the surface object spec, and resolved defaults are in `DESIGN.md`.
+Full rationale, contracts, the surface object spec, and resolved defaults are in `cairn/DESIGN.md`.
 
 The package must serve **newcomers** (safe, loud defaults + guidance) and **experts** (every
 hyperparameter exposed, raw surface accessible, full surrogate machinery) at once.
 
-## Milestone bookkeeping (single source of truth)
+## Milestone history (pre-cairn)
 
-Detailed milestone history — the baseline and the full `M<N> (done)` narrative for every completed
-milestone — lives in **`MILESTONES.md`** (repo root), in numeric order with no gaps. This file
-carries only the one-line index below. To avoid redundancy, each kind of note has exactly one home:
+Milestones M1–M7 (through the v0.1.0 CRAN-ready release) were tracked in a
+precursor system; their full narrative is entombed verbatim in
+`cairn/legacy/MILESTONES.md`. Status and the forward roadmap now live in
+`cairn/ROADMAP.md` (see "Project tracking (cairn)" below).
 
-- **Detailed milestone narrative** → `MILESTONES.md`.
-- **One-line index per milestone** → "## Completed milestones" below.
-- **User-facing changes** → `NEWS.md`.
-- **Design-contract changes** → `DESIGN.md` §1–14 (its §15 is the forward roadmap plus a pointer to
-  `MILESTONES.md`, **not** a second copy of the log).
-
-**User-facing docs must not reference milestone numbers.** README, vignettes, roxygen (and the
-generated `man/*.Rd`), and `NEWS.md` describe features in plain terms — never `M<n>`. `NEWS.md` is
-organized by release/theme, not by milestone. Internal `#` code comments in `R/` *may* carry
-milestone tags for dev provenance. `tests/testthat/test-doc-hygiene.R` enforces this (scans the
+**User-facing docs must not reference milestone numbers.** README, vignettes,
+roxygen (and the generated `man/*.Rd`), and `NEWS.md` describe features in
+plain terms — never `M<n>`. `NEWS.md` is organized by release/theme, not by
+milestone. Internal `#` code comments in `R/` *may* carry milestone tags for
+dev provenance. `tests/testthat/test-doc-hygiene.R` enforces this (scans the
 user-facing docs, skips `R/`).
-
-## Completed milestones
-
-One line each; full detail in [`MILESTONES.md`](MILESTONES.md).
-
-- **M1 — Correctness & robustness.** `na.rm` honored in WCC; window-size semantics fixed
-  (`w_max = window_size - 1`); short-series aborts; `evaluate_signal_power()` side-effect plotting
-  removed; cli condition style; `leadership_asymmetry()`/`suggest_wcc_params()` docs.
-- **M2 — Efficiency.** `calc_wcc_cpp` rewritten to an NA-aware prefix-sum core (5.4×–24.9×); pure-R
-  oracle regression test; OpenMP removed (serial, reproducible).
-- **M3 — CRAN readiness.** Build artifacts untracked; `@return` everywhere; `R CMD check --as-cran`
-  0/0/0; spell-check enforced in CI.
-- **M4 — Selectable WCC aggregate statistic.** `wcc(statistic = c("mean_abs_z","peak"))`; single
-  `wcc_aggregate()` drives observed + surrogate paths (Invariant 2).
-- **M5 — Shared windowed-surface + surrogate framework + tidy interface.** `build_surface_grid()` /
-  `run_surrogate_engine()` / `build_surface_heatmap()` factored; `bsync_surface` superclass;
-  `tidy()`/`glance()`/`as_tibble()` (`generics` + `tibble` added to Imports).
-- **M6 — Parameter guidance & synchrony multiverse.** `synchrony_multiverse()` engine + spec-curve
-  plot; `autotune_wcc()` rebuilt as a thin wrapper + exported `select_specification()`; PSD-driven
-  `suggest_wcc_params()`.
-- **M7 — First CRAN release (`v0.1.0`).** Docs/messaging pass (get-started vignette, grouped pkgdown,
-  README); version bump to `0.1.0`; `cran-comments.md`; ready to submit (human-gated).
-
-## Current focus
-
-**Post-release maintenance and next-estimator work.** M7 (`v0.1.0`) is complete and ready to submit
-to CRAN (human-gated — see `cran-comments.md` pre-submission checklist). The next milestone is M8.
-
-- **M8 — Phase synchrony estimator (next).** Add a windowed phase-synchrony estimator to the
-  `bsync_surface` framework established in M5. See `DESIGN.md` §15 for scope.
-
-See `DESIGN.md` §15 for the full roadmap (M8 phase synchrony; M9 wavelet coherence; M10 CRQA/MEA;
-M11 group-level workflow; M12 expanded surrogates).
 
 ## Invariants — do not violate without flagging
 
@@ -94,7 +57,7 @@ These encode hard-won reasoning. Changing them is a design decision, not a refac
 8. **Time integrity.** When `time` is supplied, window positions map to real timestamps; edge
    trimming preserves the true timeline (the documented reason `time` exists).
 
-## Resolved defaults (see `DESIGN.md` §9)
+## Resolved defaults (see `cairn/DESIGN.md` §9)
 
 `window_size`/`lag_max` **required** · window length = exactly `window_size` samples · increments =
 `1`/`1` · WCC `na.rm = TRUE` (pairwise; honored — `FALSE` ⇒ NA window) · WDTW `scale_method =
@@ -104,7 +67,7 @@ autocorrelation) · `n_surrogates = 100` (≥ 1000 advised for reporting) · smo
 order 3 · downsample/aggregate = median · `impute maxgap = 5`, no extrapolation · PSD `threshold =
 0.95`. Don't change these silently.
 
-## Dependencies (see `DESIGN.md` §10)
+## Dependencies (see `cairn/DESIGN.md` §10)
 
 Compiled cores via **`LinkingTo: Rcpp, RcppArmadillo`** are the package's reason for existing —
 unlike a pure-R package, heavy inner loops belong in C++ here. Current `Imports`: `Rcpp`, `cli`,
@@ -150,15 +113,10 @@ snapshots; roxygen2 for every exported function (document the *why* of each defa
 ## Git
 
 - Default branch is **`main`**.
-- **Milestone work happens on a feature branch, merged via PR — not committed directly to `main`.**
-  `/plan-milestone` cuts `m<N>-<slug>` off an up-to-date `main`; the planning commit (the
-  "## Current focus" update) and all implementation commits land there. `main` is updated only by
-  merging a reviewed PR once CI is green (see below). Trivial, isolated doc-typo fixes may still go
-  directly to `main` at the user's discretion; anything touching `R/`, `src/`, `tests/`,
-  `DESCRIPTION`, or vignettes goes through a PR.
-- **Commit / push cadence (respects "only when asked"):** the milestone skills create the branch and
-  make commits **locally**; **pushing the branch and opening the PR happen only on the user's
-  request** — never auto-pushed. Don't force-push `main`.
+- Branching, commits, merge approval, and push cadence follow the cairn git
+  model (see "Project tracking (cairn)" below): milestone work on
+  `m<nnn>-<slug>` branches merged via PR at the review gate, never directly
+  to `main`.
 - **CI gate:** a milestone PR merges into `main` only after the three GitHub Actions workflows go
   green — `R-CMD-check`, `test-coverage`, `pkgdown`.
 - **R-hub (on demand, not a per-PR gate):** for milestones that touch `src/` and before any actual
@@ -172,7 +130,7 @@ snapshots; roxygen2 for every exported function (document the *why* of each defa
 
 ## Ask-first / guardrails
 
-- Ambiguity in `DESIGN.md` → ask; don't invent a design decision.
+- Ambiguity in `cairn/DESIGN.md` → ask; don't invent a design decision.
 - Adding an `Imports` dependency, changing a resolved default, or changing the numeric output of a
   C++ core (beyond the deliberate M1 window-semantics fix) → flag for approval first.
 - Adopting OpenMP / introducing C-level parallelism (M2) → flag; default must stay serial and
@@ -186,11 +144,37 @@ snapshots; roxygen2 for every exported function (document the *why* of each defa
   after the M5 shared-surface framework lands.
 - **Parameter-guidance overhaul** (`synchrony_multiverse()` engine, `autotune_wcc()` as a thin
   wrapper over it, PSD-driven `suggest_wcc_params()`) — deferred to **M6**, after the M5 framework
-  (DESIGN.md §14 #10).
+  (cairn/DESIGN.md §14 #10).
 - **First CRAN release** (`v0.1.0`) — explicitly its own milestone **M7**, after M6; not near-term.
 - **Group-level / multivariate modeling** — deferred to M11 (`mvSUSY` is the multivariate reference).
 - **tidy/glance/as_tibble methods** — built in **M5** (done).
-- **IAAFT / segment-shuffling / pseudo-dyad surrogates** — resolved to add (DESIGN.md §6/§14),
+- **IAAFT / segment-shuffling / pseudo-dyad surrogates** — resolved to add (cairn/DESIGN.md §6/§14),
   scheduled **M12**; the pseudo-dyad (between-dyad rMEA) generator depends on M11's `dyad_list`.
-- **A unified `bsync_ts` preprocessing object** — logged in DESIGN.md §14; specify before building.
+- **A unified `bsync_ts` preprocessing object** — logged in cairn/DESIGN.md §14; specify before building.
 - **OpenMP** — not adopted until the M2 decision; no `#pragma omp` ships before then.
+
+## Project tracking (cairn)
+
+This repo uses the cairn plugin. **Before acting on any request, classify it
+and route** — the tracking rulebook only loads once a cairn skill fires, so
+starting work in plain conversation silently bypasses the work tiers and the
+git model. Classify first:
+
+- **Trivial** (no runtime surface — typo, comment, tracking edit): commit
+  directly to the default branch.
+- **User-visible bug**: invoke `/hotfix`.
+- **New work, a design decision, or more than one sitting**: invoke
+  `/milestone-plan` (then `/milestone-implement` → `/milestone-review`).
+- **Status, "what's next", or unsure which tier**: invoke `/milestone`.
+- **Never implement code on the default branch** outside a milestone/hotfix
+  branch; nothing reaches it without the user's explicit approval at the
+  review gate.
+
+Whenever the request is anything but trivial, invoke the skill *first* so the
+full rulebook (the plugin's `skills/shared/tracking-rules.md`) and its conduct
+load — do not reconstruct the rules here from memory. All project state lives under
+`cairn/` (**Architecture → DESIGN · Status → ROADMAP · Tasks → milestone
+files · Decisions → DECISIONS · Lessons → LESSONS · History → archive +
+git**); never record
+status or TODOs in this file. Claude's persistent memory never holds project
+state; `cairn/` files win any conflict.

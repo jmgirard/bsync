@@ -371,33 +371,9 @@ reproducible; result objects stay light; supplied `time` maps windows to real ti
 
 ## 15. Milestone roadmap
 
-**Completed milestones (M1–M7) have their detailed log in `MILESTONES.md`** (repo root, the single
-source of truth), with a one-line index in `CLAUDE.md`. This section is the *forward* roadmap only;
-do not duplicate the completed-milestone narrative here. The hardening cycle (M1 correctness, M2
-efficiency, M3 CRAN readiness, M4 selectable WCC statistic), the M5 shared windowed-surface +
-surrogate + tidy framework, M6 parameter guidance / synchrony multiverse, and the M7 first CRAN
-release (`v0.1.0`) are all done; the later estimators (M8+) are post-1.0 minor releases and are
-listed below.
-
-8. **M8 — Phase synchrony (Hilbert).** Analytic-signal instantaneous phase; windowed phase-locking
-   value / phase synchrony; relative-phase output.
-9. **M9 — Wavelet coherence.** Cross-wavelet / wavelet coherence for nonstationary time–frequency
-   lead–lag across scales.
-10. **M10 — CRQA / MEA conventions.** Cross-recurrence quantification analysis and motion-energy-
-    analysis-style windowed cross-correlation conventions/conveniences.
-11. **M11 — Group-level / multivariate workflow.** Tidy multi-dyad pipeline (list / nested frame in,
-    per-dyad surfaces out) + aggregation / mixed-model summaries across many dyads, reusing the
-    `autotune_wcc()` / `synchrony_multiverse()` dyad-list conventions; the `mvSUSY`
-    multivariate-synchrony measures are the reference for the >2-series case.
-12. **M12 — Expanded surrogate generators.** Three new generators wired through the matched-null
-    engine (Inv. 2), making bsync's nulls comparable to SUSY/rMEA: **IAAFT** (Schreiber & Schmitz
-    1996) and **segment-shuffling** (SUSY) — both *within-series* nulls — plus the **pseudo-dyad**
-    (between-dyad) null, the rMEA "pseudosynchrony" convention that pairs a real participant with a
-    real partner from a *different* dyad. The pseudo-dyad generator **depends on M11** (it needs the
-    multi-dyad `dyad_list` structure to draw cross-dyad pairings) and slots straight into the
-    existing `y_surrogates` matrix interface; document that, unlike phase/circular, it does not
-    preserve the partner's own autocorrelation (it substitutes a different real person's), so it
-    tests a slightly different null (§2 honesty caveat — state which null).
-
-Later, unscheduled: a unified `bsync_ts` preprocessing object, expanded educational vignettes
-(choosing a method, interpreting a surface, reporting synchrony).
+**The forward roadmap now lives in `cairn/ROADMAP.md`** (the only authority
+on milestone status; the M8–M12 estimator ideas are its candidate rows).
+Completed milestones M1–M7 have their detailed log entombed verbatim in
+`cairn/legacy/MILESTONES.md`; do not duplicate either here. (Replaced at
+cairn-init migration, 2026-08-29; the pre-migration §15 text is in git
+history.)
