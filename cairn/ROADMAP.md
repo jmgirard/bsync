@@ -8,7 +8,7 @@ _Last hygiene check: 2026-08-29 (cairn-init migration; no milestones yet)_
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M008 | Phase synchrony estimator (wphase) | in-progress | — | normal | milestones/M008-phase-synchrony.md |
+| M008 | Phase synchrony estimator (wphase) | review | — | normal | milestones/M008-phase-synchrony.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 5 most recent
      terminal (done or dropped) rows — older ones live in milestones/archive/ + git -->
 
