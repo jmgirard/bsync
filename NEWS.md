@@ -1,3 +1,22 @@
+# bsync (development version)
+
+## New estimator: windowed phase synchrony
+
+* **`wphase()`** — new windowed phase-synchrony estimator. Instantaneous phase
+  is extracted once per series via the analytic signal (`gsignal::hilbert()`);
+  each window-by-lag cell reports the phase-locking value (PLV; Lachaux,
+  Rodriguez, Martinerie, & Varela, 1999) and the mean relative phase
+  (positive = `x` ahead). Returns the shared `bsync_surface` object with
+  `print()`, `summary()`, `plot()` (PLV heatmap), and `tidy()`/`glance()`/
+  `as_tibble()` support. Input with missing values aborts with guidance
+  (impute or trim first) because the FFT-based analytic signal has no coherent
+  per-window NA handling.
+* **`wphase_surrogate()`** — matched-null surrogate significance test for
+  `wphase()`: the mean-PLV aggregate is computed identically on the observed
+  and every surrogate series, with the empirical p-value as its upper tail.
+* **`pick_optima()`** and **`leadership_asymmetry()`** now accept the phase
+  surface (`wphase_res` / `wphase_optima`), searching for peak phase locking.
+
 # bsync 0.1.0
 
 First public release.

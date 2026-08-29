@@ -214,3 +214,64 @@ test_that("wphase validates inputs via the shared validators", {
   # Short series: build_surface_grid's abort
   expect_error(wphase(rnorm(20), rnorm(20), window_size = 15, lag_max = 5), regexp = "too short")
 })
+
+# AC4/AC6: superclass methods, optima and leadership --------------------------
+test_that("tidy/glance/as_tibble return superclass shapes on wphase_res", {
+  res <- wphase(sim_dyad$z_A[1:300], sim_dyad$z_B[1:300],
+    window_size = 64, lag_max = 5, window_increment = 8
+  )
+
+  td <- generics::tidy(res)
+  expect_equal(nrow(td), nrow(res$results_df))
+  expect_true(all(c("i", "tau", "plv", "rel_phase") %in% names(td)))
+
+  gl <- generics::glance(res)
+  expect_equal(nrow(gl), 1L)
+  expect_true(all(
+    c("window_size", "window_increment", "lag_max", "lag_increment", "statistic") %in% names(gl)
+  ))
+  expect_equal(gl$window_size, 64)
+  expect_equal(gl$statistic, "mean_plv")
+
+  tb <- tibble::as_tibble(res)
+  expect_s3_class(tb, "tbl_df")
+  expect_equal(nrow(tb), nrow(res$results_df))
+})
+
+test_that("pick_optima and leadership_asymmetry accept wphase surfaces", {
+  res <- wphase(sim_dyad$z_A[1:300], sim_dyad$z_B[1:300],
+    window_size = 64, lag_max = 5, window_increment = 8
+  )
+
+  opt_local <- pick_optima(res, L_size = 3)
+  expect_s3_class(opt_local, "wphase_optima")
+  expect_true(all(c("i", "optimum_lag", "optimum_value") %in% names(opt_local)))
+  # PLV optima are maxima within the searched region
+  expect_true(all(opt_local$optimum_value >= 0, na.rm = TRUE))
+
+  opt_global <- pick_optima(res, search_method = "global")
+  expect_s3_class(opt_global, "wphase_optima")
+  # Global search returns each window's max PLV
+  by_win <- tapply(res$results_df$plv, res$results_df$i, max)
+  expect_equal(unname(opt_global$optimum_value), as.vector(by_win[as.character(opt_global$i)]))
+
+  lai <- leadership_asymmetry(opt_local, epoch_size = 6)
+  expect_true(all(c("i", "asymmetry_index") %in% names(lai)))
+  expect_true(all(abs(lai$asymmetry_index) <= 1, na.rm = TRUE))
+})
+
+test_that("print and summary methods run for wphase objects", {
+  res <- wphase(sim_dyad$z_A[1:300], sim_dyad$z_B[1:300],
+    window_size = 64, lag_max = 5, window_increment = 8
+  )
+  expect_message(print(res), "Windowed Phase Synchrony Analysis")
+  expect_message(summary(res), "Phase-Locking Value Distribution")
+
+  set.seed(7)
+  ys <- generate_surrogate_circular(sim_dyad$z_B[1:300], n_surrogates = 9)
+  surr <- wphase_surrogate(sim_dyad$z_A[1:300], sim_dyad$z_B[1:300],
+    y_surrogates = ys, window_size = 64, lag_max = 5, window_increment = 8
+  )
+  expect_s3_class(surr, "wphase_surr")
+  expect_message(print(surr), "Windowed Phase Synchrony Surrogate Analysis")
+})

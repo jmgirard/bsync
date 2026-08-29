@@ -161,3 +161,10 @@ test_that("Visual outputs remain consistent", {
   )
   vdiffr::expect_doppelganger("wcc-optima-overlay", p_overlay)
 })
+
+test_that("wphase plot visual output remains consistent", {
+  skip_if_not_installed("vdiffr")
+  mock_wphase <- wphase(sig1, sig2, window_size = 6, lag_max = 3)
+  p_wphase <- plot(mock_wphase)
+  vdiffr::expect_doppelganger("wphase-plot-default", p_wphase)
+})

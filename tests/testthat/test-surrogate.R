@@ -601,3 +601,101 @@ test_that("M7: print.wcc_surr labels have no double-colon (cli regression)", {
     label = "print.wcc_surr (peak) must not contain double colon ': :'"
   )
 })
+
+
+# wphase surrogate: Invariant 2, Invariant 6, and calibration -----------------
+
+test_that("Invariant 2: wphase_surrogate observed_z equals wphase aggregate exactly", {
+  set.seed(11)
+  x <- sim_dyad$z_A[1:300]
+  y <- sim_dyad$z_B[1:300]
+  ys <- generate_surrogate_circular(y, n_surrogates = 5)
+
+  obs <- wphase(x, y, window_size = 64, lag_max = 5, window_increment = 8)
+  surr <- wphase_surrogate(x, y,
+    y_surrogates = ys,
+    window_size = 64, lag_max = 5, window_increment = 8
+  )
+
+  expect_identical(surr$observed_z, obs$aggregate[[1]])
+
+  # Cross-path check: y itself as the sole "surrogate" must reproduce the
+  # observed aggregate through the aggregate-only surrogate path.
+  self <- wphase_surrogate(x, y,
+    y_surrogates = matrix(y, ncol = 1),
+    window_size = 64, lag_max = 5, window_increment = 8
+  )
+  expect_equal(self$surrogate_z[1], obs$aggregate[[1]], tolerance = 1e-12)
+})
+
+test_that("Invariant 6: wphase_surrogate is reproducible under set.seed", {
+  x <- sim_dyad$z_A[1:300]
+  y <- sim_dyad$z_B[1:300]
+
+  run_once <- function() {
+    set.seed(99)
+    ys <- generate_surrogate_circular(y, n_surrogates = 19)
+    wphase_surrogate(x, y,
+      y_surrogates = ys,
+      window_size = 64, lag_max = 5, window_increment = 8
+    )
+  }
+  a <- run_once()
+  b <- run_once()
+  expect_identical(a$p_value, b$p_value)
+  expect_identical(a$surrogate_z, b$surrogate_z)
+})
+
+test_that("wphase surrogate p-values are calibrated under the null (Type I)", {
+  skip_on_cran()
+  # 200 seeded replicates of independent white-noise pairs, n_surrogates = 99.
+  # With B = 99 surrogates, p <= .05 iff at most 4 surrogates >= observed,
+  # which has probability exactly 5/100 under exchangeability. Over R = 200
+  # replicates the rejection count is Binomial(200, .05): mean 10,
+  # SE = sqrt(200 * .05 * .95) = 3.08; a +/- 3 SE band is 10 +/- 9.25,
+  # so integer counts in [1, 19].
+  set.seed(20260829)
+  rep_seeds <- sample.int(.Machine$integer.max, 200)
+  pvals <- vapply(rep_seeds, function(s) {
+    set.seed(s)
+    x <- rnorm(300)
+    y <- rnorm(300)
+    ys <- generate_surrogate_circular(y, n_surrogates = 99)
+    wphase_surrogate(x, y,
+      y_surrogates = ys,
+      window_size = 64, lag_max = 5, window_increment = 8
+    )$p_value
+  }, numeric(1))
+  rejections <- sum(pvals <= 0.05)
+  expect_gte(rejections, 1)
+  expect_lte(rejections, 19)
+})
+
+test_that("wphase surrogate test has power against phase-locked signals", {
+  skip_on_cran()
+  # Coupling design: a shared frequency-wandering sinusoid (theta = 8 Hz
+  # carrier at fs = 128 plus a cumulative-normal phase wander, sd = 0.15/step)
+  # with independent additive noise, sd = 0.5. PLV is invariant to constant
+  # phase offsets, so a strictly periodic common component would give the
+  # circular-shift null NO power (the shift only offsets the phase); the
+  # shared wander is what a shift misaligns. At this design a 60-replicate
+  # pilot rejected at rate .983 (~.95+ expected power); the assertion floor
+  # is .80, leaving ~6 SE of Monte-Carlo headroom at power .95
+  # (SE = sqrt(.95*.05/200) = .0154).
+  set.seed(20260830)
+  rep_seeds <- sample.int(.Machine$integer.max, 200)
+  pvals <- vapply(rep_seeds, function(s) {
+    set.seed(s)
+    n <- 300
+    t <- 0:(n - 1)
+    theta <- 2 * pi * 8 * t / 128 + cumsum(rnorm(n, sd = 0.15))
+    x <- sin(theta) + rnorm(n, sd = 0.5)
+    y <- sin(theta + 0.8) + rnorm(n, sd = 0.5)
+    ys <- generate_surrogate_circular(y, n_surrogates = 99)
+    wphase_surrogate(x, y,
+      y_surrogates = ys,
+      window_size = 64, lag_max = 5, window_increment = 8
+    )$p_value
+  }, numeric(1))
+  expect_gte(mean(pvals <= 0.05), 0.80)
+})

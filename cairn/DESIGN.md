@@ -280,6 +280,10 @@ reproducible; result objects stay light; supplied `time` maps windows to real ti
 ## 13. Testing & infrastructure
 
 - testthat 3e; `vdiffr` snapshots for every plot method.
+- **Oracle records:** provenance headers in the asserting test files
+  (`tests/testthat/test-external-oracle.R`, per-estimator test files) plus the
+  committed generators under `data-raw/` (`wphase_null_bound.R`,
+  `wphase_mne_pin.py`); each names its source, versions, and asserting test.
 - **Layered validation (four modes, distinct failure types).** Unit tests catch *implementation*
   bugs but cannot catch a *definitional* one: a pure-R oracle written from the same mental model as
   the C++ core agrees with it and is wrong in the same way. The four layers close different gaps:

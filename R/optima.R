@@ -2,7 +2,7 @@
 
 #' Find Optimum (Peak or Valley) in Windowed Analyses
 #'
-#' @param obj An object of class "wcc_res" or "wdtw_res".
+#' @param obj An object of class "wcc_res", "wdtw_res", or "wphase_res".
 #' @param L_size An odd integer specifying the size of the local search region.
 #'   Ignored if `search_method = "global"`. Default is `NULL`.
 #' @param strict_monotonic Logical indicating whether to strictly enforce
@@ -10,7 +10,8 @@
 #' @param find_min Logical indicating whether to search for local minima instead
 #'   of local maxima. If `NULL` (the default), the function automatically
 #'   searches for maxima (`FALSE`) for cross-correlation ("wcc_res") and
-#'   minima (`TRUE`) for distance metrics ("wdtw_res").
+#'   minima (`TRUE`) for distance metrics ("wdtw_res"); "wphase_res" searches
+#'   for maxima (peak phase-locking value).
 #' @param search_method Character string specifying "local" or "global" search.
 #'   "local" searches symmetrically outward from lag 0. "global" searches the
 #'   entire window for the absolute extremum. If `NULL`, defaults to "local"
@@ -18,7 +19,8 @@
 #' @param threshold A numeric value. For WCC (`find_min = FALSE`), optima with an
 #'   absolute value below this threshold are set to NA. For WDTW (`find_min = TRUE`),
 #'   optima with a distance above this threshold are set to NA. Default is `NULL`.
-#' @return A data frame of class "wcc_optima" or "wdtw_optima".
+#' @return A data frame of class "wcc_optima", "wdtw_optima", or
+#'   "wphase_optima".
 #' @examples
 #' wcc_res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
 #' optima <- pick_optima(wcc_res, L_size = 9)
@@ -46,9 +48,16 @@ pick_optima <- function(
       find_min <- TRUE
     }
     if (is.null(search_method)) search_method <- "global"
+  } else if (inherits(obj, "wphase_res")) {
+    metric_col <- "plv"
+    out_class <- "wphase_optima"
+    if (is.null(find_min)) {
+      find_min <- FALSE
+    }
+    if (is.null(search_method)) search_method <- "local"
   } else {
     cli::cli_abort(
-      "Input {.arg obj} must be a {.cls wcc_res} or {.cls wdtw_res} object."
+      "Input {.arg obj} must be a {.cls wcc_res}, {.cls wdtw_res}, or {.cls wphase_res} object."
     )
   }
 

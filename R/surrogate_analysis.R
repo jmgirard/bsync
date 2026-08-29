@@ -399,6 +399,131 @@ wgranger_surrogate <- function(
   structure(out, class = c("wgranger_surr", "list"))
 }
 
+# -------------------------------------------------------------------------
+# --- 4. Windowed Phase Synchrony (wphase) --------------------------------
+# -------------------------------------------------------------------------
+
+#' Calculate Surrogate Windowed Phase Synchrony
+#'
+#' @details
+#' The p-value is the proportion of surrogates whose aggregate statistic is **at least as
+#' large as** the observed statistic. The aggregate -- the mean phase-locking value over
+#' all window x lag combinations (`mean_plv`) -- is computed identically on the observed
+#' data and every surrogate via the same internal helper, so the null distribution and
+#' the observed value are directly comparable (Invariant 2: surrogate nulls match the
+#' observed statistic).
+#'
+#' Phase extraction (the analytic signal via `gsignal::hilbert()`) is applied to each
+#' surrogate column exactly as to the observed series. Circular-shift surrogates
+#' ([generate_surrogate_circular()]) preserve each series' own phase continuity while
+#' breaking cross-series alignment, which makes them a natural null for a phase
+#' statistic; phase-randomization surrogates ([generate_surrogate_phase()]) instead
+#' destroy the surrogate's phase structure itself -- state which null you are testing.
+#'
+#' @param x A numeric vector containing a time series.
+#' @param y A numeric vector containing a time series.
+#' @param y_surrogates A matrix of surrogate time series for `y` (columns are surrogates).
+#' @param time An optional numeric vector representing the timestamps for the data. Default is `NULL`.
+#' @param window_size A positive integer indicating the size of each window.
+#' @param lag_max A positive integer indicating the maximum lag to try.
+#' @param window_increment A positive integer indicating the window shift increment. Default is 1.
+#' @param lag_increment A positive integer indicating the lag shift increment. Default is 1.
+#' @return A list object of class "wphase_surr".
+#' @examples
+#' \donttest{
+#' # Two-step pipeline: generate a null matrix, then test the observed synchrony
+#' y_surr <- generate_surrogate_circular(sim_dyad$z_B, n_surrogates = 100)
+#' res <- wphase_surrogate(
+#'   x = sim_dyad$z_A,
+#'   y = sim_dyad$z_B,
+#'   y_surrogates = y_surr,
+#'   window_size = 96,
+#'   lag_max = 10
+#' )
+#' res
+#' }
+#' @export
+wphase_surrogate <- function(
+  x,
+  y,
+  y_surrogates,
+  time = NULL,
+  window_size,
+  lag_max,
+  window_increment = 1,
+  lag_increment = 1
+) {
+  if (!is.matrix(y_surrogates)) {
+    cli::cli_abort("{.arg y_surrogates} must be a matrix.")
+  }
+  if (nrow(y_surrogates) != length(y)) {
+    cli::cli_abort(
+      "{.arg y_surrogates} must have the same number of rows as length of {.arg y}."
+    )
+  }
+  if (anyNA(y_surrogates)) {
+    cli::cli_abort(c(
+      "{.arg y_surrogates} must not contain missing values.",
+      "i" = "The analytic signal (FFT-based Hilbert transform) is corrupted by any NA."
+    ))
+  }
+
+  n_surrogates <- ncol(y_surrogates)
+
+  # 1. Calculate observed windowed phase synchrony
+  obs_wphase <- wphase(
+    x = x,
+    y = y,
+    time = time,
+    window_size = window_size,
+    lag_max = lag_max,
+    window_increment = window_increment,
+    lag_increment = lag_increment
+  )
+  obs_plv <- obs_wphase$aggregate[[1]]
+
+  # 2. Build the structural grid ONCE (hoistable in a multiverse loop)
+  grid <- build_surface_grid(
+    n_x = length(x),
+    window_size = window_size,
+    window_increment = window_increment,
+    lag_max = lag_max,
+    lag_increment = lag_increment,
+    lagged = TRUE
+  )
+
+  # Phase of x is fixed across surrogates; extract once (Invariant 7:
+  # aggregate-only path, no results_df on the surrogate side).
+  phi_x <- extract_phase(as.double(x))
+
+  wphase_compute <- function(xv, y_col, g) {
+    core <- calc_wphase_cpp(
+      phi_x = xv, phi_y = extract_phase(as.double(y_col)),
+      i_vals = g$i_vals, tau_vals = g$tau_vals,
+      w_max = g$w_max
+    )
+    wphase_aggregate(core$plv)
+  }
+
+  # 3. Surrogate loop via shared engine
+  surrogate_plvs <- run_surrogate_engine(
+    x = phi_x, y_surrogates = y_surrogates, grid = grid,
+    compute_fn = wphase_compute, fun_value = numeric(1)
+  )
+
+  p_val <- sum(surrogate_plvs >= obs_plv) / n_surrogates
+
+  out <- list(
+    observed_z = obs_plv,
+    surrogate_z = surrogate_plvs,
+    p_value = p_val,
+    n_surrogates = n_surrogates,
+    settings = obs_wphase$settings
+  )
+
+  structure(out, class = c("wphase_surr", "list"))
+}
+
 # =========================================================================
 # === S3 PRINT METHODS ====================================================
 # =========================================================================
@@ -551,6 +676,47 @@ print.wgranger_surr <- function(x, ...) {
   } else {
     cli::cli_alert_warning(
       "Predictive power (y -> x) is not significantly different from chance."
+    )
+  }
+
+  if (x$n_surrogates < 1000) {
+    cli::cli_alert_info(
+      "Note: {x$n_surrogates} permutations may be too few for stable p-values.\n\tConsider setting `n_surrogates >= 1000` for final reporting."
+    )
+  }
+
+  invisible(x)
+}
+
+#' Print method for wphase_surr objects
+#'
+#' @param x An object of class "wphase_surr".
+#' @param ... Additional arguments (not used).
+#' @return Returns `x` invisibly.
+#' @export
+print.wphase_surr <- function(x, ...) {
+  cli::cli_h1("Windowed Phase Synchrony Surrogate Analysis (Pseudo-Synchrony)")
+
+  if (x$p_value == 0) {
+    p_disp <- paste0("< ", 1 / x$n_surrogates)
+  } else {
+    p_disp <- as.character(round(x$p_value, 4))
+  }
+
+  cli::cli_dl(c(
+    "Permutations" = "{x$n_surrogates}",
+    "Observed Mean PLV" = "{round(x$observed_z, 4)}",
+    "Average Null Mean PLV" = "{round(mean(x$surrogate_z), 4)}",
+    "Empirical p-value" = "{p_disp}"
+  ))
+
+  if (x$p_value < 0.05) {
+    cli::cli_alert_success(
+      "Observed phase synchrony is significantly greater than chance."
+    )
+  } else {
+    cli::cli_alert_warning(
+      "Observed phase synchrony is not significantly different from chance."
     )
   }
 

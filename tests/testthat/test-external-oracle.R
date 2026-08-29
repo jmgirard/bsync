@@ -159,3 +159,34 @@ test_that("AC0: Granger R-level oracle (lm-based) matches C++ core", {
   expect_equal(res$results_df$f_xy[1], oracle$f_xy, tolerance = 1e-9)
   expect_equal(res$results_df$f_yx[1], oracle$f_yx, tolerance = 1e-9)
 })
+
+
+# wphase Layer-2 oracle test ---------------------------------------------------
+#
+# MNE-Python golden (PLV): computed 2026-08-29 with mne 1.8.0 / numpy 2.0.2 by
+# data-raw/wphase_mne_pin.py (committed; reproduces these values from scratch).
+# MNE supplies the analytic signal (raw.apply_hilbert, n_fft = 512 — no
+# padding, the same exact-length FFT convention gsignal::hilbert uses); the
+# PLV formula is lachaux1999 (p. 195). The window compared is the identical
+# sample slice bsync's grid emits for window_size = 509, lag_max = 1 at
+# (i = 2, tau = 0). Inputs are formula-built (no RNG), so both sides see
+# bit-identical series.
+
+test_that("AC0: wphase PLV matches the MNE-Python golden values", {
+  mne_plv_golden <- 0.979491828758
+  mne_rel_golden <- -0.698478098856
+
+  n <- 512
+  fs <- 128
+  t <- 0:(n - 1)
+  x <- cos(2 * pi * 8 * t / fs + 0.3 * sin(2 * pi * 0.5 * t / fs))
+  y <- cos(2 * pi * 8 * t / fs + 0.3 * sin(2 * pi * 0.5 * t / fs + 1.0) + 0.7)
+
+  res <- wphase(x, y, window_size = 509, lag_max = 1)
+  row <- res$results_df[res$results_df$i == 2 & res$results_df$tau == 0, ]
+
+  expect_equal(nrow(row), 1L)
+  expect_lt(abs(row$plv - mne_plv_golden), 1e-6)
+  d <- (row$rel_phase - mne_rel_golden + pi) %% (2 * pi) - pi
+  expect_lt(abs(d), 1e-6)
+})
