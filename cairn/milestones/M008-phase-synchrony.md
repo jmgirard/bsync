@@ -9,7 +9,7 @@
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** —   <!-- owner: plan · create/amend-via-gate; bsync's numbered invariants live in CLAUDE.md (1,2,4,6,7,8 bind here), no DESIGN IP/GP numbering yet -->
-- **Branch/PR:** m008-phase-synchrony   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m008-phase-synchrony · https://github.com/jmgirard/bsync/pull/3   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
