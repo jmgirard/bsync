@@ -270,3 +270,45 @@ summary_optima <- function(object, title) {
 
   invisible(object)
 }
+
+#' Print method for wphase_optima objects
+#'
+#' @param x An object of class "wphase_optima".
+#' @param ... Additional arguments (not used).
+#' @return Returns `x` invisibly.
+#' @export
+print.wphase_optima <- function(x, ...) {
+  n_total <- nrow(x)
+  n_valid <- sum(!is.na(x$optimum_lag))
+
+  cli::cli_h1("Windowed Phase Synchrony Optima")
+
+  cli::cli_dl(c(
+    "Total Windows" = "{n_total}",
+    "Valid Optima" = "{n_valid}",
+    "Search Method" = "{attr(x, 'search_method') %||% 'unknown'}"
+  ))
+
+  invisible(x)
+}
+
+#' Summary method for wphase_optima objects
+#'
+#' @param object An object of class "wphase_optima".
+#' @param ... Additional arguments (not used).
+#' @return Returns `object` invisibly.
+#' @export
+summary.wphase_optima <- function(object, ...) {
+  print(object)
+
+  cli::cli_h2("Optimum Lag Distribution")
+  lag_vals <- object$optimum_lag
+  q_vals <- stats::quantile(
+    lag_vals,
+    probs = c(0, 0.25, 0.5, 0.75, 1),
+    na.rm = TRUE
+  )
+  print(round(q_vals, 2))
+
+  invisible(object)
+}

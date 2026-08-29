@@ -163,11 +163,16 @@ test_that("AC0: Granger R-level oracle (lm-based) matches C++ core", {
 
 # wphase Layer-2 oracle test ---------------------------------------------------
 #
-# MNE-Python golden (PLV): computed 2026-08-29 with mne 1.8.0 / numpy 2.0.2 by
-# data-raw/wphase_mne_pin.py (committed; reproduces these values from scratch).
-# MNE supplies the analytic signal (raw.apply_hilbert, n_fft = 512 — no
-# padding, the same exact-length FFT convention gsignal::hilbert uses); the
-# PLV formula is lachaux1999 (p. 195). The window compared is the identical
+# MNE-analytic-signal golden (PLV): computed 2026-08-29 with mne 1.8.0 /
+# numpy 2.0.2 by data-raw/wphase_mne_pin.py (committed; reproduces these
+# values from scratch). Scope of the pin, stated precisely: MNE supplies the
+# analytic signal (raw.apply_hilbert, n_fft = 512 — no padding, the same
+# exact-length FFT convention gsignal::hilbert uses) — an independent
+# phase-extraction codebase — while the PLV reduction itself is the
+# lachaux1999 (p. 195) formula written in the generator, NOT
+# mne_connectivity's own PLV pipeline (whose spectral estimation differs and
+# cannot match a raw-Hilbert PLV at 1e-6). A tolerance-banded pin against
+# mne_connectivity is a ROADMAP candidate row. The window compared is the identical
 # sample slice bsync's grid emits for window_size = 509, lag_max = 1 at
 # (i = 2, tau = 0). Inputs are formula-built (no RNG), so both sides see
 # bit-identical series.

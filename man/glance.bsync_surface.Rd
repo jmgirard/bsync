@@ -7,7 +7,7 @@
 \method{glance}{bsync_surface}(x, ...)
 }
 \arguments{
-\item{x}{A `bsync_surface` object (`wcc_res`, `wdtw_res`, or `wgranger_res`).}
+\item{x}{A `bsync_surface` object (`wcc_res`, `wdtw_res`, `wgranger_res`, or `wphase_res`).}
 
 \item{...}{Additional arguments (not used).}
 }

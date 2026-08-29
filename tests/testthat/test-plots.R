@@ -164,7 +164,11 @@ test_that("Visual outputs remain consistent", {
 
 test_that("wphase plot visual output remains consistent", {
   skip_if_not_installed("vdiffr")
-  mock_wphase <- wphase(sig1, sig2, window_size = 6, lag_max = 3)
+  # sig1 vs sig2 saturates PLV near 1 (same frequency), which makes the
+  # snapshot blind to fill-mapping changes; use two different-frequency
+  # sinusoids so the surface has real dynamic range.
+  sig3 <- sin(seq(0, 8 * pi, length.out = 30))
+  mock_wphase <- wphase(sig1, sig3, window_size = 6, lag_max = 3)
   p_wphase <- plot(mock_wphase)
   vdiffr::expect_doppelganger("wphase-plot-default", p_wphase)
 })

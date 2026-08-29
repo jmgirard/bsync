@@ -21,7 +21,8 @@ wphase(
 
 \item{time}{An optional numeric vector of timestamps for the data, same
 length as `x` and `y`; if provided, window indices in the results are
-mapped to these timestamps. Default is `NULL`.}
+mapped to these timestamps (and it must not contain missing values).
+Default is `NULL`.}
 
 \item{window_size}{A positive integer indicating the size of each window in
 samples.}
@@ -61,7 +62,13 @@ differences (radians); positive values mean `x`'s phase is ahead of `y`'s.
 phase is well-defined for narrowband signals. Lachaux et al. band-pass
 filter before phase extraction; `wphase()` leaves filtering to you (e.g.
 [smooth_signal()] or an external band-pass) rather than silently changing
-the basis. Broadband input yields interpretable but blunted PLV values.
+the basis. Beware that this failure mode is **anti-conservative**:
+broadband or low-frequency-dominated input *inflates* PLV toward 1 (two
+independent AR(0.98) series measure a mean PLV near 0.6 at
+`window_size = 96`, against roughly 0.12 for white noise), because slowly
+drifting phases stay aligned across a short window. High PLV on
+unfiltered signals is not evidence of synchrony; band-pass first and use
+[wphase_surrogate()] for significance.
 
 **NA policy:** the analytic signal is FFT-based, so a single `NA` corrupts
 every phase estimate; unlike [wcc()], there is no coherent per-window
@@ -71,8 +78,8 @@ every phase estimate; unlike [wcc()], there is no coherent per-window
 \examples{
 # Windowed phase synchrony on the bundled simulated dyad
 wphase_res <- wphase(
-  x = sim_dyad$z_A,
-  y = sim_dyad$z_B,
+  x = sim_dyad$x_A,
+  y = sim_dyad$x_B,
   window_size = 96,
   lag_max = 10
 )
