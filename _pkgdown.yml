@@ -73,8 +73,8 @@ reference:
       - pick_optima
       - leadership_asymmetry
       - plot_optima_overlay
-      - matches("^print\\.(wcc|wdtw)_optima$")
-      - matches("^summary\\.(wcc|wdtw)_optima$")
+      - matches("^print\\.(wcc|wdtw|wphase)_optima$")
+      - matches("^summary\\.(wcc|wdtw|wphase)_optima$")
       - print.bsync_lai
       - plot.bsync_lai
 
