@@ -91,7 +91,7 @@ Owner-stated priorities and the standing stance on each.
 
 ## 4. Estimators & the shared windowed-surface contract
 
-Three estimators today, each a sliding-window analysis over two equal-length series `x`, `y`. The
+Four estimators today (wphase added post-1.0), each a sliding-window analysis over two equal-length series `x`, `y`. The
 **design target (M5)** is that all current and future estimators conform to one *windowed-surface
 contract* so the optima, surrogate, and plotting layers are written once.
 
@@ -100,10 +100,11 @@ contract* so the optima, surrogate, and plotting layers are written once.
 | Windowed cross-correlation | `wcc()` | `calc_wcc_cpp` | Pearson `r` per (window, lag) | yes (±`lag_max`) |
 | Windowed dynamic time warping | `wdtw()` | `calc_wdtw_cpp` | DTW distance per (window, lag) | yes (±`lag_max`) |
 | Windowed Granger causality | `wgranger()` | `calc_wgranger_cpp` | `F`/`p` for x→y and y→x per window | no (directional, AR-based) |
+| Windowed phase synchrony | `wphase()` | `calc_wphase_cpp` | PLV + mean relative phase per (window, lag) | yes (±`lag_max`) |
 
 ### 4.1 Surface contract (target form)
 
-Each estimator returns a list-based S3 object (`wcc_res`, `wdtw_res`, `wgranger_res`) with:
+Each estimator returns a list-based S3 object (`wcc_res`, `wdtw_res`, `wgranger_res`, `wphase_res`) with:
 
 ```r
 structure(list(
@@ -115,7 +116,7 @@ structure(list(
 
 - **`results_df` columns.** `i` = window position (a sample index, or the real timestamp when
   `time` is supplied). For lagged estimators, `tau` = lag in samples. Then the metric column(s):
-  `wcc` (r), `dtw_dist`, or `f_xy/p_xy/f_yx/p_yx`.
+  `wcc` (r), `dtw_dist`, `f_xy/p_xy/f_yx/p_yx`, or `plv/rel_phase`.
 - **Grid construction.** From `window_size`, `lag_max`, `window_increment`, `lag_increment`, the R
   wrapper builds the `(i, tau)` grid, calls the C++ core once, and assembles `results_df`. The grid
   builder is shared logic (`create_*_df`), a prime target for unification in M5.
@@ -280,6 +281,10 @@ reproducible; result objects stay light; supplied `time` maps windows to real ti
 ## 13. Testing & infrastructure
 
 - testthat 3e; `vdiffr` snapshots for every plot method.
+- **Oracle records:** provenance headers in the asserting test files
+  (`tests/testthat/test-external-oracle.R`, per-estimator test files) plus the
+  committed generators under `data-raw/` (`wphase_null_bound.R`,
+  `wphase_mne_pin.py`); each names its source, versions, and asserting test.
 - **Layered validation (four modes, distinct failure types).** Unit tests catch *implementation*
   bugs but cannot catch a *definitional* one: a pure-R oracle written from the same mental model as
   the C++ core agrees with it and is wrong in the same way. The four layers close different gaps:

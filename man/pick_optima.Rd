@@ -14,7 +14,7 @@ pick_optima(
 )
 }
 \arguments{
-\item{obj}{An object of class "wcc_res" or "wdtw_res".}
+\item{obj}{An object of class "wcc_res", "wdtw_res", or "wphase_res".}
 
 \item{L_size}{An odd integer specifying the size of the local search region.
 Ignored if `search_method = "global"`. Default is `NULL`.}
@@ -25,7 +25,8 @@ monotonic flanks around the extremum. Ignored if `search_method = "global"`. Def
 \item{find_min}{Logical indicating whether to search for local minima instead
 of local maxima. If `NULL` (the default), the function automatically
 searches for maxima (`FALSE`) for cross-correlation ("wcc_res") and
-minima (`TRUE`) for distance metrics ("wdtw_res").}
+minima (`TRUE`) for distance metrics ("wdtw_res"); "wphase_res" searches
+for maxima (peak phase-locking value).}
 
 \item{search_method}{Character string specifying "local" or "global" search.
 "local" searches symmetrically outward from lag 0. "global" searches the
@@ -37,7 +38,8 @@ absolute value below this threshold are set to NA. For WDTW (`find_min = TRUE`),
 optima with a distance above this threshold are set to NA. Default is `NULL`.}
 }
 \value{
-A data frame of class "wcc_optima" or "wdtw_optima".
+A data frame of class "wcc_optima", "wdtw_optima", or
+  "wphase_optima".
 }
 \description{
 Find Optimum (Peak or Valley) in Windowed Analyses

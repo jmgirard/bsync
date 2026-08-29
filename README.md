@@ -21,7 +21,8 @@ movement), the lead-lag relationship between individuals is highly
 dynamic. **bsync** allows researchers to quantify these nonstationary
 associations using highly optimized windowed cross-correlation (WCC),
 windowed dynamic time warping (WDTW), windowed Granger causality (WGC),
-and optima-extraction algorithms.
+windowed phase synchrony (Hilbert phase-locking value), and
+optima-extraction algorithms.
 
 Furthermore, the package provides a complete analytical pipeline for
 behavioral time series. This includes robust preprocessing functions for
@@ -44,7 +45,7 @@ pak::pak("jmgirard/bsync")
 
 ## The workflow at a glance
 
-``` mermaid
+```
 flowchart LR
   A[Condition<br/>gaps, common rate,<br/>smoothing] --> B[Fix timescale<br/>from whole dataset]
   B --> C[Decide parameters<br/>sweep a grid,<br/>report robustness]
@@ -287,6 +288,15 @@ framework of Granger causality:
 - Granger, C. W. J. (1969). Investigating causal relations by
   econometric models and cross-spectral methods. *Econometrica, 37*(3),
   424-438.
+
+### Windowed Phase Synchrony
+
+The phase-locking value computed by the windowed phase-synchrony
+estimator is based on:
+
+- Lachaux, J.-P., Rodriguez, E., Martinerie, J., & Varela, F. J. (1999).
+  Measuring phase synchrony in brain signals. *Human Brain Mapping,
+  8*(4), 194-208.
 
 ### Pseudo-Synchrony & Surrogate Testing
 

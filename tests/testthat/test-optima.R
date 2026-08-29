@@ -21,7 +21,7 @@ test_that("pick_optima validates inputs and handles errors properly", {
   # Test class check
   expect_error(
     pick_optima(list(), search_method = "global"),
-    "<wcc_res> or <wdtw_res>"
+    "<wcc_res>, <wdtw_res>, or <wphase_res>"
   )
 
   # Test even L_size C++ exception (requires local search)

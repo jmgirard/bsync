@@ -17,9 +17,9 @@ plot_optima_overlay(
 )
 }
 \arguments{
-\item{surface_obj}{An object of class "wcc_res" or "wdtw_res".}
+\item{surface_obj}{An object of class "wcc_res", "wdtw_res", or "wphase_res".}
 
-\item{optima_df}{A data frame of class "wcc_optima" or "wdtw_optima".}
+\item{optima_df}{A data frame of class "wcc_optima", "wdtw_optima", or "wphase_optima".}
 
 \item{time_step}{A numeric value specifying the duration of each index. Default is 1.}
 

@@ -35,7 +35,7 @@ tibble::as_tibble
 #' Returns one row per cell in `results_df`: window position x lag (or just
 #' window position for Granger). Column names match the underlying estimator.
 #'
-#' @param x A `bsync_surface` object (`wcc_res`, `wdtw_res`, or `wgranger_res`).
+#' @param x A `bsync_surface` object (`wcc_res`, `wdtw_res`, `wgranger_res`, or `wphase_res`).
 #' @param ... Additional arguments (not used).
 #' @return A [tibble::tibble()].
 #' @seealso [glance.bsync_surface()], [as_tibble.bsync_surface()]
@@ -59,7 +59,7 @@ tidy.bsync_surface <- function(x, ...) {
 #' For WCC/WDTW the aggregate is a single named column (`mean_abs_z`, `peak`,
 #' or `mean_distance`). For Granger, `f_xy` and `f_yx` are separate columns.
 #'
-#' @param x A `bsync_surface` object (`wcc_res`, `wdtw_res`, or `wgranger_res`).
+#' @param x A `bsync_surface` object (`wcc_res`, `wdtw_res`, `wgranger_res`, or `wphase_res`).
 #' @param ... Additional arguments (not used).
 #' @return A one-row [tibble::tibble()].
 #' @seealso [tidy.bsync_surface()], [as_tibble.bsync_surface()]

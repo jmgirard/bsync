@@ -7,7 +7,8 @@
 leadership_asymmetry(optima_obj, epoch_size = 10, min_valid = 3)
 }
 \arguments{
-\item{optima_obj}{An object of class "wcc_optima" or "wdtw_optima".}
+\item{optima_obj}{An object of class "wcc_optima", "wdtw_optima", or
+"wphase_optima".}
 
 \item{epoch_size}{A positive integer specifying the total width of the centered
 sliding window (in number of optima) used to compute each local asymmetry

@@ -1,7 +1,7 @@
 #' Plot Surface with Optima Overlay
 #'
-#' @param surface_obj An object of class "wcc_res" or "wdtw_res".
-#' @param optima_df A data frame of class "wcc_optima" or "wdtw_optima".
+#' @param surface_obj An object of class "wcc_res", "wdtw_res", or "wphase_res".
+#' @param optima_df A data frame of class "wcc_optima", "wdtw_optima", or "wphase_optima".
 #' @param time_step A numeric value specifying the duration of each index. Default is 1.
 #' @param line_color Character string specifying the color of the connecting line. Default is "black".
 #' @param point_fill Character string specifying the inner fill of the optima points. Default is "black".
@@ -46,12 +46,13 @@ plot_optima_overlay <- function(
   }
 
   # Set a dynamic title based on the input object class
-  is_wcc <- inherits(surface_obj, "wcc_res")
-  plot_title <- ifelse(
-    is_wcc,
-    "Windowed Cross-Correlation with Optima Overlay",
+  plot_title <- if (inherits(surface_obj, "wcc_res")) {
+    "Windowed Cross-Correlation with Optima Overlay"
+  } else if (inherits(surface_obj, "wphase_res")) {
+    "Windowed Phase Synchrony with Optima Overlay"
+  } else {
     "Windowed Dynamic Time Warping with Optima Overlay"
-  )
+  }
 
   p_final <- p_base +
     # The connecting line (drawn first so points sit on top)

@@ -12,7 +12,8 @@
 #' the asymmetry score. Positions where fewer than `min_valid` non-`NA` optima
 #' fall inside the window receive `NA` in the output.
 #'
-#' @param optima_obj An object of class "wcc_optima" or "wdtw_optima".
+#' @param optima_obj An object of class "wcc_optima", "wdtw_optima", or
+#'   "wphase_optima".
 #' @param epoch_size A positive integer specifying the total width of the centered
 #'   sliding window (in number of optima) used to compute each local asymmetry
 #'   ratio. (default = `10`)
@@ -27,9 +28,9 @@
 #' head(lai)
 #' @export
 leadership_asymmetry <- function(optima_obj, epoch_size = 10, min_valid = 3) {
-  if (!inherits(optima_obj, c("wcc_optima", "wdtw_optima"))) {
+  if (!inherits(optima_obj, c("wcc_optima", "wdtw_optima", "wphase_optima"))) {
     cli::cli_abort(
-      "Input {.arg optima_obj} must be a {.cls wcc_optima} or {.cls wdtw_optima} object."
+      "Input {.arg optima_obj} must be a {.cls wcc_optima}, {.cls wdtw_optima}, or {.cls wphase_optima} object."
     )
   }
 

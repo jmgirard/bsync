@@ -75,12 +75,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calc_wphase_cpp
+List calc_wphase_cpp(NumericVector phi_x, NumericVector phi_y, IntegerVector i_vals, IntegerVector tau_vals, int w_max);
+RcppExport SEXP _bsync_calc_wphase_cpp(SEXP phi_xSEXP, SEXP phi_ySEXP, SEXP i_valsSEXP, SEXP tau_valsSEXP, SEXP w_maxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type phi_x(phi_xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type phi_y(phi_ySEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type i_vals(i_valsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type tau_vals(tau_valsSEXP);
+    Rcpp::traits::input_parameter< int >::type w_max(w_maxSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_wphase_cpp(phi_x, phi_y, i_vals, tau_vals, w_max));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_bsync_pick_optima_cpp", (DL_FUNC) &_bsync_pick_optima_cpp, 6},
     {"_bsync_calc_wcc_cpp", (DL_FUNC) &_bsync_calc_wcc_cpp, 6},
     {"_bsync_calc_wdtw_cpp", (DL_FUNC) &_bsync_calc_wdtw_cpp, 7},
     {"_bsync_calc_wgranger_cpp", (DL_FUNC) &_bsync_calc_wgranger_cpp, 5},
+    {"_bsync_calc_wphase_cpp", (DL_FUNC) &_bsync_calc_wphase_cpp, 5},
     {NULL, NULL, 0}
 };
 

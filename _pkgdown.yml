@@ -40,15 +40,16 @@ articles:
 reference:
   - title: "Estimators"
     desc: >
-      Windowed estimators of nonstationary lead-lag synchrony. All three return a
+      Windowed estimators of nonstationary lead-lag synchrony. All four return a
       `bsync_surface` object with a shared `print()`, `summary()`, and `plot()`.
     contents:
       - wcc
       - wdtw
       - wgranger
-      - matches("^print\\.(wcc|wdtw|wgranger)_res$")
-      - matches("^summary\\.(wcc|wdtw|wgranger)_res$")
-      - matches("^plot\\.(wcc|wdtw|wgranger)_res$")
+      - wphase
+      - matches("^print\\.(wcc|wdtw|wgranger|wphase)_res$")
+      - matches("^summary\\.(wcc|wdtw|wgranger|wphase)_res$")
+      - matches("^plot\\.(wcc|wdtw|wgranger|wphase)_res$")
 
   - title: "Surrogate testing"
     desc: >
@@ -61,7 +62,8 @@ reference:
       - wcc_surrogate
       - wdtw_surrogate
       - wgranger_surrogate
-      - matches("^print\\.(wcc|wdtw|wgranger)_surr$")
+      - wphase_surrogate
+      - matches("^print\\.(wcc|wdtw|wgranger|wphase)_surr$")
 
   - title: "Optima extraction & leadership"
     desc: >
@@ -71,8 +73,8 @@ reference:
       - pick_optima
       - leadership_asymmetry
       - plot_optima_overlay
-      - matches("^print\\.(wcc|wdtw)_optima$")
-      - matches("^summary\\.(wcc|wdtw)_optima$")
+      - matches("^print\\.(wcc|wdtw|wphase)_optima$")
+      - matches("^summary\\.(wcc|wdtw|wphase)_optima$")
       - print.bsync_lai
       - plot.bsync_lai
 

@@ -4,12 +4,12 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M008: Phase synchrony estimator (wphase)
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** —   <!-- owner: plan · create/amend-via-gate; bsync's numbered invariants live in CLAUDE.md (1,2,4,6,7,8 bind here), no DESIGN IP/GP numbering yet -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m008-phase-synchrony · https://github.com/jmgirard/bsync/pull/3   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -42,7 +42,7 @@ convention → not started here (AC5 uses house-style message matchers).
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets. -->
 
-- [ ] AC1: `wphase()` is exported and returns a `bsync_surface` subclass
+- [x] AC1: `wphase()` is exported and returns a `bsync_surface` subclass
       (`wphase_res`) whose `results_df` carries metric columns `plv` and
       `rel_phase`; tests assert the realized window count `n_r` equals the
       hand-computed expectation under `w_max = window_size - 1`
@@ -53,7 +53,7 @@ convention → not started here (AC5 uses house-style message matchers).
       a test asserts the returned object's components are exactly
       `results_df` + `settings` + the aggregate — no cached phase vectors
       (Invariant 7).
-- [ ] AC2: the shipped PLV/rel_phase numbers clear the validation doctrine's
+- [x] AC2: the shipped PLV/rel_phase numbers clear the validation doctrine's
       ≥2-independent-oracle-types bar via (a) closed-form — PLV and
       relative phase hand-computed from raw samples through a hand-rolled
       DFT analytic signal on one small fixed window, arithmetic in test
@@ -69,7 +69,7 @@ convention → not started here (AC5 uses house-style message matchers).
       `rel_phase` (wrapped) within 1e-6; mean PLV on independent white-noise
       pairs stays below a committed simulated-null quantile (generator +
       seed committed). Formula source: lachaux1999, cited by the tests.
-- [ ] AC3: `wphase_surrogate()` routes the observed and every surrogate
+- [x] AC3: `wphase_surrogate()` routes the observed and every surrogate
       statistic through the same aggregate helper `wphase()` uses; tests
       assert `observed_z` equals `wphase()`'s aggregate exactly and that
       passing `y` itself as the sole surrogate reproduces it (Invariant 2).
@@ -81,28 +81,28 @@ convention → not started here (AC5 uses house-style message matchers).
       sinusoid-plus-noise pair whose stated coupling is designed for ~.95
       expected power, the rejection rate is ≥ .80. Slow parts
       `skip_on_cran`.
-- [ ] AC4: `print.wphase_res()`, `summary.wphase_res()`, `plot.wphase_res()`
+- [x] AC4: `print.wphase_res()`, `summary.wphase_res()`, `plot.wphase_res()`
       (vdiffr snapshot), and `print.wphase_surr()` exist; `tidy()`,
       `glance()`, and `as_tibble()` on a `wphase_res` return the superclass
       shapes — `tidy()` the `results_df` rows; `glance()` one row whose
       columns include `window_size`, `window_increment`, `lag_max`,
       `lag_increment`, `statistic`, and the aggregate — each covered by a
       test.
-- [ ] AC5: `wphase()` aborts via `cli::cli_abort()` on NA-containing input,
+- [x] AC5: `wphase()` aborts via `cli::cli_abort()` on NA-containing input,
       asserted by a test looping over NA in `x`, NA in `y`, leading,
       interior, and all-NA cases with message matchers; the abort message
       and roxygen point at `impute_ts_gaps()` and
       `trim_edges(pad_na = FALSE)`.
-- [ ] AC6: `pick_optima()` and `leadership_asymmetry()` accept the wphase
+- [x] AC6: `pick_optima()` and `leadership_asymmetry()` accept the wphase
       classes (whitelists extended), each covered by a test on a `wphase`
       surface.
-- [ ] AC7: every entry the NAMESPACE diff at the review ref adds —
+- [x] AC7: every entry the NAMESPACE diff at the review ref adds —
       `export()` and `S3method()` lines — has a `_pkgdown.yml` reference
       row, and every added `export()` function carries roxygen with
       runnable `sim_dyad` examples; NEWS.md gains a plain-terms entry (no
       milestone numbers); the doc-hygiene test passes;
       `devtools::document()` produces no diff.
-- [ ] AC8: at the review ref `devtools::check()` reports 0 errors,
+- [x] AC8: at the review ref `devtools::check()` reports 0 errors,
       0 warnings, and every NOTE it emits is enumerated with a one-line
       disposition in this file's Review evidence; `devtools::test()` fully
       green.
@@ -122,24 +122,24 @@ convention → not started here (AC5 uses house-style message matchers).
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Ingest lachaux1999 (search DOI/publisher; hard stop-and-ask if
+- [x] T1: Ingest lachaux1999 (search DOI/publisher; hard stop-and-ask if
       inaccessible): source to `cairn/references/sources/`, committed
       source note + INDEX line. Write the failing oracle tests first:
       closed-form hand-DFT window fixture, sinusoid-offset and
       simulated-null-bound checks (null fixture generator + seed under
       `data-raw/`), live pure-R agreement harness. Install `gsignal`
       locally first (Imports, missing from the local library).
-- [ ] T2: Implement `calc_wphase_cpp` (pure core, Invariant 1; bounds → NA;
+- [x] T2: Implement `calc_wphase_cpp` (pure core, Invariant 1; bounds → NA;
       `w_max = window_size - 1` at the boundary) and `wphase()` builder —
       `build_surface_grid(lagged = TRUE)`, settings, `mean_plv` aggregate
       helper, NA abort — greening T1; AC1's grid/time/light-object tests;
       input-validation tests; `Rcpp::compileAttributes()`; record the
       NA-policy decision as a milestone-local Decisions entry.
-- [ ] T3: MNE-Python frozen pin (committed generator + fixture with
+- [x] T3: MNE-Python frozen pin (committed generator + fixture with
       versions and matched preprocessing); `wphase_surrogate()` sharing the
       aggregate helper; Invariant-2 identity tests; seeded circular-shift
       calibration + power tests per AC3.
-- [ ] T4: Optima/leadership whitelist extension + tests; S3 methods +
+- [x] T4: Optima/leadership whitelist extension + tests; S3 methods +
       vdiffr snapshot; tidy/glance/as_tibble tests; roxygen + examples;
       `_pkgdown.yml` rows; NEWS entry; oracle-registry pointer line in
       `cairn/DESIGN.md` Conventions ("Oracle records: provenance headers in
@@ -151,6 +151,11 @@ convention → not started here (AC5 uses house-style message matchers).
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
 
 - 2026-08-29: created by /milestone-plan; promoted from the phase-synchrony candidate row (legacy DESIGN §15 M8).
+- 2026-08-29: T1 done: lachaux1999 retrieved (Europe PMC green OA copy), source note + INDEX line committed; oracle tests authored first and run red (9 failures, wphase undefined) before any implementation; null-bound generator committed, its q99 (0.1316320, 500 reps, seed 20260829) frozen into the test.
+- 2026-08-29: T3 done: MNE-Python frozen pin green (mne 1.8.0/numpy 2.0.2, generator data-raw/wphase_mne_pin.py, plv/rel_phase match within 1e-6); wphase_surrogate() + print method added sharing wphase_aggregate; Invariant-2 identity, Invariant-6 same-seed, Type-I calibration (200 reps, rejections in [1,19]) and power (design .983 pilot, floor .80) tests all green (surrogate file 83/83 with NOT_CRAN). Power design lesson: a strictly periodic common component gives the circular-shift null zero power (PLV is offset-invariant) — the test couples via shared frequency wander, recorded in test comments.
+- 2026-08-29: T4 in progress: optima/leadership whitelists extended + tests; plot.wphase_res + vdiffr snapshot; tidy/glance/as_tibble tests; pkgdown rows, NEWS entry, DESCRIPTION four-estimators, DESIGN §13 oracle-records pointer; document() run (NAMESPACE + man regenerated); full suite + check() running — results at next checkpoint.
+- 2026-08-29: T4 done: pkgdown check_pkgdown clean; document() no diff; NEWS/DESCRIPTION updated (four estimators; no milestone numbers — doc-hygiene green); DESIGN §13 oracle-records pointer added; vdiffr snapshot committed; pick_optima class-message test updated for the widened whitelist (the one full-suite red, fixed); devtools::check() 0 errors / 0 warnings / 0 NOTEs (1m53s); R-hub dispatched: https://github.com/jmgirard/bsync/actions/runs/33279203264 (on demand, not a merge gate); plot_optima_overlay styling gap routed as a candidate row. Status -> review.
+- 2026-08-29: T2 done: calc_wphase_cpp (prefix-sum cos/sin, M2 pattern) + wphase() builder + print/summary; closed-form Dirichlet oracle, sinusoid-offset, live pure-R, null-bound, grid/time/light-object, and NA-abort tests all green; full suite 1140 passing, 0 failures; RcppExports regenerated via compileAttributes.
 - 2026-08-29: plan-gate criteria audit ran in full mode (user-facing tier), fresh [O] reader, two passes — pass 1: findings on every criterion (oracle-independence gap: pure-R path shared gsignal::hilbert with shipped path; missing frozen external pin vs DESIGN §13 Layer 2; unbounded tolerances; instrument-bound clauses); pass 2 over revised wording: AC1 sample-count promise unobservable → rebound to n_r + hand-enumerated lag set; white-noise bound simulated ~35% above the analytic expectation → rebound to committed simulated-null quantile; power clause a coin-flip at .80 → design-for-.95-assert-.80; glance whitelist conflict → columns named; S3method() lines escaping the NAMESPACE export() domain → domain widened; classed-condition novelty dropped for house-style message matchers; optima-layer hard-reject and src/-touching ambiguity → gate questions, both resolved (extend in scope; Rcpp core).
 - 2026-08-29: plan gate chose a lagged PLV surface over lag-free windows because the surface contract and optima/leadership layer are the package's value proposition; falsified by lagged PLV proving uninterpretable or redundant with rel_phase directionality in practice.
 - 2026-08-29: plan gate chose including the frozen external pin over skipping it because DESIGN §13 names Layer 2 as the only catch for misreading the field's definition; falsified by no accessible external PLV implementation with matchable preprocessing.
@@ -163,5 +168,91 @@ convention → not started here (AC5 uses house-style message matchers).
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
 
+- 2026-08-29 (implement): NA policy — `wphase()` aborts on NA-containing
+  input instead of offering `na.rm`. Rationale: the analytic signal is
+  FFT-based, so one NA corrupts every phase estimate and a per-window
+  `na.rm` (wcc's pattern) has no coherent meaning; Invariant 3 prefers a
+  loud stop with guidance (`impute_ts_gaps()` / `trim_edges(pad_na =
+  FALSE)`) over silently changing the basis. Deliberate divergence from
+  wcc's `na.rm = TRUE` resolved default, settled at the M008 plan gate.
+
 ## Review
 <!-- owner: review · exclusive -->
+
+Review ref: 6e4fcc5 (branch m008-phase-synchrony, PR #3). All evidence
+gathered by command at review time, 2026-08-29.
+
+**Evidence per criterion** (full suite `devtools::test()` with NOT_CRAN:
+1172 pass / 0 fail / 0 skip at 3e1de34+snapshot; plots file re-run 0 warn):
+
+- AC1: grid tests green — n_r hand-computed cases 60 / 21 / 30 across odd/even
+  window_size, window_increment 3, lag_increment 3 (truncated lag set
+  −5,−2,1,4 asserted); results_df columns `i, tau, plv, rel_phase`;
+  time-mapping test (Invariant 8); component-names test (Invariant 7).
+- AC2: closed-form Dirichlet fixture matched < 1e-8 (0.6376435773…,
+  arithmetic in test comments); sinusoid-offset PLV within 1e-6 of 1, offset
+  recovered (wrapped); live pure-R agreement < 1e-8 over all 264 grid rows;
+  frozen MNE-analytic-signal pin < 1e-6 (reviewer independently reproduced
+  at 1.6e-14); white-noise mean-of-5 below committed q99 0.1316320
+  (generator data-raw/wphase_null_bound.R, seed 20260829); lachaux1999
+  source note committed, cited by tests. Three oracle types: closed-form,
+  frozen, simulation (AC3).
+- AC3: observed_z identical to wphase() aggregate; y-as-sole-surrogate
+  reproduces it (1e-12); same-seed reproducibility (Invariant 6); Type-I:
+  200 seeded white-noise replicates, rejection count within [1, 19]; power:
+  200 replicates at the wander-coupled design (pilot .983), rate >= .80.
+  Both blocks passed in the NOT_CRAN full run.
+- AC4: print/summary/plot.wphase_res + print.wphase_surr exist and are
+  message-asserted; vdiffr snapshot regenerated non-degenerate (10 distinct
+  fill levels across 142 tiles; the first fixture saturated near PLV 1 and
+  was replaced at review); tidy/glance/as_tibble tested, glance asserting
+  window_size, window_increment, lag_max, lag_increment, statistic, and
+  mean_plv (= the aggregate).
+- AC5: abort loop green over NA in x, y, leading, interior, all-NA (+ a
+  review-added time-NA case), message matchers naming impute_ts_gaps;
+  roxygen points at impute_ts_gaps() / trim_edges(pad_na = FALSE).
+- AC6: pick_optima local + global and leadership_asymmetry green on a
+  wphase surface, with non-NA-count assertions; global optima equal
+  per-window max PLV.
+- AC7: NAMESPACE diff adds export(wphase), export(wphase_surrogate) and 6
+  S3method lines; every entry has a _pkgdown.yml row
+  (pkgdown::check_pkgdown clean after the optima-method regex fix);
+  runnable sim_dyad examples on both exported functions; NEWS entry in
+  plain terms; doc-hygiene test green; devtools::document() no diff.
+- AC8: devtools::check() at review ref: 0 errors / 0 warnings / 0 NOTEs
+  (NOTE disposition list: empty); devtools::test() fully green.
+
+**Consistency gate:** cairn_validate all checks pass (1 advisory: sizing —
+8 ACs, accepted at the plan gate as one vertical slice). r-package slot:
+document() no diff; README.Rmd re-knitted in sync (build_readme); pkgdown
+check clean; NEWS.md entry present, no milestone numbers; no new top-level
+files needing .Rbuildignore (check 0 NOTEs); full check clean. R-hub
+on-demand run dispatched (actions/runs/33279203264; not a merge gate).
+
+**Independent review (3 fresh-context lenses).** [S] blame-history: no
+findings (verified whitelist extensions content-clean, NAMESPACE additive,
+no M1–M7 intent undone). [S] prior-review: 1 finding. [O] diff-bug:
+independently re-verified the core (brute-force agreement to 1.2e-15 over
+34,870 cells; bounds/NA exact; Invariant-2 structural; lag sign matches
+wcc) and returned 17 ranked findings. Triage of the 18:
+
+- Fixed at the gate (branch commits b6886c5, 3e1de34, 6e4fcc5): WORDLIST
+  vocabulary (prior-review F1); backwards broadband caveat, now
+  anti-conservative with re-measured figures (O1); degenerate example and
+  saturated vdiffr fixture replaced (O2); pin scope relabeled honestly —
+  MNE analytic signal + Lachaux formula, not mne_connectivity's pipeline
+  (O3); plot_optima_overlay wphase title branch (O4); print/summary
+  .wphase_optima added with tests + pkgdown rows (O5); flaky per-draw
+  null-bound comparison → mean-of-5 (O6); DESIGN §4 fourth estimator (O7);
+  README fourth estimator + Lachaux reference, knitted (O8); time-NA abort
+  + test (O9); definitional-only optima assertions hardened (O10); case-3
+  n_r hand-computed (O11); glance aggregate asserted (O12); line-ending
+  churn reverted — optima.R back to CRLF, leadership.R LF (O14, first
+  half); stale tidy roxygen (O15); DESCRIPTION wrap (O16).
+- Routed as candidate rows: tolerance-banded mne_connectivity PLV pipeline
+  pin (O3 remainder); pick_optima local-search failure with
+  lag_increment > 1 — pre-existing, all estimators (O13).
+- Rejected with reason: p <= .05 vs p < .05 print inconsistency — no
+  reachable difference at B = 99, house print convention retained (O17);
+  roxygen2 Config 8.0.0 → 8.1.0 bump — genuine regenerated output from the
+  installed toolchain, retained and noted here (O14, second half).

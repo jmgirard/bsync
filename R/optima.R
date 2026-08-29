@@ -2,7 +2,7 @@
 
 #' Find Optimum (Peak or Valley) in Windowed Analyses
 #'
-#' @param obj An object of class "wcc_res" or "wdtw_res".
+#' @param obj An object of class "wcc_res", "wdtw_res", or "wphase_res".
 #' @param L_size An odd integer specifying the size of the local search region.
 #'   Ignored if `search_method = "global"`. Default is `NULL`.
 #' @param strict_monotonic Logical indicating whether to strictly enforce
@@ -10,7 +10,8 @@
 #' @param find_min Logical indicating whether to search for local minima instead
 #'   of local maxima. If `NULL` (the default), the function automatically
 #'   searches for maxima (`FALSE`) for cross-correlation ("wcc_res") and
-#'   minima (`TRUE`) for distance metrics ("wdtw_res").
+#'   minima (`TRUE`) for distance metrics ("wdtw_res"); "wphase_res" searches
+#'   for maxima (peak phase-locking value).
 #' @param search_method Character string specifying "local" or "global" search.
 #'   "local" searches symmetrically outward from lag 0. "global" searches the
 #'   entire window for the absolute extremum. If `NULL`, defaults to "local"
@@ -18,7 +19,8 @@
 #' @param threshold A numeric value. For WCC (`find_min = FALSE`), optima with an
 #'   absolute value below this threshold are set to NA. For WDTW (`find_min = TRUE`),
 #'   optima with a distance above this threshold are set to NA. Default is `NULL`.
-#' @return A data frame of class "wcc_optima" or "wdtw_optima".
+#' @return A data frame of class "wcc_optima", "wdtw_optima", or
+#'   "wphase_optima".
 #' @examples
 #' wcc_res <- wcc(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10)
 #' optima <- pick_optima(wcc_res, L_size = 9)
@@ -46,9 +48,16 @@ pick_optima <- function(
       find_min <- TRUE
     }
     if (is.null(search_method)) search_method <- "global"
+  } else if (inherits(obj, "wphase_res")) {
+    metric_col <- "plv"
+    out_class <- "wphase_optima"
+    if (is.null(find_min)) {
+      find_min <- FALSE
+    }
+    if (is.null(search_method)) search_method <- "local"
   } else {
     cli::cli_abort(
-      "Input {.arg obj} must be a {.cls wcc_res} or {.cls wdtw_res} object."
+      "Input {.arg obj} must be a {.cls wcc_res}, {.cls wdtw_res}, or {.cls wphase_res} object."
     )
   }
 
@@ -258,6 +267,48 @@ summary_optima <- function(object, title) {
     q_vals <- stats::quantile(vals, probs = c(0, 0.25, 0.5, 0.75, 1))
     print(round(q_vals, 4))
   }
+
+  invisible(object)
+}
+
+#' Print method for wphase_optima objects
+#'
+#' @param x An object of class "wphase_optima".
+#' @param ... Additional arguments (not used).
+#' @return Returns `x` invisibly.
+#' @export
+print.wphase_optima <- function(x, ...) {
+  n_total <- nrow(x)
+  n_valid <- sum(!is.na(x$optimum_lag))
+
+  cli::cli_h1("Windowed Phase Synchrony Optima")
+
+  cli::cli_dl(c(
+    "Total Windows" = "{n_total}",
+    "Valid Optima" = "{n_valid}",
+    "Search Method" = "{attr(x, 'search_method') %||% 'unknown'}"
+  ))
+
+  invisible(x)
+}
+
+#' Summary method for wphase_optima objects
+#'
+#' @param object An object of class "wphase_optima".
+#' @param ... Additional arguments (not used).
+#' @return Returns `object` invisibly.
+#' @export
+summary.wphase_optima <- function(object, ...) {
+  print(object)
+
+  cli::cli_h2("Optimum Lag Distribution")
+  lag_vals <- object$optimum_lag
+  q_vals <- stats::quantile(
+    lag_vals,
+    probs = c(0, 0.25, 0.5, 0.75, 1),
+    na.rm = TRUE
+  )
+  print(round(q_vals, 2))
 
   invisible(object)
 }
