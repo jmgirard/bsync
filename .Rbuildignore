@@ -14,7 +14,6 @@
 ^[.]?air[.]toml$
 ^\.claude$
 ^CLAUDE\.md$
-^DESIGN\.md$
-^MILESTONES\.md$
 ^bench$
 ^cran-comments\.md$
+^cairn$
