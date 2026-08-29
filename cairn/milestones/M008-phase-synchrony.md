@@ -122,14 +122,14 @@ convention → not started here (AC5 uses house-style message matchers).
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Ingest lachaux1999 (search DOI/publisher; hard stop-and-ask if
+- [x] T1: Ingest lachaux1999 (search DOI/publisher; hard stop-and-ask if
       inaccessible): source to `cairn/references/sources/`, committed
       source note + INDEX line. Write the failing oracle tests first:
       closed-form hand-DFT window fixture, sinusoid-offset and
       simulated-null-bound checks (null fixture generator + seed under
       `data-raw/`), live pure-R agreement harness. Install `gsignal`
       locally first (Imports, missing from the local library).
-- [ ] T2: Implement `calc_wphase_cpp` (pure core, Invariant 1; bounds → NA;
+- [x] T2: Implement `calc_wphase_cpp` (pure core, Invariant 1; bounds → NA;
       `w_max = window_size - 1` at the boundary) and `wphase()` builder —
       `build_surface_grid(lagged = TRUE)`, settings, `mean_plv` aggregate
       helper, NA abort — greening T1; AC1's grid/time/light-object tests;
@@ -151,6 +151,8 @@ convention → not started here (AC5 uses house-style message matchers).
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
 
 - 2026-08-29: created by /milestone-plan; promoted from the phase-synchrony candidate row (legacy DESIGN §15 M8).
+- 2026-08-29: T1 done: lachaux1999 retrieved (Europe PMC green OA copy), source note + INDEX line committed; oracle tests authored first and run red (9 failures, wphase undefined) before any implementation; null-bound generator committed, its q99 (0.1316320, 500 reps, seed 20260829) frozen into the test.
+- 2026-08-29: T2 done: calc_wphase_cpp (prefix-sum cos/sin, M2 pattern) + wphase() builder + print/summary; closed-form Dirichlet oracle, sinusoid-offset, live pure-R, null-bound, grid/time/light-object, and NA-abort tests all green; full suite 1140 passing, 0 failures; RcppExports regenerated via compileAttributes.
 - 2026-08-29: plan-gate criteria audit ran in full mode (user-facing tier), fresh [O] reader, two passes — pass 1: findings on every criterion (oracle-independence gap: pure-R path shared gsignal::hilbert with shipped path; missing frozen external pin vs DESIGN §13 Layer 2; unbounded tolerances; instrument-bound clauses); pass 2 over revised wording: AC1 sample-count promise unobservable → rebound to n_r + hand-enumerated lag set; white-noise bound simulated ~35% above the analytic expectation → rebound to committed simulated-null quantile; power clause a coin-flip at .80 → design-for-.95-assert-.80; glance whitelist conflict → columns named; S3method() lines escaping the NAMESPACE export() domain → domain widened; classed-condition novelty dropped for house-style message matchers; optima-layer hard-reject and src/-touching ambiguity → gate questions, both resolved (extend in scope; Rcpp core).
 - 2026-08-29: plan gate chose a lagged PLV surface over lag-free windows because the surface contract and optima/leadership layer are the package's value proposition; falsified by lagged PLV proving uninterpretable or redundant with rel_phase directionality in practice.
 - 2026-08-29: plan gate chose including the frozen external pin over skipping it because DESIGN §13 names Layer 2 as the only catch for misreading the field's definition; falsified by no accessible external PLV implementation with matchable preprocessing.
@@ -162,6 +164,14 @@ convention → not started here (AC5 uses house-style message matchers).
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
+
+- 2026-08-29 (implement): NA policy — `wphase()` aborts on NA-containing
+  input instead of offering `na.rm`. Rationale: the analytic signal is
+  FFT-based, so one NA corrupts every phase estimate and a per-window
+  `na.rm` (wcc's pattern) has no coherent meaning; Invariant 3 prefers a
+  loud stop with guidance (`impute_ts_gaps()` / `trim_edges(pad_na =
+  FALSE)`) over silently changing the basis. Deliberate divergence from
+  wcc's `na.rm = TRUE` resolved default, settled at the M008 plan gate.
 
 ## Review
 <!-- owner: review · exclusive -->

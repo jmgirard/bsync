@@ -17,3 +17,7 @@ calc_wgranger_cpp <- function(x, y, i_vals, w_max, p) {
     .Call(`_bsync_calc_wgranger_cpp`, x, y, i_vals, w_max, p)
 }
 
+calc_wphase_cpp <- function(phi_x, phi_y, i_vals, tau_vals, w_max) {
+    .Call(`_bsync_calc_wphase_cpp`, phi_x, phi_y, i_vals, tau_vals, w_max)
+}
+
