@@ -43,6 +43,7 @@
 <url><loc>https://jmgirard.github.io/bsync/reference/plot.wcc_res.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/plot.wdtw_res.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/plot.wgranger_res.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/plot.wphase_res.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/plot_optima_overlay.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/print.bsync_autotune.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/print.bsync_lai.html</loc></url>
@@ -55,6 +56,9 @@
 <url><loc>https://jmgirard.github.io/bsync/reference/print.wdtw_surr.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/print.wgranger_res.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/print.wgranger_surr.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/print.wphase_optima.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/print.wphase_res.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/print.wphase_surr.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/reexports.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/select_specification.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/sim_dyad.html</loc></url>
@@ -65,6 +69,8 @@
 <url><loc>https://jmgirard.github.io/bsync/reference/summary.wcc_res.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/summary.wdtw_optima.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/summary.wgranger_res.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/summary.wphase_optima.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/summary.wphase_res.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/synchrony_multiverse.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/tidy.bsync_multiverse.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/tidy.bsync_surface.html</loc></url>
@@ -75,5 +81,7 @@
 <url><loc>https://jmgirard.github.io/bsync/reference/wdtw_surrogate.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/wgranger.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/wgranger_surrogate.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/wphase.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/wphase_surrogate.html</loc></url>
 </urlset>
 

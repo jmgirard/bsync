@@ -1,5 +1,36 @@
 # Changelog
 
+## bsync (development version)
+
+### New estimator: windowed phase synchrony
+
+- **[`wphase()`](https://jmgirard.github.io/bsync/reference/wphase.md)**
+  — new windowed phase-synchrony estimator. Instantaneous phase is
+  extracted once per series via the analytic signal
+  ([`gsignal::hilbert()`](https://rdrr.io/pkg/gsignal/man/hilbert.html));
+  each window-by-lag cell reports the phase-locking value (PLV; Lachaux,
+  Rodriguez, Martinerie, & Varela, 1999) and the mean relative phase
+  (positive = `x` ahead). Returns the shared `bsync_surface` object with
+  [`print()`](https://rdrr.io/r/base/print.html),
+  [`summary()`](https://rdrr.io/r/base/summary.html),
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) (PLV
+  heatmap), and
+  [`tidy()`](https://generics.r-lib.org/reference/tidy.html)/[`glance()`](https://generics.r-lib.org/reference/glance.html)/
+  [`as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
+  support. Input with missing values aborts with guidance (impute or
+  trim first) because the FFT-based analytic signal has no coherent
+  per-window NA handling.
+- **[`wphase_surrogate()`](https://jmgirard.github.io/bsync/reference/wphase_surrogate.md)**
+  — matched-null surrogate significance test for
+  [`wphase()`](https://jmgirard.github.io/bsync/reference/wphase.md):
+  the mean-PLV aggregate is computed identically on the observed and
+  every surrogate series, with the empirical p-value as its upper tail.
+- **[`pick_optima()`](https://jmgirard.github.io/bsync/reference/pick_optima.md)**
+  and
+  **[`leadership_asymmetry()`](https://jmgirard.github.io/bsync/reference/leadership_asymmetry.md)**
+  now accept the phase surface (`wphase_res` / `wphase_optima`),
+  searching for peak phase locking.
+
 ## bsync 0.1.0
 
 First public release.

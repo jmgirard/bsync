@@ -14,7 +14,7 @@ leadership_asymmetry(optima_obj, epoch_size = 10, min_valid = 3)
 
 - optima_obj:
 
-  An object of class "wcc_optima" or "wdtw_optima".
+  An object of class "wcc_optima", "wdtw_optima", or "wphase_optima".
 
 - epoch_size:
 

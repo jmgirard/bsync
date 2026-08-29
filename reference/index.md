@@ -2,8 +2,8 @@
 
 ## Estimators
 
-Windowed estimators of nonstationary lead-lag synchrony. All three
-return a `bsync_surface` object with a shared
+Windowed estimators of nonstationary lead-lag synchrony. All four return
+a `bsync_surface` object with a shared
 [`print()`](https://rdrr.io/r/base/print.html),
 [`summary()`](https://rdrr.io/r/base/summary.html), and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html).
@@ -14,22 +14,30 @@ return a `bsync_surface` object with a shared
   Windowed Dynamic Time Warping
 - [`wgranger()`](https://jmgirard.github.io/bsync/reference/wgranger.md)
   : Windowed Granger Causality
+- [`wphase()`](https://jmgirard.github.io/bsync/reference/wphase.md) :
+  Windowed Phase Synchrony
 - [`print(`*`<wcc_res>`*`)`](https://jmgirard.github.io/bsync/reference/print.wcc_res.md)
   : Print method for wcc_res objects
 - [`print(`*`<wdtw_res>`*`)`](https://jmgirard.github.io/bsync/reference/print.wdtw_res.md)
   : Print method for wdtw_res objects
 - [`print(`*`<wgranger_res>`*`)`](https://jmgirard.github.io/bsync/reference/print.wgranger_res.md)
   : Print method for wgranger_res objects
+- [`print(`*`<wphase_res>`*`)`](https://jmgirard.github.io/bsync/reference/print.wphase_res.md)
+  : Print method for wphase_res objects
 - [`summary(`*`<wcc_res>`*`)`](https://jmgirard.github.io/bsync/reference/summary.wcc_res.md)
   : Summary method for wcc_res objects
 - [`summary(`*`<wgranger_res>`*`)`](https://jmgirard.github.io/bsync/reference/summary.wgranger_res.md)
   : Summary method for wgranger_res objects
+- [`summary(`*`<wphase_res>`*`)`](https://jmgirard.github.io/bsync/reference/summary.wphase_res.md)
+  : Summary method for wphase_res objects
 - [`plot(`*`<wcc_res>`*`)`](https://jmgirard.github.io/bsync/reference/plot.wcc_res.md)
   : Plot wcc_res object
 - [`plot(`*`<wdtw_res>`*`)`](https://jmgirard.github.io/bsync/reference/plot.wdtw_res.md)
   : Plot wdtw_res object
 - [`plot(`*`<wgranger_res>`*`)`](https://jmgirard.github.io/bsync/reference/plot.wgranger_res.md)
   : Plot wgranger_res object
+- [`plot(`*`<wphase_res>`*`)`](https://jmgirard.github.io/bsync/reference/plot.wphase_res.md)
+  : Plot wphase_res object
 
 ## Surrogate testing
 
@@ -47,12 +55,16 @@ then pass it to the matched surrogate wrapper.
   : Calculate Surrogate Windowed Dynamic Time Warping (WDTW)
 - [`wgranger_surrogate()`](https://jmgirard.github.io/bsync/reference/wgranger_surrogate.md)
   : Calculate Surrogate Windowed Granger Causality
+- [`wphase_surrogate()`](https://jmgirard.github.io/bsync/reference/wphase_surrogate.md)
+  : Calculate Surrogate Windowed Phase Synchrony
 - [`print(`*`<wcc_surr>`*`)`](https://jmgirard.github.io/bsync/reference/print.wcc_surr.md)
   : Print method for wcc_surr objects
 - [`print(`*`<wdtw_surr>`*`)`](https://jmgirard.github.io/bsync/reference/print.wdtw_surr.md)
   : Print method for wdtw_surr objects
 - [`print(`*`<wgranger_surr>`*`)`](https://jmgirard.github.io/bsync/reference/print.wgranger_surr.md)
   : Print method for wgranger_surr objects
+- [`print(`*`<wphase_surr>`*`)`](https://jmgirard.github.io/bsync/reference/print.wphase_surr.md)
+  : Print method for wphase_surr objects
 
 ## Optima extraction & leadership
 
@@ -69,10 +81,14 @@ Leadership Asymmetry Index (LAI).
   : Print method for wcc_optima objects
 - [`print(`*`<wdtw_optima>`*`)`](https://jmgirard.github.io/bsync/reference/print.wdtw_optima.md)
   : Print method for wdtw_optima objects
+- [`print(`*`<wphase_optima>`*`)`](https://jmgirard.github.io/bsync/reference/print.wphase_optima.md)
+  : Print method for wphase_optima objects
 - [`summary(`*`<wcc_optima>`*`)`](https://jmgirard.github.io/bsync/reference/summary.wcc_optima.md)
   : Summary method for wcc_optima objects
 - [`summary(`*`<wdtw_optima>`*`)`](https://jmgirard.github.io/bsync/reference/summary.wdtw_optima.md)
   : Summary method for wdtw_optima objects
+- [`summary(`*`<wphase_optima>`*`)`](https://jmgirard.github.io/bsync/reference/summary.wphase_optima.md)
+  : Summary method for wphase_optima objects
 - [`print(`*`<bsync_lai>`*`)`](https://jmgirard.github.io/bsync/reference/print.bsync_lai.md)
   : Print method for bsync_lai objects
 - [`plot(`*`<bsync_lai>`*`)`](https://jmgirard.github.io/bsync/reference/plot.bsync_lai.md)

@@ -19,7 +19,7 @@ pick_optima(
 
 - obj:
 
-  An object of class "wcc_res" or "wdtw_res".
+  An object of class "wcc_res", "wdtw_res", or "wphase_res".
 
 - L_size:
 
@@ -37,7 +37,8 @@ pick_optima(
   Logical indicating whether to search for local minima instead of local
   maxima. If \`NULL\` (the default), the function automatically searches
   for maxima (\`FALSE\`) for cross-correlation ("wcc_res") and minima
-  (\`TRUE\`) for distance metrics ("wdtw_res").
+  (\`TRUE\`) for distance metrics ("wdtw_res"); "wphase_res" searches
+  for maxima (peak phase-locking value).
 
 - search_method:
 
@@ -55,7 +56,7 @@ pick_optima(
 
 ## Value
 
-A data frame of class "wcc_optima" or "wdtw_optima".
+A data frame of class "wcc_optima", "wdtw_optima", or "wphase_optima".
 
 ## Examples
 

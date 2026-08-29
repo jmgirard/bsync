@@ -54,6 +54,18 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="bsync-development-version">bsync (development version)<a class="anchor" aria-label="anchor" href="#bsync-development-version"></a></h2>
+<div class="section level3">
+<h3 id="new-estimator-windowed-phase-synchrony-development-version">New estimator: windowed phase synchrony<a class="anchor" aria-label="anchor" href="#new-estimator-windowed-phase-synchrony-development-version"></a></h3>
+<ul><li>
+<strong><code><a href="../reference/wphase.html">wphase()</a></code></strong> — new windowed phase-synchrony estimator. Instantaneous phase is extracted once per series via the analytic signal (<code><a href="https://rdrr.io/pkg/gsignal/man/hilbert.html" class="external-link">gsignal::hilbert()</a></code>); each window-by-lag cell reports the phase-locking value (PLV; Lachaux, Rodriguez, Martinerie, &amp; Varela, 1999) and the mean relative phase (positive = <code>x</code> ahead). Returns the shared <code>bsync_surface</code> object with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> (PLV heatmap), and <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>/<code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code>/ <code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble()</a></code> support. Input with missing values aborts with guidance (impute or trim first) because the FFT-based analytic signal has no coherent per-window NA handling.</li>
+<li>
+<strong><code><a href="../reference/wphase_surrogate.html">wphase_surrogate()</a></code></strong> — matched-null surrogate significance test for <code><a href="../reference/wphase.html">wphase()</a></code>: the mean-PLV aggregate is computed identically on the observed and every surrogate series, with the empirical p-value as its upper tail.</li>
+<li>
+<strong><code><a href="../reference/pick_optima.html">pick_optima()</a></code></strong> and <strong><code><a href="../reference/leadership_asymmetry.html">leadership_asymmetry()</a></code></strong> now accept the phase surface (<code>wphase_res</code> / <code>wphase_optima</code>), searching for peak phase locking.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="bsync-010">bsync 0.1.0<a class="anchor" aria-label="anchor" href="#bsync-010"></a></h2>
 <p>First public release.</p>
 <div class="section level3">

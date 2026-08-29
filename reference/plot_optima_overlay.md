@@ -22,11 +22,11 @@ plot_optima_overlay(
 
 - surface_obj:
 
-  An object of class "wcc_res" or "wdtw_res".
+  An object of class "wcc_res", "wdtw_res", or "wphase_res".
 
 - optima_df:
 
-  A data frame of class "wcc_optima" or "wdtw_optima".
+  A data frame of class "wcc_optima", "wdtw_optima", or "wphase_optima".
 
 - time_step:
 
