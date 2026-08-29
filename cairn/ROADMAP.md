@@ -17,6 +17,7 @@ _Last hygiene check: 2026-08-29 (cairn-init migration; no milestones yet)_
 - Phase synchrony estimator (Hilbert): analytic-signal instantaneous phase, windowed phase-locking value / phase synchrony, relative-phase output, on the shared `bsync_surface` framework — added 2026-08-29 — legacy DESIGN §15 M8. Promoted 2026-08-29 as M008 (row stays until completion)
 - wphase workflow vignette: parity with the wcc/wdtw/wgranger workflow articles, incl. narrowband/band-pass guidance for phase methods — added 2026-08-29 — M008 Out
 - Selectable wphase aggregate statistic (the M4 wcc pattern: `statistic =` argument, null matched to observed) — added 2026-08-29 — M008 Out
+- plot_optima_overlay wphase styling: the overlay plotter switches on `inherits(surface_obj, "wcc_res")` and silently gives any other class the WDTW styling; a wphase surface should get PLV-appropriate styling (or an explicit class check) — added 2026-08-29 — M008 implement (noticed, out of AC scope)
 - Wavelet coherence estimator: cross-wavelet / wavelet coherence for nonstationary time–frequency lead–lag across scales — added 2026-08-29 — legacy DESIGN §15 M9
 - CRQA / MEA conventions: cross-recurrence quantification analysis and MEA-style windowed cross-correlation conveniences — added 2026-08-29 — legacy DESIGN §15 M10
 - Group-level / multivariate workflow: tidy multi-dyad pipeline + aggregation / mixed-model summaries; `mvSUSY` is the >2-series reference — added 2026-08-29 — legacy DESIGN §15 M11
