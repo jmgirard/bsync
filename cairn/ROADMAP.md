@@ -2,19 +2,18 @@
 
 _The only authority on milestone status. Grouped by status, not ID._
 _Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M008)._
-_Last hygiene check: 2026-08-29 (cairn-init migration; no milestones yet)_
+_Last hygiene check: 2026-08-29 (M008 archived; promoted phase-synchrony row pruned; 2 review-finding candidate rows added; suite 1172 green, check 0/0/0; validate green; ROADMAP 25 lines / `wc -c` below; LESSONS seeded with 3 lines)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M008 | Phase synchrony estimator (wphase) | review | — | normal | milestones/M008-phase-synchrony.md |
+| M008 | Phase synchrony estimator (wphase) | done | — | normal | milestones/archive/M008-phase-synchrony.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 5 most recent
      terminal (done or dropped) rows — older ones live in milestones/archive/ + git -->
 
 ## Candidates
 
-- Phase synchrony estimator (Hilbert): analytic-signal instantaneous phase, windowed phase-locking value / phase synchrony, relative-phase output, on the shared `bsync_surface` framework — added 2026-08-29 — legacy DESIGN §15 M8. Promoted 2026-08-29 as M008 (row stays until completion)
 - wphase workflow vignette: parity with the wcc/wdtw/wgranger workflow articles, incl. narrowband/band-pass guidance for phase methods — added 2026-08-29 — M008 Out
 - Selectable wphase aggregate statistic (the M4 wcc pattern: `statistic =` argument, null matched to observed) — added 2026-08-29 — M008 Out
 - mne_connectivity PLV pipeline pin: M008's frozen pin uses MNE's analytic signal + the Lachaux formula, not mne_connectivity's own PLV pipeline (different spectral estimation; unmatchable at 1e-6); a tolerance-banded comparison against the toolbox's shipped PLV would close the convention gap the pin leaves. Promote when a definitional question about the PLV convention actually arises — added 2026-08-29 — M008 review F3
