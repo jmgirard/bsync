@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M009: Pseudo-dyad surrogate generators
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -143,7 +143,7 @@ build dyad lists from `sim_dyad` columns.
       `inst/WORDLIST`. Update `cairn/DESIGN.md` §6 generator list and the
       CLAUDE.md out-of-scope line so they say the pseudo-dyad generators
       shipped.
-- [ ] T7: Gate. Run `devtools::document()`, `devtools::test()`,
+- [x] T7: Gate. Run `devtools::document()`, `devtools::test()`,
       `devtools::check()`, `air format`, and `lintr::lint_package()`.
 
 ## Work log
@@ -169,6 +169,7 @@ build dyad lists from `sim_dyad` columns.
 - 2026-10-05: found that roxygen markdown is off package-wide, so existing `[fn()]` links render as raw text. Used a per-block `@md` on the two new functions to make their @seealso links render (AC6). Package-wide fix recorded as a candidate row, not done here.
 - 2026-10-05: T7 gate (first pass, pre-claim-audit code): air format applied to the two new files. lintr: no hits in new code (the object_usage hits are package-wide false positives, bsync not installed). document() no diff except man/bsync-package.Rd from the DESCRIPTION edit. check_pkgdown(): no problems. check(): 0 errors, 0 warnings, 0 notes.
 - 2026-10-05: claim audit: 66 claims read, 3 corrected — R/surrogate_generation.R, vignettes/surrogate-testing.Rmd. Crop message counted partners before the n_surrogates draw (code fixed). Vignette implied both functions crop to the shorter series (wording fixed). keep_roles = FALSE gave x = 1y for a (1y, 2x) pair where rMEA gives x = 2x (pool reordered to rMEA's 1x..Nx, 1y..Ny, roxygen states it). Two regression tests added; both fail on the pre-fix code.
+- 2026-10-05: T7 done on the final code (301e560): check() 0 errors, 0 warnings, 0 notes; document() no diff. Status set to review.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
