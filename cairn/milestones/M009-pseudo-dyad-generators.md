@@ -11,7 +11,7 @@
 - **Principles touched:** —   <!-- owner: plan · create/amend-via-gate; bsync's numbered invariants live in CLAUDE.md (2, 3, 6, 7 bind here), no DESIGN IP/GP numbering yet -->
 - **Resolves:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Surface tier:** user-facing — two new exported generator functions   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m009-pseudo-dyad-generators   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m009-pseudo-dyad-generators, https://github.com/jmgirard/bsync/pull/4   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
