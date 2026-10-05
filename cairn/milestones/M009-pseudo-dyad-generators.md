@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M009: Pseudo-dyad surrogate generators
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -174,6 +174,7 @@ build dyad lists from `sim_dyad` columns.
 - 2026-10-05: T7 done on the final code (301e560): check() 0 errors, 0 warnings, 0 notes; document() no diff. Status set to review.
 - 2026-10-05: review return 1: AC6 fails as written. The `generate_pseudo_dyads()` roxygen @seealso has no links to the surrogate wrappers (`wcc_surrogate()`, `wdtw_surrogate()`, `wgranger_surrogate()`, `wphase_surrogate()`) or the existing generators (`generate_surrogate_circular()`, `generate_surrogate_phase()`). AC1–AC5 and AC7 passed with evidence. Status back to in-progress.
 - 2026-10-05: T8 added for review return 1 (minor amendment; Coverage AC6 → T1, T6, T8). Done: generate_pseudo_dyads() @seealso now links the four `*_surrogate()` wrappers and both existing generators (12 links in the Rd). Its one new claim, that the wrappers accept the per-dyad matrix, is the behavior test 17 asserts. Full suite: 1529 expectations, 0 failures. Status set to review.
+- 2026-10-05: review return 2: consistency gate FAIL, `cairn_validate` weight caps. The plan-owned body is 150 lines (cap <150) after T8 was added. Heaviest sections: Acceptance criteria 71, Tasks 27. Status back to in-progress.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
