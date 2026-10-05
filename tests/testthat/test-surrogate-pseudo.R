@@ -398,3 +398,52 @@ test_that("generate_pseudo_dyads() follows set.seed and never reseeds", {
   c2 <- generate_pseudo_dyads(dl, n_pairs = 4)
   expect_false(identical(c1, c2))
 })
+
+# =========================================================================
+# --- Integration with the surrogate wrappers -----------------------------
+# =========================================================================
+
+test_that("a pseudo-dyad matrix works in all four surrogate wrappers", {
+  # Equal-length, NA-free dyads from sim_dyad's three axes (first 400
+  # samples, 5 s at 80 Hz, to keep WDTW fast).
+  idx <- 1:400
+  dl <- list(
+    list(x = sim_dyad$x_A[idx], y = sim_dyad$x_B[idx]),
+    list(x = sim_dyad$y_A[idx], y = sim_dyad$y_B[idx]),
+    list(x = sim_dyad$z_A[idx], y = sim_dyad$z_B[idx])
+  )
+  y_pseudo <- generate_surrogate_pseudo(dl, dyad = 3)
+  expect_equal(dim(y_pseudo), c(400L, 2L))
+  x <- dl[[3]]$x
+  y <- dl[[3]]$y
+
+  res_wcc <- wcc_surrogate(x, y, y_pseudo,
+    window_size = 80, lag_max = 8, window_increment = 20
+  )
+  res_wdtw <- wdtw_surrogate(x, y, y_pseudo,
+    window_size = 80, lag_max = 8, window_increment = 20
+  )
+  res_wgr <- wgranger_surrogate(x, y, y_pseudo,
+    window_size = 80, window_increment = 20
+  )
+  res_wph <- wphase_surrogate(x, y, y_pseudo,
+    window_size = 80, lag_max = 8, window_increment = 20
+  )
+
+  in_unit <- function(p) length(p) == 1 && !is.na(p) && p >= 0 && p <= 1
+  for (res in list(res_wcc, res_wdtw, res_wph)) {
+    expect_true(in_unit(res$p_value))
+    expect_equal(res$n_surrogates, ncol(y_pseudo))
+  }
+  expect_true(in_unit(res_wgr$p_value_xy))
+  expect_true(in_unit(res_wgr$p_value_yx))
+  expect_equal(res_wgr$n_surrogates, ncol(y_pseudo))
+})
+
+test_that("pseudo-dyad list elements work as estimator input", {
+  set.seed(215)
+  dl <- make_dyads(lengths = c(120, 150, 130))
+  pd <- suppressMessages(generate_pseudo_dyads(dl))
+  res <- wcc(pd[[1]]$x, pd[[1]]$y, window_size = 30, lag_max = 5)
+  expect_s3_class(res, "wcc_res")
+})
