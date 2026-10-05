@@ -210,4 +210,5 @@ Pass 2 (2026-10-05, branch head 6247c38, after review return 1). `test-surrogate
 - blame-history #6: DESCRIPTION edit consistent with man/bsync-package.Rd — noted, no issue.
 - blame-history #7: NEWS.md additions alter no existing text — noted, no issue.
 - prior-review #1: the `generate_pseudo_dyads()` example runs `wcc()` on six pseudo-dyads outside `\donttest{}` — reject (false): measured at 0.05 s elapsed.
+- AC7 evidence (post-fix head 7302851, the last code commit): `devtools::check()` reports 0 errors, 0 warnings, 0 notes. Every later commit (a84cc40, 4c42027, 94878bd) changes only this milestone file. Pass 3 (after review return 2, head 94878bd): `cairn_validate` all checks passed. Code and evidence are unchanged since 7302851.
 - After the fixes: `test-surrogate-pseudo.R` passes 24 tests. The full suite passes 1561 expectations with 0 failures. Spell check is clean. `document()` gives no diff.
