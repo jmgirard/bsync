@@ -124,7 +124,7 @@ build dyad lists from `sim_dyad` columns.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Write the source note for the rMEA `shuffle()` convention
+- [x] T1: Write the source note for the rMEA `shuffle()` convention
       (CRAN source `R/rMEA_rand.R`, cited as Kleinbub & Ramseyer 2020) in
       `cairn/references/` with its `INDEX.md` line. Record the pairing,
       role, sampling, and cropping rules, and where bsync departs from them.
@@ -159,6 +159,8 @@ build dyad lists from `sim_dyad` columns.
 - 2026-10-05: plan chose a `"sources"` data-frame attribute over per-element source fields because it keeps each element in the plain `list(x, y)` dyad form; falsified by a downstream need to carry sources through `lapply()`.
 - 2026-10-05: plan chose to abort when `n_surrogates` exceeds the eligible count, not to sample with replacement as the circular generator does, because duplicate partners add no null information.
 - 2026-10-05: no new example dataset: examples and the AC5 fixture build dyad lists from `sim_dyad` columns. The vignette simulates a small dyad list inline.
+- 2026-10-05: branch m009-pseudo-dyad-generators cut from main at 39ca324; status in-progress.
+- 2026-10-05: T1 done: cairn/references/kleinbub2020.md from the rMEA 1.2.2 source (shuffle(), unequalCbind()). It confirms the start-aligned crop to the shorter series and the N(N-1) and 2N(N-1) pair counts. Departures recorded there: keep_roles default, no na.omit().
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
