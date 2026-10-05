@@ -165,8 +165,9 @@ never silently change the basis. Each pairs a *diagnostic* with an *action*.
 
 ## 6. Surrogate significance testing (the inferential spine)
 
-Generators produce a null in which genuine cross-coupling is destroyed while each series' own
-structure is preserved:
+Generators produce a null in which genuine cross-coupling is destroyed. The within-dyad
+generators preserve each series' own structure. The pseudo-dyad generators replace the partner
+with a real series from another dyad (corrected M009):
 
 - `generate_surrogate_circular()` — circular shifts (preserve autocorrelation; good for behavioral
   data; can respect `lag_max` to guarantee decoupling).
@@ -177,7 +178,8 @@ structure is preserved:
   it keeps task-locked co-movement and removes interaction-specific coupling. Convention and
   departures (roles kept by default, no NA-row removal): `cairn/references/kleinbub2020.md`.
 
-Analysis wrappers (`wcc_surrogate()`, `wdtw_surrogate()`, `wgranger_surrogate()`):
+Analysis wrappers (`wcc_surrogate()`, `wdtw_surrogate()`, `wgranger_surrogate()`,
+`wphase_surrogate()`; corrected M009):
 
 1. Compute the **observed aggregate statistic**.
 2. Recompute that **same statistic** on each surrogate column (parallelized via `future.apply`,
@@ -337,8 +339,9 @@ reproducible; result objects stay light; supplied `time` maps windows to real ti
    + mean\|Z\| path is the SUSY method generalized and C++-accelerated.
 7. **tidy / glance / as_tibble** → **will be added** (§7), built in M5 from the shared framework
    (`generics` → Imports at that point).
-8. **IAAFT surrogates** → **will be added** (§6, roadmap M12); segment-shuffling surrogates a
-   candidate alongside.
+8. **IAAFT surrogates** → **will be added** (§6; a ROADMAP candidate row, corrected M009 —
+   the pre-cairn "M12" slot no longer exists); segment-shuffling surrogates a candidate
+   alongside. Pseudo-dyad generators shipped in M009.
 
 9. **OpenMP** → **removed** (M2). The prefix-sum algorithm eliminates the inner w_max loop that
    motivated OpenMP; the serial implementation already achieves 5–25× speedup over the baseline.

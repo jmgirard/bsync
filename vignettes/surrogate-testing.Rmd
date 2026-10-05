@@ -39,7 +39,7 @@ Phase randomization uses the Fourier Transform to decompose a signal into its fr
 ### 1.3 Pseudo-Dyads (`generate_surrogate_pseudo`, `generate_pseudo_dyads`)
 A pseudo-dyad pairs one person's series with a partner from a *different* dyad: two people who never interacted. This is the pseudo-synchrony approach of the rMEA package (Kleinbub & Ramseyer, 2020).
 
-* **How it works:** The partner series is real data, recorded under the same task timeline. Series of unequal length are cropped start-aligned, so sample `t` of both series sits at the same task time. `generate_pseudo_dyads()` crops each pair to its shorter series. `generate_surrogate_pseudo()` crops longer partners to the length of the target's `y`, and excludes shorter partners with a warning.
+* **How it works:** The partner series is real data, recorded under the same task timeline. Series of unequal length are cropped start-aligned, so sample `t` of both series sits at the same task time. `generate_pseudo_dyads()` crops each pair to its shorter series. `generate_surrogate_pseudo()` crops longer partners to the length of the target's `y`, and excludes shorter partners with a warning. Start alignment assumes that every dyad was sampled at the same rate and that sample 1 of every series is the same task onset. Resample and trim first if that is not true.
 * **Which null it tests:** Circular shifts and phase randomization break all time alignment. If the task itself makes both people move at the same moments (a trial starts, a video plays), that shared movement looks like synchrony against those nulls. A pseudo-dyad partner went through the same task, so the pseudo-dyad null keeps task-driven co-movement. A significant result then means "more synchronous than with a stranger in the same setting."
 * **When to use it:** When you have a sample of dyads that did the same task, and you want to separate interaction-specific synchrony from synchrony that the task produces.
 * **Important Note:** A sample of N dyads gives each target at most N - 1 partners (2(N - 1) with `keep_roles = FALSE`), so the p-value of one dyad has a resolution of 1 / (N - 1). The sample-level comparison in Section 3 uses all N(N - 1) pseudo-dyads.
@@ -48,7 +48,7 @@ A pseudo-dyad pairs one person's series with a partner from a *different* dyad: 
 
 Regardless of the generation method, the logic of the **bsync** surrogate pipeline remains consistent:
 
-1. **Decouple:** Generate a matrix of $N$ null time series that remove the synchrony while keeping the individual characteristics.
+1. **Decouple:** Generate a matrix of $N$ null time series that remove the synchrony while keeping the individual characteristics (or, for pseudo-dyads, that replace the partner with a person from another dyad).
 2. **Evaluate:** Run your chosen synchrony metric (WCC, WDTW, or WGC) against every column in that matrix.
 3. **Compare:** Calculate the empirical p-value as the proportion of surrogate results that are as extreme as, or more extreme than, your observed result.
 
@@ -117,7 +117,7 @@ p_pseudo <- vapply(seq_len(n_dyads), function(i) {
 c(circular = sum(p_circular < 0.05), pseudo = sum(p_pseudo < 0.05))
 ```
 
-The circular-shift null breaks the shared task timeline, so it reads task-driven co-movement as synchrony. The pseudo-dyad null keeps that timeline, so it flags far fewer dyads. With nine partners per dyad, `p_value` can only be 0, 1/9, 2/9, and so on, and `p < .05` means that the real partner beat all nine strangers.
+The circular-shift null breaks the shared task timeline, so it reads task-driven co-movement as synchrony. The pseudo-dyad null keeps that timeline, so it flags far fewer dyads. With nine partners per dyad, `p_value` can only be 0, 1/9, 2/9, and so on, and `p < .05` means that the real partner beat all nine strangers. If the real partner is no different from a stranger, that happens with chance 1/10, so a single-dyad pseudo-dyad test at `p < .05` has a false-positive rate of about 1/N for N dyads. With small samples, prefer the sample-level comparison below.
 
 For a sample-level comparison, `generate_pseudo_dyads()` builds every role-keeping pairing (the `x` of one dyad with the `y` of another: 10 × 9 = 90 pseudo-dyads). Compute the same statistic on the real dyads and on the pseudo-dyads, then compare the two distributions. Here we add a real coupling to each dyad: person B follows person A by 10 samples.
 
@@ -149,7 +149,7 @@ The real dyads score higher than the pseudo-dyads, because only real partners sh
 
 * **Permutation Count:** For a stable p-value, we recommend at least 1,000 permutations. Using fewer (e.g., 100) is fine for rapid exploratory analysis, but it will lack the granularity needed to report significance levels like $p < .001$.
 * **Power and Speed:** Surrogate analysis is "embarrassingly parallel." For heavy analyses like WDTW, always use the `future` package to distribute these 1,000+ calculations across your machine's CPU cores.
-* **Interpretation:** A significant p-value does not mean the behavior is *causal*; it only means the observed degree of synchrony is statistically unlikely to have occurred if the two participants were moving independently.
+* **Interpretation:** A significant p-value does not mean the behavior is *causal*; it only means the observed degree of synchrony is statistically unlikely to have occurred if the two participants were moving independently. For a pseudo-dyad null, it means more synchrony than with a stranger in the same setting.
 
 ## References
 

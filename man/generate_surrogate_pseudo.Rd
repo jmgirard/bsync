@@ -28,7 +28,8 @@ single positive integer to draw that many without replacement.}
 A numeric matrix with \code{length(y)} rows and one column per partner,
 ready to pass as \code{y_surrogates} to \code{\link[=wcc_surrogate]{wcc_surrogate()}} and the other
 surrogate wrappers. The attribute \code{"sources"} is a data frame with
-columns \code{dyad} and \code{role} giving each column's source.
+columns \code{dyad} and \code{role} giving each column's source. Subsetting the
+matrix drops this attribute, so read it before you subset.
 }
 \description{
 Builds a surrogate matrix for one target dyad whose columns are partner
@@ -52,7 +53,10 @@ the first \code{length(y)} samples of its source, so sample \code{t} of the part
 sits at the same task time as sample \code{t} of the target (the rMEA
 convention). Partners shorter than the target's \code{y} cannot fill the matrix
 and are excluded with a warning. How many longer partners were cropped is
-announced. Missing values are passed through unchanged.
+announced. Missing values are passed through unchanged. Start alignment
+assumes that every dyad was sampled at the same rate and that sample 1 of
+every series is the same task onset. Resample and trim first if not; this
+function cannot check it.
 
 \strong{Roles.} With \code{keep_roles = TRUE} (the default) every partner is the \code{y}
 of another dyad. bsync's lead-lag sign depends on which series is \code{x}, so
@@ -63,7 +67,13 @@ from rMEA's \code{shuffle()}, which mixes roles by default. Use
 
 \strong{How many surrogates.} A sample of N dyads offers at most N - 1
 partners per target (2(N - 1) with \code{keep_roles = FALSE}), so the p-value
-has a resolution of 1 / \code{ncol}. \code{n_surrogates = NULL} (the default) uses
+has a resolution of 1 / \code{ncol}. The wrappers report the share of partners
+that score at least as high as the real partner. If the real partner is no
+different from a stranger, it ranks first among the N series with chance
+1 / N, so \code{p_value = 0} (and \code{p < .05}) occurs with chance about 1 / N:
+10\% with 10 dyads. With fewer than about 20 dyads, read single-dyad
+p-values with care and prefer the sample-level comparison of
+\code{\link[=generate_pseudo_dyads]{generate_pseudo_dyads()}}. \code{n_surrogates = NULL} (the default) uses
 every eligible partner, with no random draw. An integer draws that many
 partners without replacement. Asking for more partners than exist is an
 error, because repeated partners add no information to the null.

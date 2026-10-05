@@ -21,7 +21,8 @@ the \code{y} of another. \code{FALSE} pairs any two series from different dyads.
 A list of pseudo-dyads. Each element is \code{list(x = , y = )}, the
 dyad form that \code{\link[=autotune_wcc]{autotune_wcc()}} and \code{\link[=generate_surrogate_pseudo]{generate_surrogate_pseudo()}} read.
 The attribute \code{"sources"} is a data frame with one row per pseudo-dyad
-and columns \code{x_dyad}, \code{x_role}, \code{y_dyad}, and \code{y_role}.
+and columns \code{x_dyad}, \code{x_role}, \code{y_dyad}, and \code{y_role}. Subsetting the
+list drops this attribute, so read it before you subset.
 }
 \description{
 Pairs series from \emph{different} dyads to build pseudo-dyads: pairs of people
@@ -44,7 +45,10 @@ series to \code{x} and \code{y}: a pair of an \code{x} series and a \code{y} ser
 \strong{Length handling.} Both series of a pseudo-dyad are cropped to the
 shorter one, start-aligned (the rMEA convention), so sample \code{t} of each
 series sits at the same task time. The number of cropped pseudo-dyads is
-announced. Missing values are passed through unchanged.
+announced. Missing values are passed through unchanged. Start alignment
+assumes that every dyad was sampled at the same rate and that sample 1 of
+every series is the same task onset. Resample and trim first if not; this
+function cannot check it.
 
 \strong{How many.} \code{n_pairs = NULL} (the default) returns every pairing in a
 fixed order, with no random draw. An integer draws that many pairings

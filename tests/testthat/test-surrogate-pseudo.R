@@ -513,3 +513,75 @@ test_that("keep_roles = FALSE keeps the x series as x in mixed-role pairs", {
   expect_true(any(s$x_role == "x" & s$y_role == "x"))
   expect_true(any(s$x_role == "y" & s$y_role == "y"))
 })
+
+# =========================================================================
+# --- Regressions from the independent review -----------------------------
+# =========================================================================
+
+test_that("zero-length series and a bare data frame abort with guidance", {
+  set.seed(218)
+  dl <- make_dyads(lengths = c(20, 20))
+  empty <- c(dl, list(list(x = numeric(0), y = numeric(0))))
+  expect_error(
+    generate_surrogate_pseudo(empty, dyad = 3),
+    "dyad 3 in .*must have at least one"
+  )
+  expect_error(
+    generate_pseudo_dyads(empty),
+    "dyad 3 in .*must have at least one"
+  )
+  one_df <- data.frame(x = 1:5, y = 1:5)
+  expect_error(
+    generate_surrogate_pseudo(one_df, dyad = 1),
+    "not a single data frame"
+  )
+  expect_error(generate_pseudo_dyads(one_df), "not a single data frame")
+})
+
+test_that("NA values keep their position and integer input becomes double", {
+  dl <- list(
+    list(x = 1:10, y = c(1:4, NA, 6:10)),
+    list(x = 11:20, y = c(NA, 12:20)),
+    list(x = 21:32, y = c(21:25, NA, 27:32))
+  )
+  mat <- suppressMessages(generate_surrogate_pseudo(dl, dyad = 1))
+  expect_true(is.double(mat))
+  srcs <- attr(mat, "sources")
+  expect_identical(mat[, srcs$dyad == 2], c(NA, as.double(12:20)))
+  expect_identical(mat[, srcs$dyad == 3], c(21, 22, 23, 24, 25, NA, 27:30))
+
+  pd <- suppressMessages(generate_pseudo_dyads(dl))
+  s <- attr(pd, "sources")
+  k <- which(s$x_dyad == 3 & s$y_dyad == 1)
+  expect_true(is.double(pd[[k]]$x))
+  expect_identical(pd[[k]]$y, c(1, 2, 3, 4, NA, 6:10))
+})
+
+test_that("asking for exactly the eligible count returns the full set", {
+  set.seed(219)
+  dl <- make_dyads(lengths = rep(20, 5))
+  all_cols <- generate_surrogate_pseudo(dl, dyad = 2, keep_roles = FALSE)
+  drawn <- generate_surrogate_pseudo(
+    dl,
+    dyad = 2,
+    n_surrogates = ncol(all_cols),
+    keep_roles = FALSE
+  )
+  expect_setequal(column_sources(drawn, dl), column_sources(all_cols, dl))
+
+  all_pairs <- generate_pseudo_dyads(dl)
+  drawn_pairs <- generate_pseudo_dyads(dl, n_pairs = length(all_pairs))
+  expect_setequal(
+    recorded_keys(drawn_pairs, TRUE),
+    recorded_keys(all_pairs, TRUE)
+  )
+})
+
+test_that("the sources attribute matches column contents for keep_roles = TRUE", {
+  set.seed(220)
+  dl <- make_dyads(lengths = c(20, 25, 30, 22))
+  mat <- suppressMessages(generate_surrogate_pseudo(dl, dyad = 1))
+  srcs <- attr(mat, "sources")
+  expect_true(all(srcs$role == "y"))
+  expect_equal(paste0(srcs$dyad, srcs$role), column_sources(mat, dl))
+})

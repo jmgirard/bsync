@@ -160,7 +160,10 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #' sits at the same task time as sample `t` of the target (the rMEA
 #' convention). Partners shorter than the target's `y` cannot fill the matrix
 #' and are excluded with a warning. How many longer partners were cropped is
-#' announced. Missing values are passed through unchanged.
+#' announced. Missing values are passed through unchanged. Start alignment
+#' assumes that every dyad was sampled at the same rate and that sample 1 of
+#' every series is the same task onset. Resample and trim first if not; this
+#' function cannot check it.
 #'
 #' **Roles.** With `keep_roles = TRUE` (the default) every partner is the `y`
 #' of another dyad. bsync's lead-lag sign depends on which series is `x`, so
@@ -171,7 +174,13 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #'
 #' **How many surrogates.** A sample of N dyads offers at most N - 1
 #' partners per target (2(N - 1) with `keep_roles = FALSE`), so the p-value
-#' has a resolution of 1 / `ncol`. `n_surrogates = NULL` (the default) uses
+#' has a resolution of 1 / `ncol`. The wrappers report the share of partners
+#' that score at least as high as the real partner. If the real partner is no
+#' different from a stranger, it ranks first among the N series with chance
+#' 1 / N, so `p_value = 0` (and `p < .05`) occurs with chance about 1 / N:
+#' 10% with 10 dyads. With fewer than about 20 dyads, read single-dyad
+#' p-values with care and prefer the sample-level comparison of
+#' [generate_pseudo_dyads()]. `n_surrogates = NULL` (the default) uses
 #' every eligible partner, with no random draw. An integer draws that many
 #' partners without replacement. Asking for more partners than exist is an
 #' error, because repeated partners add no information to the null.
@@ -187,7 +196,8 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #' @return A numeric matrix with `length(y)` rows and one column per partner,
 #'   ready to pass as `y_surrogates` to [wcc_surrogate()] and the other
 #'   surrogate wrappers. The attribute `"sources"` is a data frame with
-#'   columns `dyad` and `role` giving each column's source.
+#'   columns `dyad` and `role` giving each column's source. Subsetting the
+#'   matrix drops this attribute, so read it before you subset.
 #' @references Kleinbub, J. R., & Ramseyer, F. T. (2020). rMEA: An R package
 #'   to assess nonverbal synchronization in motion energy analysis
 #'   time-series. *Psychotherapy Research*. \doi{10.1080/10503307.2020.1844334}
@@ -323,7 +333,10 @@ generate_surrogate_pseudo <- function(
 #' **Length handling.** Both series of a pseudo-dyad are cropped to the
 #' shorter one, start-aligned (the rMEA convention), so sample `t` of each
 #' series sits at the same task time. The number of cropped pseudo-dyads is
-#' announced. Missing values are passed through unchanged.
+#' announced. Missing values are passed through unchanged. Start alignment
+#' assumes that every dyad was sampled at the same rate and that sample 1 of
+#' every series is the same task onset. Resample and trim first if not; this
+#' function cannot check it.
 #'
 #' **How many.** `n_pairs = NULL` (the default) returns every pairing in a
 #' fixed order, with no random draw. An integer draws that many pairings
@@ -337,7 +350,8 @@ generate_surrogate_pseudo <- function(
 #' @return A list of pseudo-dyads. Each element is `list(x = , y = )`, the
 #'   dyad form that [autotune_wcc()] and [generate_surrogate_pseudo()] read.
 #'   The attribute `"sources"` is a data frame with one row per pseudo-dyad
-#'   and columns `x_dyad`, `x_role`, `y_dyad`, and `y_role`.
+#'   and columns `x_dyad`, `x_role`, `y_dyad`, and `y_role`. Subsetting the
+#'   list drops this attribute, so read it before you subset.
 #' @references Kleinbub, J. R., & Ramseyer, F. T. (2020). rMEA: An R package
 #'   to assess nonverbal synchronization in motion energy analysis
 #'   time-series. *Psychotherapy Research*. \doi{10.1080/10503307.2020.1844334}
@@ -444,9 +458,13 @@ generate_pseudo_dyads <- function(
 
 # Extract and type-check every dyad in a dyad_list (>= 2 dyads).
 .pseudo_extract_dyads <- function(dyad_list) {
-  if (
-    !is.list(dyad_list) || is.data.frame(dyad_list) || length(dyad_list) < 2
-  ) {
+  if (is.data.frame(dyad_list)) {
+    cli::cli_abort(
+      "{.arg dyad_list} must be a list of dyads, not a single data frame. \\
+      Wrap one data frame per dyad in a list."
+    )
+  }
+  if (!is.list(dyad_list) || length(dyad_list) < 2) {
     cli::cli_abort(
       "{.arg dyad_list} must contain at least two dyads (a list with one \\
       element per dyad)."
@@ -457,6 +475,12 @@ generate_pseudo_dyads <- function(
     if (!is.numeric(xy$x) || !is.numeric(xy$y)) {
       cli::cli_abort(
         "Both series of dyad {i} in {.arg dyad_list} must be numeric."
+      )
+    }
+    if (length(xy$x) == 0 || length(xy$y) == 0) {
+      cli::cli_abort(
+        "Both series of dyad {i} in {.arg dyad_list} must have at least one \\
+        sample."
       )
     }
     list(x = as.double(xy$x), y = as.double(xy$y))
