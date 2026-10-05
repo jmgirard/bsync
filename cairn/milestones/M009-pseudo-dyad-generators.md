@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M009: Pseudo-dyad surrogate generators
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -124,29 +124,19 @@ build dyad lists from `sim_dyad` columns.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [x] T1: Write the source note for the rMEA `shuffle()` convention
-      (CRAN source `R/rMEA_rand.R`, cited as Kleinbub & Ramseyer 2020) in
-      `cairn/references/` with its `INDEX.md` line. Record the pairing,
-      role, sampling, and cropping rules, and where bsync departs from them.
-- [x] T2: Tests first for `generate_surrogate_pseudo()` in
-      `tests/testthat/test-surrogate-pseudo.R` (AC1, AC2, AC4). Use pairwise
-      distinct seeded series. Assert cli output with `expect_message()` or
-      `expect_warning()` (LESSONS 2026-08-29).
+- [x] T1: Source note `cairn/references/kleinbub2020.md` (rMEA `shuffle()`
+      rules, bsync departures) with its `INDEX.md` line.
+- [x] T2: Tests first for `generate_surrogate_pseudo()` (AC1, AC2, AC4),
+      cli output via `expect_message()`/`expect_warning()`.
 - [x] T3: Implement `generate_surrogate_pseudo()` in
-      `R/surrogate_generation.R`. Reuse `.extract_xy()` and move it to a
-      shared helper file if both new functions need it.
+      `R/surrogate_generation.R`, reusing `.extract_xy()`.
 - [x] T4: Tests first, then implement `generate_pseudo_dyads()` (AC3, AC4).
-- [x] T5: Wrapper integration test over all four `*_surrogate()` functions
-      (AC5).
-- [x] T6: Docs. Roxygen for both functions, `_pkgdown.yml` surrogate
-      section, NEWS.md entry, surrogate-testing vignette section,
-      `inst/WORDLIST`. Update `cairn/DESIGN.md` §6 generator list and the
-      CLAUDE.md out-of-scope line so they say the pseudo-dyad generators
-      shipped.
-- [x] T7: Gate. Run `devtools::document()`, `devtools::test()`,
-      `devtools::check()`, `air format`, and `lintr::lint_package()`.
-- [x] T8: Review return 1. Add @seealso links from `generate_pseudo_dyads()`
-      to the four surrogate wrappers and the existing generators (AC6).
+- [x] T5: Wrapper integration test over all four `*_surrogate()` (AC5).
+- [x] T6: Docs: roxygen, `_pkgdown.yml`, NEWS.md, vignette, WORDLIST,
+      DESIGN §6, CLAUDE.md out-of-scope line.
+- [x] T7: Gate: document, test, check, air format, lintr.
+- [x] T8: Review return 1: `generate_pseudo_dyads()` @seealso links (AC6).
+- [x] T9: Review return 2: compress Tasks under the 150-line cap.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
@@ -175,6 +165,7 @@ build dyad lists from `sim_dyad` columns.
 - 2026-10-05: review return 1: AC6 fails as written. The `generate_pseudo_dyads()` roxygen @seealso has no links to the surrogate wrappers (`wcc_surrogate()`, `wdtw_surrogate()`, `wgranger_surrogate()`, `wphase_surrogate()`) or the existing generators (`generate_surrogate_circular()`, `generate_surrogate_phase()`). AC1–AC5 and AC7 passed with evidence. Status back to in-progress.
 - 2026-10-05: T8 added for review return 1 (minor amendment; Coverage AC6 → T1, T6, T8). Done: generate_pseudo_dyads() @seealso now links the four `*_surrogate()` wrappers and both existing generators (12 links in the Rd). Its one new claim, that the wrappers accept the per-dyad matrix, is the behavior test 17 asserts. Full suite: 1529 expectations, 0 failures. Status set to review.
 - 2026-10-05: review return 2: consistency gate FAIL, `cairn_validate` weight caps. The plan-owned body is 150 lines (cap <150) after T8 was added. Heaviest sections: Acceptance criteria 71, Tasks 27. Status back to in-progress.
+- 2026-10-05: T9 added and done for review return 2 (minor amendment). The Tasks section was rewritten once, shorter, all tasks already done. Acceptance criteria are untouched because their wording is amendment-gated. cairn_validate all checks passed. Status set to review.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
