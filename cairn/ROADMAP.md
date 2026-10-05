@@ -2,13 +2,13 @@
 
 _The only authority on milestone status. Grouped by status, not ID._
 _Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M010)._
-_Last hygiene check: 2026-10-05 (no changes since 2026-08-29, validate green, no open issues, PRs, or outside merges, ROADMAP 3.3 KB, LESSONS 1.1 KB)_
+_Last hygiene check: 2026-10-05 (M009 merged and archived, 4 candidate rows added, validate green, ROADMAP 4.7 KB, LESSONS 1.4 KB)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M009 | Pseudo-dyad surrogate generators | review | — | normal | milestones/M009-pseudo-dyad-generators.md |
+| M009 | Pseudo-dyad surrogate generators | done | — | normal | milestones/archive/M009-pseudo-dyad-generators.md |
 | M008 | Phase synchrony estimator (wphase) | done | — | normal | milestones/archive/M008-phase-synchrony.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 5 most recent
      terminal (done or dropped) rows — older ones live in milestones/archive/ + git -->
