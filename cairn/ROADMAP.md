@@ -8,7 +8,7 @@ _Last hygiene check: 2026-10-05 (no changes since 2026-08-29, validate green, no
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M009 | Pseudo-dyad surrogate generators | planned | — | normal | milestones/M009-pseudo-dyad-generators.md |
+| M009 | Pseudo-dyad surrogate generators | in-progress | — | normal | milestones/M009-pseudo-dyad-generators.md |
 | M008 | Phase synchrony estimator (wphase) | done | — | normal | milestones/archive/M008-phase-synchrony.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 5 most recent
      terminal (done or dropped) rows — older ones live in milestones/archive/ + git -->
