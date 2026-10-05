@@ -194,4 +194,28 @@ Pass 1 (2026-10-05, branch head bb1adf9). `testthat::test_file("tests/testthat/t
 
 Pass 2 (2026-10-05, branch head 6247c38, after review return 1). `test-surrogate-pseudo.R`: 20 tests, 357 expectations, all passing. The only code change since pass 1 is roxygen @seealso text, so the AC1–AC5 evidence stands, re-run at this head.
 - AC6 evidence (pass 2): `man/generate_pseudo_dyads.Rd` now links wcc_surrogate, wdtw_surrogate, wgranger_surrogate, wphase_surrogate, generate_surrogate_circular, and generate_surrogate_phase (also autotune_wcc, generate_surrogate_pseudo, wcc, wdtw, wgranger, wphase). `man/generate_surrogate_pseudo.Rd` links the same wrappers and generators. The other AC6 items are unchanged from pass 1. Pass.
+- AC7 evidence (pass 2): at 6247c38, `devtools::check()` reports 0 errors, 0 warnings, 0 notes. `document()` gives no diff.
 - spawned: diff-bug, blame-history, prior-review
+- diff-bug #1: with N dyads, a single-dyad pseudo-dyad test gives p = 0 with chance about 1/N under the null (p = b/n, no +1), and the vignette did not say so — fix now (roxygen "How many surrogates" and vignette section 3 state the 1/N rate and point small samples to the sample-level comparison), fixed 7302851. The wrapper formula change goes to the candidate row "Add-one surrogate p-value".
+- diff-bug #2: a zero-length target `y` returned a 0-row matrix instead of aborting — fix now (abort in `.pseudo_extract_dyads()`, test added), fixed 7302851.
+- diff-bug #3: `.extract_xy()` partial-matches names and silently falls back to position — follow-up, a pre-existing helper shared with `autotune_wcc()`: candidate row "Strict dyad extraction in `.extract_xy()`".
+- diff-bug #4: no test of NA pass-through or integer input — fix now (test added), fixed 7302851.
+- diff-bug #5: no test of `n_surrogates` / `n_pairs` equal to the full count — fix now (test added), fixed 7302851.
+- diff-bug #6: the `"sources"` attribute is dropped on subsetting — fix now (documented in both @return), fixed 7302851.
+- diff-bug #7: `dyad_list` names are not carried into `sources` — follow-up: candidate row "Carry `dyad_list` names into the pseudo-dyad `"sources"` attribute".
+- diff-bug #8: the docs did not state the shared sampling-rate and shared-onset assumption behind start alignment — fix now (both roxygen blocks and the vignette), fixed 7302851.
+- diff-bug #9: a bare data frame as `dyad_list` got a misleading "at least two dyads" error — fix now (separate message, test added), fixed 7302851.
+- diff-bug #10: `.extract_xy()` errors do not name the dyad index — follow-up: same candidate row as #3.
+- diff-bug #11: `generate_surrogate_pseudo()` does not check the target's `x` length against `y` — reject (false as a defect): the generator's contract covers `y` only, and every wrapper aborts with "x and y must be the same length" before computing.
+- diff-bug #12: the `sources`-to-columns check ran only for keep_roles = FALSE — fix now (test added for TRUE), fixed 7302851.
+- diff-bug #13: DESCRIPTION labels all generators "(pseudo-synchrony)" and the line is long — reject (false): the "(pseudo-synchrony)" label predates M009, and DESIGN §1 uses the term for all surrogate nulls. Line length is style.
+- diff-bug #14: DESIGN §6 wrapper list omits `wphase_surrogate()` — fix now (pre-existing, corrected in place), fixed 7302851.
+- blame-history #1: README vignette row and surrogate references still described circular-shift and phase only — fix now (README.Rmd row and rMEA reference, README.md re-knit), fixed 7302851.
+- blame-history #2: DESIGN §14 #8 still said "roadmap M12" — fix now (corrected in place), fixed 7302851.
+- blame-history #3: DESIGN §6 lead sentence said every generator preserves each series' own structure — fix now (qualified for pseudo-dyads), fixed 7302851.
+- blame-history #4: the vignette's "Decouple" step and "Interpretation" bullet assumed within-dyad nulls — fix now (both qualified), fixed 7302851.
+- blame-history #5: CLAUDE.md reverses the old "depends on M11's dyad_list" claim — reject (false as a defect): the reversal matches the code (`R/autotune.R:63`) and no D-entry records the old claim.
+- blame-history #6: DESCRIPTION edit consistent with man/bsync-package.Rd — noted, no issue.
+- blame-history #7: NEWS.md additions alter no existing text — noted, no issue.
+- prior-review #1: the `generate_pseudo_dyads()` example runs `wcc()` on six pseudo-dyads outside `\donttest{}` — reject (false): measured at 0.05 s elapsed.
+- After the fixes: `test-surrogate-pseudo.R` passes 24 tests. The full suite passes 1561 expectations with 0 failures. Spell check is clean. `document()` gives no diff.
