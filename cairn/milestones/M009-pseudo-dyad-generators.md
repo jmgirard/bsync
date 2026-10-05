@@ -167,6 +167,7 @@ build dyad lists from `sim_dyad` columns.
 - 2026-10-05: review return 2: consistency gate FAIL, `cairn_validate` weight caps. The plan-owned body is 150 lines (cap <150) after T8 was added. Heaviest sections: Acceptance criteria 71, Tasks 27. Status back to in-progress.
 - 2026-10-05: T9 added and done for review return 2 (minor amendment). The Tasks section was rewritten once, shorter, all tasks already done. Acceptance criteria are untouched because their wording is amendment-gated. cairn_validate all checks passed. Status set to review.
 - 2026-10-05: step-7 approval: m009-pseudo-dyad-generators approved for merge
+- 2026-10-05: PR #4 opened and the merge marker written. CI is not yet reported (the app's PR monitor shows 0 checks). The session harness forbids watching CI with gh polling, so the run stops before the merge. `/milestone-review M009` resumes at route (c).
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
