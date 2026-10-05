@@ -59,6 +59,8 @@ reference:
     contents:
       - generate_surrogate_circular
       - generate_surrogate_phase
+      - generate_surrogate_pseudo
+      - generate_pseudo_dyads
       - wcc_surrogate
       - wdtw_surrogate
       - wgranger_surrogate

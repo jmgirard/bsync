@@ -17,6 +17,24 @@
 * **`pick_optima()`** and **`leadership_asymmetry()`** now accept the phase
   surface (`wphase_res` / `wphase_optima`), searching for peak phase locking.
 
+## Pseudo-dyad surrogates
+
+* **`generate_surrogate_pseudo()`** — new surrogate generator for one dyad in
+  a sample of dyads. Its columns are partner series taken from the other
+  dyads (pseudo-dyads), cropped start-aligned to the target's length, ready
+  for `wcc_surrogate()`, `wdtw_surrogate()`, `wgranger_surrogate()`, and
+  `wphase_surrogate()`. This null keeps co-movement that a shared task
+  produces and removes coupling specific to the real interaction (the rMEA
+  pseudo-synchrony approach; Kleinbub & Ramseyer, 2020). Partners shorter
+  than the target are excluded with a warning.
+* **`generate_pseudo_dyads()`** — builds the sample-wide set of pseudo-dyads
+  (every pairing of series from different dyads, or a random subset), each in
+  the `list(x, y)` form, for comparing real dyads to pseudo-dyads. Both
+  generators keep partner roles by default (`keep_roles = TRUE`), because
+  the lead-lag sign depends on which series is `x`.
+* The surrogate-testing vignette has a new pseudo-dyad section with a worked
+  example.
+
 # bsync 0.1.0
 
 First public release.

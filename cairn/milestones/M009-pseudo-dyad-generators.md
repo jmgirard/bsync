@@ -138,7 +138,7 @@ build dyad lists from `sim_dyad` columns.
 - [x] T4: Tests first, then implement `generate_pseudo_dyads()` (AC3, AC4).
 - [x] T5: Wrapper integration test over all four `*_surrogate()` functions
       (AC5).
-- [ ] T6: Docs. Roxygen for both functions, `_pkgdown.yml` surrogate
+- [x] T6: Docs. Roxygen for both functions, `_pkgdown.yml` surrogate
       section, NEWS.md entry, surrogate-testing vignette section,
       `inst/WORDLIST`. Update `cairn/DESIGN.md` §6 generator list and the
       CLAUDE.md out-of-scope line so they say the pseudo-dyad generators
@@ -165,6 +165,8 @@ build dyad lists from `sim_dyad` columns.
 - 2026-10-05: implementation choices: .extract_xy() stays in R/autotune.R (package-internal, reachable from both files). Added a numeric-series abort and a keep_roles TRUE/FALSE abort beyond AC2's list. The matrix also carries a "sources" attribute (dyad, role) matching AC3's form. NULL n_surrogates keeps pool order and draws no random numbers.
 - 2026-10-05: T4 done: generate_pseudo_dyads() with tests that compare the recorded pairings to an independent enumeration for N = 2, 3, 4 under both keep_roles values. Full suite: 1512 expectations, 0 failures. Planted defects went red: same-dyad pairs with roles kept (4 tests fail), same-dyad pairs with roles mixed (3), end-aligned crop (1).
 - 2026-10-05: T5 done: wrapper test on a 3-dyad list from sim_dyad's axes (first 400 samples, window_increment 20 to keep WDTW fast). All four wrappers return p-values in [0, 1] and n_surrogates = 2. A further test runs wcc() on a generate_pseudo_dyads() element.
+- 2026-10-05: T6 done: roxygen, _pkgdown.yml, NEWS.md, WORDLIST, DESIGN §2 and §6, the CLAUDE.md out-of-scope line, and the DESCRIPTION Description field. The vignette gets section 1.3 and a worked example (section 3). Its rendered output shows 9 of 10 task-only dyads significant against circular shifts and 2 of 10 against pseudo-dyads, and real dyads scoring higher than pseudo-dyads. The prose was written against that render.
+- 2026-10-05: found that roxygen markdown is off package-wide, so existing `[fn()]` links render as raw text. Used a per-block `@md` on the two new functions to make their @seealso links render (AC6). Package-wide fix recorded as a candidate row, not done here.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->

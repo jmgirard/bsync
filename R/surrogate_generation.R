@@ -213,6 +213,7 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #'   window_size = 96, lag_max = 10
 #' )
 #' }
+#' @md
 #' @export
 generate_surrogate_pseudo <- function(dyad_list,
                                       dyad,
@@ -351,6 +352,7 @@ generate_surrogate_pseudo <- function(dyad_list,
 #'     aggregate[[1]]
 #' }, numeric(1))
 #' summary(pseudo_z)
+#' @md
 #' @export
 generate_pseudo_dyads <- function(dyad_list,
                                   n_pairs = NULL,

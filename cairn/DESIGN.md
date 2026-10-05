@@ -49,9 +49,9 @@ method generalized and accelerated**, plus more:
 - **C++/Armadillo cores** for the inner loops, where SUSY/rMEA/crqa are pure R.
 - **Multiple estimators behind one surface contract** (§4) — WCC *and* windowed DTW *and* windowed
   Granger — not WCC alone, with a shared optima/surrogate/plot layer.
-- **Matched-null surrogate testing** for every estimator, with circular-shift and
-  phase-randomization generators (segment-shuffling and IAAFT planned, §6) rather than a single
-  shuffle scheme.
+- **Matched-null surrogate testing** for every estimator, with circular-shift,
+  phase-randomization, and pseudo-dyad generators (segment-shuffling and IAAFT planned, §6) rather
+  than a single shuffle scheme.
 - **Peak/valley optima + leadership asymmetry** as a shared, estimator-agnostic layer.
 - **An educational preprocessing + tuning layer** — PSD downsampling guidance, zero-phase smoothing,
   kinematics, gap diagnosis/imputation; `suggest_wcc_params()` (theory-based starting points) and
@@ -172,6 +172,10 @@ structure is preserved:
   data; can respect `lag_max` to guarantee decoupling).
 - `generate_surrogate_phase()` — Fourier phase randomization (preserve power spectrum; good for
   continuous/physiological data; Hermitian-symmetric reconstruction; even-length requirement).
+- `generate_surrogate_pseudo()` / `generate_pseudo_dyads()` — pseudo-dyads (M009): partners drawn
+  from *other* dyads in a `dyad_list`, cropped start-aligned. A different null from the two above:
+  it keeps task-locked co-movement and removes interaction-specific coupling. Convention and
+  departures (roles kept by default, no NA-row removal): `cairn/references/kleinbub2020.md`.
 
 Analysis wrappers (`wcc_surrogate()`, `wdtw_surrogate()`, `wgranger_surrogate()`):
 

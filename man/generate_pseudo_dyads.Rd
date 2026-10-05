@@ -8,43 +8,43 @@ generate_pseudo_dyads(dyad_list, n_pairs = NULL, keep_roles = TRUE)
 }
 \arguments{
 \item{dyad_list}{A list with one element per dyad. Each element is a data
-frame (first two columns are `x` and `y`) or a list (elements named `x`
-and `y`, else its first two elements), the form [autotune_wcc()] reads.}
+frame (first two columns are \code{x} and \code{y}) or a list (elements named \code{x}
+and \code{y}, else its first two elements), the form \code{\link[=autotune_wcc]{autotune_wcc()}} reads.}
 
-\item{n_pairs}{`NULL` (default) to return every pairing, or a single
+\item{n_pairs}{\code{NULL} (default) to return every pairing, or a single
 positive integer to draw that many without replacement.}
 
-\item{keep_roles}{Logical. `TRUE` (default) pairs the `x` of one dyad with
-the `y` of another. `FALSE` pairs any two series from different dyads.}
+\item{keep_roles}{Logical. \code{TRUE} (default) pairs the \code{x} of one dyad with
+the \code{y} of another. \code{FALSE} pairs any two series from different dyads.}
 }
 \value{
-A list of pseudo-dyads. Each element is `list(x = , y = )`, the
-  dyad form that [autotune_wcc()] and [generate_surrogate_pseudo()] read.
-  The attribute `"sources"` is a data frame with one row per pseudo-dyad
-  and columns `x_dyad`, `x_role`, `y_dyad`, and `y_role`.
+A list of pseudo-dyads. Each element is \code{list(x = , y = )}, the
+dyad form that \code{\link[=autotune_wcc]{autotune_wcc()}} and \code{\link[=generate_surrogate_pseudo]{generate_surrogate_pseudo()}} read.
+The attribute \code{"sources"} is a data frame with one row per pseudo-dyad
+and columns \code{x_dyad}, \code{x_role}, \code{y_dyad}, and \code{y_role}.
 }
 \description{
-Pairs series from *different* dyads to build pseudo-dyads: pairs of people
+Pairs series from \emph{different} dyads to build pseudo-dyads: pairs of people
 who never interacted. Computing the same synchrony statistic on the real
 dyads and on these pseudo-dyads gives the classic pseudo-synchrony
 comparison: real dyads should be more synchronous than pseudo-dyads
 recorded under the same task (Kleinbub & Ramseyer, 2020).
 }
 \details{
-**Pairings.** With `keep_roles = TRUE` (the default), each pseudo-dyad is
-the `x` of dyad i with the `y` of dyad j, for every i != j: N(N - 1)
+\strong{Pairings.} With \code{keep_roles = TRUE} (the default), each pseudo-dyad is
+the \code{x} of dyad i with the \code{y} of dyad j, for every i != j: N(N - 1)
 ordered pairs for N dyads. bsync's lead-lag sign depends on which series is
-`x`, so keeping roles keeps pseudo-dyads comparable to real ones. With
-`keep_roles = FALSE`, any two series from different dyads form a pair, in
+\code{x}, so keeping roles keeps pseudo-dyads comparable to real ones. With
+\code{keep_roles = FALSE}, any two series from different dyads form a pair, in
 either role: 2N(N - 1) unordered pairs. This is the pair set of rMEA's
-`shuffle()`, which mixes roles by default.
+\code{shuffle()}, which mixes roles by default.
 
-**Length handling.** Both series of a pseudo-dyad are cropped to the
-shorter one, start-aligned (the rMEA convention), so sample `t` of each
+\strong{Length handling.} Both series of a pseudo-dyad are cropped to the
+shorter one, start-aligned (the rMEA convention), so sample \code{t} of each
 series sits at the same task time. The number of cropped pseudo-dyads is
 announced. Missing values are passed through unchanged.
 
-**How many.** `n_pairs = NULL` (the default) returns every pairing in a
+\strong{How many.} \code{n_pairs = NULL} (the default) returns every pairing in a
 fixed order, with no random draw. An integer draws that many pairings
 without replacement. Asking for more than exist is an error.
 }
@@ -68,11 +68,11 @@ summary(pseudo_z)
 }
 \references{
 Kleinbub, J. R., & Ramseyer, F. T. (2020). rMEA: An R package
-  to assess nonverbal synchronization in motion energy analysis
-  time-series. *Psychotherapy Research*. \doi{10.1080/10503307.2020.1844334}
+to assess nonverbal synchronization in motion energy analysis
+time-series. \emph{Psychotherapy Research}. \doi{10.1080/10503307.2020.1844334}
 }
 \seealso{
-[generate_surrogate_pseudo()] for a per-dyad surrogate matrix;
-  [wcc()], [wdtw()], [wgranger()], and [wphase()] to compute the statistic
-  on each pseudo-dyad.
+\code{\link[=generate_surrogate_pseudo]{generate_surrogate_pseudo()}} for a per-dyad surrogate matrix;
+\code{\link[=wcc]{wcc()}}, \code{\link[=wdtw]{wdtw()}}, \code{\link[=wgranger]{wgranger()}}, and \code{\link[=wphase]{wphase()}} to compute the statistic
+on each pseudo-dyad.
 }

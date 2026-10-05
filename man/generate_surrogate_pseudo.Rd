@@ -13,33 +13,33 @@ generate_surrogate_pseudo(
 }
 \arguments{
 \item{dyad_list}{A list with one element per dyad. Each element is a data
-frame (first two columns are `x` and `y`) or a list (elements named `x`
-and `y`, else its first two elements), the form [autotune_wcc()] reads.}
+frame (first two columns are \code{x} and \code{y}) or a list (elements named \code{x}
+and \code{y}, else its first two elements), the form \code{\link[=autotune_wcc]{autotune_wcc()}} reads.}
 
-\item{dyad}{A single integer: the index of the target dyad in `dyad_list`.}
+\item{dyad}{A single integer: the index of the target dyad in \code{dyad_list}.}
 
-\item{n_surrogates}{`NULL` (default) to use every eligible partner, or a
+\item{n_surrogates}{\code{NULL} (default) to use every eligible partner, or a
 single positive integer to draw that many without replacement.}
 
-\item{keep_roles}{Logical. `TRUE` (default) draws partners only from the
-`y` series of other dyads. `FALSE` also allows their `x` series.}
+\item{keep_roles}{Logical. \code{TRUE} (default) draws partners only from the
+\code{y} series of other dyads. \code{FALSE} also allows their \code{x} series.}
 }
 \value{
-A numeric matrix with `length(y)` rows and one column per partner,
-  ready to pass as `y_surrogates` to [wcc_surrogate()] and the other
-  surrogate wrappers. The attribute `"sources"` is a data frame with
-  columns `dyad` and `role` giving each column's source.
+A numeric matrix with \code{length(y)} rows and one column per partner,
+ready to pass as \code{y_surrogates} to \code{\link[=wcc_surrogate]{wcc_surrogate()}} and the other
+surrogate wrappers. The attribute \code{"sources"} is a data frame with
+columns \code{dyad} and \code{role} giving each column's source.
 }
 \description{
 Builds a surrogate matrix for one target dyad whose columns are partner
-series taken from *other* dyads in the sample. Pairing the target's `x`
+series taken from \emph{other} dyads in the sample. Pairing the target's \code{x}
 with a partner who never interacted with that person gives a
 pseudo-synchrony null: it keeps any co-movement that the shared task or
 setting produces at the same moment, and removes the coupling that is
 specific to the real interaction.
 }
 \details{
-**Which null this tests.** Circular-shift and phase surrogates break all
+\strong{Which null this tests.} Circular-shift and phase surrogates break all
 time alignment, so a shared task structure (for example, both people move
 when a trial starts) can look like synchrony against them. A pseudo-dyad
 partner was recorded under the same task timeline but in a different
@@ -47,23 +47,23 @@ interaction, so the null keeps task-driven co-movement. A significant
 result then means more synchrony than people in the same setting show with
 a stranger (Kleinbub & Ramseyer, 2020).
 
-**Length handling.** Partners are cropped *start-aligned*: each column is
-the first `length(y)` samples of its source, so sample `t` of the partner
-sits at the same task time as sample `t` of the target (the rMEA
-convention). Partners shorter than the target's `y` cannot fill the matrix
+\strong{Length handling.} Partners are cropped \emph{start-aligned}: each column is
+the first \code{length(y)} samples of its source, so sample \code{t} of the partner
+sits at the same task time as sample \code{t} of the target (the rMEA
+convention). Partners shorter than the target's \code{y} cannot fill the matrix
 and are excluded with a warning. How many longer partners were cropped is
 announced. Missing values are passed through unchanged.
 
-**Roles.** With `keep_roles = TRUE` (the default) every partner is the `y`
-of another dyad. bsync's lead-lag sign depends on which series is `x`, so
+\strong{Roles.} With \code{keep_roles = TRUE} (the default) every partner is the \code{y}
+of another dyad. bsync's lead-lag sign depends on which series is \code{x}, so
 keeping roles keeps the null comparable to the observed dyad. This differs
-from rMEA's `shuffle()`, which mixes roles by default. Use
-`keep_roles = FALSE` when partners are interchangeable: the `x` and the
-`y` of every other dyad are then candidates, which doubles the pool.
+from rMEA's \code{shuffle()}, which mixes roles by default. Use
+\code{keep_roles = FALSE} when partners are interchangeable: the \code{x} and the
+\code{y} of every other dyad are then candidates, which doubles the pool.
 
-**How many surrogates.** A sample of N dyads offers at most N - 1
-partners per target (2(N - 1) with `keep_roles = FALSE`), so the p-value
-has a resolution of 1 / `ncol`. `n_surrogates = NULL` (the default) uses
+\strong{How many surrogates.} A sample of N dyads offers at most N - 1
+partners per target (2(N - 1) with \code{keep_roles = FALSE}), so the p-value
+has a resolution of 1 / \code{ncol}. \code{n_surrogates = NULL} (the default) uses
 every eligible partner, with no random draw. An integer draws that many
 partners without replacement. Asking for more partners than exist is an
 error, because repeated partners add no information to the null.
@@ -89,12 +89,12 @@ wcc_surrogate(
 }
 \references{
 Kleinbub, J. R., & Ramseyer, F. T. (2020). rMEA: An R package
-  to assess nonverbal synchronization in motion energy analysis
-  time-series. *Psychotherapy Research*. \doi{10.1080/10503307.2020.1844334}
+to assess nonverbal synchronization in motion energy analysis
+time-series. \emph{Psychotherapy Research}. \doi{10.1080/10503307.2020.1844334}
 }
 \seealso{
-[generate_pseudo_dyads()] for the sample-wide set of
-  pseudo-dyads; [generate_surrogate_circular()] and
-  [generate_surrogate_phase()] for within-dyad nulls; [wcc_surrogate()],
-  [wdtw_surrogate()], [wgranger_surrogate()], [wphase_surrogate()].
+\code{\link[=generate_pseudo_dyads]{generate_pseudo_dyads()}} for the sample-wide set of
+pseudo-dyads; \code{\link[=generate_surrogate_circular]{generate_surrogate_circular()}} and
+\code{\link[=generate_surrogate_phase]{generate_surrogate_phase()}} for within-dyad nulls; \code{\link[=wcc_surrogate]{wcc_surrogate()}},
+\code{\link[=wdtw_surrogate]{wdtw_surrogate()}}, \code{\link[=wgranger_surrogate]{wgranger_surrogate()}}, \code{\link[=wphase_surrogate]{wphase_surrogate()}}.
 }
