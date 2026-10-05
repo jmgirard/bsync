@@ -98,7 +98,7 @@ build dyad lists from `sim_dyad` columns.
       and `lag_max` valid for that length. It asserts that `p_value` (both
       `p_value_xy` and `p_value_yx` for Granger) is in [0, 1]. It asserts that
       `n_surrogates` equals the column count of the matrix.
-- [ ] AC6: The roxygen of both functions states the rationale for each
+- [x] AC6: The roxygen of both functions states the rationale for each
       default, including why `keep_roles` defaults differ from rMEA. It has
       runnable `@examples` and `@seealso` links to the surrogate wrappers and
       the existing generators. Both functions are in the surrogate section of
@@ -191,3 +191,7 @@ Pass 1 (2026-10-05, branch head bb1adf9). `testthat::test_file("tests/testthat/t
 - AC6 evidence: FAIL. `man/generate_pseudo_dyads.Rd` links to autotune_wcc, generate_surrogate_pseudo, wcc, wdtw, wgranger, and wphase. It does not link to the surrogate wrappers (`*_surrogate()`) or the existing generators (`generate_surrogate_circular()`, `generate_surrogate_phase()`), as the criterion requires for both functions. The other items pass: the rationale for every default including the keep_roles departure from rMEA (both Rd files), `_pkgdown.yml` lines 62–63, NEWS.md lines 22 and 30, and vignette section 1.3 "Which null it tests" with the Kleinbub & Ramseyer (2020) citation and the section 3 worked example.
 - AC7 evidence: at bb1adf9, `devtools::document()` leaves man/ and NAMESPACE unchanged. `devtools::check()` reports 0 errors, 0 warnings, 0 notes, and it runs the full test suite, the examples, and the vignette. Pass.
 - Consistency gate: `cairn_validate.py` all checks passed. `pkgdown::check_pkgdown()` no problems. README.Rmd and README.md are unchanged on the branch. No new top-level files. The NEWS.md entry is present with no milestone numbers. Principle change: none, so `cairn_impact` is skipped.
+
+Pass 2 (2026-10-05, branch head 6247c38, after review return 1). `test-surrogate-pseudo.R`: 20 tests, 357 expectations, all passing. The only code change since pass 1 is roxygen @seealso text, so the AC1–AC5 evidence stands, re-run at this head.
+- AC6 evidence (pass 2): `man/generate_pseudo_dyads.Rd` now links wcc_surrogate, wdtw_surrogate, wgranger_surrogate, wphase_surrogate, generate_surrogate_circular, and generate_surrogate_phase (also autotune_wcc, generate_surrogate_pseudo, wcc, wdtw, wgranger, wphase). `man/generate_surrogate_pseudo.Rd` links the same wrappers and generators. The other AC6 items are unchanged from pass 1. Pass.
+- spawned: diff-bug, blame-history, prior-review
