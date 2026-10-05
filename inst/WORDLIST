@@ -3,6 +3,7 @@ autocorrelated
 autotune
 Biomechanics
 Boker
+bsync's
 Butterworth
 butterworth
 CMD
@@ -39,6 +40,7 @@ gsignal
 hilbert
 interpretability
 iqr
+Kleinbub
 Lachaux
 LAI
 lai
@@ -70,6 +72,7 @@ PSD
 Ramseyer
 README
 rMEA
+rMEA's
 Rotondo
 Runnable
 runnable

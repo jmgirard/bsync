@@ -148,8 +148,9 @@ snapshots; roxygen2 for every exported function (document the *why* of each defa
 - **First CRAN release** (`v0.1.0`) — explicitly its own milestone **M7**, after M6; not near-term.
 - **Group-level / multivariate modeling** — deferred to M11 (`mvSUSY` is the multivariate reference).
 - **tidy/glance/as_tibble methods** — built in **M5** (done).
-- **IAAFT / segment-shuffling / pseudo-dyad surrogates** — resolved to add (cairn/DESIGN.md §6/§14),
-  scheduled **M12**; the pseudo-dyad (between-dyad rMEA) generator depends on M11's `dyad_list`.
+- **IAAFT / segment-shuffling surrogates** — resolved to add (cairn/DESIGN.md §6/§14); a
+  candidate row in `cairn/ROADMAP.md`. The pseudo-dyad (between-dyad rMEA) generators shipped
+  in M009 on the existing `dyad_list` input.
 - **A unified `bsync_ts` preprocessing object** — logged in cairn/DESIGN.md §14; specify before building.
 - **OpenMP** — not adopted until the M2 decision; no `#pragma omp` ships before then.
 

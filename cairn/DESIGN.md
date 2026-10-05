@@ -49,9 +49,9 @@ method generalized and accelerated**, plus more:
 - **C++/Armadillo cores** for the inner loops, where SUSY/rMEA/crqa are pure R.
 - **Multiple estimators behind one surface contract** (§4) — WCC *and* windowed DTW *and* windowed
   Granger — not WCC alone, with a shared optima/surrogate/plot layer.
-- **Matched-null surrogate testing** for every estimator, with circular-shift and
-  phase-randomization generators (segment-shuffling and IAAFT planned, §6) rather than a single
-  shuffle scheme.
+- **Matched-null surrogate testing** for every estimator, with circular-shift,
+  phase-randomization, and pseudo-dyad generators (segment-shuffling and IAAFT planned, §6) rather
+  than a single shuffle scheme.
 - **Peak/valley optima + leadership asymmetry** as a shared, estimator-agnostic layer.
 - **An educational preprocessing + tuning layer** — PSD downsampling guidance, zero-phase smoothing,
   kinematics, gap diagnosis/imputation; `suggest_wcc_params()` (theory-based starting points) and
@@ -165,15 +165,21 @@ never silently change the basis. Each pairs a *diagnostic* with an *action*.
 
 ## 6. Surrogate significance testing (the inferential spine)
 
-Generators produce a null in which genuine cross-coupling is destroyed while each series' own
-structure is preserved:
+Generators produce a null in which genuine cross-coupling is destroyed. The within-dyad
+generators preserve each series' own structure. The pseudo-dyad generators replace the partner
+with a real series from another dyad (corrected M009):
 
 - `generate_surrogate_circular()` — circular shifts (preserve autocorrelation; good for behavioral
   data; can respect `lag_max` to guarantee decoupling).
 - `generate_surrogate_phase()` — Fourier phase randomization (preserve power spectrum; good for
   continuous/physiological data; Hermitian-symmetric reconstruction; even-length requirement).
+- `generate_surrogate_pseudo()` / `generate_pseudo_dyads()` — pseudo-dyads (M009): partners drawn
+  from *other* dyads in a `dyad_list`, cropped start-aligned. A different null from the two above:
+  it keeps task-locked co-movement and removes interaction-specific coupling. Convention and
+  departures (roles kept by default, no NA-row removal): `cairn/references/kleinbub2020.md`.
 
-Analysis wrappers (`wcc_surrogate()`, `wdtw_surrogate()`, `wgranger_surrogate()`):
+Analysis wrappers (`wcc_surrogate()`, `wdtw_surrogate()`, `wgranger_surrogate()`,
+`wphase_surrogate()`; corrected M009):
 
 1. Compute the **observed aggregate statistic**.
 2. Recompute that **same statistic** on each surrogate column (parallelized via `future.apply`,
@@ -333,8 +339,9 @@ reproducible; result objects stay light; supplied `time` maps windows to real ti
    + mean\|Z\| path is the SUSY method generalized and C++-accelerated.
 7. **tidy / glance / as_tibble** → **will be added** (§7), built in M5 from the shared framework
    (`generics` → Imports at that point).
-8. **IAAFT surrogates** → **will be added** (§6, roadmap M12); segment-shuffling surrogates a
-   candidate alongside.
+8. **IAAFT surrogates** → **will be added** (§6; a ROADMAP candidate row, corrected M009 —
+   the pre-cairn "M12" slot no longer exists); segment-shuffling surrogates a candidate
+   alongside. Pseudo-dyad generators shipped in M009.
 
 9. **OpenMP** → **removed** (M2). The prefix-sum algorithm eliminates the inner w_max loop that
    motivated OpenMP; the serial implementation already achieves 5–25× speedup over the baseline.

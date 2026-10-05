@@ -8,7 +8,7 @@ _Last hygiene check: 2026-10-05 (no changes since 2026-08-29, validate green, no
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M009 | Pseudo-dyad surrogate generators | planned | — | normal | milestones/M009-pseudo-dyad-generators.md |
+| M009 | Pseudo-dyad surrogate generators | review | — | normal | milestones/M009-pseudo-dyad-generators.md |
 | M008 | Phase synchrony estimator (wphase) | done | — | normal | milestones/archive/M008-phase-synchrony.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 5 most recent
      terminal (done or dropped) rows — older ones live in milestones/archive/ + git -->
@@ -19,6 +19,10 @@ _Last hygiene check: 2026-10-05 (no changes since 2026-08-29, validate green, no
 - Selectable wphase aggregate statistic (the M4 wcc pattern: `statistic =` argument, null matched to observed) — added 2026-08-29 — M008 Out
 - mne_connectivity PLV pipeline pin: M008's frozen pin uses MNE's analytic signal + the Lachaux formula, not mne_connectivity's own PLV pipeline (different spectral estimation; unmatchable at 1e-6); a tolerance-banded comparison against the toolbox's shipped PLV would close the convention gap the pin leaves. Promote when a definitional question about the PLV convention actually arises — added 2026-08-29 — M008 review F3
 - pick_optima local search with lag_increment > 1: pick_optima_cpp hard-errors unless each window carries exactly 2*lag_max+1 lags, so `search_method = "local"` fails for any estimator surface built with lag_increment > 1 (pre-existing, all estimators; surfaced by M008's whitelist extension). Promote when a user hits it or the next optima-touching milestone — added 2026-08-29 — M008 review F13
+- Strict dyad extraction in `.extract_xy()`: it reads `dyad$x` / `dyad$y`, which partial-match names (`list(xx =, yy =)`), and falls back to position when only one of `x`/`y` is named (`list(y = a, a2 = b)` swaps roles); its errors also do not name the dyad index. Shared by `autotune_wcc()` and the pseudo-dyad generators — added 2026-10-05 — M009 review (diff-bug #3, #10)
+- Carry `dyad_list` names into the pseudo-dyad `"sources"` attribute and element names, so dyad IDs survive (today only integer positions are recorded) — added 2026-10-05 — M009 review (diff-bug #7)
+- Add-one surrogate p-value, `(b + 1) / (n + 1)`, in the `*_surrogate()` wrappers: today `p = b / n` can be 0, which with few surrogates (pseudo-dyads give N - 1) overstates evidence; changes every wrapper's output, so it needs approval as a default change — added 2026-10-05 — M009 review (diff-bug #1)
+- Enable roxygen markdown package-wide: DESCRIPTION sets no roxygen markdown option, so `[fn()]` links, `**bold**`, and backticks in existing roxygen render as raw text in `man/*.Rd`. M009's two new functions use a per-block `@md` instead. Turning it on regenerates every Rd file, so check the output — added 2026-10-05 — M009 T6
 - Wavelet coherence estimator: cross-wavelet / wavelet coherence for nonstationary time–frequency lead–lag across scales — added 2026-08-29 — legacy DESIGN §15 M9
 - CRQA / MEA conventions: cross-recurrence quantification analysis and MEA-style windowed cross-correlation conveniences — added 2026-08-29 — legacy DESIGN §15 M10
 - Group-level / multivariate workflow: tidy multi-dyad pipeline + aggregation / mixed-model summaries; `mvSUSY` is the >2-series reference — added 2026-08-29 — legacy DESIGN §15 M11
