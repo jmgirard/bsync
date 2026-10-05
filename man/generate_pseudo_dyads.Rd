@@ -37,7 +37,9 @@ ordered pairs for N dyads. bsync's lead-lag sign depends on which series is
 \code{x}, so keeping roles keeps pseudo-dyads comparable to real ones. With
 \code{keep_roles = FALSE}, any two series from different dyads form a pair, in
 either role: 2N(N - 1) unordered pairs. This is the pair set of rMEA's
-\code{shuffle()}, which mixes roles by default.
+\code{shuffle()}, which mixes roles by default, with the same assignment of
+series to \code{x} and \code{y}: a pair of an \code{x} series and a \code{y} series keeps the
+\code{x} series as \code{x}.
 
 \strong{Length handling.} Both series of a pseudo-dyad are cropped to the
 shorter one, start-aligned (the rMEA convention), so sample \code{t} of each

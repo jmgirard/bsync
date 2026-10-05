@@ -13,16 +13,21 @@ library(testthat)
 #   "rev"     list(y = , x = ) -- names, not position, decide the roles
 #   "unnamed" list(<x>, <y>)
 make_dyads <- function(lengths, forms = rep("named", length(lengths))) {
-  Map(function(n, form) {
-    x <- stats::rnorm(n)
-    y <- stats::rnorm(n)
-    switch(form,
-      df = data.frame(x = x, y = y),
-      named = list(x = x, y = y),
-      rev = list(y = y, x = x),
-      unnamed = list(x, y)
-    )
-  }, lengths, forms)
+  Map(
+    function(n, form) {
+      x <- stats::rnorm(n)
+      y <- stats::rnorm(n)
+      switch(
+        form,
+        df = data.frame(x = x, y = y),
+        named = list(x = x, y = y),
+        rev = list(y = y, x = x),
+        unnamed = list(x, y)
+      )
+    },
+    lengths,
+    forms
+  )
 }
 
 # Every candidate source series as (dyad, role, values).
@@ -47,20 +52,27 @@ source_pool <- function(dyad_list) {
 # length(col) samples equal the column exactly.
 identify_source <- function(col, pool) {
   n <- length(col)
-  hits <- Filter(function(s) {
-    length(s$values) >= n && identical(as.double(s$values[seq_len(n)]), col)
-  }, pool)
+  hits <- Filter(
+    function(s) {
+      length(s$values) >= n && identical(as.double(s$values[seq_len(n)]), col)
+    },
+    pool
+  )
   vapply(hits, function(s) paste0(s$dyad, s$role), character(1))
 }
 
 # Identify every column; each must have exactly one source.
 column_sources <- function(mat, dyad_list) {
   pool <- source_pool(dyad_list)
-  vapply(seq_len(ncol(mat)), function(j) {
-    src <- identify_source(mat[, j], pool)
-    expect_length(src, 1)
-    src[1]
-  }, character(1))
+  vapply(
+    seq_len(ncol(mat)),
+    function(j) {
+      src <- identify_source(mat[, j], pool)
+      expect_length(src, 1)
+      src[1]
+    },
+    character(1)
+  )
 }
 
 target_y <- function(dyad_list, dyad) source_pool(dyad_list)[[2 * dyad]]$values
@@ -136,7 +148,12 @@ test_that("integer n_surrogates samples distinct eligible partners", {
   set.seed(105)
   dl <- make_dyads(lengths = c(40, 40, 45, 50, 40, 60, 41))
   mat <- suppressMessages(suppressWarnings(
-    generate_surrogate_pseudo(dl, dyad = 3, n_surrogates = 2, keep_roles = FALSE)
+    generate_surrogate_pseudo(
+      dl,
+      dyad = 3,
+      n_surrogates = 2,
+      keep_roles = FALSE
+    )
   ))
   expect_equal(dim(mat), c(45L, 2L))
   src <- column_sources(mat, dl)
@@ -283,7 +300,10 @@ recorded_keys <- function(pd, keep_roles) {
   if (keep_roles) {
     paste0(xl, "|", yl)
   } else {
-    mapply(function(a, b) paste(sort(c(a, b)), collapse = "|"), xl, yl,
+    mapply(
+      function(a, b) paste(sort(c(a, b)), collapse = "|"),
+      xl,
+      yl,
       USE.NAMES = FALSE
     )
   }
@@ -417,17 +437,36 @@ test_that("a pseudo-dyad matrix works in all four surrogate wrappers", {
   x <- dl[[3]]$x
   y <- dl[[3]]$y
 
-  res_wcc <- wcc_surrogate(x, y, y_pseudo,
-    window_size = 80, lag_max = 8, window_increment = 20
+  res_wcc <- wcc_surrogate(
+    x,
+    y,
+    y_pseudo,
+    window_size = 80,
+    lag_max = 8,
+    window_increment = 20
   )
-  res_wdtw <- wdtw_surrogate(x, y, y_pseudo,
-    window_size = 80, lag_max = 8, window_increment = 20
+  res_wdtw <- wdtw_surrogate(
+    x,
+    y,
+    y_pseudo,
+    window_size = 80,
+    lag_max = 8,
+    window_increment = 20
   )
-  res_wgr <- wgranger_surrogate(x, y, y_pseudo,
-    window_size = 80, window_increment = 20
+  res_wgr <- wgranger_surrogate(
+    x,
+    y,
+    y_pseudo,
+    window_size = 80,
+    window_increment = 20
   )
-  res_wph <- wphase_surrogate(x, y, y_pseudo,
-    window_size = 80, lag_max = 8, window_increment = 20
+  res_wph <- wphase_surrogate(
+    x,
+    y,
+    y_pseudo,
+    window_size = 80,
+    lag_max = 8,
+    window_increment = 20
   )
 
   in_unit <- function(p) length(p) == 1 && !is.na(p) && p >= 0 && p <= 1
@@ -446,4 +485,31 @@ test_that("pseudo-dyad list elements work as estimator input", {
   pd <- suppressMessages(generate_pseudo_dyads(dl))
   res <- wcc(pd[[1]]$x, pd[[1]]$y, window_size = 30, lag_max = 5)
   expect_s3_class(res, "wcc_res")
+})
+
+# =========================================================================
+# --- Regressions from the claim audit ------------------------------------
+# =========================================================================
+
+test_that("the crop message counts only the partners returned", {
+  set.seed(216)
+  # Target length 10; three longer partners; draw one of them.
+  dl <- make_dyads(lengths = c(10, 20, 20, 20))
+  expect_message(
+    mat <- generate_surrogate_pseudo(dl, dyad = 1, n_surrogates = 1),
+    "Cropped 1 partner series"
+  )
+  expect_equal(ncol(mat), 1)
+})
+
+test_that("keep_roles = FALSE keeps the x series as x in mixed-role pairs", {
+  set.seed(217)
+  dl <- make_dyads(lengths = rep(20, 4))
+  s <- attr(generate_pseudo_dyads(dl, keep_roles = FALSE), "sources")
+  mixed <- s$x_role != s$y_role
+  expect_true(any(mixed))
+  expect_true(all(s$x_role[mixed] == "x"))
+  # Same-role pairs exist in both roles (rMEA's role-mixing pair set).
+  expect_true(any(s$x_role == "x" & s$y_role == "x"))
+  expect_true(any(s$x_role == "y" & s$y_role == "y"))
 })

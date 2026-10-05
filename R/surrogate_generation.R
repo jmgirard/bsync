@@ -215,10 +215,12 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #' }
 #' @md
 #' @export
-generate_surrogate_pseudo <- function(dyad_list,
-                                      dyad,
-                                      n_surrogates = NULL,
-                                      keep_roles = TRUE) {
+generate_surrogate_pseudo <- function(
+  dyad_list,
+  dyad,
+  n_surrogates = NULL,
+  keep_roles = TRUE
+) {
   dyads <- .pseudo_extract_dyads(dyad_list)
   if (!.is_count(dyad) || dyad > length(dyads)) {
     cli::cli_abort(
@@ -239,11 +241,14 @@ generate_surrogate_pseudo <- function(dyad_list,
   # Candidate partner series from every other dyad.
   roles <- if (keep_roles) "y" else c("x", "y")
   pool <- expand.grid(
-    role = roles, dyad = setdiff(seq_along(dyads), dyad),
+    role = roles,
+    dyad = setdiff(seq_along(dyads), dyad),
     stringsAsFactors = FALSE
   )[, c("dyad", "role")]
   pool_len <- mapply(
-    function(d, r) length(dyads[[d]][[r]]), pool$dyad, pool$role
+    function(d, r) length(dyads[[d]][[r]]),
+    pool$dyad,
+    pool$role
   )
 
   eligible <- pool_len >= n_y
@@ -261,7 +266,7 @@ generate_surrogate_pseudo <- function(dyad_list,
     )
   }
   pool <- pool[eligible, , drop = FALSE]
-  n_cropped <- sum(pool_len[eligible] > n_y)
+  pool_len <- pool_len[eligible]
 
   n_eligible <- nrow(pool)
   if (is.null(n_surrogates)) {
@@ -277,6 +282,8 @@ generate_surrogate_pseudo <- function(dyad_list,
   }
   pool <- pool[pick, , drop = FALSE]
 
+  # Count crops among the partners actually returned.
+  n_cropped <- sum(pool_len[pick] > n_y)
   if (n_cropped > 0) {
     cli::cli_inform(
       "Cropped {n_cropped} partner series to their first {n_y} samples \\
@@ -309,7 +316,9 @@ generate_surrogate_pseudo <- function(dyad_list,
 #' `x`, so keeping roles keeps pseudo-dyads comparable to real ones. With
 #' `keep_roles = FALSE`, any two series from different dyads form a pair, in
 #' either role: 2N(N - 1) unordered pairs. This is the pair set of rMEA's
-#' `shuffle()`, which mixes roles by default.
+#' `shuffle()`, which mixes roles by default, with the same assignment of
+#' series to `x` and `y`: a pair of an `x` series and a `y` series keeps the
+#' `x` series as `x`.
 #'
 #' **Length handling.** Both series of a pseudo-dyad are cropped to the
 #' shorter one, start-aligned (the rMEA convention), so sample `t` of each
@@ -354,9 +363,11 @@ generate_surrogate_pseudo <- function(dyad_list,
 #' summary(pseudo_z)
 #' @md
 #' @export
-generate_pseudo_dyads <- function(dyad_list,
-                                  n_pairs = NULL,
-                                  keep_roles = TRUE) {
+generate_pseudo_dyads <- function(
+  dyad_list,
+  n_pairs = NULL,
+  keep_roles = TRUE
+) {
   dyads <- .pseudo_extract_dyads(dyad_list)
   if (!is.null(n_pairs) && !.is_count(n_pairs)) {
     cli::cli_abort("{.arg n_pairs} must be NULL or a single positive integer.")
@@ -369,20 +380,26 @@ generate_pseudo_dyads <- function(dyad_list,
     g <- expand.grid(y_dyad = seq_len(n), x_dyad = seq_len(n))
     g <- g[g$x_dyad != g$y_dyad, ]
     pairs <- data.frame(
-      x_dyad = g$x_dyad, x_role = "x", y_dyad = g$y_dyad, y_role = "y",
+      x_dyad = g$x_dyad,
+      x_role = "x",
+      y_dyad = g$y_dyad,
+      y_role = "y",
       stringsAsFactors = FALSE
     )
   } else {
-    # Unordered pairs of the 2N series (1x, 1y, 2x, 2y, ...) from different
-    # dyads; the earlier series in that order becomes x.
-    lab_dyad <- rep(seq_len(n), each = 2)
-    lab_role <- rep(c("x", "y"), times = n)
+    # Unordered pairs of the 2N series from different dyads, pooled as
+    # rMEA's shuffle() does (1x, ..., Nx, 1y, ..., Ny); the earlier series
+    # in that order becomes x, so a mixed-role pair keeps an x series as x.
+    lab_dyad <- rep(seq_len(n), times = 2)
+    lab_role <- rep(c("x", "y"), each = n)
     ab <- utils::combn(2 * n, 2)
     keep <- lab_dyad[ab[1, ]] != lab_dyad[ab[2, ]]
     ab <- ab[, keep, drop = FALSE]
     pairs <- data.frame(
-      x_dyad = lab_dyad[ab[1, ]], x_role = lab_role[ab[1, ]],
-      y_dyad = lab_dyad[ab[2, ]], y_role = lab_role[ab[2, ]],
+      x_dyad = lab_dyad[ab[1, ]],
+      x_role = lab_role[ab[1, ]],
+      y_dyad = lab_dyad[ab[2, ]],
+      y_role = lab_role[ab[2, ]],
       stringsAsFactors = FALSE
     )
   }
@@ -404,7 +421,9 @@ generate_pseudo_dyads <- function(dyad_list,
     sx <- dyads[[pairs$x_dyad[k]]][[pairs$x_role[k]]]
     sy <- dyads[[pairs$y_dyad[k]]][[pairs$y_role[k]]]
     m <- min(length(sx), length(sy))
-    if (length(sx) != length(sy)) n_cropped <<- n_cropped + 1L
+    if (length(sx) != length(sy)) {
+      n_cropped <<- n_cropped + 1L
+    }
     list(x = sx[seq_len(m)], y = sy[seq_len(m)])
   })
   if (n_cropped > 0) {
@@ -422,8 +441,9 @@ generate_pseudo_dyads <- function(dyad_list,
 
 # Extract and type-check every dyad in a dyad_list (>= 2 dyads).
 .pseudo_extract_dyads <- function(dyad_list) {
-  if (!is.list(dyad_list) || is.data.frame(dyad_list) ||
-    length(dyad_list) < 2) {
+  if (
+    !is.list(dyad_list) || is.data.frame(dyad_list) || length(dyad_list) < 2
+  ) {
     cli::cli_abort(
       "{.arg dyad_list} must contain at least two dyads (a list with one \\
       element per dyad)."
