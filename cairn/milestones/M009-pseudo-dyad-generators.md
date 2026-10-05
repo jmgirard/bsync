@@ -128,11 +128,11 @@ build dyad lists from `sim_dyad` columns.
       (CRAN source `R/rMEA_rand.R`, cited as Kleinbub & Ramseyer 2020) in
       `cairn/references/` with its `INDEX.md` line. Record the pairing,
       role, sampling, and cropping rules, and where bsync departs from them.
-- [ ] T2: Tests first for `generate_surrogate_pseudo()` in
+- [x] T2: Tests first for `generate_surrogate_pseudo()` in
       `tests/testthat/test-surrogate-pseudo.R` (AC1, AC2, AC4). Use pairwise
       distinct seeded series. Assert cli output with `expect_message()` or
       `expect_warning()` (LESSONS 2026-08-29).
-- [ ] T3: Implement `generate_surrogate_pseudo()` in
+- [x] T3: Implement `generate_surrogate_pseudo()` in
       `R/surrogate_generation.R`. Reuse `.extract_xy()` and move it to a
       shared helper file if both new functions need it.
 - [ ] T4: Tests first, then implement `generate_pseudo_dyads()` (AC3, AC4).
@@ -161,6 +161,8 @@ build dyad lists from `sim_dyad` columns.
 - 2026-10-05: no new example dataset: examples and the AC5 fixture build dyad lists from `sim_dyad` columns. The vignette simulates a small dyad list inline.
 - 2026-10-05: branch m009-pseudo-dyad-generators cut from main at 39ca324; status in-progress.
 - 2026-10-05: T1 done: cairn/references/kleinbub2020.md from the rMEA 1.2.2 source (shuffle(), unequalCbind()). It confirms the start-aligned crop to the shorter series and the N(N-1) and 2N(N-1) pair counts. Departures recorded there: keep_roles default, no na.omit().
+- 2026-10-05: T2+T3 done: generate_surrogate_pseudo() in R/surrogate_generation.R with tests in test-surrogate-pseudo.R (11 tests). Full suite: 0 failures. Planted defects went red: end-aligned crop (3 tests fail), target's own series in the pool (8 tests fail).
+- 2026-10-05: implementation choices: .extract_xy() stays in R/autotune.R (package-internal, reachable from both files). Added a numeric-series abort and a keep_roles TRUE/FALSE abort beyond AC2's list. The matrix also carries a "sources" attribute (dyad, role) matching AC3's form. NULL n_surrogates keeps pool order and draws no random numbers.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
