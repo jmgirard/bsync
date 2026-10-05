@@ -341,9 +341,12 @@ generate_surrogate_pseudo <- function(
 #' @references Kleinbub, J. R., & Ramseyer, F. T. (2020). rMEA: An R package
 #'   to assess nonverbal synchronization in motion energy analysis
 #'   time-series. *Psychotherapy Research*. \doi{10.1080/10503307.2020.1844334}
-#' @seealso [generate_surrogate_pseudo()] for a per-dyad surrogate matrix;
-#'   [wcc()], [wdtw()], [wgranger()], and [wphase()] to compute the statistic
-#'   on each pseudo-dyad.
+#' @seealso [generate_surrogate_pseudo()] for a per-dyad surrogate matrix,
+#'   which [wcc_surrogate()], [wdtw_surrogate()], [wgranger_surrogate()], and
+#'   [wphase_surrogate()] accept; [generate_surrogate_circular()] and
+#'   [generate_surrogate_phase()] for within-dyad nulls; [wcc()], [wdtw()],
+#'   [wgranger()], and [wphase()] to compute the statistic on each
+#'   pseudo-dyad.
 #' @examples
 #' # Three "dyads" built from sim_dyad's axes (a stand-in for a real sample)
 #' dyads <- list(

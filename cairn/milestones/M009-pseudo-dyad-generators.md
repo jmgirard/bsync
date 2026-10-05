@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M009: Pseudo-dyad surrogate generators
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -118,7 +118,7 @@ build dyad lists from `sim_dyad` columns.
 - AC3 → T4
 - AC4 → T2, T3, T4
 - AC5 → T5
-- AC6 → T1, T6
+- AC6 → T1, T6, T8
 - AC7 → T7
 
 ## Tasks
@@ -145,6 +145,8 @@ build dyad lists from `sim_dyad` columns.
       shipped.
 - [x] T7: Gate. Run `devtools::document()`, `devtools::test()`,
       `devtools::check()`, `air format`, and `lintr::lint_package()`.
+- [x] T8: Review return 1. Add @seealso links from `generate_pseudo_dyads()`
+      to the four surrogate wrappers and the existing generators (AC6).
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
@@ -171,6 +173,7 @@ build dyad lists from `sim_dyad` columns.
 - 2026-10-05: claim audit: 66 claims read, 3 corrected — R/surrogate_generation.R, vignettes/surrogate-testing.Rmd. Crop message counted partners before the n_surrogates draw (code fixed). Vignette implied both functions crop to the shorter series (wording fixed). keep_roles = FALSE gave x = 1y for a (1y, 2x) pair where rMEA gives x = 2x (pool reordered to rMEA's 1x..Nx, 1y..Ny, roxygen states it). Two regression tests added; both fail on the pre-fix code.
 - 2026-10-05: T7 done on the final code (301e560): check() 0 errors, 0 warnings, 0 notes; document() no diff. Status set to review.
 - 2026-10-05: review return 1: AC6 fails as written. The `generate_pseudo_dyads()` roxygen @seealso has no links to the surrogate wrappers (`wcc_surrogate()`, `wdtw_surrogate()`, `wgranger_surrogate()`, `wphase_surrogate()`) or the existing generators (`generate_surrogate_circular()`, `generate_surrogate_phase()`). AC1–AC5 and AC7 passed with evidence. Status back to in-progress.
+- 2026-10-05: T8 added for review return 1 (minor amendment; Coverage AC6 → T1, T6, T8). Done: generate_pseudo_dyads() @seealso now links the four `*_surrogate()` wrappers and both existing generators (12 links in the Rd). Its one new claim, that the wrappers accept the per-dyad matrix, is the behavior test 17 asserts. Full suite: 1529 expectations, 0 failures. Status set to review.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
