@@ -31,6 +31,30 @@
   now accept the phase surface (`wphase_res` / `wphase_optima`),
   searching for peak phase locking.
 
+### Pseudo-dyad surrogates
+
+- **[`generate_surrogate_pseudo()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_pseudo.md)**
+  — new surrogate generator for one dyad in a sample of dyads. Its
+  columns are partner series taken from the other dyads (pseudo-dyads),
+  cropped start-aligned to the target’s length, ready for
+  [`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md),
+  [`wdtw_surrogate()`](https://jmgirard.github.io/bsync/reference/wdtw_surrogate.md),
+  [`wgranger_surrogate()`](https://jmgirard.github.io/bsync/reference/wgranger_surrogate.md),
+  and
+  [`wphase_surrogate()`](https://jmgirard.github.io/bsync/reference/wphase_surrogate.md).
+  This null keeps co-movement that a shared task produces and removes
+  coupling specific to the real interaction (the rMEA pseudo-synchrony
+  approach; Kleinbub & Ramseyer, 2020). Partners shorter than the target
+  are excluded with a warning.
+- **[`generate_pseudo_dyads()`](https://jmgirard.github.io/bsync/reference/generate_pseudo_dyads.md)**
+  — builds the sample-wide set of pseudo-dyads (every pairing of series
+  from different dyads, or a random subset), each in the `list(x, y)`
+  form, for comparing real dyads to pseudo-dyads. Both generators keep
+  partner roles by default (`keep_roles = TRUE`), because the lead-lag
+  sign depends on which series is `x`.
+- The surrogate-testing vignette has a new pseudo-dyad section with a
+  worked example.
+
 ## bsync 0.1.0
 
 First public release.

@@ -82,14 +82,14 @@ res
 #> 
 #> Permutations: 100
 #> Observed Mean F-statistic: 1.0923
-#> Average Null F-statistic: 1.0091
+#> Average Null F-statistic: 0.9951
 #> Empirical p-value: 0.33
 #> ! Predictive power (x -> y) is not significantly different from chance.
 #> 
 #> ── Direction: y -> x ──
 #> 
 #> Observed Mean F-statistic: 1.8485
-#> Average Null F-statistic: 1.0021
+#> Average Null F-statistic: 1.0135
 #> Empirical p-value: < 0.01
 #> ✔ Predictive power (y -> x) is significantly greater than chance.
 #> ℹ Note: 100 permutations may be too few for stable p-values.

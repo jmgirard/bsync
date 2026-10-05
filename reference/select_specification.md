@@ -63,7 +63,7 @@ select_specification(mv_list)
 #> # A tibble: 1 × 15
 #>   estimator window_sec lag_sec increment_pct surrogate_method statistic 
 #>   <chr>          <dbl>   <dbl>         <dbl> <chr>            <chr>     
-#> 1 wcc                2       1           0.1 phase            mean_abs_z
+#> 1 wcc                4       1           0.1 phase            mean_abs_z
 #> # ℹ 9 more variables: window_size <dbl>, lag_max <int>, window_increment <dbl>,
 #> #   n_windows <dbl>, observed <dbl>, null_mean <dbl>, null_sd <dbl>, es <dbl>,
 #> #   p <dbl>
@@ -72,13 +72,13 @@ select_specification(mv_list)
 #> [1] 0
 #> 
 #> $median_es
-#> [1] 1.310915
+#> [1] 1.26632
 #> 
 #> $iqr_es
-#> [1] 0.3378733
+#> [1] 0.1390848
 #> 
 #> $score
-#> [1] 1.141978
+#> [1] 1.196777
 #> 
 #> $n_gated
 #> [1] 3

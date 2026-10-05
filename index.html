@@ -17,8 +17,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Behavioral Synchrony Analyses">
-<meta name="description" content="A comprehensive toolkit for analyzing interpersonal and behavioral synchrony in continuous dyadic time series. Provides efficient, C++ backed implementations of four windowed estimators: cross-correlation (WCC), dynamic time warping (WDTW), Granger causality, and phase synchrony (Hilbert phase-locking value), each with a full surrogate (pseudo-synchrony) significance testing layer using circular-shift and phase-randomization generators. Includes peak and valley optima picking, a rolling leadership asymmetry index, and a preprocessing pipeline featuring zero-phase smoothing, time-bin aggregation, gap imputation, and kinematic velocity and speed calculations. Theory-driven and data-driven hyperparameter helpers guide window size and lag selection.">
-<meta property="og:description" content="A comprehensive toolkit for analyzing interpersonal and behavioral synchrony in continuous dyadic time series. Provides efficient, C++ backed implementations of four windowed estimators: cross-correlation (WCC), dynamic time warping (WDTW), Granger causality, and phase synchrony (Hilbert phase-locking value), each with a full surrogate (pseudo-synchrony) significance testing layer using circular-shift and phase-randomization generators. Includes peak and valley optima picking, a rolling leadership asymmetry index, and a preprocessing pipeline featuring zero-phase smoothing, time-bin aggregation, gap imputation, and kinematic velocity and speed calculations. Theory-driven and data-driven hyperparameter helpers guide window size and lag selection.">
+<meta name="description" content="A comprehensive toolkit for analyzing interpersonal and behavioral synchrony in continuous dyadic time series. Provides efficient, C++ backed implementations of four windowed estimators: cross-correlation (WCC), dynamic time warping (WDTW), Granger causality, and phase synchrony (Hilbert phase-locking value), each with a full surrogate (pseudo-synchrony) significance testing layer using circular-shift, phase-randomization, and pseudo-dyad (between-dyad) generators. Includes peak and valley optima picking, a rolling leadership asymmetry index, and a preprocessing pipeline featuring zero-phase smoothing, time-bin aggregation, gap imputation, and kinematic velocity and speed calculations. Theory-driven and data-driven hyperparameter helpers guide window size and lag selection.">
+<meta property="og:description" content="A comprehensive toolkit for analyzing interpersonal and behavioral synchrony in continuous dyadic time series. Provides efficient, C++ backed implementations of four windowed estimators: cross-correlation (WCC), dynamic time warping (WDTW), Granger causality, and phase synchrony (Hilbert phase-locking value), each with a full surrogate (pseudo-synchrony) significance testing layer using circular-shift, phase-randomization, and pseudo-dyad (between-dyad) generators. Includes peak and valley optima picking, a rolling leadership asymmetry index, and a preprocessing pipeline featuring zero-phase smoothing, time-bin aggregation, gap imputation, and kinematic velocity and speed calculations. Theory-driven and data-driven hyperparameter helpers guide window size and lag selection.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -88,7 +88,7 @@
 <div class="section level2">
 <h2 id="the-workflow-at-a-glance">The workflow at a glance<a class="anchor" aria-label="anchor" href="#the-workflow-at-a-glance"></a>
 </h2>
-<pre><code>flowchart LR
+<pre class="mermaid"><code>flowchart LR
   A[Condition&lt;br/&gt;gaps, common rate,&lt;br/&gt;smoothing] --&gt; B[Fix timescale&lt;br/&gt;from whole dataset]
   B --&gt; C[Decide parameters&lt;br/&gt;sweep a grid,&lt;br/&gt;report robustness]
   C --&gt; D[Estimate + test&lt;br/&gt;vs. matched-null&lt;br/&gt;surrogates]
@@ -250,7 +250,7 @@
 </tr>
 <tr>
 <td><a href="https://jmgirard.github.io/bsync/articles/surrogate-testing.html">Surrogate testing</a></td>
-<td>Circular-shift vs. phase-randomization; best practices</td>
+<td>Circular-shift vs. phase-randomization vs. pseudo-dyads; best practices</td>
 </tr>
 <tr>
 <td><a href="https://jmgirard.github.io/bsync/articles/determine-downsampling.html">Downsampling</a></td>
@@ -322,6 +322,11 @@
 <p>The use of circular-shifted surrogate data to establish a statistical baseline for true interpersonal synchrony was popularized in behavioral research by:</p>
 <ul>
 <li>Ramseyer, F., &amp; Tschacher, W. (2011). Nonverbal synchrony in psychotherapy: Coordinated body movement reflects relationship quality and outcome. <em>Journal of Consulting and Clinical Psychology, 79</em>(3), 284-295.</li>
+</ul>
+<p>The pseudo-dyad generators (<code><a href="reference/generate_surrogate_pseudo.html">generate_surrogate_pseudo()</a></code>, <code><a href="reference/generate_pseudo_dyads.html">generate_pseudo_dyads()</a></code>) follow the between-dyad shuffling convention of the rMEA package:</p>
+<ul>
+<li>Kleinbub, J. R., &amp; Ramseyer, F. T. (2020). rMEA: An R package to assess nonverbal synchronization in motion energy analysis time-series. <em>Psychotherapy Research</em>. <a href="https://doi.org/10.1080/10503307.2020.1844334" class="external-link uri">https://doi.org/10.1080/10503307.2020.1844334</a>
+</li>
 </ul>
 </div>
 <div class="section level3">

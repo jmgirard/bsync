@@ -29,8 +29,10 @@
 <url><loc>https://jmgirard.github.io/bsync/reference/diagnose_ts_gaps.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/downsample_signal.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/evaluate_signal_power.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/generate_pseudo_dyads.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.html</loc></url>
+<url><loc>https://jmgirard.github.io/bsync/reference/generate_surrogate_pseudo.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/glance.bsync_multiverse.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/glance.bsync_surface.html</loc></url>
 <url><loc>https://jmgirard.github.io/bsync/reference/impute_ts_gaps.html</loc></url>

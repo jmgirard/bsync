@@ -49,6 +49,10 @@ then pass it to the matched surrogate wrapper.
   : Generate Circular Shift Surrogates
 - [`generate_surrogate_phase()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md)
   : Generate Phase-Randomized Surrogates (Fourier Transform)
+- [`generate_surrogate_pseudo()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_pseudo.md)
+  : Generate Pseudo-Dyad Surrogates for One Dyad
+- [`generate_pseudo_dyads()`](https://jmgirard.github.io/bsync/reference/generate_pseudo_dyads.md)
+  : Generate the Sample-Wide Set of Pseudo-Dyads
 - [`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md)
   : Calculate Surrogate Windowed Cross-Correlations
 - [`wdtw_surrogate()`](https://jmgirard.github.io/bsync/reference/wdtw_surrogate.md)

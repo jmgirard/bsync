@@ -191,9 +191,10 @@ Scaffolding: `usethis::use_r()`, `use_test()`, `use_package()`. testthat
 - **Group-level / multivariate modeling** — deferred to M11 (`mvSUSY` is
   the multivariate reference).
 - **tidy/glance/as_tibble methods** — built in **M5** (done).
-- **IAAFT / segment-shuffling / pseudo-dyad surrogates** — resolved to
-  add (cairn/DESIGN.md §6/§14), scheduled **M12**; the pseudo-dyad
-  (between-dyad rMEA) generator depends on M11’s `dyad_list`.
+- **IAAFT / segment-shuffling surrogates** — resolved to add
+  (cairn/DESIGN.md §6/§14); a candidate row in `cairn/ROADMAP.md`. The
+  pseudo-dyad (between-dyad rMEA) generators shipped in M009 on the
+  existing `dyad_list` input.
 - **A unified `bsync_ts` preprocessing object** — logged in
   cairn/DESIGN.md §14; specify before building.
 - **OpenMP** — not adopted until the M2 decision; no `#pragma omp` ships

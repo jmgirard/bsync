@@ -94,9 +94,10 @@ meaningful.</p>
 <div class="section level2">
 <h2 id="choosing-a-surrogate-method">1. Choosing a Surrogate Method<a class="anchor" aria-label="anchor" href="#choosing-a-surrogate-method"></a>
 </h2>
-<p>The <strong>bsync</strong> package provides two primary methods for
-generating null data. Choosing the right one depends on the nature of
-your signal.</p>
+<p>The <strong>bsync</strong> package provides three methods for
+generating null data. The first two work within one dyad. The third
+needs a sample of dyads. Choosing the right one depends on the nature of
+your signal and on the null hypothesis you want to test.</p>
 <div class="section level3">
 <h3 id="circular-shift-generate_surrogate_circular">1.1 Circular Shift (<code>generate_surrogate_circular</code>)<a class="anchor" aria-label="anchor" href="#circular-shift-generate_surrogate_circular"></a>
 </h3>
@@ -144,6 +145,46 @@ conservative than circular shifting. It is significantly more
 computationally expensive to generate than circular shifts.</li>
 </ul>
 </div>
+<div class="section level3">
+<h3 id="pseudo-dyads-generate_surrogate_pseudo-generate_pseudo_dyads">1.3 Pseudo-Dyads (<code>generate_surrogate_pseudo</code>,
+<code>generate_pseudo_dyads</code>)<a class="anchor" aria-label="anchor" href="#pseudo-dyads-generate_surrogate_pseudo-generate_pseudo_dyads"></a>
+</h3>
+<p>A pseudo-dyad pairs one person’s series with a partner from a
+<em>different</em> dyad: two people who never interacted. This is the
+pseudo-synchrony approach of the rMEA package (Kleinbub &amp; Ramseyer,
+2020).</p>
+<ul>
+<li>
+<strong>How it works:</strong> The partner series is real data,
+recorded under the same task timeline. Series of unequal length are
+cropped start-aligned, so sample <code>t</code> of both series sits at
+the same task time. <code><a href="../reference/generate_pseudo_dyads.html">generate_pseudo_dyads()</a></code> crops each pair
+to its shorter series. <code><a href="../reference/generate_surrogate_pseudo.html">generate_surrogate_pseudo()</a></code> crops
+longer partners to the length of the target’s <code>y</code>, and
+excludes shorter partners with a warning. Start alignment assumes that
+every dyad was sampled at the same rate and that sample 1 of every
+series is the same task onset. Resample and trim first if that is not
+true.</li>
+<li>
+<strong>Which null it tests:</strong> Circular shifts and phase
+randomization break all time alignment. If the task itself makes both
+people move at the same moments (a trial starts, a video plays), that
+shared movement looks like synchrony against those nulls. A pseudo-dyad
+partner went through the same task, so the pseudo-dyad null keeps
+task-driven co-movement. A significant result then means “more
+synchronous than with a stranger in the same setting.”</li>
+<li>
+<strong>When to use it:</strong> When you have a sample of dyads
+that did the same task, and you want to separate interaction-specific
+synchrony from synchrony that the task produces.</li>
+<li>
+<strong>Important Note:</strong> A sample of N dyads gives each
+target at most N - 1 partners (2(N - 1) with
+<code>keep_roles = FALSE</code>), so the p-value of one dyad has a
+resolution of 1 / (N - 1). The sample-level comparison in Section 3 uses
+all N(N - 1) pseudo-dyads.</li>
+</ul>
+</div>
 </div>
 <div class="section level2">
 <h2 id="theoretical-pipeline">2. Theoretical Pipeline<a class="anchor" aria-label="anchor" href="#theoretical-pipeline"></a>
@@ -153,7 +194,9 @@ computationally expensive to generate than circular shifts.</li>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Decouple:</strong> Generate a matrix of <span class="math inline">\(N\)</span> null time series that remove the
-synchrony while keeping the individual characteristics.</li>
+synchrony while keeping the individual characteristics (or, for
+pseudo-dyads, that replace the partner with a person from another
+dyad).</li>
 <li>
 <strong>Evaluate:</strong> Run your chosen synchrony metric (WCC,
 WDTW, or WGC) against every column in that matrix.</li>
@@ -184,7 +227,109 @@ than, your observed result.</li>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="best-practices">3. Best Practices<a class="anchor" aria-label="anchor" href="#best-practices"></a>
+<h2 id="pseudo-dyads-a-worked-example">3. Pseudo-Dyads: A Worked Example<a class="anchor" aria-label="anchor" href="#pseudo-dyads-a-worked-example"></a>
+</h2>
+<p>The pseudo-dyad generators read a <em>list of dyads</em>. Each
+element is a data frame (first two columns are <code>x</code> and
+<code>y</code>) or a list with elements <code>x</code> and
+<code>y</code>, the same form that <code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code> reads.
+Here we simulate a sample of 10 dyads that did the same task. Every
+person follows one shared task timeline, plus independent noise. The
+dyads have no interaction-specific coupling at all.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jmgirard.github.io/bsync/">bsync</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">n_dyads</span> <span class="op">&lt;-</span> <span class="fl">10</span></span>
+<span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">1200</span></span>
+<span><span class="va">smooth</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">v</span>, <span class="va">k</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">v</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="va">k</span>, <span class="va">k</span><span class="op">)</span>, circular <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># One task timeline that every participant follows</span></span>
+<span><span class="va">task</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/smooth.html" class="external-link">smooth</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, <span class="fl">40</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">task_only</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_dyads</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">task</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">task</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<p>We test each dyad twice: against circular-shift surrogates and
+against pseudo-dyad surrogates. <code><a href="../reference/generate_surrogate_pseudo.html">generate_surrogate_pseudo()</a></code>
+returns a matrix whose columns are the <code>y</code> series of the
+other nine dyads, ready for any surrogate wrapper.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">test_dyad</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">i</span>, <span class="va">y_surrogates</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">d</span> <span class="op">&lt;-</span> <span class="va">task_only</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="fu"><a href="../reference/wcc_surrogate.html">wcc_surrogate</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="va">d</span><span class="op">$</span><span class="va">x</span>, y <span class="op">=</span> <span class="va">d</span><span class="op">$</span><span class="va">y</span>, y_surrogates <span class="op">=</span> <span class="va">y_surrogates</span>,</span>
+<span>    window_size <span class="op">=</span> <span class="fl">100</span>, lag_max <span class="op">=</span> <span class="fl">20</span>, window_increment <span class="op">=</span> <span class="fl">25</span></span>
+<span>  <span class="op">)</span><span class="op">$</span><span class="va">p_value</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">p_circular</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_dyads</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">test_dyad</span><span class="op">(</span><span class="va">i</span>, <span class="fu"><a href="../reference/generate_surrogate_circular.html">generate_surrogate_circular</a></span><span class="op">(</span><span class="va">task_only</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">y</span>, <span class="fl">99</span>, lag_max <span class="op">=</span> <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">p_pseudo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_dyads</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">test_dyad</span><span class="op">(</span><span class="va">i</span>, <span class="fu"><a href="../reference/generate_surrogate_pseudo.html">generate_surrogate_pseudo</a></span><span class="op">(</span><span class="va">task_only</span>, dyad <span class="op">=</span> <span class="va">i</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Dyads called significant at .05, out of 10</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>circular <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">p_circular</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span>, pseudo <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">p_pseudo</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; circular   pseudo </span></span>
+<span><span class="co">#&gt;        9        2</span></span></code></pre></div>
+<p>The circular-shift null breaks the shared task timeline, so it reads
+task-driven co-movement as synchrony. The pseudo-dyad null keeps that
+timeline, so it flags far fewer dyads. With nine partners per dyad,
+<code>p_value</code> can only be 0, 1/9, 2/9, and so on, and
+<code>p &lt; .05</code> means that the real partner beat all nine
+strangers. If the real partner is no different from a stranger, that
+happens with chance 1/10, so a single-dyad pseudo-dyad test at
+<code>p &lt; .05</code> has a false-positive rate of about 1/N for N
+dyads. With small samples, prefer the sample-level comparison below.</p>
+<p>For a sample-level comparison, <code><a href="../reference/generate_pseudo_dyads.html">generate_pseudo_dyads()</a></code>
+builds every role-keeping pairing (the <code>x</code> of one dyad with
+the <code>y</code> of another: 10 × 9 = 90 pseudo-dyads). Compute the
+same statistic on the real dyads and on the pseudo-dyads, then compare
+the two distributions. Here we add a real coupling to each dyad: person
+B follows person A by 10 samples.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">coupled</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_dyads</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">own</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/smooth.html" class="external-link">smooth</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="va">task</span> <span class="op">+</span> <span class="va">own</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>    y <span class="op">=</span> <span class="va">task</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span><span class="op">)</span>, <span class="va">own</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="op">(</span><span class="va">n</span> <span class="op">-</span> <span class="fl">10</span><span class="op">)</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span><span class="va">pseudo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_pseudo_dyads.html">generate_pseudo_dyads</a></span><span class="op">(</span><span class="va">coupled</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pseudo</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 90</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">pseudo</span>, <span class="st">"sources"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   x_dyad x_role y_dyad y_role</span></span>
+<span><span class="co">#&gt; 1      1      x      2      y</span></span>
+<span><span class="co">#&gt; 2      1      x      3      y</span></span>
+<span><span class="co">#&gt; 3      1      x      4      y</span></span>
+<span><span class="co">#&gt; 4      1      x      5      y</span></span>
+<span><span class="co">#&gt; 5      1      x      6      y</span></span>
+<span><span class="co">#&gt; 6      1      x      7      y</span></span>
+<span></span>
+<span><span class="va">mean_abs_z</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">d</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="../reference/wcc.html">wcc</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">x</span>, <span class="va">d</span><span class="op">$</span><span class="va">y</span>, window_size <span class="op">=</span> <span class="fl">100</span>, lag_max <span class="op">=</span> <span class="fl">20</span>, window_increment <span class="op">=</span> <span class="fl">25</span><span class="op">)</span><span class="op">$</span><span class="va">aggregate</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">real_z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">coupled</span>, <span class="va">mean_abs_z</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">pseudo_z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">pseudo</span>, <span class="va">mean_abs_z</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">real_z</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span><span class="co">#&gt;  0.1835  0.1974  0.2011  0.2052  0.2097  0.2458</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pseudo_z</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span><span class="co">#&gt;  0.1430  0.1620  0.1681  0.1700  0.1774  0.1982</span></span></code></pre></div>
+<p>The real dyads score higher than the pseudo-dyads, because only real
+partners share the 10-sample coupling. Both groups share the task
+timeline. How you compare the two distributions (a t-test, a permutation
+test, or a mixed model) is your choice. The generators only build the
+pseudo-dyads.</p>
+</div>
+<div class="section level2">
+<h2 id="best-practices">4. Best Practices<a class="anchor" aria-label="anchor" href="#best-practices"></a>
 </h2>
 <ul>
 <li>
@@ -202,8 +347,16 @@ across your machine’s CPU cores.</li>
 <strong>Interpretation:</strong> A significant p-value does not mean
 the behavior is <em>causal</em>; it only means the observed degree of
 synchrony is statistically unlikely to have occurred if the two
-participants were moving independently.</li>
+participants were moving independently. For a pseudo-dyad null, it means
+more synchrony than with a stranger in the same setting.</li>
 </ul>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p>Kleinbub, J. R., &amp; Ramseyer, F. T. (2020). rMEA: An R package to
+assess nonverbal synchronization in motion energy analysis time-series.
+<em>Psychotherapy Research</em>. <a href="https://doi.org/10.1080/10503307.2020.1844334" class="external-link uri">https://doi.org/10.1080/10503307.2020.1844334</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

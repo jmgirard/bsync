@@ -37,11 +37,13 @@ pak::pak("jmgirard/bsync")
 
 ## The workflow at a glance
 
-    flowchart LR
-      A[Condition<br/>gaps, common rate,<br/>smoothing] --> B[Fix timescale<br/>from whole dataset]
-      B --> C[Decide parameters<br/>sweep a grid,<br/>report robustness]
-      C --> D[Estimate + test<br/>vs. matched-null<br/>surrogates]
-      D --> E[Characterize<br/>optima &<br/>leadership]
+``` mermaid
+flowchart LR
+  A[Condition<br/>gaps, common rate,<br/>smoothing] --> B[Fix timescale<br/>from whole dataset]
+  B --> C[Decide parameters<br/>sweep a grid,<br/>report robustness]
+  C --> D[Estimate + test<br/>vs. matched-null<br/>surrogates]
+  D --> E[Characterize<br/>optima &<br/>leadership]
+```
 
 In one sentence: **clean → put on a common rate and smooth → set the
 timescale from the whole dataset → sweep a grid and report matched-null
@@ -226,7 +228,7 @@ surrogate_results
 | [WDTW workflow](https://jmgirard.github.io/bsync/articles/wdtw-workflow.html) | WDTW pipeline: time-warped alignment, optima extraction |
 | [WGC workflow](https://jmgirard.github.io/bsync/articles/wgranger-workflow.html) | Windowed Granger Causality: directional F-statistic and p-value plots |
 | [Choosing parameters](https://jmgirard.github.io/bsync/articles/choosing-parameters.html) | [`suggest_wcc_params()`](https://jmgirard.github.io/bsync/reference/suggest_wcc_params.md), [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md), [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md) |
-| [Surrogate testing](https://jmgirard.github.io/bsync/articles/surrogate-testing.html) | Circular-shift vs. phase-randomization; best practices |
+| [Surrogate testing](https://jmgirard.github.io/bsync/articles/surrogate-testing.html) | Circular-shift vs. phase-randomization vs. pseudo-dyads; best practices |
 | [Downsampling](https://jmgirard.github.io/bsync/articles/determine-downsampling.html) | PSD-based guidance for choosing a biologically appropriate sample rate |
 
 ## Citation
@@ -307,6 +309,16 @@ research by:
   psychotherapy: Coordinated body movement reflects relationship quality
   and outcome. *Journal of Consulting and Clinical Psychology, 79*(3),
   284-295.
+
+The pseudo-dyad generators
+([`generate_surrogate_pseudo()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_pseudo.md),
+[`generate_pseudo_dyads()`](https://jmgirard.github.io/bsync/reference/generate_pseudo_dyads.md))
+follow the between-dyad shuffling convention of the rMEA package:
+
+- Kleinbub, J. R., & Ramseyer, F. T. (2020). rMEA: An R package to
+  assess nonverbal synchronization in motion energy analysis
+  time-series. *Psychotherapy Research*.
+  <https://doi.org/10.1080/10503307.2020.1844334>
 
 ### Signal Smoothing & Kinematics
 

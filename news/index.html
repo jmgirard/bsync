@@ -64,6 +64,14 @@
 <li>
 <strong><code><a href="../reference/pick_optima.html">pick_optima()</a></code></strong> and <strong><code><a href="../reference/leadership_asymmetry.html">leadership_asymmetry()</a></code></strong> now accept the phase surface (<code>wphase_res</code> / <code>wphase_optima</code>), searching for peak phase locking.</li>
 </ul></div>
+<div class="section level3">
+<h3 id="pseudo-dyad-surrogates-development-version">Pseudo-dyad surrogates<a class="anchor" aria-label="anchor" href="#pseudo-dyad-surrogates-development-version"></a></h3>
+<ul><li>
+<strong><code><a href="../reference/generate_surrogate_pseudo.html">generate_surrogate_pseudo()</a></code></strong> — new surrogate generator for one dyad in a sample of dyads. Its columns are partner series taken from the other dyads (pseudo-dyads), cropped start-aligned to the target’s length, ready for <code><a href="../reference/wcc_surrogate.html">wcc_surrogate()</a></code>, <code><a href="../reference/wdtw_surrogate.html">wdtw_surrogate()</a></code>, <code><a href="../reference/wgranger_surrogate.html">wgranger_surrogate()</a></code>, and <code><a href="../reference/wphase_surrogate.html">wphase_surrogate()</a></code>. This null keeps co-movement that a shared task produces and removes coupling specific to the real interaction (the rMEA pseudo-synchrony approach; Kleinbub &amp; Ramseyer, 2020). Partners shorter than the target are excluded with a warning.</li>
+<li>
+<strong><code><a href="../reference/generate_pseudo_dyads.html">generate_pseudo_dyads()</a></code></strong> — builds the sample-wide set of pseudo-dyads (every pairing of series from different dyads, or a random subset), each in the <code>list(x, y)</code> form, for comparing real dyads to pseudo-dyads. Both generators keep partner roles by default (<code>keep_roles = TRUE</code>), because the lead-lag sign depends on which series is <code>x</code>.</li>
+<li>The surrogate-testing vignette has a new pseudo-dyad section with a worked example.</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="bsync-010">bsync 0.1.0<a class="anchor" aria-label="anchor" href="#bsync-010"></a></h2>
