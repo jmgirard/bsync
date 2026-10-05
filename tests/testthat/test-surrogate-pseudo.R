@@ -249,3 +249,152 @@ test_that("generate_surrogate_pseudo() follows set.seed and never reseeds", {
   c2 <- generate_surrogate_pseudo(dl, dyad = 1, n_surrogates = 3)
   expect_false(identical(c1, c2))
 })
+
+# =========================================================================
+# --- generate_pseudo_dyads(): pairing set --------------------------------
+# =========================================================================
+
+# Independently enumerated expected pairings, as keys. keep_roles = TRUE:
+# ordered "<i>x|<j>y" for i != j. FALSE: unordered pairs of the 2N series
+# from different dyads, key = the two labels sorted.
+expected_keys <- function(n, keep_roles) {
+  if (keep_roles) {
+    g <- expand.grid(i = seq_len(n), j = seq_len(n))
+    g <- g[g$i != g$j, ]
+    return(paste0(g$i, "x|", g$j, "y"))
+  }
+  labels <- paste0(rep(seq_len(n), each = 2), c("x", "y"))
+  dyad_of <- rep(seq_len(n), each = 2)
+  keys <- character(0)
+  for (a in seq_along(labels)) {
+    for (b in seq_along(labels)) {
+      if (a < b && dyad_of[a] != dyad_of[b]) {
+        keys <- c(keys, paste(sort(c(labels[a], labels[b])), collapse = "|"))
+      }
+    }
+  }
+  keys
+}
+
+recorded_keys <- function(pd, keep_roles) {
+  s <- attr(pd, "sources")
+  xl <- paste0(s$x_dyad, s$x_role)
+  yl <- paste0(s$y_dyad, s$y_role)
+  if (keep_roles) {
+    paste0(xl, "|", yl)
+  } else {
+    mapply(function(a, b) paste(sort(c(a, b)), collapse = "|"), xl, yl,
+      USE.NAMES = FALSE
+    )
+  }
+}
+
+# Each element's samples must equal the first min(length) samples of the
+# two sources the attribute records.
+expect_samples_match_sources <- function(pd, dyad_list) {
+  pool <- source_pool(dyad_list)
+  get_src <- function(d, r) pool[[2 * d - (r == "x")]]$values
+  s <- attr(pd, "sources")
+  for (k in seq_along(pd)) {
+    sx <- get_src(s$x_dyad[k], s$x_role[k])
+    sy <- get_src(s$y_dyad[k], s$y_role[k])
+    m <- min(length(sx), length(sy))
+    expect_identical(names(pd[[k]]), c("x", "y"))
+    expect_identical(pd[[k]]$x, as.double(sx[seq_len(m)]))
+    expect_identical(pd[[k]]$y, as.double(sy[seq_len(m)]))
+  }
+}
+
+test_that("NULL n_pairs returns every pairing, for N = 2, 3, 4", {
+  forms <- c("df", "named", "unnamed", "rev")
+  for (n in 2:4) {
+    for (kr in c(TRUE, FALSE)) {
+      set.seed(200 + n)
+      dl <- make_dyads(lengths = 20 + 3 * seq_len(n), forms = forms[seq_len(n)])
+      pd <- suppressMessages(generate_pseudo_dyads(dl, keep_roles = kr))
+      expect_length(pd, if (kr) n * (n - 1) else 2 * n * (n - 1))
+
+      rec <- recorded_keys(pd, kr)
+      expect_false(anyDuplicated(rec) > 0)
+      expect_setequal(rec, expected_keys(n, kr))
+
+      s <- attr(pd, "sources")
+      expect_s3_class(s, "data.frame")
+      expect_named(s, c("x_dyad", "x_role", "y_dyad", "y_role"))
+      expect_true(all(s$x_dyad != s$y_dyad))
+      if (kr) {
+        expect_true(all(s$x_role == "x" & s$y_role == "y"))
+      }
+      expect_samples_match_sources(pd, dl)
+    }
+  }
+})
+
+test_that("pairs are cropped start-aligned and the crop is announced", {
+  set.seed(210)
+  dl <- make_dyads(lengths = c(30, 40, 30))
+  # keep_roles = TRUE pairs with unequal lengths: (1,2), (2,1), (2,3), (3,2).
+  expect_message(
+    pd <- generate_pseudo_dyads(dl),
+    "Cropped 4 pseudo-dyads"
+  )
+  expect_true(all(lengths(lapply(pd, `[[`, "x")) == 30))
+
+  set.seed(211)
+  same <- make_dyads(lengths = c(25, 25, 25))
+  expect_no_message(generate_pseudo_dyads(same))
+})
+
+test_that("integer n_pairs samples distinct pairings", {
+  set.seed(212)
+  dl <- make_dyads(lengths = c(30, 30, 30, 30))
+  for (kr in c(TRUE, FALSE)) {
+    pd <- generate_pseudo_dyads(dl, n_pairs = 5, keep_roles = kr)
+    expect_length(pd, 5)
+    rec <- recorded_keys(pd, kr)
+    expect_false(anyDuplicated(rec) > 0)
+    expect_true(all(rec %in% expected_keys(4, kr)))
+    expect_equal(nrow(attr(pd, "sources")), 5)
+    expect_samples_match_sources(pd, dl)
+  }
+})
+
+test_that("generate_pseudo_dyads() aborts on invalid input", {
+  set.seed(213)
+  dl <- make_dyads(lengths = c(30, 30, 30, 30))
+  expect_error(generate_pseudo_dyads(dl[1]), "must contain at least two dyads")
+  for (bad in list(0, -1, 1.5, c(1, 2), "2", NA)) {
+    expect_error(
+      generate_pseudo_dyads(dl, n_pairs = bad),
+      "must be NULL or a single positive integer"
+    )
+  }
+  expect_error(
+    generate_pseudo_dyads(dl, n_pairs = 13),
+    "exceeds the 12 possible pseudo-dyads"
+  )
+  expect_error(
+    generate_pseudo_dyads(dl, n_pairs = 25, keep_roles = FALSE),
+    "exceeds the 24 possible pseudo-dyads"
+  )
+  expect_error(
+    generate_pseudo_dyads(dl, keep_roles = "yes"),
+    "must be TRUE or FALSE"
+  )
+})
+
+test_that("generate_pseudo_dyads() follows set.seed and never reseeds", {
+  set.seed(214)
+  dl <- make_dyads(lengths = rep(30, 6))
+
+  set.seed(9)
+  a <- generate_pseudo_dyads(dl, n_pairs = 4)
+  set.seed(9)
+  b <- generate_pseudo_dyads(dl, n_pairs = 4)
+  expect_identical(a, b)
+
+  set.seed(10)
+  c1 <- generate_pseudo_dyads(dl, n_pairs = 4)
+  c2 <- generate_pseudo_dyads(dl, n_pairs = 4)
+  expect_false(identical(c1, c2))
+})

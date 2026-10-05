@@ -135,7 +135,7 @@ build dyad lists from `sim_dyad` columns.
 - [x] T3: Implement `generate_surrogate_pseudo()` in
       `R/surrogate_generation.R`. Reuse `.extract_xy()` and move it to a
       shared helper file if both new functions need it.
-- [ ] T4: Tests first, then implement `generate_pseudo_dyads()` (AC3, AC4).
+- [x] T4: Tests first, then implement `generate_pseudo_dyads()` (AC3, AC4).
 - [ ] T5: Wrapper integration test over all four `*_surrogate()` functions
       (AC5).
 - [ ] T6: Docs. Roxygen for both functions, `_pkgdown.yml` surrogate
@@ -163,6 +163,7 @@ build dyad lists from `sim_dyad` columns.
 - 2026-10-05: T1 done: cairn/references/kleinbub2020.md from the rMEA 1.2.2 source (shuffle(), unequalCbind()). It confirms the start-aligned crop to the shorter series and the N(N-1) and 2N(N-1) pair counts. Departures recorded there: keep_roles default, no na.omit().
 - 2026-10-05: T2+T3 done: generate_surrogate_pseudo() in R/surrogate_generation.R with tests in test-surrogate-pseudo.R (11 tests). Full suite: 0 failures. Planted defects went red: end-aligned crop (3 tests fail), target's own series in the pool (8 tests fail).
 - 2026-10-05: implementation choices: .extract_xy() stays in R/autotune.R (package-internal, reachable from both files). Added a numeric-series abort and a keep_roles TRUE/FALSE abort beyond AC2's list. The matrix also carries a "sources" attribute (dyad, role) matching AC3's form. NULL n_surrogates keeps pool order and draws no random numbers.
+- 2026-10-05: T4 done: generate_pseudo_dyads() with tests that compare the recorded pairings to an independent enumeration for N = 2, 3, 4 under both keep_roles values. Full suite: 1512 expectations, 0 failures. Planted defects went red: same-dyad pairs with roles kept (4 tests fail), same-dyad pairs with roles mixed (3), end-aligned crop (1).
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
