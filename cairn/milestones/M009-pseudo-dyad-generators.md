@@ -42,7 +42,7 @@ build dyad lists from `sim_dyad` columns.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets. -->
 
-- [ ] AC1: `generate_surrogate_pseudo(dyad_list, dyad, n_surrogates = NULL,
+- [x] AC1: `generate_surrogate_pseudo(dyad_list, dyad, n_surrogates = NULL,
       keep_roles = TRUE)` is exported. It returns a numeric matrix with
       `length(y)` rows, where `y` is the series that `.extract_xy()` returns
       for `dyad_list[[dyad]]`. Every column equals the first `length(y)`
@@ -56,7 +56,7 @@ build dyad lists from `sim_dyad` columns.
       lengths, a partner shorter than the target, data-frame elements, named
       and unnamed list elements, N = 2 and an odd N, both `keep_roles`
       values, and both `n_surrogates = NULL` and an integer.
-- [ ] AC2: `generate_surrogate_pseudo()` excludes partner series shorter
+- [x] AC2: `generate_surrogate_pseudo()` excludes partner series shorter
       than the target's `y`. When it excludes at least one, a cli warning
       states how many. When it excludes none, no warning fires. With
       `n_surrogates = NULL`, the column count equals the eligible partner
@@ -67,7 +67,7 @@ build dyad lists from `sim_dyad` columns.
       matcher: fewer than two dyads, `dyad` not a single valid index into
       `dyad_list`, `n_surrogates` not a single positive integer, no eligible
       partner, and `n_surrogates` greater than the eligible partner count.
-- [ ] AC3: `generate_pseudo_dyads(dyad_list, n_pairs = NULL,
+- [x] AC3: `generate_pseudo_dyads(dyad_list, n_pairs = NULL,
       keep_roles = TRUE)` is exported. It returns a list of pseudo-dyads.
       Each one is a list with named elements `x` and `y`. Its two series come
       from different dyads. Each series is the first `min(length)` samples
@@ -86,12 +86,12 @@ build dyad lists from `sim_dyad` columns.
       distinct. Tests fire each abort branch with a message matcher: fewer
       than two dyads, `n_pairs` not a single positive integer, and `n_pairs`
       greater than the pairing count.
-- [ ] AC4: Both generators draw from the session RNG and do not reseed it.
+- [x] AC4: Both generators draw from the session RNG and do not reseed it.
       For each generator, a test shows that two calls under the same
       `set.seed()` return identical output when they subsample. A test also
       shows that two consecutive calls without reseeding return different
       output when they subsample.
-- [ ] AC5: A test builds a dyad list of equal-length, NA-free series from
+- [x] AC5: A test builds a dyad list of equal-length, NA-free series from
       `sim_dyad` columns. It passes one `generate_surrogate_pseudo()` matrix
       to each of `wcc_surrogate()`, `wdtw_surrogate()`,
       `wgranger_surrogate()`, and `wphase_surrogate()`, with `window_size`
@@ -176,3 +176,12 @@ build dyad lists from `sim_dyad` columns.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+Pass 1 (2026-10-05, branch head bb1adf9). `testthat::test_file("tests/testthat/test-surrogate-pseudo.R")`: 20 tests, all passing.
+
+- AC1 evidence: `export(generate_surrogate_pseudo)` in NAMESPACE. Source identity is matched against every candidate series (`column_sources()`, pairwise distinct `rnorm` probes) in tests 1 (N = 5, df/named/unnamed/reversed-named elements, unequal lengths, one shorter partner, keep_roles TRUE), 2 (same, keep_roles FALSE), 3 (y read by name), 4 (N = 2), 5 (integer n_surrogates), 7. The crop message is asserted in tests 1, 2, and 19 (count of returned partners). Pass.
+- AC2 evidence: excluded-count warning asserted in tests 1 and 2. No warning when nothing is excluded: tests 4 and 8. NULL column count equals the eligible count: tests 1, 2, 6. Integer draw gives distinct partners: test 5. Abort branches with message matchers: test 9 (fewer than two dyads, invalid `dyad`, invalid `n_surrogates`, count over eligible) and test 10 (no eligible partner, which fires first when `n_surrogates` also exceeds zero). Pass.
+- AC3 evidence: `export(generate_pseudo_dyads)` in NAMESPACE. Test 12 compares the recorded source set to an independent enumeration with no duplicates, for N = 2, 3, 4 under both keep_roles values (N(N-1) and 2N(N-1)). It also checks the `"sources"` column names, that x_dyad != y_dyad, the `x`/`y` element names, and that samples match their sources (unequal lengths; df and list elements). Test 13: crop message. Test 14: integer `n_pairs` length and distinct rows. Test 15: the three abort branches. Pass.
+- AC4 evidence: same seed gives identical output, and consecutive unseeded calls differ, while subsampling: test 11 (generate_surrogate_pseudo) and test 16 (generate_pseudo_dyads). Pass.
+- AC5 evidence: test 17 builds a 3-dyad list from sim_dyad x/y/z columns (400 samples, NA-free) and runs all four wrappers. `p_value` is in [0, 1] (both Granger p-values) and `n_surrogates` = 2 = ncol. Pass.
+- AC6 evidence: FAIL. `man/generate_pseudo_dyads.Rd` links to autotune_wcc, generate_surrogate_pseudo, wcc, wdtw, wgranger, and wphase. It does not link to the surrogate wrappers (`*_surrogate()`) or the existing generators (`generate_surrogate_circular()`, `generate_surrogate_phase()`), as the criterion requires for both functions. The other items pass: the rationale for every default including the keep_roles departure from rMEA (both Rd files), `_pkgdown.yml` lines 62–63, NEWS.md lines 22 and 30, and vignette section 1.3 "Which null it tests" with the Kleinbub & Ramseyer (2020) citation and the section 3 worked example.
