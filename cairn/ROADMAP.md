@@ -2,7 +2,7 @@
 
 _The only authority on milestone status. Grouped by status, not ID._
 _Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M008)._
-_Last hygiene check: 2026-08-29 (M008 archived; promoted phase-synchrony row pruned; 2 review-finding candidate rows added; suite 1172 green, check 0/0/0; validate green; ROADMAP 25 lines / `wc -c` below; LESSONS seeded with 3 lines)_
+_Last hygiene check: 2026-10-05 (no changes since 2026-08-29, validate green, no open issues, PRs, or outside merges, ROADMAP 3.3 KB, LESSONS 1.1 KB)_
 
 ## Milestones
 
