@@ -1,13 +1,14 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M008)._
+_Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M010)._
 _Last hygiene check: 2026-10-05 (no changes since 2026-08-29, validate green, no open issues, PRs, or outside merges, ROADMAP 3.3 KB, LESSONS 1.1 KB)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M009 | Pseudo-dyad surrogate generators | planned | — | normal | milestones/M009-pseudo-dyad-generators.md |
 | M008 | Phase synchrony estimator (wphase) | done | — | normal | milestones/archive/M008-phase-synchrony.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 5 most recent
      terminal (done or dropped) rows — older ones live in milestones/archive/ + git -->
@@ -21,7 +22,8 @@ _Last hygiene check: 2026-10-05 (no changes since 2026-08-29, validate green, no
 - Wavelet coherence estimator: cross-wavelet / wavelet coherence for nonstationary time–frequency lead–lag across scales — added 2026-08-29 — legacy DESIGN §15 M9
 - CRQA / MEA conventions: cross-recurrence quantification analysis and MEA-style windowed cross-correlation conveniences — added 2026-08-29 — legacy DESIGN §15 M10
 - Group-level / multivariate workflow: tidy multi-dyad pipeline + aggregation / mixed-model summaries; `mvSUSY` is the >2-series reference — added 2026-08-29 — legacy DESIGN §15 M11
-- Expanded surrogate generators: IAAFT and segment-shuffling (within-series) plus the pseudo-dyad (between-dyad) null; pseudo-dyad depends on the multi-dyad workflow row and tests a different null (see `cairn/DESIGN.md` §2, §6) — added 2026-08-29 — legacy DESIGN §15 M12
+- Expanded surrogate generators: IAAFT and segment-shuffling (within-series) nulls (see `cairn/DESIGN.md` §6); the pseudo-dyad (between-dyad) generator moved to M009 — added 2026-08-29 — legacy DESIGN §15 M12 (narrowed 2026-10-05, M009 plan)
+- Pseudo-dyad surrogates in `synchrony_multiverse()` / `autotune_wcc()`: a `surrogate_method` that draws partners from other dyads; needs the whole dyad list, which the single-dyad multiverse does not see — added 2026-10-05 — M009 Out
 - CRAN submission of v0.1.0: package is submission-ready (`cran-comments.md` checklist, human-gated); release timing is user-declared, never agent-proposed — added 2026-08-29 — legacy CLAUDE.md Current focus
 - Unified `bsync_ts` preprocessing object: specify before building — added 2026-08-29 — legacy DESIGN §15 unscheduled
 - Expanded educational vignettes: choosing a method, interpreting a surface, reporting synchrony — added 2026-08-29 — legacy DESIGN §15 unscheduled
