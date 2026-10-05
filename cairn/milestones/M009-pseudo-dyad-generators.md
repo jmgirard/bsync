@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M009: Pseudo-dyad surrogate generators
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -106,7 +106,7 @@ build dyad lists from `sim_dyad` columns.
       gets a pseudo-dyad section with a worked example. The section states
       which null hypothesis the pseudo-dyad null tests, and cites the
       published convention source.
-- [ ] AC7: `devtools::document()` produces no diff against the committed
+- [x] AC7: `devtools::document()` produces no diff against the committed
       tree. `devtools::test()` passes. `devtools::check()` reports 0 errors
       and 0 warnings, and the milestone file triages any NOTE.
 
@@ -170,6 +170,7 @@ build dyad lists from `sim_dyad` columns.
 - 2026-10-05: T7 gate (first pass, pre-claim-audit code): air format applied to the two new files. lintr: no hits in new code (the object_usage hits are package-wide false positives, bsync not installed). document() no diff except man/bsync-package.Rd from the DESCRIPTION edit. check_pkgdown(): no problems. check(): 0 errors, 0 warnings, 0 notes.
 - 2026-10-05: claim audit: 66 claims read, 3 corrected — R/surrogate_generation.R, vignettes/surrogate-testing.Rmd. Crop message counted partners before the n_surrogates draw (code fixed). Vignette implied both functions crop to the shorter series (wording fixed). keep_roles = FALSE gave x = 1y for a (1y, 2x) pair where rMEA gives x = 2x (pool reordered to rMEA's 1x..Nx, 1y..Ny, roxygen states it). Two regression tests added; both fail on the pre-fix code.
 - 2026-10-05: T7 done on the final code (301e560): check() 0 errors, 0 warnings, 0 notes; document() no diff. Status set to review.
+- 2026-10-05: review return 1: AC6 fails as written. The `generate_pseudo_dyads()` roxygen @seealso has no links to the surrogate wrappers (`wcc_surrogate()`, `wdtw_surrogate()`, `wgranger_surrogate()`, `wphase_surrogate()`) or the existing generators (`generate_surrogate_circular()`, `generate_surrogate_phase()`). AC1–AC5 and AC7 passed with evidence. Status back to in-progress.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
@@ -185,3 +186,5 @@ Pass 1 (2026-10-05, branch head bb1adf9). `testthat::test_file("tests/testthat/t
 - AC4 evidence: same seed gives identical output, and consecutive unseeded calls differ, while subsampling: test 11 (generate_surrogate_pseudo) and test 16 (generate_pseudo_dyads). Pass.
 - AC5 evidence: test 17 builds a 3-dyad list from sim_dyad x/y/z columns (400 samples, NA-free) and runs all four wrappers. `p_value` is in [0, 1] (both Granger p-values) and `n_surrogates` = 2 = ncol. Pass.
 - AC6 evidence: FAIL. `man/generate_pseudo_dyads.Rd` links to autotune_wcc, generate_surrogate_pseudo, wcc, wdtw, wgranger, and wphase. It does not link to the surrogate wrappers (`*_surrogate()`) or the existing generators (`generate_surrogate_circular()`, `generate_surrogate_phase()`), as the criterion requires for both functions. The other items pass: the rationale for every default including the keep_roles departure from rMEA (both Rd files), `_pkgdown.yml` lines 62–63, NEWS.md lines 22 and 30, and vignette section 1.3 "Which null it tests" with the Kleinbub & Ramseyer (2020) citation and the section 3 worked example.
+- AC7 evidence: at bb1adf9, `devtools::document()` leaves man/ and NAMESPACE unchanged. `devtools::check()` reports 0 errors, 0 warnings, 0 notes, and it runs the full test suite, the examples, and the vignette. Pass.
+- Consistency gate: `cairn_validate.py` all checks passed. `pkgdown::check_pkgdown()` no problems. README.Rmd and README.md are unchanged on the branch. No new top-level files. The NEWS.md entry is present with no milestone numbers. Principle change: none, so `cairn_impact` is skipped.
