@@ -40,7 +40,7 @@ and segment shuffling stay on their candidate row.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets. -->
 
-- [ ] AC1: `wcc_surrogate()`, `wdtw_surrogate()`, `wgranger_surrogate()`
+- [x] AC1: `wcc_surrogate()`, `wdtw_surrogate()`, `wgranger_surrogate()`
       (`p_value_xy` and `p_value_yx`), and `wphase_surrogate()` return
       p = (b + 1) / (n + 1), phipson2010 (p. 6). Here n is the number of
       surrogate columns, and b is the number of surrogate statistics at least
@@ -51,7 +51,7 @@ and segment shuffling stay on their candidate row.
       covers inputs where every observed and surrogate statistic is finite.
       NA handling is unchanged. The probes include one case with b = 0 and
       one with 0 < b < n for each wrapper, and for both wgranger directions.
-- [ ] AC2: A simulation test shows that the add-one p-value keeps its size
+- [x] AC2: A simulation test shows that the add-one p-value keeps its size
       under an exchangeable null, phipson2010 (pp. 4, 6). Each replicate
       builds N = 10 independent, uncoupled dyads of white noise and tests
       dyad 1 against all 9 of its `generate_surrogate_pseudo()` partners
@@ -61,20 +61,20 @@ and segment shuffling stay on their candidate row.
       is below 0.1, and that the shares of p-values at or below 0.15 and at
       or below 0.5 are within 3 binomial standard errors of 0.1 and 0.5.
       (Under b / n the share at or below 0.15 is 0.2.)
-- [ ] AC3: Each of the four print methods shows the returned p-value
+- [x] AC3: Each of the four print methods shows the returned p-value
       rounded to 4 digits, or `< 0.0001` when that rounding gives 0. The
       `< 1/n` form is gone. Tests on constructed result objects assert the
       printed p-value (captured from the message stream) for a mid-range p
       and for a p below 5e-5, for each print method and for both wgranger
       directions.
-- [ ] AC4: `synchrony_multiverse()` raises a cli warning when
+- [x] AC4: `synchrony_multiverse()` raises a cli warning when
       `n_surrogates < 20`. The warning states that the smallest possible
       p-value is `1 / (n_surrogates + 1)`, so no cell can reach p < .05.
       `autotune_wcc()` gives this warning once per call. Tests assert the
       warning with a message matcher at `n_surrogates = 19` and no such
       warning at `n_surrogates = 20`, for both functions, and assert that
       `autotune_wcc()` with 3 dyads and 19 surrogates gives it once.
-- [ ] AC5: `cairn/references/phipson2010.md` exists with its `INDEX.md`
+- [x] AC5: `cairn/references/phipson2010.md` exists with its `INDEX.md`
       line and anchors the formula (p. 6) and the size of b / n (p. 4).
       DESIGN.md §6 states the add-one formula with that citation in step 3
       and in its Invariant 2 paragraph. The roxygen of the four wrappers
@@ -84,7 +84,7 @@ and segment shuffling stay on their candidate row.
       p-value is 1 / N, so p < .05 needs at least 21 dyads. The wcc and wdtw workflow vignettes no
       longer report a p-value as `< .001` or `< 0.001`. NEWS.md has an
       entry. README.md is re-knit from README.Rmd.
-- [ ] AC6: `devtools::document()` leaves no diff, `devtools::test()`
+- [x] AC6: `devtools::document()` leaves no diff, `devtools::test()`
       passes, and `devtools::check()` reports 0 errors and 0 warnings.
 
 ## Coverage
@@ -156,3 +156,13 @@ and segment shuffling stay on their candidate row.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+Evidence gathered 2026-10-05 at 75f348f (main f06719a, unmoved), NOT_CRAN=true.
+
+- AC1 evidence: `test-surrogate.R` tests "all four wrappers return (b + 1) / (n + 1) when b = 0" (11 expectations) and "... when 0 < b < n" (10 expectations) pass, 0 failed, 0 skipped. Each counts b with a plain loop for wcc, wdtw (lower tail), wgranger xy and yx, and wphase, and checks the p-value to 1e-12. Every observed and surrogate statistic in the probes is finite. The seeded pin test (2 expectations) also passes.
+- AC2 evidence: `test-surrogate-pseudo.R` test "the add-one pseudo-dyad p-value keeps its size under the null" passes (3 expectations, 0 failed, not skipped under NOT_CRAN). It runs 400 seeded replicates of 10 white-noise dyads, with dyad 1 tested against all 9 `keep_roles = TRUE` partners by `wcc_surrogate()`. It asserts every p >= 0.1, and that the shares at or below 0.15 and 0.5 sit within 3 binomial SEs of 0.1 and 0.5. Run against b / n during T1, it failed the first two assertions (share 0.205).
+- AC3 evidence: `test-surrogate.R` test "print methods show p rounded to 4 digits, or < 0.0001" passes (11 expectations). It builds result objects for wcc, wdtw, and wphase, and reads the printed value from the message stream. 0.123456 prints "0.1235", 1e-5 prints "< 0.0001", and 1e-4 prints "0.0001". For wgranger, both direction orders are checked. `grep -n '1 / x\$n_surrogates' R/surrogate_analysis.R` finds no match, so the `< 1/n` form is gone.
+- AC4 evidence: `test-multiverse.R` test "fewer than 20 surrogates warns that no cell can reach p < .05" passes (2 expectations). At 19 it expects a warning of class `bsync_few_surrogates` whose message matches "smallest possible p-value is `1 / (n_surrogates + 1)` = 0.05". At 20 it expects no such warning. `test-autotune.R` test "autotune_wcc gives the few-surrogates warning once per call" passes (2 expectations). With 3 dyads it counts exactly 1 matching warning at 19 and 0 at 20. With the class removed as a planted defect (T2), the count was 4.
+- AC5 evidence: `cairn/references/phipson2010.md` exists, and `INDEX.md` has its line. The note anchors p. 6 (formula) and p. 4 (size of b / m). DESIGN.md §6 step 3 (line 187) states the formula with the phipson2010 p. 6 citation, and the Invariant 2 paragraph (line 195) names the add-one form with that citation. All 4 wrapper roxygen blocks contain "(b + 1) / (n + 1) (Phipson & Smyth, 2010)" and "never 0". The surrogate-testing vignette (lines 45, 123) and the `generate_surrogate_pseudo()` roxygen (line 180) state the 1 / N floor and 21 dyads. A grep for `< .001` or `< 0.001` in the wcc and wdtw workflow vignettes finds 0 matches. NEWS.md line 3 has the entry. README.md was re-knit in 2d9e73d and shows 0.0693.
+- AC6 evidence: `devtools::document()` at 75f348f leaves `git status` clean. `devtools::check()` at 75f348f gives Status OK, with 0 errors, 0 warnings, and 0 notes. That check runs the full test suite, so `devtools::test()` passes too.
+- Consistency gate: `cairn_validate.py` passes all checks. `pkgdown::check_pkgdown()` reports no problems. README.md is knit from README.Rmd. The NEWS.md entry has no milestone numbers, and the doc-hygiene test passes. No new top-level files were added, so no `.Rbuildignore` change is needed. No DESIGN principle changed, so `cairn_impact` is skipped.
