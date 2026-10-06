@@ -150,7 +150,7 @@ The real dyads score higher than the pseudo-dyads, because only real partners sh
 
 ## 4. Best Practices
 
-* **Permutation Count:** For a stable p-value, we recommend at least 1,000 permutations. Using fewer (e.g., 100) is fine for rapid exploratory analysis, but the smallest possible p-value is $1 / (n + 1)$: about .0099 with 100 surrogates, and about .001 with 1,000. A result counts as significant at $p \le .05$, so below 19 surrogates no result can be significant.
+* **Permutation Count:** For a stable p-value, we recommend at least 1,000 permutations. Using fewer (e.g., 100) is fine for rapid exploratory analysis, but the smallest possible p-value is $1 / (n + 1)$: about .0099 with 100 surrogates, and about .001 with 1,000. A result counts as significant at `p <= .05`, so below 19 surrogates no result can be significant.
 * **Power and Speed:** Surrogate analysis is "embarrassingly parallel." For heavy analyses like WDTW, always use the `future` package to distribute these 1,000+ calculations across your machine's CPU cores.
 * **Interpretation:** A significant p-value does not mean the behavior is *causal*; it only means the observed degree of synchrony is statistically unlikely to have occurred if the two participants were moving independently. For a pseudo-dyad null, it means more synchrony than with a stranger in the same setting.
 
