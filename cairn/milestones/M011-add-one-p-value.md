@@ -167,3 +167,27 @@ Evidence gathered 2026-10-05 at 75f348f (main f06719a, unmoved), NOT_CRAN=true.
 - AC5 evidence: `cairn/references/phipson2010.md` exists, and `INDEX.md` has its line. The note anchors p. 6 (formula) and p. 4 (size of b / m). DESIGN.md §6 step 3 (line 187) states the formula with the phipson2010 p. 6 citation, and the Invariant 2 paragraph (line 195) names the add-one form with that citation. All 4 wrapper roxygen blocks contain "(b + 1) / (n + 1) (Phipson & Smyth, 2010)" and "never 0". The surrogate-testing vignette (lines 45, 123) and the `generate_surrogate_pseudo()` roxygen (line 180) state the 1 / N floor and 21 dyads. A grep for `< .001` or `< 0.001` in the wcc and wdtw workflow vignettes finds 0 matches. NEWS.md line 3 has the entry. README.md was re-knit in 2d9e73d and shows 0.0693.
 - AC6 evidence: `devtools::document()` at 75f348f leaves `git status` clean. `devtools::check()` at 75f348f gives Status OK, with 0 errors, 0 warnings, and 0 notes. That check runs the full test suite, so `devtools::test()` passes too.
 - Consistency gate: `cairn_validate.py` passes all checks. `pkgdown::check_pkgdown()` reports no problems. README.md is knit from README.Rmd. The NEWS.md entry has no milestone numbers, and the doc-hygiene test passes. No new top-level files were added, so no `.Rbuildignore` change is needed. No DESIGN principle changed, so `cairn_impact` is skipped.
+- spawned: diff-bug, blame-history, prior-review
+- diff-bug #1: a zero-column surrogate matrix gave p = 1 with no message — fix now, fixed 0b040f8
+- diff-bug #2: print methods crash on an NA p-value at `if (x$p_value < 0.05)` — follow-up (already on main before M011), candidate row "Surrogate print methods at the edges"
+- diff-bug #3: `n_surrogates = NA` gave a base-R error in `autotune_wcc()` (and in `synchrony_multiverse()` on main) — fix now, fixed 0b040f8
+- diff-bug #4: `format_p_value()` followed `getOption("digits")`, so `digits = 3` printed "0.123" — fix now, fixed 0b040f8
+- diff-bug #5: the 1 / N floor holds only when all partners are used, and `keep_roles = FALSE` was not stated — fix now, fixed 0b040f8
+- diff-bug #6: the `n_surrogates` docs and DESIGN §9 did not mention the new warning — fix now, fixed 0b040f8
+- diff-bug #7: the once-per-call test did not show that the muffle leaves other warnings alone — fix now, fixed 0b040f8
+- diff-bug #8: the warning-text regex depended on cli line wrapping — fix now, fixed 0b040f8
+- diff-bug #9: the multiverse warned before its `lag_sec` check, so a call that aborts warned first — fix now, fixed 0b040f8. In `autotune_wcc()` the warning already follows its own argument checks.
+- diff-bug #10: with 10 dyads the vignette contrast holds by construction — reject (planned change: Scope names the pseudo-dyad demo and its text, and the prose says so)
+- diff-bug #11: the add-one size claim does not hold for `wdtw_surrogate(fast_method = TRUE)` — fix now, fixed 0b040f8
+- diff-bug #12: the wphase calibration test counts `<= .05` while the package uses `< .05` — follow-up, candidate row "Significance boundary for add-one p-values"
+- blame-history #1: at n = 99, b = 4 gives p = .05, which is not significant under the strict `< .05` rule, where b / n called it significant — follow-up (Scope keeps the .05 rule unchanged), candidate row "Significance boundary for add-one p-values"
+- blame-history #2: the vignette demo lost its empirical contrast — reject (planned change, same as diff-bug #10)
+- blame-history #3: the "fewer than 21 dyads" advice did not cover `keep_roles = FALSE` — fix now, fixed 0b040f8 (with diff-bug #5)
+- blame-history #4: the wrappers give no note below 20 surrogates, and DESIGN §9 and the param docs were not updated — docs part fix now, fixed 0b040f8. The wrapper note is a follow-up, candidate row "Surrogate print methods at the edges"
+- blame-history #5: tests raised to 20 surrogates keep their purpose, and the snapshot still shows 6 of 12 — reject (false: the lens itself found no defect)
+- blame-history #6: hand-edited vignette numbers cannot be reproduced because the runs are unseeded — reject (false: all three vignettes call `set.seed(2026)`, and the claim auditor reproduced the numbers)
+- blame-history #7: the print branches were replaced and nothing was undone — reject (false: no defect)
+- prior-review #1: non-ASCII characters on edited roxygen lines — reject (style, already on main; `Encoding: UTF-8` and check gives 0 notes)
+- prior-review #2: `@md` was added to only some blocks — reject (false: this follows the M009 lesson, and the candidate row was updated)
+- prior-review #3: the `n_surrogates` param docs did not mention the warning — fix now, fixed 0b040f8 (same as diff-bug #6)
+- Return floor: no finding shows an acceptance criterion failing. Diff-bug #1 is an input-validation edge case and was fixed on the branch, so status stays review. Verify after the fixes: `devtools::document()`, then the full `devtools::test()` passes (NOT_CRAN).
