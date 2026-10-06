@@ -342,8 +342,8 @@ test_that("print methods show p rounded to 4 digits, or < 0.0001", {
 })
 
 test_that("is_significant() counts p <= .05 and never NA", {
-  # (4 + 1) / (99 + 1) and 1 / 20 equal .05 exactly: division is correctly
-  # rounded, so they are the same double as the literal 0.05.
+  # (4 + 1) / (99 + 1) and 1 / 20 give the same double as the literal 0.05,
+  # because division is correctly rounded.
   expect_identical(
     is_significant(c((4 + 1) / (99 + 1), 1 / 20, 0.0501, NA_real_, 0.01)),
     c(TRUE, TRUE, FALSE, FALSE, TRUE)

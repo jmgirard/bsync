@@ -74,6 +74,8 @@ Make every surrogate significance call in bsync come from one internal p <= .05 
 - 2026-10-06: T2 done: the four print methods call shared helpers `print_significance_call()` and `print_surrogate_count_notes()` (implementation choice: one place for the NA message and both notes). The NA, p = .05, and 18/19-note tests fail against the old print code (1 error, 5 and 4 failures) and pass on the branch.
 - 2026-10-06: T3 done: the multiverse summary moved into `multiverse_robustness()` and the plot's data step into `multiverse_plot_data()` (implementation choice: internal functions the AC4 tests call directly). `warn_few_surrogates()` uses `significance_reachable()`. With the old `<` rule planted, the 18/19, AC4, and autotune tests fail. The re-recorded snapshot changes only the legend text, and its 14 points keep their colors (7 and 7).
 - 2026-10-06: T4 done: roxygen, five `man/` pages, both vignettes, and the NEWS.md development section now state p <= .05, 19 surrogates, and 20 dyads. The four AC2 sweeps give the planned output: (a) and (b) list only the helper body line and `R/wgranger.R:96,97,100`, (c) lists nothing, and (d) finds each required line.
+- 2026-10-06: T5 in progress: spelling clean after the vignette's `$p \le .05$` became code, and `devtools::test()` passes with no failures or skips. `devtools::check()` is running. Checkpoint before the claim-audit re-read and the check result.
+- 2026-10-06: claim audit: 56 claims read, 4 corrected — tests/testthat/test-surrogate.R, R/autotune.R (+ man/autotune_wcc.Rd), NEWS.md, cairn/references/phipson2010.md; also corrected the stale "below 20" in cairn/DESIGN.md:247. Re-read of the corrections pending.
 
 ## Decisions
 
