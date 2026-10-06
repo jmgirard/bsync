@@ -9,7 +9,7 @@
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** user-facing — changes the significance calls that print methods, `synchrony_multiverse()`, and `autotune_wcc()` report
-- **Branch/PR:** m012-significance-rule
+- **Branch/PR:** m012-significance-rule, https://github.com/jmgirard/bsync/pull/7
 
 ## Goal
 
