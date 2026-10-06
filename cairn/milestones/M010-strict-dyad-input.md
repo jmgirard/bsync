@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M010: Strict dyad input and named pseudo-dyad sources
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -98,7 +98,7 @@ candidate row and are not added here.
 
 - AC1 → T1
 - AC2 → T1
-- AC3 → T2
+- AC3 → T2, T4
 - AC4 → T3
 
 ## Tasks
@@ -118,6 +118,9 @@ candidate row and are not added here.
       `autotune_wcc()` only if the block gains markdown), run
       `devtools::document()`, add the NEWS entry, run `devtools::test()` and
       `devtools::check()`, style with `air format`.
+- [x] T4: (review return 1) Extend the "unnamed dyad_list" test in
+      `test-surrogate-pseudo.R` to an integer `n_surrogates` and `n_pairs`
+      draw for both generators under both `keep_roles` values.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
@@ -140,6 +143,8 @@ candidate row and are not added here.
 - 2026-10-05: the T2 commit swept in testthat failure files from the red run (`tests/testthat/_problems/`, `testthat-problems.rds`). They are removed and added to `.gitignore`.
 - 2026-10-05: claim audit: 44 claims read, 4 corrected — NEWS.md, R/autotune.R, R/surrogate_generation.R, man/*.Rd (the silent-change bullet named lists where only data frames change and missed `list(xval =, other =, yval =)`; "read and checked" narrowed to names and shape; NA names added to the naming rule). The same reader re-read the corrections and found them true, plus one stale test comment, which is now fixed. The autotune test also runs with `n_tune_dyads = 4`, so it covers the case where the bad dyad is sampled.
 - 2026-10-05: review return 1: AC3 requires the unnamed-list case under an integer `n_surrogates` / `n_pairs`, but the "unnamed dyad_list" test covers only the NULL draw for both generators. AC1, AC2, and AC4 probes are all present, and the two test files pass (42 tests, 0 failed).
+- 2026-10-05: minor amendment: T4 added for review return 1, Coverage AC3 → T2, T4.
+- 2026-10-05: T4 done. The unnamed-list test now loops over a NULL and an integer draw (`n_surrogates = 1`, `n_pairs = 3`) for both generators and both `keep_roles` values, and checks the source identity of each column or pair. The full suite passed (1806 tests). Status set to review.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->

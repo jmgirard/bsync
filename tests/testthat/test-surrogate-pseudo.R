@@ -719,16 +719,36 @@ test_that("unnamed dyad_list: name columns are NA and no names are set", {
   set.seed(313)
   dl <- make_dyads(lengths = c(20, 20, 20))
 
+  # NULL draws every partner or pairing; an integer draws a random subset.
   for (keep in c(TRUE, FALSE)) {
-    mat <- generate_surrogate_pseudo(dl, dyad = 1, keep_roles = keep)
-    expect_identical(attr(mat, "sources")$name, rep(NA_character_, ncol(mat)))
-    expect_null(colnames(mat))
+    for (n_draw in list(NULL, 1)) {
+      mat <- generate_surrogate_pseudo(
+        dl,
+        dyad = 1,
+        n_surrogates = n_draw,
+        keep_roles = keep
+      )
+      expect_identical(
+        attr(mat, "sources")$name,
+        rep(NA_character_, ncol(mat))
+      )
+      expect_null(colnames(mat))
+      expect_equal(
+        paste0(attr(mat, "sources")$dyad, attr(mat, "sources")$role),
+        column_sources(mat, dl)
+      )
 
-    pd <- generate_pseudo_dyads(dl, keep_roles = keep)
-    src <- attr(pd, "sources")
-    expect_identical(src$x_name, rep(NA_character_, nrow(src)))
-    expect_identical(src$y_name, rep(NA_character_, nrow(src)))
-    expect_null(names(pd))
+      pd <- generate_pseudo_dyads(
+        dl,
+        n_pairs = if (is.null(n_draw)) NULL else 3,
+        keep_roles = keep
+      )
+      src <- attr(pd, "sources")
+      expect_identical(src$x_name, rep(NA_character_, nrow(src)))
+      expect_identical(src$y_name, rep(NA_character_, nrow(src)))
+      expect_null(names(pd))
+      expect_samples_match_sources(pd, dl)
+    }
   }
 })
 
