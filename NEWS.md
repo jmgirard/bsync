@@ -35,6 +35,30 @@
 * The surrogate-testing vignette has a new pseudo-dyad section with a worked
   example.
 
+## Stricter `dyad_list` reading
+
+* `autotune_wcc()`, `generate_surrogate_pseudo()`, and
+  `generate_pseudo_dyads()` now read each dyad by one rule. If its names
+  contain `x` and `y` exactly once each, those elements are read by name, in
+  any position. If its names contain neither, the first two elements are
+  read. Any other use of the names `x` and `y` is an error. Names are no
+  longer matched partially, and every error names the dyad's index in
+  `dyad_list`.
+* Results change without an error for two kinds of input. A data frame or
+  list with elements named `x` and `y` that are not its first two elements,
+  in that order, is now read by name: for example, columns `time`, `x`, `y`
+  now give `x` and `y`, not `time` and `x`. A list whose names only start
+  with `x` or `y`, for example `list(yy = , xx = )`, is now read by
+  position, so `yy` becomes `x`.
+* `autotune_wcc()` reads and checks every dyad before it samples
+  `n_tune_dyads` dyads, so a malformed dyad is an error even if the sample
+  leaves it out.
+* If `dyad_list` is named, `generate_surrogate_pseudo()` and
+  `generate_pseudo_dyads()` carry the names into their output: a `name`
+  column (`x_name` and `y_name` for pseudo-dyads) in the `"sources"`
+  attribute, plus matrix column names and list element names. The names
+  must be non-empty and unique. Without names, the name columns are `NA`.
+
 # bsync 0.1.0
 
 First public release.

@@ -185,9 +185,14 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #' partners without replacement. Asking for more partners than exist is an
 #' error, because repeated partners add no information to the null.
 #'
-#' @param dyad_list A list with one element per dyad. Each element is a data
-#'   frame (first two columns are `x` and `y`) or a list (elements named `x`
-#'   and `y`, else its first two elements), the form [autotune_wcc()] reads.
+#' @param dyad_list A list with one element per dyad, the form
+#'   [autotune_wcc()] also reads. Each element is a data frame or a list. If
+#'   its names contain `x` and `y` exactly once each, those two elements are
+#'   read by name, in any position. If its names contain neither `x` nor `y`,
+#'   or it has no names, its first two elements are read as `x` and `y`. Any
+#'   other use of the names `x` and `y` is an error. Names are never matched
+#'   partially. If `dyad_list` itself is named, the names identify the dyads
+#'   in the output, so every name must be non-empty and unique.
 #' @param dyad A single integer: the index of the target dyad in `dyad_list`.
 #' @param n_surrogates `NULL` (default) to use every eligible partner, or a
 #'   single positive integer to draw that many without replacement.
@@ -195,9 +200,12 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #'   `y` series of other dyads. `FALSE` also allows their `x` series.
 #' @return A numeric matrix with `length(y)` rows and one column per partner,
 #'   ready to pass as `y_surrogates` to [wcc_surrogate()] and the other
-#'   surrogate wrappers. The attribute `"sources"` is a data frame with
-#'   columns `dyad` and `role` giving each column's source. Subsetting the
-#'   matrix drops this attribute, so read it before you subset.
+#'   surrogate wrappers. The attribute `"sources"` is a data frame with one
+#'   row per column and the columns `dyad` (the source dyad's index in
+#'   `dyad_list`), `role` (`"x"` or `"y"`), and `name` (the source dyad's name
+#'   in `dyad_list`, or `NA` if `dyad_list` has no names). If `dyad_list` is
+#'   named, the matrix column names are `"<name>:<role>"`. Subsetting the
+#'   matrix drops the attribute, so read it before you subset.
 #' @references Kleinbub, J. R., & Ramseyer, F. T. (2020). rMEA: An R package
 #'   to assess nonverbal synchronization in motion energy analysis
 #'   time-series. *Psychotherapy Research*. \doi{10.1080/10503307.2020.1844334}
@@ -359,8 +367,12 @@ generate_surrogate_pseudo <- function(
 #' @return A list of pseudo-dyads. Each element is `list(x = , y = )`, the
 #'   dyad form that [autotune_wcc()] and [generate_surrogate_pseudo()] read.
 #'   The attribute `"sources"` is a data frame with one row per pseudo-dyad
-#'   and columns `x_dyad`, `x_role`, `y_dyad`, and `y_role`. Subsetting the
-#'   list drops this attribute, so read it before you subset.
+#'   and the columns `x_dyad`, `x_role`, `x_name`, `y_dyad`, `y_role`, and
+#'   `y_name`: the index, role, and name in `dyad_list` of each series. The
+#'   name columns are `NA` if `dyad_list` has no names. If `dyad_list` is
+#'   named, the list elements are named
+#'   `"<x_name>:<x_role>|<y_name>:<y_role>"`. Subsetting the list drops the
+#'   attribute, so read it before you subset.
 #' @references Kleinbub, J. R., & Ramseyer, F. T. (2020). rMEA: An R package
 #'   to assess nonverbal synchronization in motion energy analysis
 #'   time-series. *Psychotherapy Research*. \doi{10.1080/10503307.2020.1844334}

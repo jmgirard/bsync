@@ -114,7 +114,7 @@ candidate row and are not added here.
       sibling helper) that returns the names or `NULL`. Add the name columns
       to both `"sources"` data frames after any subsample, and set the matrix
       column names and list element names.
-- [ ] T3: Update the roxygen (`@md` is already on both generators; add it to
+- [x] T3: Update the roxygen (`@md` is already on both generators; add it to
       `autotune_wcc()` only if the block gains markdown), run
       `devtools::document()`, add the NEWS entry, run `devtools::test()` and
       `devtools::check()`, style with `air format`.
@@ -136,6 +136,7 @@ candidate row and are not added here.
 - 2026-10-05: T1 done. `.extract_xy(dyad, index)` applies the exact-name-else-position rule with abort messages that name the dyad index; `autotune_wcc()` extracts every dyad before sampling. New tests saw red first (7 failures), then the full suite passed (1579 tests). `air` restyled untouched code in `R/autotune.R` and `test-autotune.R`, which were never air-clean, so that restyle was dropped to keep the diff focused.
 - 2026-10-05: T2 done. New helper `.pseudo_dyad_names()` returns the names or NULL and aborts on empty, NA, or repeated names. Both generators add the name columns after any draw. On the pre-T2 code the new tests failed (45 failures), and on the new code the full suite passed (1710 tests). The M009 test that pinned the 4-column `generate_pseudo_dyads()` "sources" schema now pins the 6-column schema (AC3).
 - 2026-10-05: implementation choice: in `generate_pseudo_dyads()` the "sources" data frame is rebuilt with the name columns placed after each role column, which gives the AC3 column order.
+- 2026-10-05: T3 done. Roxygen for `dyad_list` (both generators and `autotune_wcc()`) and the two `@return` blocks updated. `autotune_wcc()` stays without `@md` and uses `\code{}`. NEWS has a "Stricter `dyad_list` reading" section. `devtools::document()` is clean on a second run, `devtools::check()` gives 0 errors, 0 warnings, 0 notes, and `spelling::spell_check_package()` finds nothing. `R/autotune.R` is still not air-clean, as it was on main.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->
