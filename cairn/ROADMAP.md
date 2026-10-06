@@ -1,17 +1,16 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M012)._
-_Last hygiene check: 2026-10-06 (M011 merged and archived, M008 row pruned, 2 lessons added, 3 candidate rows added in M011, validate green)_
+_Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M013)._
+_Last hygiene check: 2026-10-06 (M012 merged and archived, M009 row pruned, 1 lesson added, 2 candidate rows added in M012, validate green)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M012 | One significance rule (p <= .05) and surrogate print edges | review | — | normal | milestones/M012-significance-rule.md |
+| M012 | One significance rule (p <= .05) and surrogate print edges | done | — | normal | milestones/archive/M012-significance-rule.md |
 | M011 | Add-one surrogate p-values | done | — | normal | milestones/archive/M011-add-one-p-value.md |
 | M010 | Strict dyad input and named pseudo-dyad sources | done | — | normal | milestones/archive/M010-strict-dyad-input.md |
-| M009 | Pseudo-dyad surrogate generators | done | — | normal | milestones/archive/M009-pseudo-dyad-generators.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent
      terminal (done or dropped) rows — older ones live in milestones/archive/ + git -->
 
