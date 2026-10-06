@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M010: Strict dyad input and named pseudo-dyad sources
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -139,6 +139,7 @@ candidate row and are not added here.
 - 2026-10-05: T3 done. Roxygen for `dyad_list` (both generators and `autotune_wcc()`) and the two `@return` blocks updated. `autotune_wcc()` stays without `@md` and uses `\code{}`. NEWS has a "Stricter `dyad_list` reading" section. `devtools::document()` is clean on a second run, `devtools::check()` gives 0 errors, 0 warnings, 0 notes, and `spelling::spell_check_package()` finds nothing. `R/autotune.R` is still not air-clean, as it was on main.
 - 2026-10-05: the T2 commit swept in testthat failure files from the red run (`tests/testthat/_problems/`, `testthat-problems.rds`). They are removed and added to `.gitignore`.
 - 2026-10-05: claim audit: 44 claims read, 4 corrected — NEWS.md, R/autotune.R, R/surrogate_generation.R, man/*.Rd (the silent-change bullet named lists where only data frames change and missed `list(xval =, other =, yval =)`; "read and checked" narrowed to names and shape; NA names added to the naming rule). The same reader re-read the corrections and found them true, plus one stale test comment, which is now fixed. The autotune test also runs with `n_tune_dyads = 4`, so it covers the case where the bad dyad is sampled.
+- 2026-10-05: review return 1: AC3 requires the unnamed-list case under an integer `n_surrogates` / `n_pairs`, but the "unnamed dyad_list" test covers only the NULL draw for both generators. AC1, AC2, and AC4 probes are all present, and the two test files pass (42 tests, 0 failed).
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->
