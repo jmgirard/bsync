@@ -154,11 +154,11 @@ print(surrogate_results)
 #> Permutations: 1000
 #> Observed Mean Cost: 27.1612
 #> Average Null Cost: 57.2509
-#> Empirical p-value: < 0.001
+#> Empirical p-value: 0.001
 #> ✔ Observed cost is significantly lower than chance (stronger alignment).
 ```
 
-The output gives us an empirical p-value by calculating the proportion of surrogate distance costs that are less than or equal to our observed distance cost. Because WDTW calculates a distance metric rather than a correlation, lower values indicate stronger synchronization. Our observed cost (27.16) was less than half the average chance cost (57.25) and was lower than all 1,000 phase-randomized permutations. Therefore, the empirical p-value is reported as < 0.001. This statistically confirms that the shape matching we observed between Person A and Person B is driven by genuine interactive behavior.
+The output gives us an empirical p-value of (b + 1) / (n + 1), where n is the number of surrogates and b counts the surrogate distance costs that are less than or equal to our observed distance cost. The `+ 1` counts the observed data as one more draw from the null, so the p-value is never 0. Because WDTW calculates a distance metric rather than a correlation, lower values indicate stronger synchronization. Our observed cost (27.16) was less than half the average chance cost (57.25) and was lower than all 1,000 phase-randomized permutations. So b = 0, and the empirical p-value is 1 / 1001, printed as 0.001. This is the smallest p-value that 1,000 surrogates can give. This statistically confirms that the shape matching we observed between Person A and Person B is driven by genuine interactive behavior.
 
 Notice that for WDTW, a smaller cost indicates stronger synchrony. The print method automatically adjusts its logic to test if your observed cost is significantly lower than the null distribution.
 

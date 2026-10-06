@@ -19,9 +19,9 @@ wgranger_surrogate(
 
 \item{y}{A numeric vector containing a time series.}
 
-\item{y_surrogates}{A matrix of surrogate time series for `y` (columns are surrogates).}
+\item{y_surrogates}{A matrix of surrogate time series for \code{y} (columns are surrogates).}
 
-\item{time}{An optional numeric vector representing the timestamps for the data. Default is `NULL`.}
+\item{time}{An optional numeric vector representing the timestamps for the data. Default is \code{NULL}.}
 
 \item{window_size}{A positive integer indicating the size of the rolling window.}
 
@@ -36,11 +36,14 @@ A list object of class "wgranger_surr".
 Calculate Surrogate Windowed Granger Causality
 }
 \details{
-Two p-values are returned: one for x → y and one for y → x. Each is the proportion of
-surrogates whose mean F-statistic across windows is **at least as large as** the
-corresponding observed mean F-statistic. Both null distributions are built with the same
-aggregate (`mean(f_xy)` and `mean(f_yx)`) as the observed statistics stored in
-`wgranger_res$results_df`, so the null and observed values are directly comparable.
+Two p-values are returned: one for x → y and one for y → x. Each is the add-one form
+p = (b + 1) / (n + 1) (Phipson & Smyth, 2010), where n is the number of surrogate columns
+and b is the number of surrogates whose mean F-statistic across windows is \strong{at least as
+large as} the corresponding observed mean F-statistic. The \code{+ 1} counts the observed
+data as one more draw from the null, so neither p-value is ever 0. The smallest value is
+1 / (n + 1). Both null distributions are built with the same
+aggregate (\code{mean(f_xy)} and \code{mean(f_yx)}) as the observed statistics stored in
+\code{wgranger_res$results_df}, so the null and observed values are directly comparable.
 }
 \examples{
 \donttest{
@@ -53,4 +56,10 @@ res <- wgranger_surrogate(
 )
 res
 }
+}
+\references{
+Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never be
+zero: calculating exact p-values when permutations are randomly drawn. \emph{Statistical
+Applications in Genetics and Molecular Biology}, 9(1), Article 39.
+\doi{10.2202/1544-6115.1585}
 }

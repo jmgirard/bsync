@@ -135,7 +135,7 @@ surrogate_results <- wgranger_surrogate(
 print(surrogate_results)
 ```
 
-The output provides empirical p-values by calculating the proportion of surrogate mean F-statistics that meet or exceed our observed mean F-statistics. In our simulated interaction, leadership was split evenly: Person A led for the first half and Person B led for the second half. As a result, the analysis correctly identifies significant predictive power in both directions over the course of the overall interaction. The observed F-statistics (161.27 and 134.87) vastly outperform the chance baseline (roughly 1.87), resulting in highly significant empirical p-values for both the x -> y and y -> x directions.
+The output provides an empirical p-value for each direction as (b + 1) / (n + 1), where n is the number of surrogates and b counts the surrogate mean F-statistics that meet or exceed the observed mean F-statistic. The `+ 1` counts the observed data as one more draw from the null, so the p-value is never 0, and its smallest value with 1,000 surrogates is 1 / 1001. In our simulated interaction, leadership was split evenly: Person A led for the first half and Person B led for the second half. As a result, the analysis correctly identifies significant predictive power in both directions over the course of the overall interaction. The observed F-statistics (161.27 and 134.87) vastly outperform the chance baseline (roughly 1.87), resulting in highly significant empirical p-values for both the x -> y and y -> x directions.
 
 ## 5. Visualizing the Results
 

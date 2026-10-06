@@ -23,9 +23,9 @@ wdtw_surrogate(
 
 \item{y}{A numeric vector containing the query time series.}
 
-\item{y_surrogates}{A matrix of surrogate time series for `y` (columns are surrogates).}
+\item{y_surrogates}{A matrix of surrogate time series for \code{y} (columns are surrogates).}
 
-\item{time}{An optional numeric vector representing the timestamps for the data. Default is `NULL`.}
+\item{time}{An optional numeric vector representing the timestamps for the data. Default is \code{NULL}.}
 
 \item{window_size}{A positive integer indicating the size of the rolling window.}
 
@@ -35,12 +35,12 @@ wdtw_surrogate(
 
 \item{lag_increment}{A positive integer indicating the lag shift increment. Default is 1.}
 
-\item{scale_method}{Character string specifying how to standardize the data. Default is `"global"`.}
+\item{scale_method}{Character string specifying how to standardize the data. Default is \code{"global"}.}
 
-\item{distance_metric}{Character string specifying the local cost function. Default is `"L2"`.}
+\item{distance_metric}{Character string specifying the local cost function. Default is \code{"L2"}.}
 
-\item{fast_method}{Logical. If `TRUE`, severely reduces computation time by only evaluating
-surrogate alignments at lag 0. **See Details for the statistical caveat.** Default is `FALSE`.}
+\item{fast_method}{Logical. If \code{TRUE}, severely reduces computation time by only evaluating
+surrogate alignments at lag 0. \strong{See Details for the statistical caveat.} Default is \code{FALSE}.}
 }
 \value{
 A list object of class "wdtw_surr".
@@ -49,13 +49,16 @@ A list object of class "wdtw_surr".
 Calculate Surrogate Windowed Dynamic Time Warping (WDTW)
 }
 \details{
-The p-value is the proportion of surrogates whose aggregate statistic is **at most as
-large as** the observed statistic (lower DTW distance = better alignment). The aggregate
-is `mean(dtw_dist)` over all window × lag combinations — the same quantity stored in
-`wdtw_res$aggregate[["mean_distance"]]` — computed identically on both the observed data and every
+The p-value is the add-one form p = (b + 1) / (n + 1) (Phipson & Smyth, 2010), where n
+is the number of surrogate columns and b is the number of surrogates whose aggregate
+statistic is \strong{at most as large as} the observed statistic (lower DTW distance = better
+alignment). The \code{+ 1} counts the observed data as one more draw from the null, so the
+p-value is never 0. Its smallest value is 1 / (n + 1). The aggregate
+is \code{mean(dtw_dist)} over all window × lag combinations — the same quantity stored in
+\code{wdtw_res$aggregate[["mean_distance"]]} — computed identically on both the observed data and every
 surrogate, so the null distribution and the observed value are directly comparable.
 
-**`fast_method` warning:** when `fast_method = TRUE`, surrogates are evaluated at lag 0
+\strong{\code{fast_method} warning:} when \code{fast_method = TRUE}, surrogates are evaluated at lag 0
 only, while the observed statistic is computed over all lags. The null and observed
 aggregates therefore cover different lag ranges, making the resulting p-value
 approximate. Use only for quick exploratory checks, never for reporting.
@@ -77,4 +80,10 @@ res <- wdtw_surrogate(
 )
 res
 }
+}
+\references{
+Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never be
+zero: calculating exact p-values when permutations are randomly drawn. \emph{Statistical
+Applications in Genetics and Molecular Biology}, 9(1), Article 39.
+\doi{10.2202/1544-6115.1585}
 }

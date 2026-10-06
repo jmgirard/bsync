@@ -481,7 +481,7 @@ synchrony_multiverse <- function(
   } else {
     NA_real_
   }
-  # p = proportion of surrogates <= obs (lower tail)
+  # p = (b + 1) / (n + 1), b = surrogates with cost <= obs (lower tail)
   p <- surr_res$p_value
   n_r <- build_surface_grid(
     n_x = length(x), window_size = window_size,

@@ -20,9 +20,9 @@ wphase_surrogate(
 
 \item{y}{A numeric vector containing a time series.}
 
-\item{y_surrogates}{A matrix of surrogate time series for `y` (columns are surrogates).}
+\item{y_surrogates}{A matrix of surrogate time series for \code{y} (columns are surrogates).}
 
-\item{time}{An optional numeric vector representing the timestamps for the data. Default is `NULL`.}
+\item{time}{An optional numeric vector representing the timestamps for the data. Default is \code{NULL}.}
 
 \item{window_size}{A positive integer indicating the size of each window.}
 
@@ -39,18 +39,21 @@ A list object of class "wphase_surr".
 Calculate Surrogate Windowed Phase Synchrony
 }
 \details{
-The p-value is the proportion of surrogates whose aggregate statistic is **at least as
-large as** the observed statistic. The aggregate -- the mean phase-locking value over
-all window x lag combinations (`mean_plv`) -- is computed identically on the observed
+The p-value is the add-one form p = (b + 1) / (n + 1) (Phipson & Smyth, 2010), where n
+is the number of surrogate columns and b is the number of surrogates whose aggregate
+statistic is \strong{at least as large as} the observed statistic. The \code{+ 1} counts the
+observed data as one more draw from the null, so the p-value is never 0. Its smallest
+value is 1 / (n + 1). The aggregate -- the mean phase-locking value over
+all window x lag combinations (\code{mean_plv}) -- is computed identically on the observed
 data and every surrogate via the same internal helper, so the null distribution and
 the observed value are directly comparable (Invariant 2: surrogate nulls match the
 observed statistic).
 
-Phase extraction (the analytic signal via `gsignal::hilbert()`) is applied to each
+Phase extraction (the analytic signal via \code{gsignal::hilbert()}) is applied to each
 surrogate column exactly as to the observed series. Circular-shift surrogates
-([generate_surrogate_circular()]) preserve each series' own phase continuity while
+(\code{\link[=generate_surrogate_circular]{generate_surrogate_circular()}}) preserve each series' own phase continuity while
 breaking cross-series alignment, which makes them a natural null for a phase
-statistic; phase-randomization surrogates ([generate_surrogate_phase()]) instead
+statistic; phase-randomization surrogates (\code{\link[=generate_surrogate_phase]{generate_surrogate_phase()}}) instead
 destroy the surrogate's phase structure itself -- state which null you are testing.
 }
 \examples{
@@ -66,4 +69,10 @@ res <- wphase_surrogate(
 )
 res
 }
+}
+\references{
+Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never be
+zero: calculating exact p-values when permutations are randomly drawn. \emph{Statistical
+Applications in Genetics and Molecular Biology}, 9(1), Article 39.
+\doi{10.2202/1544-6115.1585}
 }
