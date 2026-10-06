@@ -2,14 +2,14 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M012: One significance rule (p <= .05) and surrogate print edges
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** user-facing — changes the significance calls that print methods, `synchrony_multiverse()`, and `autotune_wcc()` report
-- **Branch/PR:** —
+- **Branch/PR:** m012-significance-rule
 
 ## Goal
 
@@ -55,7 +55,7 @@ Make every surrogate significance call in bsync come from one internal p <= .05 
 
 ## Tasks
 
-- [ ] T1: Add `is_significant()` in `R/surrogate_analysis.R` beside `format_p_value()`, with a comment citing phipson2010 and D-002, and its unit test (AC1). Keep `0.05` out of the comment so sweep (a) finds one line.
+- [x] T1: Add `is_significant()` in `R/surrogate_analysis.R` beside `format_p_value()`, with a comment citing phipson2010 and D-002, and its unit test (AC1). Keep `0.05` out of the comment so sweep (a) finds one line.
 - [ ] T2: Route the five comparisons in the four print methods through `is_significant()`. Add the NA-p message and the few-surrogates note to each. Extend the `mock_surr()` tests in `tests/testthat/test-surrogate.R` per class, asserting with `expect_message` (cli writes to the message stream). The existing `< 1000` note prints at 18 and at 19, so match the new note by its own text.
 - [ ] T3: Route `R/multiverse.R:398,412`, `R/multiverse_plot.R:46`, and `R/autotune.R:338` through the helper, with the AC4 tests. Move `warn_few_surrogates()` (`R/multiverse.R:24,32`) to 19 and update its message and comment. Update the labels at `R/multiverse.R:566` and `R/multiverse_plot.R:63`. Rewrite the test at `tests/testthat/test-multiverse.R:52` for 18 and 19, and add the `autotune_wcc()` case. Re-record the vdiffr snapshot `_snaps/multiverse/multiverse-spec-curve.svg` and make sure that its diff changes only the legend label.
 - [ ] T4: Update roxygen (`R/multiverse.R:87`, `R/autotune.R:83-90,289`, `R/multiverse_plot.R:14,18`, `R/surrogate_generation.R:177-187`), then run `devtools::document()`. Update `vignettes/surrogate-testing.Rmd` (lines 45, 117, 123, 153, including the code `sum(p_circular < 0.05)`) and `vignettes/choosing-parameters.Rmd:214`. Rewrite the NEWS.md development entries in place. State the new rule without quoting the old `<` form, because sweep (b) covers NEWS.md.
@@ -70,6 +70,7 @@ Make every surrogate significance call in bsync come from one internal p <= .05 
 - 2026-10-06: plan gate chose a print-time note over a call-time warning in the four wrappers because a call-time warning fires once per dyad in a pseudo-dyad loop; falsified by a user report of an unreachable p-value read from a wrapper without printing it.
 - 2026-10-06: lessons surfaced: cli output asserts with expect_message (M008). `R/autotune.R` and `tests/testthat/test-autotune.R` are not air-clean (M010). New words need `inst/WORDLIST` (M011). Vignettes need `plan(sequential)` under `load_all()` (M011).
 - 2026-10-06: criteria audit (full mode, fresh Opus reader) returned 11 findings, all fixed. AC1 adds a vector probe. Old AC2 and AC3 merge into one sweep AC with a one-line helper rule, a wider threshold pattern, and positive checks for the new text. New AC4 tests the multiverse, plot, and `select_specification()` counts. AC3 adds `autotune_wcc()`. AC5 adds the both-NA wgranger case and direction naming. AC6 tests both wgranger directions and matches the new note by text. T3 re-records the vdiffr snapshot. T4 names the vignette code lines and NEWS wording. D-002 is written in the plan commit. The audit found no Invariant conflict and no float issue at p = .05.
+- 2026-10-06: T1 done: `is_significant()` and `significance_reachable()` added in `R/surrogate_analysis.R`, with a unit test. Planting the old `<` rule makes the AC1 assertion fail. `R/surrogate_analysis.R` and `tests/testthat/test-surrogate.R` were not air-clean before the edit, so air is not run on them.
 
 ## Decisions
 

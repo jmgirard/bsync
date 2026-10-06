@@ -341,6 +341,16 @@ test_that("print methods show p rounded to 4 digits, or < 0.0001", {
   expect_identical(printed_p_values(mock_surr("wcc_surr", 0.123456)), "0.1235")
 })
 
+test_that("is_significant() counts p <= .05 and never NA", {
+  # (4 + 1) / (99 + 1) and 1 / 20 equal .05 exactly: division is correctly
+  # rounded, so they are the same double as the literal 0.05.
+  expect_identical(
+    is_significant(c((4 + 1) / (99 + 1), 1 / 20, 0.0501, NA_real_, 0.01)),
+    c(TRUE, TRUE, FALSE, FALSE, TRUE)
+  )
+  expect_identical(significance_reachable(c(18, 19, 100)), c(FALSE, TRUE, TRUE))
+})
+
 test_that("a surrogate matrix with no columns aborts in every wrapper", {
   # (0 + 1) / (0 + 1) would report p = 1 as if it were a result.
   x <- rnorm(60)

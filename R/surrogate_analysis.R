@@ -584,6 +584,20 @@ format_p_value <- function(p) {
   format(p_round, scientific = FALSE, digits = 15)
 }
 
+# The one significance rule for add-one surrogate p-values (D-002). The size of
+# a Monte Carlo test is P(p <= alpha), and the add-one p-value keeps it at or
+# below alpha (phipson2010, pp. 4, 6), so a p-value equal to alpha passes. An
+# NA p-value is never significant. Vectorized for the multiverse callers.
+is_significant <- function(p) {
+  !is.na(p) & p <= 0.05
+}
+
+# The smallest add-one p-value is 1 / (n_surrogates + 1). It reaches .05 at
+# 19 surrogates, so below that no result can be significant.
+significance_reachable <- function(n_surrogates) {
+  is_significant(1 / (n_surrogates + 1))
+}
+
 #' Print method for wcc_surr objects
 #'
 #' @param x An object of class "wcc_surr".
