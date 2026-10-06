@@ -211,13 +211,13 @@ pseudo <- generate_pseudo_dyads(coupled)
 length(pseudo)
 #> [1] 90
 head(attr(pseudo, "sources"))
-#>   x_dyad x_role y_dyad y_role
-#> 1      1      x      2      y
-#> 2      1      x      3      y
-#> 3      1      x      4      y
-#> 4      1      x      5      y
-#> 5      1      x      6      y
-#> 6      1      x      7      y
+#>   x_dyad x_role x_name y_dyad y_role y_name
+#> 1      1      x   <NA>      2      y   <NA>
+#> 2      1      x   <NA>      3      y   <NA>
+#> 3      1      x   <NA>      4      y   <NA>
+#> 4      1      x   <NA>      5      y   <NA>
+#> 5      1      x   <NA>      6      y   <NA>
+#> 6      1      x   <NA>      7      y   <NA>
 
 mean_abs_z <- function(d) {
   wcc(d$x, d$y, window_size = 100, lag_max = 20, window_increment = 25)$aggregate[[1]]

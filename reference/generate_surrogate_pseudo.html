@@ -88,9 +88,14 @@ specific to the real interaction.</p>
 
 
 <dl><dt id="arg-dyad-list">dyad_list<a class="anchor" aria-label="anchor" href="#arg-dyad-list"></a></dt>
-<dd><p>A list with one element per dyad. Each element is a data
-frame (first two columns are <code>x</code> and <code>y</code>) or a list (elements named <code>x</code>
-and <code>y</code>, else its first two elements), the form <code><a href="autotune_wcc.html">autotune_wcc()</a></code> reads.</p></dd>
+<dd><p>A list with one element per dyad, the form
+<code><a href="autotune_wcc.html">autotune_wcc()</a></code> also reads. Each element is a data frame or a list. If
+its names contain <code>x</code> and <code>y</code> exactly once each, those two elements are
+read by name, in any position. If its names contain neither <code>x</code> nor <code>y</code>,
+or it has no names, its first two elements are read as <code>x</code> and <code>y</code>. Any
+other use of the names <code>x</code> and <code>y</code> is an error. Names are never matched
+partially. If <code>dyad_list</code> itself is named, the names identify the dyads
+in the output, so every name must be non-empty, not <code>NA</code>, and unique.</p></dd>
 
 
 <dt id="arg-dyad">dyad<a class="anchor" aria-label="anchor" href="#arg-dyad"></a></dt>
@@ -111,9 +116,12 @@ single positive integer to draw that many without replacement.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A numeric matrix with <code>length(y)</code> rows and one column per partner,
 ready to pass as <code>y_surrogates</code> to <code><a href="wcc_surrogate.html">wcc_surrogate()</a></code> and the other
-surrogate wrappers. The attribute <code>"sources"</code> is a data frame with
-columns <code>dyad</code> and <code>role</code> giving each column's source. Subsetting the
-matrix drops this attribute, so read it before you subset.</p>
+surrogate wrappers. The attribute <code>"sources"</code> is a data frame with one
+row per column and the columns <code>dyad</code> (the source dyad's index in
+<code>dyad_list</code>), <code>role</code> (<code>"x"</code> or <code>"y"</code>), and <code>name</code> (the source dyad's name
+in <code>dyad_list</code>, or <code>NA</code> if <code>dyad_list</code> has no names). If <code>dyad_list</code> is
+named, the matrix column names are <code>"&lt;name&gt;:&lt;role&gt;"</code>. Subsetting the
+matrix drops the attribute, so read it before you subset.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -178,9 +186,9 @@ pseudo-dyads; <code><a href="generate_surrogate_circular.html">generate_surrogat
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">y_pseudo</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2400    2</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">y_pseudo</span>, <span class="st">"sources"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   dyad role</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1    1    y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2    2    y</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   dyad role name</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    1    y &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    2    y &lt;NA&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Test dyad 3 against partners from the other dyads</span></span></span>

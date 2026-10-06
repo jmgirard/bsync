@@ -72,6 +72,15 @@
 <strong><code><a href="../reference/generate_pseudo_dyads.html">generate_pseudo_dyads()</a></code></strong> — builds the sample-wide set of pseudo-dyads (every pairing of series from different dyads, or a random subset), each in the <code>list(x, y)</code> form, for comparing real dyads to pseudo-dyads. Both generators keep partner roles by default (<code>keep_roles = TRUE</code>), because the lead-lag sign depends on which series is <code>x</code>.</li>
 <li>The surrogate-testing vignette has a new pseudo-dyad section with a worked example.</li>
 </ul></div>
+<div class="section level3">
+<h3 id="stricter-dyad_list-reading-development-version">Stricter <code>dyad_list</code> reading<a class="anchor" aria-label="anchor" href="#stricter-dyad_list-reading-development-version"></a></h3>
+<ul><li>
+<code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code>, <code><a href="../reference/generate_surrogate_pseudo.html">generate_surrogate_pseudo()</a></code>, and <code><a href="../reference/generate_pseudo_dyads.html">generate_pseudo_dyads()</a></code> now read each dyad by one rule. If its names contain <code>x</code> and <code>y</code> exactly once each, those elements are read by name, in any position. If its names contain neither, the first two elements are read. Any other use of the names <code>x</code> and <code>y</code> is an error. Names are no longer matched partially, and every error about a dyad’s names or shape names the dyad’s index in <code>dyad_list</code>.</li>
+<li>Results change without an error for two kinds of input. A data frame with columns named <code>x</code> and <code>y</code> that are not its first two columns, in that order (for example <code>y, x</code> or <code>time, x, y</code>), is now read by name. Data frames used to be read by position. A list whose names only start with <code>x</code> or <code>y</code>, for example <code>list(yy = , xx = )</code> or <code>list(xval = , other = , yval = )</code>, used to be matched partially and is now read by position.</li>
+<li>
+<code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code> reads every dyad and checks its names and shape before it samples <code>n_tune_dyads</code> dyads. A dyad with an unusable naming or shape is now an error even if the sample leaves it out. A single data frame passed as <code>dyad_list</code> is now an error that says to wrap it in a list.</li>
+<li>If <code>dyad_list</code> is named, <code><a href="../reference/generate_surrogate_pseudo.html">generate_surrogate_pseudo()</a></code> and <code><a href="../reference/generate_pseudo_dyads.html">generate_pseudo_dyads()</a></code> carry the names into their output: a <code>name</code> column (<code>x_name</code> and <code>y_name</code> for pseudo-dyads) in the <code>"sources"</code> attribute, plus matrix column names and list element names. The names must be non-empty, not <code>NA</code>, and unique. Without names, the name columns are <code>NA</code>.</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="bsync-010">bsync 0.1.0<a class="anchor" aria-label="anchor" href="#bsync-010"></a></h2>

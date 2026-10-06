@@ -28,9 +28,13 @@ autotune_wcc(
 
 - dyad_list:
 
-  A list of data frames or lists. Each element represents one dyad and
-  must have at least two numeric columns (or two named list elements
-  \`x\` and \`y\`) containing the two time series.
+  A list of data frames or lists, one element per dyad. If an element's
+  names contain `x` and `y` exactly once each, those two elements are
+  read by name, in any position. If its names contain neither `x` nor
+  `y`, or it has no names, its first two elements are read as `x` and
+  `y`. Any other use of the names `x` and `y` is an error. Names are
+  never matched partially. The names and shape of every dyad are checked
+  before any dyads are sampled.
 
 - sample_rate:
 

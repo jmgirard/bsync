@@ -80,9 +80,14 @@ recorded under the same task (Kleinbub &amp; Ramseyer, 2020).</p>
 
 
 <dl><dt id="arg-dyad-list">dyad_list<a class="anchor" aria-label="anchor" href="#arg-dyad-list"></a></dt>
-<dd><p>A list with one element per dyad. Each element is a data
-frame (first two columns are <code>x</code> and <code>y</code>) or a list (elements named <code>x</code>
-and <code>y</code>, else its first two elements), the form <code><a href="autotune_wcc.html">autotune_wcc()</a></code> reads.</p></dd>
+<dd><p>A list with one element per dyad, the form
+<code><a href="autotune_wcc.html">autotune_wcc()</a></code> also reads. Each element is a data frame or a list. If
+its names contain <code>x</code> and <code>y</code> exactly once each, those two elements are
+read by name, in any position. If its names contain neither <code>x</code> nor <code>y</code>,
+or it has no names, its first two elements are read as <code>x</code> and <code>y</code>. Any
+other use of the names <code>x</code> and <code>y</code> is an error. Names are never matched
+partially. If <code>dyad_list</code> itself is named, the names identify the dyads
+in the output, so every name must be non-empty, not <code>NA</code>, and unique.</p></dd>
 
 
 <dt id="arg-n-pairs">n_pairs<a class="anchor" aria-label="anchor" href="#arg-n-pairs"></a></dt>
@@ -100,8 +105,14 @@ the <code>y</code> of another. <code>FALSE</code> pairs any two series from diff
     <p>A list of pseudo-dyads. Each element is <code>list(x = , y = )</code>, the
 dyad form that <code><a href="autotune_wcc.html">autotune_wcc()</a></code> and <code><a href="generate_surrogate_pseudo.html">generate_surrogate_pseudo()</a></code> read.
 The attribute <code>"sources"</code> is a data frame with one row per pseudo-dyad
-and columns <code>x_dyad</code>, <code>x_role</code>, <code>y_dyad</code>, and <code>y_role</code>. Subsetting the
-list drops this attribute, so read it before you subset.</p>
+and the columns <code>x_dyad</code>, <code>x_role</code>, <code>x_name</code>, <code>y_dyad</code>, <code>y_role</code>, and
+<code>y_name</code>: the index, role, and name in <code>dyad_list</code> of each series. The
+name columns are <code>NA</code> if <code>dyad_list</code> has no names. If <code>dyad_list</code> is
+named, the list elements are named
+<code>"&lt;x_name&gt;:&lt;x_role&gt;|&lt;y_name&gt;:&lt;y_role&gt;"</code>. These element names are labels:
+if dyad names contain <code>:</code> or <code>|</code>, two labels can be equal, and the list
+cannot then be passed back as a named <code>dyad_list</code>. Subsetting the list
+drops the attribute, so read it before you subset.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -153,13 +164,13 @@ pseudo-dyad.</p></div>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pseudo</span><span class="op">)</span> <span class="co"># 3 * 2 = 6 role-keeping pairings</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">pseudo</span>, <span class="st">"sources"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   x_dyad x_role y_dyad y_role</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      1      x      2      y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      1      x      3      y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3      2      x      1      y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4      2      x      3      y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5      3      x      1      y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6      3      x      2      y</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   x_dyad x_role x_name y_dyad y_role y_name</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      1      x   &lt;NA&gt;      2      y   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      1      x   &lt;NA&gt;      3      y   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3      2      x   &lt;NA&gt;      1      y   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4      2      x   &lt;NA&gt;      3      y   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5      3      x   &lt;NA&gt;      1      y   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6      3      x   &lt;NA&gt;      2      y   &lt;NA&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Mean |Fisher z| on each pseudo-dyad: the pseudo-synchrony baseline</span></span></span>
 <span class="r-in"><span><span class="va">pseudo_z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">pseudo</span>, <span class="kw">function</span><span class="op">(</span><span class="va">d</span><span class="op">)</span> <span class="op">{</span></span></span>

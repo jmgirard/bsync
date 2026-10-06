@@ -16,11 +16,16 @@ generate_pseudo_dyads(dyad_list, n_pairs = NULL, keep_roles = TRUE)
 
 - dyad_list:
 
-  A list with one element per dyad. Each element is a data frame (first
-  two columns are `x` and `y`) or a list (elements named `x` and `y`,
-  else its first two elements), the form
+  A list with one element per dyad, the form
   [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
-  reads.
+  also reads. Each element is a data frame or a list. If its names
+  contain `x` and `y` exactly once each, those two elements are read by
+  name, in any position. If its names contain neither `x` nor `y`, or it
+  has no names, its first two elements are read as `x` and `y`. Any
+  other use of the names `x` and `y` is an error. Names are never
+  matched partially. If `dyad_list` itself is named, the names identify
+  the dyads in the output, so every name must be non-empty, not `NA`,
+  and unique.
 
 - n_pairs:
 
@@ -40,8 +45,14 @@ form that
 and
 [`generate_surrogate_pseudo()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_pseudo.md)
 read. The attribute `"sources"` is a data frame with one row per
-pseudo-dyad and columns `x_dyad`, `x_role`, `y_dyad`, and `y_role`.
-Subsetting the list drops this attribute, so read it before you subset.
+pseudo-dyad and the columns `x_dyad`, `x_role`, `x_name`, `y_dyad`,
+`y_role`, and `y_name`: the index, role, and name in `dyad_list` of each
+series. The name columns are `NA` if `dyad_list` has no names. If
+`dyad_list` is named, the list elements are named
+`"<x_name>:<x_role>|<y_name>:<y_role>"`. These element names are labels:
+if dyad names contain `:` or `|`, two labels can be equal, and the list
+cannot then be passed back as a named `dyad_list`. Subsetting the list
+drops the attribute, so read it before you subset.
 
 ## Details
 
@@ -107,13 +118,13 @@ pseudo <- generate_pseudo_dyads(dyads)
 length(pseudo) # 3 * 2 = 6 role-keeping pairings
 #> [1] 6
 attr(pseudo, "sources")
-#>   x_dyad x_role y_dyad y_role
-#> 1      1      x      2      y
-#> 2      1      x      3      y
-#> 3      2      x      1      y
-#> 4      2      x      3      y
-#> 5      3      x      1      y
-#> 6      3      x      2      y
+#>   x_dyad x_role x_name y_dyad y_role y_name
+#> 1      1      x   <NA>      2      y   <NA>
+#> 2      1      x   <NA>      3      y   <NA>
+#> 3      2      x   <NA>      1      y   <NA>
+#> 4      2      x   <NA>      3      y   <NA>
+#> 5      3      x   <NA>      1      y   <NA>
+#> 6      3      x   <NA>      2      y   <NA>
 
 # Mean |Fisher z| on each pseudo-dyad: the pseudo-synchrony baseline
 pseudo_z <- vapply(pseudo, function(d) {

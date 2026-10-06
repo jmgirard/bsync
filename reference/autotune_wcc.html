@@ -89,9 +89,13 @@ a gated stability-penalized selection rule via [select_specification()].</p>
 
 
 <dl><dt id="arg-dyad-list">dyad_list<a class="anchor" aria-label="anchor" href="#arg-dyad-list"></a></dt>
-<dd><p>A list of data frames or lists. Each element represents one
-dyad and must have at least two numeric columns (or two named list elements
-`x` and `y`) containing the two time series.</p></dd>
+<dd><p>A list of data frames or lists, one element per dyad. If
+an element's names contain <code>x</code> and <code>y</code> exactly once each, those
+two elements are read by name, in any position. If its names contain
+neither <code>x</code> nor <code>y</code>, or it has no names, its first two elements
+are read as <code>x</code> and <code>y</code>. Any other use of the names <code>x</code>
+and <code>y</code> is an error. Names are never matched partially. The names
+and shape of every dyad are checked before any dyads are sampled.</p></dd>
 
 
 <dt id="arg-sample-rate">sample_rate<a class="anchor" aria-label="anchor" href="#arg-sample-rate"></a></dt>

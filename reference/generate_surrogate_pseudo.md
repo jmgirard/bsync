@@ -22,11 +22,16 @@ generate_surrogate_pseudo(
 
 - dyad_list:
 
-  A list with one element per dyad. Each element is a data frame (first
-  two columns are `x` and `y`) or a list (elements named `x` and `y`,
-  else its first two elements), the form
+  A list with one element per dyad, the form
   [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
-  reads.
+  also reads. Each element is a data frame or a list. If its names
+  contain `x` and `y` exactly once each, those two elements are read by
+  name, in any position. If its names contain neither `x` nor `y`, or it
+  has no names, its first two elements are read as `x` and `y`. Any
+  other use of the names `x` and `y` is an error. Names are never
+  matched partially. If `dyad_list` itself is named, the names identify
+  the dyads in the output, so every name must be non-empty, not `NA`,
+  and unique.
 
 - dyad:
 
@@ -48,9 +53,11 @@ A numeric matrix with `length(y)` rows and one column per partner, ready
 to pass as `y_surrogates` to
 [`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md)
 and the other surrogate wrappers. The attribute `"sources"` is a data
-frame with columns `dyad` and `role` giving each column's source.
-Subsetting the matrix drops this attribute, so read it before you
-subset.
+frame with one row per column and the columns `dyad` (the source dyad's
+index in `dyad_list`), `role` (`"x"` or `"y"`), and `name` (the source
+dyad's name in `dyad_list`, or `NA` if `dyad_list` has no names). If
+`dyad_list` is named, the matrix column names are `"<name>:<role>"`.
+Subsetting the matrix drops the attribute, so read it before you subset.
 
 ## Details
 
@@ -127,9 +134,9 @@ y_pseudo <- generate_surrogate_pseudo(dyads, dyad = 3)
 dim(y_pseudo)
 #> [1] 2400    2
 attr(y_pseudo, "sources")
-#>   dyad role
-#> 1    1    y
-#> 2    2    y
+#>   dyad role name
+#> 1    1    y <NA>
+#> 2    2    y <NA>
 
 # \donttest{
 # Test dyad 3 against partners from the other dyads

@@ -302,13 +302,13 @@ B follows person A by 10 samples.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pseudo</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 90</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">pseudo</span>, <span class="st">"sources"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   x_dyad x_role y_dyad y_role</span></span>
-<span><span class="co">#&gt; 1      1      x      2      y</span></span>
-<span><span class="co">#&gt; 2      1      x      3      y</span></span>
-<span><span class="co">#&gt; 3      1      x      4      y</span></span>
-<span><span class="co">#&gt; 4      1      x      5      y</span></span>
-<span><span class="co">#&gt; 5      1      x      6      y</span></span>
-<span><span class="co">#&gt; 6      1      x      7      y</span></span>
+<span><span class="co">#&gt;   x_dyad x_role x_name y_dyad y_role y_name</span></span>
+<span><span class="co">#&gt; 1      1      x   &lt;NA&gt;      2      y   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2      1      x   &lt;NA&gt;      3      y   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3      1      x   &lt;NA&gt;      4      y   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4      1      x   &lt;NA&gt;      5      y   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 5      1      x   &lt;NA&gt;      6      y   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 6      1      x   &lt;NA&gt;      7      y   &lt;NA&gt;</span></span>
 <span></span>
 <span><span class="va">mean_abs_z</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">d</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/wcc.html">wcc</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">x</span>, <span class="va">d</span><span class="op">$</span><span class="va">y</span>, window_size <span class="op">=</span> <span class="fl">100</span>, lag_max <span class="op">=</span> <span class="fl">20</span>, window_increment <span class="op">=</span> <span class="fl">25</span><span class="op">)</span><span class="op">$</span><span class="va">aggregate</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
