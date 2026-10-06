@@ -178,13 +178,13 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #' partner columns and b counts the partners that score at least as high as
 #' the real partner. The smallest possible p-value is 1 / (n + 1). With N
 #' dyads and `keep_roles = TRUE`, n is at most N - 1, so the single-dyad
-#' p-value is never below 1 / N, and `p < .05` needs at least 21 dyads. With
-#' `keep_roles = FALSE`, n is at most 2(N - 1), so the floor is 1 / (2N - 1)
-#' and `p < .05` needs at least 11 dyads. When every partner is used with
+#' p-value is never below 1 / N, and `p <= .05` needs at least 20 dyads.
+#' With `keep_roles = FALSE`, n is at most 2(N - 1), so the floor is
+#' 1 / (2N - 1) and `p <= .05` needs at least 11 dyads. When every partner is used with
 #' `keep_roles = TRUE`, the p-value is the real partner's rank among the N
 #' series divided by N. If the real partner is no different from a stranger,
 #' each rank has chance 1 / N, so the test keeps its nominal size. With too
-#' few dyads to reach `p < .05`, prefer the sample-level comparison of
+#' few dyads to reach `p <= .05`, prefer the sample-level comparison of
 #' [generate_pseudo_dyads()]. `n_surrogates = NULL` (the default) uses
 #' every eligible partner, with no random draw. An integer draws that many
 #' partners without replacement. Asking for more partners than exist is an

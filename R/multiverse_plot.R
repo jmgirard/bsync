@@ -24,11 +24,11 @@ multiverse_plot_data <- function(x) {
 #'
 #' Draws a Simonsohn-style specification curve for a `bsync_multiverse` object.
 #' The top panel shows effect sizes sorted from smallest to largest, with
-#' significant cells (p < .05) highlighted. The bottom panel is a choice
+#' significant cells (p <= .05) highlighted. The bottom panel is a choice
 #' dashboard showing which analytic choices each specification used.
 #'
 #' @param x A `bsync_multiverse` object.
-#' @param sig_color Color for significant cells (p < .05). Default: `"#2166AC"`.
+#' @param sig_color Color for significant cells (p <= .05). Default: `"#2166AC"`.
 #' @param insig_color Color for non-significant cells. Default: `"grey60"`.
 #' @param active_color Fill for active choice tiles. Default: `"#2166AC"`.
 #' @param point_size Size of ES points. Default: `1.5`.

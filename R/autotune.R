@@ -80,14 +80,14 @@
 #' @param surrogate_method Character; surrogate generator: `"phase"` (default)
 #'   or `"circular"`.
 #' @param n_surrogates Single positive integer; surrogates per cell per dyad.
-#'   Default `100`. Increase to >= 1000 for reporting. Below 20 the call
-#'   warns once, because no cell can then reach p < .05 and the
+#'   Default `100`. Increase to >= 1000 for reporting. Below 19 the call
+#'   warns once, because no cell can then reach p <= .05 and the
 #'   detectability gate cannot pass.
 #' @param n_tune_dyads Maximum number of dyads to use. If
 #'   `length(dyad_list) > n_tune_dyads`, a random sample is taken. Default
 #'   `30`.
 #' @param sig_pct Detectability gate: minimum proportion of dyads in which a
-#'   cell must be significant (p < .05). Default `0.5`.
+#'   cell must be significant (p <= .05). Default `0.5`.
 #' @param iqr_penalty Penalty weight on cross-dyad IQR of ES. Score =
 #'   `median(ES) - iqr_penalty * IQR(ES)`. Default `0.5`.
 #' @return An object of class `bsync_autotune` (a named list with a tidy
@@ -286,7 +286,7 @@ print.bsync_autotune <- function(x, ...) {
 #'   identical `window_sec`, `lag_sec`, `increment_pct`, `statistic`, and
 #'   `surrogate_method` arguments).
 #' @param sig_pct Minimum proportion of dyads in which a cell must be
-#'   significant (p < .05) to pass the detectability gate. Default `0.5`.
+#'   significant (p <= .05) to pass the detectability gate. Default `0.5`.
 #' @param iqr_penalty Penalty weight on cross-dyad IQR of ES in the score
 #'   `median(ES) - iqr_penalty * IQR(ES)`. Default `0.5`.
 #' @return A list with `best_row` (one-row tibble from the grid), `sig_rate`,

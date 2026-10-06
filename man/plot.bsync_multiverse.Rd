@@ -17,7 +17,7 @@
 \arguments{
 \item{x}{A `bsync_multiverse` object.}
 
-\item{sig_color}{Color for significant cells (p < .05). Default: `"#2166AC"`.}
+\item{sig_color}{Color for significant cells (p <= .05). Default: `"#2166AC"`.}
 
 \item{insig_color}{Color for non-significant cells. Default: `"grey60"`.}
 
@@ -36,7 +36,7 @@ Returns `x` invisibly; draws to the active graphics device.
 \description{
 Draws a Simonsohn-style specification curve for a `bsync_multiverse` object.
 The top panel shows effect sizes sorted from smallest to largest, with
-significant cells (p < .05) highlighted. The bottom panel is a choice
+significant cells (p <= .05) highlighted. The bottom panel is a choice
 dashboard showing which analytic choices each specification used.
 }
 \seealso{

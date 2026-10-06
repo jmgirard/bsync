@@ -115,9 +115,10 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #' @param surrogate_method Character vector; surrogate generator(s): `"phase"`
 #'   (preserves power spectrum) and/or `"circular"` (preserves autocorrelation).
 #' @param n_surrogates Single positive integer; number of surrogates per cell.
-#'   Default is `100`. Use >= 1000 for reporting. Below 20 the call warns,
-#'   because the smallest possible p-value, 1 / (n_surrogates + 1), is then
-#'   at least .05 and no cell can be significant.
+#'   Default is `100`. Use >= 1000 for reporting. A cell is significant at
+#'   p <= .05. Below 19 the call warns, because the smallest possible
+#'   p-value, 1 / (n_surrogates + 1), is then above .05 and no cell can be
+#'   significant.
 #' @param ar_order Single positive integer; AR order for `"wgranger"`. Default
 #'   is `1L`.
 #' @param scale_method Character string; scaling for `"wdtw"`. Default is

@@ -211,7 +211,7 @@ glance(results_tuned)
 
 `autotune_wcc()` applies a two-stage rule:
 
-1. **Detectability gate.** A parameter cell must be significant (p < .05 vs. the matched-null
+1. **Detectability gate.** A parameter cell must be significant (p <= .05 vs. the matched-null
    surrogate) in at least `sig_pct` (default 50%) of dyads. Cells that fail this gate are
    excluded.
 
