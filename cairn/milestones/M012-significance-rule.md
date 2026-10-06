@@ -76,6 +76,7 @@ Make every surrogate significance call in bsync come from one internal p <= .05 
 - 2026-10-06: T4 done: roxygen, five `man/` pages, both vignettes, and the NEWS.md development section now state p <= .05, 19 surrogates, and 20 dyads. The four AC2 sweeps give the planned output: (a) and (b) list only the helper body line and `R/wgranger.R:96,97,100`, (c) lists nothing, and (d) finds each required line.
 - 2026-10-06: T5 in progress: spelling clean after the vignette's `$p \le .05$` became code, and `devtools::test()` passes with no failures or skips. `devtools::check()` is running. Checkpoint before the claim-audit re-read and the check result.
 - 2026-10-06: claim audit: 56 claims read, 4 corrected — tests/testthat/test-surrogate.R, R/autotune.R (+ man/autotune_wcc.Rd), NEWS.md, cairn/references/phipson2010.md. The same pass corrected the stale "below 20" in cairn/DESIGN.md:247. Re-read of the corrections pending.
+- 2026-10-06: claim audit re-read: all 5 corrections OK. NEWS now says "computable cell", per the reader's optional point.
 
 ## Decisions
 
