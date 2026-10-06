@@ -153,13 +153,13 @@ report the add-one p-value (b + 1) / (n + 1), where n is the number of
 partner columns and b counts the partners that score at least as high as
 the real partner. The smallest possible p-value is 1 / (n + 1). With N
 dyads and <code>keep_roles = TRUE</code>, n is at most N - 1, so the single-dyad
-p-value is never below 1 / N, and <code>p &lt; .05</code> needs at least 21 dyads. With
-<code>keep_roles = FALSE</code>, n is at most 2(N - 1), so the floor is 1 / (2N - 1)
-and <code>p &lt; .05</code> needs at least 11 dyads. When every partner is used with
+p-value is never below 1 / N, and <code>p &lt;= .05</code> needs at least 20 dyads.
+With <code>keep_roles = FALSE</code>, n is at most 2(N - 1), so the floor is
+1 / (2N - 1) and <code>p &lt;= .05</code> needs at least 11 dyads. When every partner is used with
 <code>keep_roles = TRUE</code>, the p-value is the real partner's rank among the N
 series divided by N. If the real partner is no different from a stranger,
 each rank has chance 1 / N, so the test keeps its nominal size. With too
-few dyads to reach <code>p &lt; .05</code>, prefer the sample-level comparison of
+few dyads to reach <code>p &lt;= .05</code>, prefer the sample-level comparison of
 <code><a href="generate_pseudo_dyads.html">generate_pseudo_dyads()</a></code>. <code>n_surrogates = NULL</code> (the default) uses
 every eligible partner, with no random draw. An integer draws that many
 partners without replacement. Asking for more partners than exist is an
@@ -208,6 +208,7 @@ pseudo-dyads; <code><a href="generate_surrogate_circular.html">generate_surrogat
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Average Null Mean Abs. Fisher's Z: 0.0871</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Empirical p-value: 0.3333</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Observed synchrony is not significantly different from chance.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> With 2 surrogates, the smallest possible p-value is 0.333, so no result can reach p &lt;= .05.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Note: 2 permutations may be too few for stable p-values.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Consider setting `n_surrogates &gt;= 1000` for final reporting.</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>

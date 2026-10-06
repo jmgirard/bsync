@@ -2,9 +2,9 @@
 
 Draws a Simonsohn-style specification curve for a \`bsync_multiverse\`
 object. The top panel shows effect sizes sorted from smallest to
-largest, with significant cells (p \< .05) highlighted. The bottom panel
-is a choice dashboard showing which analytic choices each specification
-used.
+largest, with significant cells (p \<= .05) highlighted. The bottom
+panel is a choice dashboard showing which analytic choices each
+specification used.
 
 ## Usage
 
@@ -29,7 +29,7 @@ plot(
 
 - sig_color:
 
-  Color for significant cells (p \< .05). Default: \`"#2166AC"\`.
+  Color for significant cells (p \<= .05). Default: \`"#2166AC"\`.
 
 - insig_color:
 

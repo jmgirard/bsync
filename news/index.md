@@ -2,7 +2,7 @@
 
 ## bsync (development version)
 
-### Add-one surrogate p-values (changes reported results)
+### Add-one surrogate p-values and the p \<= .05 rule (changes reported results)
 
 - [`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md),
   [`wdtw_surrogate()`](https://jmgirard.github.io/bsync/reference/wdtw_surrogate.md),
@@ -17,12 +17,38 @@
   distribution, the test rejects no more often than its nominal level.
   The b / n form gave 0 when b = 0 and rejected too often. A single-dyad
   pseudo-dyad test (`keep_roles = TRUE`) with N dyads gives p of at
-  least 1 / N. So p \< .05 needs at least 21 dyads.
+  least 1 / N. So p \<= .05 needs at least 20 dyads.
+- The rule for a significant surrogate p-value is now p \<= .05. The
+  four surrogate print methods and the
+  [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
+  summary and print use it.
+  [`plot.bsync_multiverse()`](https://jmgirard.github.io/bsync/reference/plot.bsync_multiverse.md)
+  and the detectability gate of
+  [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  and
+  [`select_specification()`](https://jmgirard.github.io/bsync/reference/select_specification.md)
+  also use it. If n + 1 is a multiple of 20, an add-one p-value can be
+  exactly .05 (for example, 4 of 99 surrogates). Such a result is now
+  significant. A test that rejects at p \<= .05 keeps its nominal size
+  (Phipson & Smyth, 2010). An NA p-value is never significant. The
+  [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
+  summary counts a computable cell with an NA p-value as not
+  significant, and
+  [`plot.bsync_multiverse()`](https://jmgirard.github.io/bsync/reference/plot.bsync_multiverse.md)
+  draws it as not significant.
+  [`select_specification()`](https://jmgirard.github.io/bsync/reference/select_specification.md)
+  leaves a dyad with an NA p-value out of the significance rate.
 - The four surrogate print methods show the p-value rounded to 4 digits
   in fixed notation. If that rounding gives 0, they show `< 0.0001`.
-- If `n_surrogates < 20`,
+- The four surrogate print methods no longer fail on an NA p-value. They
+  say that no significance call was made, and
+  [`print()`](https://rdrr.io/r/base/print.html) of a
+  [`wgranger_surrogate()`](https://jmgirard.github.io/bsync/reference/wgranger_surrogate.md)
+  result names the direction. When `n_surrogates` is below 19, they note
+  that no result can reach p \<= .05.
+- If `n_surrogates` is below 19,
   [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
-  now warns, because no cell can then reach p \< .05.
+  now warns, because no cell can then reach p \<= .05.
   [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
   gives this warning once per call.
 

@@ -180,7 +180,7 @@ mv
 #> ── Synchrony Multiverse Analysis (wcc) ─────────────────────────────────────────
 #> Specifications: 12 (12 computable)
 #> Surrogates per cell: 100
-#> Significant (p < .05): 6 of 12 (50%)
+#> Significant (p <= .05): 6 of 12 (50%)
 #> Median ES: 1.881 [IQR: 1.345]
 #> Sign-consistent (sig. cells): 100%
 ```
@@ -324,7 +324,7 @@ glance(results_tuned)
 [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
 applies a two-stage rule:
 
-1.  **Detectability gate.** A parameter cell must be significant (p \<
+1.  **Detectability gate.** A parameter cell must be significant (p \<=
     .05 vs. the matched-null surrogate) in at least `sig_pct` (default
     50%) of dyads. Cells that fail this gate are excluded.
 

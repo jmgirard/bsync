@@ -130,9 +130,9 @@ or `"circular"`.</p></dd>
 
 <dt id="arg-n-surrogates">n_surrogates<a class="anchor" aria-label="anchor" href="#arg-n-surrogates"></a></dt>
 <dd><p>Single positive integer; surrogates per cell per dyad.
-Default `100`. Increase to &gt;= 1000 for reporting. Below 20 the call
-warns once, because no cell can then reach p &lt; .05 and the
-detectability gate cannot pass.</p></dd>
+Default `100`. Increase to &gt;= 1000 for reporting. Below 19 the call
+warns once, because no cell can then reach p &lt;= .05, so the
+detectability gate passes only if `sig_pct = 0`.</p></dd>
 
 
 <dt id="arg-n-tune-dyads">n_tune_dyads<a class="anchor" aria-label="anchor" href="#arg-n-tune-dyads"></a></dt>
@@ -143,7 +143,7 @@ detectability gate cannot pass.</p></dd>
 
 <dt id="arg-sig-pct">sig_pct<a class="anchor" aria-label="anchor" href="#arg-sig-pct"></a></dt>
 <dd><p>Detectability gate: minimum proportion of dyads in which a
-cell must be significant (p &lt; .05). Default `0.5`.</p></dd>
+cell must be significant (p &lt;= .05). Default `0.5`.</p></dd>
 
 
 <dt id="arg-iqr-penalty">iqr_penalty<a class="anchor" aria-label="anchor" href="#arg-iqr-penalty"></a></dt>

@@ -183,9 +183,9 @@ target at most N - 1 partners (2(N - 1) with
 <code>keep_roles = FALSE</code>). The smallest p-value of one dyad is 1
 / (n + 1) for n partners (Section 2 gives the formula). With
 <code>keep_roles = TRUE</code> it is therefore never below 1 / N, so
-<code>p &lt; .05</code> needs at least 21 dyads. With
+<code>p &lt;= .05</code> needs at least 20 dyads. With
 <code>keep_roles = FALSE</code> the floor is 1 / (2N - 1), so
-<code>p &lt; .05</code> needs at least 11 dyads. The sample-level
+<code>p &lt;= .05</code> needs at least 11 dyads. The sample-level
 comparison in Section 3 uses all N(N - 1) pseudo-dyads.</li>
 </ul>
 </div>
@@ -280,25 +280,25 @@ other nine dyads, ready for any surrogate wrapper.</p>
 <span>  <span class="fu">test_dyad</span><span class="op">(</span><span class="va">i</span>, <span class="fu"><a href="../reference/generate_surrogate_pseudo.html">generate_surrogate_pseudo</a></span><span class="op">(</span><span class="va">task_only</span>, dyad <span class="op">=</span> <span class="va">i</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Dyads called significant at .05 by the circular-shift null, out of 10</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">p_circular</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 7</span></span>
+<span><span class="co"># Dyads called significant (p &lt;= .05) by the circular-shift null, out of 10</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">p_circular</span> <span class="op">&lt;=</span> <span class="fl">0.05</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 9</span></span>
 <span></span>
 <span><span class="co"># Pseudo-dyad p-values, smallest first</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">p_pseudo</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] 0.1 0.1 0.3 0.4 0.5 0.6 0.7 0.7 0.9 1.0</span></span></code></pre></div>
 <p>The circular-shift null breaks the shared task timeline, so it reads
-task-driven co-movement as synchrony: it calls 7 of the 10 dyads
+task-driven co-movement as synchrony: it calls 9 of the 10 dyads
 significant. The pseudo-dyad null keeps that timeline. Each pseudo-dyad
 p-value is <span class="math inline">\((b + 1) / (9 + 1)\)</span>, where
 <span class="math inline">\(b\)</span> counts the strangers who score at
 least as high as the real partner. So the p-value is the real partner’s
 rank among the 10 series divided by 10, and it can only be 0.1, 0.2, and
 so on up to 1. With 10 dyads, no single-dyad pseudo-dyad test can reach
-<code>p &lt; .05</code>. If the real partner is no different from a
+<code>p &lt;= .05</code>. If the real partner is no different from a
 stranger, each rank has chance 1/10, so the test keeps its nominal size.
 With N dyads the smallest single-dyad p-value is 1/N, so
-<code>p &lt; .05</code> needs at least 21 dyads. With fewer dyads, use
+<code>p &lt;= .05</code> needs at least 20 dyads. With fewer dyads, use
 the sample-level comparison below.</p>
 <p>For a sample-level comparison, <code><a href="../reference/generate_pseudo_dyads.html">generate_pseudo_dyads()</a></code>
 builds every role-keeping pairing (the <code>x</code> of one dyad with
@@ -353,8 +353,9 @@ pseudo-dyads.</p>
 recommend at least 1,000 permutations. Using fewer (e.g., 100) is fine
 for rapid exploratory analysis, but the smallest possible p-value is
 <span class="math inline">\(1 / (n + 1)\)</span>: about .0099 with 100
-surrogates, and about .001 with 1,000. Below 20 surrogates, no result
-can reach <span class="math inline">\(p &lt; .05\)</span>.</li>
+surrogates, and about .001 with 1,000. A result counts as significant at
+<code>p &lt;= .05</code>, so below 19 surrogates no result can be
+significant.</li>
 <li>
 <strong>Power and Speed:</strong> Surrogate analysis is
 “embarrassingly parallel.” For heavy analyses like WDTW, always use the

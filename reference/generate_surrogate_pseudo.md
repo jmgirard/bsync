@@ -92,13 +92,13 @@ report the add-one p-value (b + 1) / (n + 1), where n is the number of
 partner columns and b counts the partners that score at least as high as
 the real partner. The smallest possible p-value is 1 / (n + 1). With N
 dyads and `keep_roles = TRUE`, n is at most N - 1, so the single-dyad
-p-value is never below 1 / N, and `p < .05` needs at least 21 dyads.
+p-value is never below 1 / N, and `p <= .05` needs at least 20 dyads.
 With `keep_roles = FALSE`, n is at most 2(N - 1), so the floor is 1 /
-(2N - 1) and `p < .05` needs at least 11 dyads. When every partner is
+(2N - 1) and `p <= .05` needs at least 11 dyads. When every partner is
 used with `keep_roles = TRUE`, the p-value is the real partner's rank
 among the N series divided by N. If the real partner is no different
 from a stranger, each rank has chance 1 / N, so the test keeps its
-nominal size. With too few dyads to reach `p < .05`, prefer the
+nominal size. With too few dyads to reach `p <= .05`, prefer the
 sample-level comparison of
 [`generate_pseudo_dyads()`](https://jmgirard.github.io/bsync/reference/generate_pseudo_dyads.md).
 `n_surrogates = NULL` (the default) uses every eligible partner, with no
@@ -156,6 +156,7 @@ wcc_surrogate(
 #> Average Null Mean Abs. Fisher's Z: 0.0871
 #> Empirical p-value: 0.3333
 #> ! Observed synchrony is not significantly different from chance.
+#> ℹ With 2 surrogates, the smallest possible p-value is 0.333, so no result can reach p <= .05.
 #> ℹ Note: 2 permutations may be too few for stable p-values.
 #> Consider setting `n_surrogates >= 1000` for final reporting.
 # }

@@ -21,7 +21,7 @@ select_specification(mv_list, sig_pct = 0.5, iqr_penalty = 0.5)
 
 - sig_pct:
 
-  Minimum proportion of dyads in which a cell must be significant (p \<
+  Minimum proportion of dyads in which a cell must be significant (p \<=
   .05) to pass the detectability gate. Default \`0.5\`.
 
 - iqr_penalty:

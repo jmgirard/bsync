@@ -75,9 +75,10 @@ synchrony_multiverse(
 - n_surrogates:
 
   Single positive integer; number of surrogates per cell. Default is
-  \`100\`. Use \>= 1000 for reporting. Below 20 the call warns, because
-  the smallest possible p-value, 1 / (n_surrogates + 1), is then at
-  least .05 and no cell can be significant.
+  \`100\`. Use \>= 1000 for reporting. A cell is significant at p \<=
+  .05. Below 19 the call warns, because the smallest possible p-value, 1
+  / (n_surrogates + 1), is then above .05 and no cell can be
+  significant.
 
 - ar_order:
 
@@ -169,7 +170,7 @@ mv
 #> ── Synchrony Multiverse Analysis (wcc) ─────────────────────────────────────────
 #> Specifications: 3 (3 computable)
 #> Surrogates per cell: 50
-#> Significant (p < .05): 0 of 3 (0%)
+#> Significant (p <= .05): 0 of 3 (0%)
 #> Median ES: 1.329 [IQR: 0.32]
 #> Sign-consistent (sig. cells): NA%
 glance(mv)

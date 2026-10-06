@@ -266,7 +266,7 @@ autocorrelation inflates).</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Synchrony Multiverse Analysis (wcc)</span> <span style="color: #00BBBB;">─────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; Specifications: 12 (12 computable)</span></span>
 <span><span class="co">#&gt; Surrogates per cell: 100</span></span>
-<span><span class="co">#&gt; Significant (p &lt; .05): 6 of 12 (50%)</span></span>
+<span><span class="co">#&gt; Significant (p &lt;= .05): 6 of 12 (50%)</span></span>
 <span><span class="co">#&gt; Median ES: 1.881 [IQR: 1.345]</span></span>
 <span><span class="co">#&gt; Sign-consistent (sig. cells): 100%</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -386,7 +386,7 @@ dyads with different signal characteristics).</p>
 <p><code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code> applies a two-stage rule:</p>
 <ol style="list-style-type: decimal">
 <li><p><strong>Detectability gate.</strong> A parameter cell must be
-significant (p &lt; .05 vs. the matched-null surrogate) in at least
+significant (p &lt;= .05 vs. the matched-null surrogate) in at least
 <code>sig_pct</code> (default 50%) of dyads. Cells that fail this gate
 are excluded.</p></li>
 <li><p><strong>Stability-penalized score.</strong> Among gated cells,

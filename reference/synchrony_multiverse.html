@@ -137,9 +137,10 @@ for other estimators.</p></dd>
 
 <dt id="arg-n-surrogates">n_surrogates<a class="anchor" aria-label="anchor" href="#arg-n-surrogates"></a></dt>
 <dd><p>Single positive integer; number of surrogates per cell.
-Default is `100`. Use &gt;= 1000 for reporting. Below 20 the call warns,
-because the smallest possible p-value, 1 / (n_surrogates + 1), is then
-at least .05 and no cell can be significant.</p></dd>
+Default is `100`. Use &gt;= 1000 for reporting. A cell is significant at
+p &lt;= .05. Below 19 the call warns, because the smallest possible
+p-value, 1 / (n_surrogates + 1), is then above .05 and no cell can be
+significant.</p></dd>
 
 
 <dt id="arg-ar-order">ar_order<a class="anchor" aria-label="anchor" href="#arg-ar-order"></a></dt>
@@ -225,7 +226,7 @@ x -&gt; y; additional columns `es_yx` and `p_yx` give y -&gt; x.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Synchrony Multiverse Analysis (wcc)</span> <span style="color: #00BBBB;">─────────────────────────────────────────</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Specifications: 3 (3 computable)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Surrogates per cell: 50</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Significant (p &lt; .05): 0 of 3 (0%)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Significant (p &lt;= .05): 0 of 3 (0%)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Median ES: 1.329 [IQR: 0.32]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Sign-consistent (sig. cells): NA%</span>
 <span class="r-in"><span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mv</span><span class="op">)</span></span></span>

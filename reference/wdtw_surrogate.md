@@ -129,7 +129,7 @@ res
 #> Observed Mean Cost: 27.8222
 #> Average Null Cost: 29.8241
 #> Empirical p-value: 0.05
-#> ! Observed cost is not significantly different from chance.
+#> ✔ Observed cost is significantly lower than chance (stronger alignment).
 #> ℹ Note: 19 permutations may be too few for stable p-values.
 #> Consider setting `n_surrogates >= 1000` for final reporting.
 # }
