@@ -16,22 +16,53 @@
 
 # select_specification() is the Phase B helper; defined in autotune.R
 
-# The multiverse and autotune_wcc() call a cell significant at p < .05. The
-# add-one p-value (b + 1) / (n_surrogates + 1) is at least
-# 1 / (n_surrogates + 1), so below 20 surrogates no cell can pass. The class
-# lets autotune_wcc() give this warning once instead of once per dyad.
+# The multiverse and autotune_wcc() call a cell significant at p <= .05
+# (is_significant(), D-002). The add-one p-value (b + 1) / (n_surrogates + 1)
+# is at least 1 / (n_surrogates + 1), so below 19 surrogates no cell can pass.
+# The class lets autotune_wcc() give this warning once instead of once per
+# dyad.
 warn_few_surrogates <- function(n_surrogates) {
-  if (n_surrogates >= 20) {
+  if (significance_reachable(n_surrogates)) {
     return(invisible(NULL))
   }
   p_min <- round(1 / (n_surrogates + 1), 3)
   cli::cli_warn(
     c(
       "With {n_surrogates} surrogate{?s}, the smallest possible p-value is \\
-      {.code 1 / (n_surrogates + 1)} = {p_min}, so no cell can reach p < .05.",
-      "i" = "Use {.code n_surrogates >= 20}, and >= 1000 for reporting."
+      {.code 1 / (n_surrogates + 1)} = {p_min}, so no cell can reach \\
+      p <= .05.",
+      "i" = "Use {.code n_surrogates >= 19}, and >= 1000 for reporting."
     ),
     class = "bsync_few_surrogates"
+  )
+}
+
+# Robustness summary of a multiverse grid. Valid cells are the non-skipped
+# cells with a computable ES. Significance uses is_significant(), so an NA
+# p-value is never significant.
+multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
+  valid <- !skipped_vec & !is.na(es_vec)
+  valid_es <- es_vec[valid]
+  valid_sig <- is_significant(p_vec[valid])
+  n_valid <- length(valid_es)
+  n_sig <- sum(valid_sig)
+
+  list(
+    n_cells = n_cells, # total specifications in the grid
+    n_valid = n_valid, # cells that produced a computable ES (non-skipped)
+    n_significant = n_sig, # of valid cells, how many have p <= .05
+    pct_significant = if (n_valid > 0) n_sig / n_valid else NA_real_,
+    median_es = if (n_valid > 0) {
+      stats::median(valid_es, na.rm = TRUE)
+    } else {
+      NA_real_
+    },
+    iqr_es = if (n_valid > 0) stats::IQR(valid_es, na.rm = TRUE) else NA_real_,
+    sign_consistent = if (n_sig > 0) {
+      mean(valid_es[valid_sig] > 0, na.rm = TRUE)
+    } else {
+      NA_real_
+    }
   )
 }
 
@@ -391,29 +422,7 @@ synchrony_multiverse <- function(
   }
 
   # --- Robustness summary -----------------------------------------------
-  valid <- !skipped_vec & !is.na(es_vec)
-  valid_es <- es_vec[valid]
-  valid_p <- p_vec[valid]
-  n_valid <- length(valid_es)
-  n_sig <- sum(valid_p < 0.05, na.rm = TRUE)
-
-  robustness <- list(
-    n_cells = n_cells, # total specifications in the grid
-    n_valid = n_valid, # cells that produced a computable ES (non-skipped)
-    n_significant = n_sig, # of valid cells, how many have p < .05
-    pct_significant = if (n_valid > 0) n_sig / n_valid else NA_real_,
-    median_es = if (n_valid > 0) {
-      stats::median(valid_es, na.rm = TRUE)
-    } else {
-      NA_real_
-    },
-    iqr_es = if (n_valid > 0) stats::IQR(valid_es, na.rm = TRUE) else NA_real_,
-    sign_consistent = if (n_sig > 0) {
-      mean(valid_es[valid_p < 0.05] > 0, na.rm = TRUE)
-    } else {
-      NA_real_
-    }
-  )
+  robustness <- multiverse_robustness(n_cells, es_vec, p_vec, skipped_vec)
 
   settings <- list(
     estimator    = estimator,
@@ -563,7 +572,7 @@ print.bsync_multiverse <- function(x, ...) {
   cli::cli_dl(c(
     "Specifications" = "{rb$n_cells} ({rb$n_valid} computable)",
     "Surrogates per cell" = "{s$n_surrogates}",
-    "Significant (p < .05)" = "{rb$n_significant} of {rb$n_valid} ({round(rb$pct_significant * 100, 1)}%)",
+    "Significant (p <= .05)" = "{rb$n_significant} of {rb$n_valid} ({round(rb$pct_significant * 100, 1)}%)",
     "Median ES" = "{round(rb$median_es, 3)} [IQR: {round(rb$iqr_es, 3)}]",
     "Sign-consistent (sig. cells)" = "{round(rb$sign_consistent * 100, 1)}%"
   ))

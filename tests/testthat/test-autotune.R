@@ -343,6 +343,20 @@ test_that("autotune_wcc keeps dyad_list names on the sampled multiverses", {
   expect_identical(names(res$dyad_multiverses), names(dl)[idx])
 })
 
+test_that("select_specification counts p = .05 as significant and skips NA p", {
+  # One cell, three dyads: p = .05, NA, and .5. The NA dyad drops out, so the
+  # rate is 1 of 2.
+  mv <- function(p) {
+    structure(
+      list(grid = data.frame(es = 0.3, p = p)),
+      class = "bsync_multiverse"
+    )
+  }
+  sel <- select_specification(list(mv(0.05), mv(NA_real_), mv(0.5)))
+  expect_identical(sel$sig_rate, 0.5)
+  expect_identical(sel$n_gated, 1L)
+})
+
 test_that("autotune_wcc gives the few-surrogates warning once per call", {
   # Every warning message the call gives; messages muffled.
   warnings_from <- function(expr) {
@@ -374,11 +388,12 @@ test_that("autotune_wcc gives the few-surrogates warning once per call", {
   # \\s+ so the match survives cli line wrapping at any width.
   pattern <- paste0(
     "smallest\\s+possible\\s+p-value\\s+is\\s+",
-    "`1\\s+/\\s+\\(n_surrogates\\s+\\+\\s+1\\)`\\s+=\\s+0\\.05"
+    "`1\\s+/\\s+\\(n_surrogates\\s+\\+\\s+1\\)`\\s+=\\s+0\\.053"
   )
   # 3 dyads, so 3 synchrony_multiverse() calls, but one warning.
-  expect_identical(sum(grepl(pattern, run(19L))), 1L)
-  expect_identical(sum(grepl("smallest\\s+possible", run(20L))), 0L)
+  expect_identical(sum(grepl(pattern, run(18L))), 1L)
+  # 1 / (19 + 1) = .05 passes p <= .05, so 19 gives no such warning.
+  expect_identical(sum(grepl("smallest\\s+possible", run(19L))), 0L)
 
   # The muffle catches only the few-surrogates class: a different warning
   # from each per-dyad call still reaches the caller, once per dyad.
@@ -390,7 +405,7 @@ test_that("autotune_wcc gives the few-surrogates warning once per call", {
     },
     .package = "bsync"
   )
-  msgs <- run(19L)
+  msgs <- run(18L)
   expect_identical(sum(msgs == "planted per-dyad warning"), 3L)
   expect_identical(sum(grepl(pattern, msgs)), 1L)
 })

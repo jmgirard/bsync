@@ -335,7 +335,7 @@ select_specification <- function(mv_list, sig_pct = 0.5, iqr_penalty = 0.5) {
       median_es[j] <- NA_real_
       iqr_es[j] <- NA_real_
     } else {
-      sig_rate[j] <- mean(p_j[ok] < 0.05)
+      sig_rate[j] <- mean(is_significant(p_j[ok]))
       median_es[j] <- stats::median(es_j[ok])
       iqr_es[j] <- stats::IQR(es_j[ok])
     }

@@ -49,7 +49,7 @@ test_that("AC1: synchrony_multiverse returns bsync_multiverse with correct struc
   expect_true(all(res$grid$lag_max <= floor(res$grid$window_size / 2L), na.rm = TRUE))
 })
 
-test_that("fewer than 20 surrogates warns that no cell can reach p < .05", {
+test_that("fewer than 19 surrogates warns that no cell can reach p <= .05", {
   s <- make_test_series(n = 100)
   run <- function(n_surr) {
     synchrony_multiverse(
@@ -59,17 +59,39 @@ test_that("fewer than 20 surrogates warns that no cell can reach p < .05", {
     )
   }
   set.seed(14)
-  # 1 / (19 + 1) = 0.05, so p < .05 is out of reach.
+  # 1 / (18 + 1) = 0.0526, so p <= .05 is out of reach.
   expect_warning(
-    run(19L),
+    run(18L),
     paste0(
       "smallest\\s+possible\\s+p-value\\s+is\\s+",
-      "`1\\s+/\\s+\\(n_surrogates\\s+\\+\\s+1\\)`\\s+=\\s+0\\.05"
+      "`1\\s+/\\s+\\(n_surrogates\\s+\\+\\s+1\\)`\\s+=\\s+0\\.053"
     ),
     class = "bsync_few_surrogates"
   )
+  # 1 / (19 + 1) = .05 passes p <= .05, so 19 gives no warning of the class.
   set.seed(14)
-  expect_no_warning(run(20L), message = "smallest\\s+possible")
+  expect_no_condition(run(19L), class = "bsync_few_surrogates")
+})
+
+test_that("the multiverse counts p = .05 as significant and NA p as not", {
+  # Cells: p = .05 (valid), NA p with an ES (valid), p = .5 (valid), and a
+  # skipped cell whose p of .01 must not count.
+  rb <- multiverse_robustness(
+    n_cells = 4L,
+    es_vec = c(0.5, 0.4, -0.3, NA),
+    p_vec = c(0.05, NA, 0.5, 0.01),
+    skipped_vec = c(FALSE, FALSE, FALSE, TRUE)
+  )
+  expect_identical(rb$n_valid, 3L)
+  expect_identical(rb$n_significant, 1L)
+  expect_equal(rb$pct_significant, 1 / 3)
+  expect_equal(rb$sign_consistent, 1)
+
+  # The plot marks the same cells, sorted by ES.
+  x <- list(grid = data.frame(es = c(0.2, 0.1, NA), p = c(0.05, NA, 0.01)))
+  gd <- multiverse_plot_data(x)
+  expect_identical(gd$es, c(0.1, 0.2))
+  expect_identical(gd$significant, c(FALSE, TRUE))
 })
 
 test_that("bad arguments abort before the few-surrogates warning", {
