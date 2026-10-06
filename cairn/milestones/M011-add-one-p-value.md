@@ -151,6 +151,7 @@ and segment shuffling stay on their candidate row.
 - 2026-10-05: the plan gate approved the switch as a default change on a 0.x package, and no argument exists to deprecate. That approval is taken as the pre-1.0 waiver of a deprecation cycle. NEWS states the change.
 - 2026-10-05: all tasks done, status review.
 - 2026-10-05: review fix-now commit. A surrogate matrix with no columns now aborts in all four wrappers. `format_p_value()` ignores `getOption("digits")`. A missing `n_surrogates` gives a cli abort in both functions. The few-surrogates warning now comes after every argument check. Other changes cover the `n_surrogates` docs, DESIGN §9, the 1 / N floor scope, and the `fast_method` caveat. The muffle and line-wrap tests were hardened. Each new test failed before its fix, and the full suite passes.
+- step-7 approval: m011-add-one-p-value approved for merge (2026-10-06)
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->
