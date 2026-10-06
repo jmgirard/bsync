@@ -145,6 +145,7 @@ candidate row and are not added here.
 - 2026-10-05: review return 1: AC3 requires the unnamed-list case under an integer `n_surrogates` / `n_pairs`, but the "unnamed dyad_list" test covers only the NULL draw for both generators. AC1, AC2, and AC4 probes are all present, and the two test files pass (42 tests, 0 failed).
 - 2026-10-05: minor amendment: T4 added for review return 1, Coverage AC3 → T2, T4.
 - 2026-10-05: T4 done. The unnamed-list test now loops over a NULL and an integer draw (`n_surrogates = 1`, `n_pairs = 3`) for both generators and both `keep_roles` values, and checks the source identity of each column or pair. The full suite passed (1806 tests). Status set to review.
+- 2026-10-05: step-7 approval: m010-strict-dyad-input approved for merge
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->
