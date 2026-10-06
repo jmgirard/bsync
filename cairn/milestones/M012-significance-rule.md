@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M012: One significance rule (p <= .05) and surrogate print edges
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -49,7 +49,7 @@ Make every surrogate significance call in bsync come from one internal p <= .05 
 - AC2 → T2, T3, T4
 - AC3 → T3
 - AC4 → T3
-- AC5 → T2
+- AC5 → T2, T6
 - AC6 → T2
 - AC7 → T4, T5
 
@@ -60,6 +60,7 @@ Make every surrogate significance call in bsync come from one internal p <= .05 
 - [x] T3: Route `R/multiverse.R:398,412`, `R/multiverse_plot.R:46`, and `R/autotune.R:338` through the helper, with the AC4 tests. Move `warn_few_surrogates()` (`R/multiverse.R:24,32`) to 19 and update its message and comment. Update the labels at `R/multiverse.R:566` and `R/multiverse_plot.R:63`. Rewrite the test at `tests/testthat/test-multiverse.R:52` for 18 and 19, and add the `autotune_wcc()` case. Re-record the vdiffr snapshot `_snaps/multiverse/multiverse-spec-curve.svg` and make sure that its diff changes only the legend label.
 - [x] T4: Update roxygen (`R/multiverse.R:87`, `R/autotune.R:83-90,289`, `R/multiverse_plot.R:14,18`, `R/surrogate_generation.R:177-187`), then run `devtools::document()`. Update `vignettes/surrogate-testing.Rmd` (lines 45, 117, 123, 153, including the code `sum(p_circular < 0.05)`) and `vignettes/choosing-parameters.Rmd:214`. Rewrite the NEWS.md development entries in place. State the new rule without quoting the old `<` form, because sweep (b) covers NEWS.md.
 - [x] T5: Run `spelling::spell_check_package()`, `devtools::test()`, and `devtools::check()`. Run `air format` only on touched files that were air-clean before the edit.
+- [x] T6: Review return 1: add `expect_invisible()` for the `p_value_xy`-NA and `p_value_yx`-NA wgranger cases in the NA print test (AC5).
 
 ## Work log
 
@@ -79,6 +80,7 @@ Make every surrogate significance call in bsync come from one internal p <= .05 
 - 2026-10-06: claim audit re-read: all 5 corrections OK. NEWS now says "computable cell", per the reader's optional point.
 - 2026-10-06: T5 done: `devtools::check()` gave 0 errors, 0 warnings, and 0 notes, on the tree before the claim-audit text fixes. After those fixes, `devtools::document()` leaves no diff and `tools::checkRd()` is clean on `man/autotune_wcc.Rd`. Air ran only on `R/surrogate_generation.R`, the one touched file that was air-clean before. Status set to review.
 - 2026-10-06: review return 1: AC5 fails as written. The `p_value_xy`-NA and `p_value_yx`-NA wgranger cases in "print methods make no significance call on an NA p-value" (`tests/testthat/test-surrogate.R`) never assert that `print()` returns `x` invisibly.
+- 2026-10-06: T6 added for review return 1 (minor amendment: new task, Coverage AC5 → T2, T6). T6 done: both single-NA wgranger cases now assert `expect_no_error` and `expect_invisible`. The test passes with 27 expectations. Status set to review.
 
 ## Decisions
 

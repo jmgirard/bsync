@@ -373,15 +373,19 @@ test_that("print methods make no significance call on an NA p-value", {
 
   # wgranger: the message names the NA direction, and the other direction
   # still gets its call.
-  xy_na <- printed_messages(mock_surr("wgranger_surr", c(NA, 0.01)))
+  xy_obj <- mock_surr("wgranger_surr", c(NA, 0.01))
+  expect_no_error(xy_na <- printed_messages(xy_obj))
   expect_match(xy_na, "No significance call for x -> y", fixed = TRUE)
   expect_match(xy_na, "(y -> x) is significantly greater", fixed = TRUE)
   expect_no_match(xy_na, "(x -> y) is", fixed = TRUE)
+  expect_invisible(suppressMessages(print(xy_obj)))
 
-  yx_na <- printed_messages(mock_surr("wgranger_surr", c(0.01, NA)))
+  yx_obj <- mock_surr("wgranger_surr", c(0.01, NA))
+  expect_no_error(yx_na <- printed_messages(yx_obj))
   expect_match(yx_na, "No significance call for y -> x", fixed = TRUE)
   expect_match(yx_na, "(x -> y) is significantly greater", fixed = TRUE)
   expect_no_match(yx_na, "(y -> x) is", fixed = TRUE)
+  expect_invisible(suppressMessages(print(yx_obj)))
 
   both_na <- mock_surr("wgranger_surr", c(NA, NA))
   expect_no_error(out <- printed_messages(both_na))
