@@ -30,8 +30,10 @@ and the columns \code{x_dyad}, \code{x_role}, \code{x_name}, \code{y_dyad}, \cod
 \code{y_name}: the index, role, and name in \code{dyad_list} of each series. The
 name columns are \code{NA} if \code{dyad_list} has no names. If \code{dyad_list} is
 named, the list elements are named
-\code{"<x_name>:<x_role>|<y_name>:<y_role>"}. Subsetting the list drops the
-attribute, so read it before you subset.
+\code{"<x_name>:<x_role>|<y_name>:<y_role>"}. These element names are labels:
+if dyad names contain \code{:} or \code{|}, two labels can be equal, and the list
+cannot then be passed back as a named \code{dyad_list}. Subsetting the list
+drops the attribute, so read it before you subset.
 }
 \description{
 Pairs series from \emph{different} dyads to build pseudo-dyads: pairs of people

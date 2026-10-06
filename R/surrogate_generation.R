@@ -371,8 +371,10 @@ generate_surrogate_pseudo <- function(
 #'   `y_name`: the index, role, and name in `dyad_list` of each series. The
 #'   name columns are `NA` if `dyad_list` has no names. If `dyad_list` is
 #'   named, the list elements are named
-#'   `"<x_name>:<x_role>|<y_name>:<y_role>"`. Subsetting the list drops the
-#'   attribute, so read it before you subset.
+#'   `"<x_name>:<x_role>|<y_name>:<y_role>"`. These element names are labels:
+#'   if dyad names contain `:` or `|`, two labels can be equal, and the list
+#'   cannot then be passed back as a named `dyad_list`. Subsetting the list
+#'   drops the attribute, so read it before you subset.
 #' @references Kleinbub, J. R., & Ramseyer, F. T. (2020). rMEA: An R package
 #'   to assess nonverbal synchronization in motion energy analysis
 #'   time-series. *Psychotherapy Research*. \doi{10.1080/10503307.2020.1844334}

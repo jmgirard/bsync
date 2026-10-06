@@ -776,3 +776,10 @@ test_that("partly named, NA-named, or repeated names abort", {
   mat <- generate_surrogate_pseudo(dl, dyad = 3)
   expect_identical(attr(mat, "sources")$name, c("a:b", "c|d"))
 })
+
+test_that("one dyad passed as dyad_list gets a hint", {
+  expect_error(
+    generate_surrogate_pseudo(list(x = 1:20, y = 1:20), dyad = 1),
+    "single dyad"
+  )
+})

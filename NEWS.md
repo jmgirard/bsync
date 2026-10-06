@@ -53,7 +53,8 @@
   now read by position.
 * `autotune_wcc()` reads every dyad and checks its names and shape before
   it samples `n_tune_dyads` dyads. A dyad with an unusable naming or shape
-  is now an error even if the sample leaves it out.
+  is now an error even if the sample leaves it out. A single data frame
+  passed as `dyad_list` is now an error that says to wrap it in a list.
 * If `dyad_list` is named, `generate_surrogate_pseudo()` and
   `generate_pseudo_dyads()` carry the names into their output: a `name`
   column (`x_name` and `y_name` for pseudo-dyads) in the `"sources"`

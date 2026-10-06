@@ -139,6 +139,12 @@ autotune_wcc <- function(
   sig_pct = 0.5,
   iqr_penalty = 0.5
 ) {
+  if (is.data.frame(dyad_list)) {
+    cli::cli_abort(
+      "{.arg dyad_list} must be a list of dyads, not a single data frame. \\
+      Wrap one data frame per dyad in a list."
+    )
+  }
   if (!is.list(dyad_list) || length(dyad_list) < 1) {
     cli::cli_abort("{.arg dyad_list} must be a non-empty list.")
   }
@@ -168,6 +174,7 @@ autotune_wcc <- function(
     seq_along(dyad_list),
     function(i) .extract_xy(dyad_list[[i]], i)
   )
+  names(xy_list) <- names(dyad_list)
 
   # Sample dyads
   n_total <- length(dyad_list)
@@ -358,9 +365,10 @@ select_specification <- function(mv_list, sig_pct = 0.5, iqr_penalty = 0.5) {
 
 .extract_xy <- function(dyad, index) {
   if (!is.list(dyad)) {
-    cli::cli_abort(
-      "Dyad {index} in {.arg dyad_list} must be a data frame or a list."
-    )
+    cli::cli_abort(c(
+      "Dyad {index} in {.arg dyad_list} must be a data frame or a list.",
+      "i" = "If you passed a single dyad, wrap it in a list of dyads."
+    ))
   }
   nm <- names(dyad)
   n_x <- sum(nm %in% "x")

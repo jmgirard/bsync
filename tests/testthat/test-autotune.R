@@ -316,3 +316,36 @@ test_that("autotune_wcc reads every dyad before sampling and names the bad one",
     }
   }
 })
+
+test_that("autotune_wcc keeps dyad_list names on the sampled multiverses", {
+  skip_on_cran()
+  set.seed(305)
+  dl <- replicate(
+    3,
+    list(x = stats::rnorm(200), y = stats::rnorm(200)),
+    simplify = FALSE
+  )
+  names(dl) <- c("A", "B", "C")
+  set.seed(1)
+  idx <- sample.int(3, 2)
+  set.seed(1)
+  res <- suppressWarnings(suppressMessages(autotune_wcc(
+    dyad_list = dl,
+    sample_rate = 10,
+    window_sec = 2,
+    n_surrogates = 20L,
+    n_tune_dyads = 2L
+  )))
+  expect_identical(names(res$dyad_multiverses), names(dl)[idx])
+})
+
+test_that("autotune_wcc rejects a single data frame as dyad_list", {
+  expect_error(
+    autotune_wcc(
+      dyad_list = data.frame(x = 1:50, y = 1:50),
+      sample_rate = 10,
+      window_sec = 2
+    ),
+    "not a single data frame"
+  )
+})
