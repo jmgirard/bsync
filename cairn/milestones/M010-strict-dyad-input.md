@@ -137,6 +137,7 @@ candidate row and are not added here.
 - 2026-10-05: T2 done. New helper `.pseudo_dyad_names()` returns the names or NULL and aborts on empty, NA, or repeated names. Both generators add the name columns after any draw. On the pre-T2 code the new tests failed (45 failures), and on the new code the full suite passed (1710 tests). The M009 test that pinned the 4-column `generate_pseudo_dyads()` "sources" schema now pins the 6-column schema (AC3).
 - 2026-10-05: implementation choice: in `generate_pseudo_dyads()` the "sources" data frame is rebuilt with the name columns placed after each role column, which gives the AC3 column order.
 - 2026-10-05: T3 done. Roxygen for `dyad_list` (both generators and `autotune_wcc()`) and the two `@return` blocks updated. `autotune_wcc()` stays without `@md` and uses `\code{}`. NEWS has a "Stricter `dyad_list` reading" section. `devtools::document()` is clean on a second run, `devtools::check()` gives 0 errors, 0 warnings, 0 notes, and `spelling::spell_check_package()` finds nothing. `R/autotune.R` is still not air-clean, as it was on main.
+- 2026-10-05: the T2 commit swept in testthat failure files from the red run (`tests/testthat/_problems/`, `testthat-problems.rds`). They are removed and added to `.gitignore`.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->

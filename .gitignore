@@ -21,6 +21,8 @@ src/*.dylib
 Rplots.pdf
 tests/testthat/Rplots.pdf
 tests/vdiffr.Rout.fail
+tests/testthat/_problems/
+tests/testthat/testthat-problems.rds
 cairn/references/sources/
 cairn/.merge-approved
 cairn/.merge-approved.pending
