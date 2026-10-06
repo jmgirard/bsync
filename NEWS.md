@@ -35,6 +35,32 @@
 * The surrogate-testing vignette has a new pseudo-dyad section with a worked
   example.
 
+## Stricter `dyad_list` reading
+
+* `autotune_wcc()`, `generate_surrogate_pseudo()`, and
+  `generate_pseudo_dyads()` now read each dyad by one rule. If its names
+  contain `x` and `y` exactly once each, those elements are read by name, in
+  any position. If its names contain neither, the first two elements are
+  read. Any other use of the names `x` and `y` is an error. Names are no
+  longer matched partially, and every error about a dyad's names or shape
+  names the dyad's index in `dyad_list`.
+* Results change without an error for two kinds of input. A data frame with
+  columns named `x` and `y` that are not its first two columns, in that
+  order (for example `y, x` or `time, x, y`), is now read by name. Data
+  frames used to be read by position. A list whose names only start with
+  `x` or `y`, for example `list(yy = , xx = )` or
+  `list(xval = , other = , yval = )`, used to be matched partially and is
+  now read by position.
+* `autotune_wcc()` reads every dyad and checks its names and shape before
+  it samples `n_tune_dyads` dyads. A dyad with an unusable naming or shape
+  is now an error even if the sample leaves it out. A single data frame
+  passed as `dyad_list` is now an error that says to wrap it in a list.
+* If `dyad_list` is named, `generate_surrogate_pseudo()` and
+  `generate_pseudo_dyads()` carry the names into their output: a `name`
+  column (`x_name` and `y_name` for pseudo-dyads) in the `"sources"`
+  attribute, plus matrix column names and list element names. The names
+  must be non-empty, not `NA`, and unique. Without names, the name columns are `NA`.
+
 # bsync 0.1.0
 
 First public release.

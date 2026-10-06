@@ -12,9 +12,14 @@ generate_surrogate_pseudo(
 )
 }
 \arguments{
-\item{dyad_list}{A list with one element per dyad. Each element is a data
-frame (first two columns are \code{x} and \code{y}) or a list (elements named \code{x}
-and \code{y}, else its first two elements), the form \code{\link[=autotune_wcc]{autotune_wcc()}} reads.}
+\item{dyad_list}{A list with one element per dyad, the form
+\code{\link[=autotune_wcc]{autotune_wcc()}} also reads. Each element is a data frame or a list. If
+its names contain \code{x} and \code{y} exactly once each, those two elements are
+read by name, in any position. If its names contain neither \code{x} nor \code{y},
+or it has no names, its first two elements are read as \code{x} and \code{y}. Any
+other use of the names \code{x} and \code{y} is an error. Names are never matched
+partially. If \code{dyad_list} itself is named, the names identify the dyads
+in the output, so every name must be non-empty, not \code{NA}, and unique.}
 
 \item{dyad}{A single integer: the index of the target dyad in \code{dyad_list}.}
 
@@ -27,9 +32,12 @@ single positive integer to draw that many without replacement.}
 \value{
 A numeric matrix with \code{length(y)} rows and one column per partner,
 ready to pass as \code{y_surrogates} to \code{\link[=wcc_surrogate]{wcc_surrogate()}} and the other
-surrogate wrappers. The attribute \code{"sources"} is a data frame with
-columns \code{dyad} and \code{role} giving each column's source. Subsetting the
-matrix drops this attribute, so read it before you subset.
+surrogate wrappers. The attribute \code{"sources"} is a data frame with one
+row per column and the columns \code{dyad} (the source dyad's index in
+\code{dyad_list}), \code{role} (\code{"x"} or \code{"y"}), and \code{name} (the source dyad's name
+in \code{dyad_list}, or \code{NA} if \code{dyad_list} has no names). If \code{dyad_list} is
+named, the matrix column names are \code{"<name>:<role>"}. Subsetting the
+matrix drops the attribute, so read it before you subset.
 }
 \description{
 Builds a surrogate matrix for one target dyad whose columns are partner

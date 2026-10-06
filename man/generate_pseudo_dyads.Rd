@@ -7,9 +7,14 @@
 generate_pseudo_dyads(dyad_list, n_pairs = NULL, keep_roles = TRUE)
 }
 \arguments{
-\item{dyad_list}{A list with one element per dyad. Each element is a data
-frame (first two columns are \code{x} and \code{y}) or a list (elements named \code{x}
-and \code{y}, else its first two elements), the form \code{\link[=autotune_wcc]{autotune_wcc()}} reads.}
+\item{dyad_list}{A list with one element per dyad, the form
+\code{\link[=autotune_wcc]{autotune_wcc()}} also reads. Each element is a data frame or a list. If
+its names contain \code{x} and \code{y} exactly once each, those two elements are
+read by name, in any position. If its names contain neither \code{x} nor \code{y},
+or it has no names, its first two elements are read as \code{x} and \code{y}. Any
+other use of the names \code{x} and \code{y} is an error. Names are never matched
+partially. If \code{dyad_list} itself is named, the names identify the dyads
+in the output, so every name must be non-empty, not \code{NA}, and unique.}
 
 \item{n_pairs}{\code{NULL} (default) to return every pairing, or a single
 positive integer to draw that many without replacement.}
@@ -21,8 +26,14 @@ the \code{y} of another. \code{FALSE} pairs any two series from different dyads.
 A list of pseudo-dyads. Each element is \code{list(x = , y = )}, the
 dyad form that \code{\link[=autotune_wcc]{autotune_wcc()}} and \code{\link[=generate_surrogate_pseudo]{generate_surrogate_pseudo()}} read.
 The attribute \code{"sources"} is a data frame with one row per pseudo-dyad
-and columns \code{x_dyad}, \code{x_role}, \code{y_dyad}, and \code{y_role}. Subsetting the
-list drops this attribute, so read it before you subset.
+and the columns \code{x_dyad}, \code{x_role}, \code{x_name}, \code{y_dyad}, \code{y_role}, and
+\code{y_name}: the index, role, and name in \code{dyad_list} of each series. The
+name columns are \code{NA} if \code{dyad_list} has no names. If \code{dyad_list} is
+named, the list elements are named
+\code{"<x_name>:<x_role>|<y_name>:<y_role>"}. These element names are labels:
+if dyad names contain \code{:} or \code{|}, two labels can be equal, and the list
+cannot then be passed back as a named \code{dyad_list}. Subsetting the list
+drops the attribute, so read it before you subset.
 }
 \description{
 Pairs series from \emph{different} dyads to build pseudo-dyads: pairs of people

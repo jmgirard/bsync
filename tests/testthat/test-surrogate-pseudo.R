@@ -340,7 +340,10 @@ test_that("NULL n_pairs returns every pairing, for N = 2, 3, 4", {
 
       s <- attr(pd, "sources")
       expect_s3_class(s, "data.frame")
-      expect_named(s, c("x_dyad", "x_role", "y_dyad", "y_role"))
+      expect_named(
+        s,
+        c("x_dyad", "x_role", "x_name", "y_dyad", "y_role", "y_name")
+      )
       expect_true(all(s$x_dyad != s$y_dyad))
       if (kr) {
         expect_true(all(s$x_role == "x" & s$y_role == "y"))
@@ -584,4 +587,199 @@ test_that("the sources attribute matches column contents for keep_roles = TRUE",
   srcs <- attr(mat, "sources")
   expect_true(all(srcs$role == "y"))
   expect_equal(paste0(srcs$dyad, srcs$role), column_sources(mat, dl))
+})
+
+# =========================================================================
+# --- Dyad reading rule (shared by both generators and autotune_wcc) -------
+# =========================================================================
+
+# Read one probe dyad through generate_surrogate_pseudo(): the probe sits at
+# position 2, dyad 1 is the target, and keep_roles = FALSE returns the
+# probe's x and y as the two columns, labeled by the "sources" attribute.
+read_probe <- function(probe) {
+  dl <- list(list(x = stats::rnorm(20), y = stats::rnorm(20)), probe)
+  mat <- generate_surrogate_pseudo(dl, dyad = 1, keep_roles = FALSE)
+  src <- attr(mat, "sources")
+  list(
+    x = unname(mat[, src$role == "x"]),
+    y = unname(mat[, src$role == "y"])
+  )
+}
+
+test_that("dyads are read by exact x/y names, else by position", {
+  set.seed(301)
+  a <- stats::rnorm(20)
+  b <- stats::rnorm(20)
+  t <- seq_len(20) / 10
+
+  # Both names present once: read by name, wherever they sit.
+  expect_equal(read_probe(list(y = b, x = a)), list(x = a, y = b))
+  expect_equal(
+    read_probe(data.frame(time = t, x = a, y = b)),
+    list(x = a, y = b)
+  )
+  # Names that only start with x or y are not matched: read by position.
+  expect_equal(read_probe(list(yy = b, xx = a)), list(x = b, y = a))
+  expect_equal(
+    read_probe(data.frame(p1 = a, p2 = b)),
+    list(x = a, y = b)
+  )
+  # No names: read by position.
+  expect_equal(read_probe(list(a, b)), list(x = a, y = b))
+})
+
+test_that("dyads with an unusable x/y naming or shape abort", {
+  set.seed(302)
+  a <- stats::rnorm(20)
+  b <- stats::rnorm(20)
+  dup_x <- data.frame(a, b, a)
+  names(dup_x) <- c("x", "x", "y")
+
+  name_msg <- "names .*x.* and .*y"
+  expect_error(read_probe(list(y = a, a2 = b)), name_msg)
+  expect_error(read_probe(list(x = a, b2 = b)), name_msg)
+  expect_error(read_probe(list(x = a, x = b, y = a)), name_msg)
+  expect_error(read_probe(dup_x), name_msg)
+  expect_error(read_probe(data.frame(p1 = a)), "at least two")
+  expect_error(read_probe(list(a)), "at least two")
+  expect_error(read_probe(a), "must be a data frame or a list")
+})
+
+test_that("dyad reading errors name the dyad's index in dyad_list", {
+  set.seed(303)
+  good <- function() list(x = stats::rnorm(20), y = stats::rnorm(20))
+  for (bad in list(list(y = 1:20, a2 = 1:20), data.frame(p1 = 1:20))) {
+    dl <- list(good(), good(), bad, good())
+    expect_error(
+      generate_surrogate_pseudo(dl, dyad = 1),
+      "Dyad 3 in `dyad_list`"
+    )
+    expect_error(generate_pseudo_dyads(dl), "Dyad 3 in `dyad_list`")
+  }
+})
+
+# =========================================================================
+# --- dyad_list names in the generators' output ---------------------------
+# =========================================================================
+
+test_that("named dyad_list: generate_surrogate_pseudo() records names", {
+  set.seed(311)
+  dl <- make_dyads(lengths = c(20, 20, 20, 20))
+  names(dl) <- c("d01", "d02", "d03", "d04")
+
+  for (keep in c(TRUE, FALSE)) {
+    mat <- generate_surrogate_pseudo(dl, dyad = 2, keep_roles = keep)
+    src <- attr(mat, "sources")
+    expect_named(src, c("dyad", "role", "name"))
+    expect_type(src$name, "character")
+    expect_identical(src$name, names(dl)[src$dyad])
+    expect_identical(colnames(mat), paste0(src$name, ":", src$role))
+    # Column contents still match the recorded integer source.
+    expect_equal(paste0(src$dyad, src$role), column_sources(mat, dl))
+  }
+
+  # Names follow the rows of a random draw.
+  drawn <- generate_surrogate_pseudo(
+    dl,
+    dyad = 2,
+    n_surrogates = 4,
+    keep_roles = FALSE
+  )
+  src <- attr(drawn, "sources")
+  expect_identical(src$name, names(dl)[src$dyad])
+  expect_identical(colnames(drawn), paste0(src$name, ":", src$role))
+  expect_equal(paste0(src$dyad, src$role), column_sources(drawn, dl))
+})
+
+test_that("named dyad_list: generate_pseudo_dyads() records names", {
+  set.seed(312)
+  dl <- make_dyads(lengths = c(20, 20, 20))
+  names(dl) <- c("A", "B", "C")
+
+  for (keep in c(TRUE, FALSE)) {
+    for (n_pairs in list(NULL, 3)) {
+      pd <- generate_pseudo_dyads(dl, n_pairs = n_pairs, keep_roles = keep)
+      src <- attr(pd, "sources")
+      expect_named(
+        src,
+        c("x_dyad", "x_role", "x_name", "y_dyad", "y_role", "y_name")
+      )
+      expect_identical(src$x_name, names(dl)[src$x_dyad])
+      expect_identical(src$y_name, names(dl)[src$y_dyad])
+      expect_identical(
+        names(pd),
+        paste0(src$x_name, ":", src$x_role, "|", src$y_name, ":", src$y_role)
+      )
+      expect_samples_match_sources(pd, dl)
+    }
+  }
+})
+
+test_that("unnamed dyad_list: name columns are NA and no names are set", {
+  set.seed(313)
+  dl <- make_dyads(lengths = c(20, 20, 20))
+
+  # NULL draws every partner or pairing; an integer draws a random subset.
+  for (keep in c(TRUE, FALSE)) {
+    for (n_draw in list(NULL, 1)) {
+      mat <- generate_surrogate_pseudo(
+        dl,
+        dyad = 1,
+        n_surrogates = n_draw,
+        keep_roles = keep
+      )
+      expect_identical(
+        attr(mat, "sources")$name,
+        rep(NA_character_, ncol(mat))
+      )
+      expect_null(colnames(mat))
+      expect_equal(
+        paste0(attr(mat, "sources")$dyad, attr(mat, "sources")$role),
+        column_sources(mat, dl)
+      )
+
+      pd <- generate_pseudo_dyads(
+        dl,
+        n_pairs = if (is.null(n_draw)) NULL else 3,
+        keep_roles = keep
+      )
+      src <- attr(pd, "sources")
+      expect_identical(src$x_name, rep(NA_character_, nrow(src)))
+      expect_identical(src$y_name, rep(NA_character_, nrow(src)))
+      expect_null(names(pd))
+      expect_samples_match_sources(pd, dl)
+    }
+  }
+})
+
+test_that("partly named, NA-named, or repeated names abort", {
+  set.seed(314)
+  dl <- make_dyads(lengths = c(20, 20, 20))
+  bad_names <- list(
+    empty = c("A", "", "C"),
+    missing = c("A", NA, "C"),
+    repeated = c("A", "B", "A")
+  )
+  msgs <- c(
+    empty = "names.*non-empty",
+    missing = "names.*non-empty",
+    repeated = "repeated"
+  )
+  for (k in names(bad_names)) {
+    names(dl) <- bad_names[[k]]
+    expect_error(generate_surrogate_pseudo(dl, dyad = 1), msgs[[k]])
+    expect_error(generate_pseudo_dyads(dl), msgs[[k]])
+  }
+
+  # Separators inside a name are accepted as given.
+  names(dl) <- c("a:b", "c|d", "e")
+  mat <- generate_surrogate_pseudo(dl, dyad = 3)
+  expect_identical(attr(mat, "sources")$name, c("a:b", "c|d"))
+})
+
+test_that("one dyad passed as dyad_list gets a hint", {
+  expect_error(
+    generate_surrogate_pseudo(list(x = 1:20, y = 1:20), dyad = 1),
+    "single dyad"
+  )
 })

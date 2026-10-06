@@ -185,9 +185,14 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #' partners without replacement. Asking for more partners than exist is an
 #' error, because repeated partners add no information to the null.
 #'
-#' @param dyad_list A list with one element per dyad. Each element is a data
-#'   frame (first two columns are `x` and `y`) or a list (elements named `x`
-#'   and `y`, else its first two elements), the form [autotune_wcc()] reads.
+#' @param dyad_list A list with one element per dyad, the form
+#'   [autotune_wcc()] also reads. Each element is a data frame or a list. If
+#'   its names contain `x` and `y` exactly once each, those two elements are
+#'   read by name, in any position. If its names contain neither `x` nor `y`,
+#'   or it has no names, its first two elements are read as `x` and `y`. Any
+#'   other use of the names `x` and `y` is an error. Names are never matched
+#'   partially. If `dyad_list` itself is named, the names identify the dyads
+#'   in the output, so every name must be non-empty, not `NA`, and unique.
 #' @param dyad A single integer: the index of the target dyad in `dyad_list`.
 #' @param n_surrogates `NULL` (default) to use every eligible partner, or a
 #'   single positive integer to draw that many without replacement.
@@ -195,9 +200,12 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #'   `y` series of other dyads. `FALSE` also allows their `x` series.
 #' @return A numeric matrix with `length(y)` rows and one column per partner,
 #'   ready to pass as `y_surrogates` to [wcc_surrogate()] and the other
-#'   surrogate wrappers. The attribute `"sources"` is a data frame with
-#'   columns `dyad` and `role` giving each column's source. Subsetting the
-#'   matrix drops this attribute, so read it before you subset.
+#'   surrogate wrappers. The attribute `"sources"` is a data frame with one
+#'   row per column and the columns `dyad` (the source dyad's index in
+#'   `dyad_list`), `role` (`"x"` or `"y"`), and `name` (the source dyad's name
+#'   in `dyad_list`, or `NA` if `dyad_list` has no names). If `dyad_list` is
+#'   named, the matrix column names are `"<name>:<role>"`. Subsetting the
+#'   matrix drops the attribute, so read it before you subset.
 #' @references Kleinbub, J. R., & Ramseyer, F. T. (2020). rMEA: An R package
 #'   to assess nonverbal synchronization in motion energy analysis
 #'   time-series. *Psychotherapy Research*. \doi{10.1080/10503307.2020.1844334}
@@ -232,6 +240,7 @@ generate_surrogate_pseudo <- function(
   keep_roles = TRUE
 ) {
   dyads <- .pseudo_extract_dyads(dyad_list)
+  dyad_names <- .pseudo_dyad_names(dyad_list)
   if (!.is_count(dyad) || dyad > length(dyads)) {
     cli::cli_abort(
       "{.arg dyad} must be a single index into {.arg dyad_list} \\
@@ -306,6 +315,14 @@ generate_surrogate_pseudo <- function(
     surr_mat[, j] <- dyads[[pool$dyad[j]]][[pool$role[j]]][seq_len(n_y)]
   }
   rownames(pool) <- NULL
+  pool$name <- if (is.null(dyad_names)) {
+    rep(NA_character_, nrow(pool))
+  } else {
+    dyad_names[pool$dyad]
+  }
+  if (!is.null(dyad_names)) {
+    colnames(surr_mat) <- paste0(pool$name, ":", pool$role)
+  }
   attr(surr_mat, "sources") <- pool
 
   surr_mat
@@ -350,8 +367,14 @@ generate_surrogate_pseudo <- function(
 #' @return A list of pseudo-dyads. Each element is `list(x = , y = )`, the
 #'   dyad form that [autotune_wcc()] and [generate_surrogate_pseudo()] read.
 #'   The attribute `"sources"` is a data frame with one row per pseudo-dyad
-#'   and columns `x_dyad`, `x_role`, `y_dyad`, and `y_role`. Subsetting the
-#'   list drops this attribute, so read it before you subset.
+#'   and the columns `x_dyad`, `x_role`, `x_name`, `y_dyad`, `y_role`, and
+#'   `y_name`: the index, role, and name in `dyad_list` of each series. The
+#'   name columns are `NA` if `dyad_list` has no names. If `dyad_list` is
+#'   named, the list elements are named
+#'   `"<x_name>:<x_role>|<y_name>:<y_role>"`. These element names are labels:
+#'   if dyad names contain `:` or `|`, two labels can be equal, and the list
+#'   cannot then be passed back as a named `dyad_list`. Subsetting the list
+#'   drops the attribute, so read it before you subset.
 #' @references Kleinbub, J. R., & Ramseyer, F. T. (2020). rMEA: An R package
 #'   to assess nonverbal synchronization in motion energy analysis
 #'   time-series. *Psychotherapy Research*. \doi{10.1080/10503307.2020.1844334}
@@ -386,6 +409,7 @@ generate_pseudo_dyads <- function(
   keep_roles = TRUE
 ) {
   dyads <- .pseudo_extract_dyads(dyad_list)
+  dyad_names <- .pseudo_dyad_names(dyad_list)
   if (!is.null(n_pairs) && !.is_count(n_pairs)) {
     cli::cli_abort("{.arg n_pairs} must be NULL or a single positive integer.")
   }
@@ -449,6 +473,29 @@ generate_pseudo_dyads <- function(
       (start-aligned)."
     )
   }
+  name_of <- function(d) {
+    if (is.null(dyad_names)) rep(NA_character_, length(d)) else dyad_names[d]
+  }
+  pairs <- data.frame(
+    x_dyad = pairs$x_dyad,
+    x_role = pairs$x_role,
+    x_name = name_of(pairs$x_dyad),
+    y_dyad = pairs$y_dyad,
+    y_role = pairs$y_role,
+    y_name = name_of(pairs$y_dyad),
+    stringsAsFactors = FALSE
+  )
+  if (!is.null(dyad_names)) {
+    names(out) <- paste0(
+      pairs$x_name,
+      ":",
+      pairs$x_role,
+      "|",
+      pairs$y_name,
+      ":",
+      pairs$y_role
+    )
+  }
   attr(out, "sources") <- pairs
 
   out
@@ -471,7 +518,7 @@ generate_pseudo_dyads <- function(
     )
   }
   lapply(seq_along(dyad_list), function(i) {
-    xy <- .extract_xy(dyad_list[[i]])
+    xy <- .extract_xy(dyad_list[[i]], i)
     if (!is.numeric(xy$x) || !is.numeric(xy$y)) {
       cli::cli_abort(
         "Both series of dyad {i} in {.arg dyad_list} must be numeric."
@@ -485,6 +532,30 @@ generate_pseudo_dyads <- function(
     }
     list(x = as.double(xy$x), y = as.double(xy$y))
   })
+}
+
+# The dyad names of a dyad_list: a character vector when every name is
+# non-empty, not NA, and unique; NULL when the list has no names. Any other
+# naming aborts, because the names are used as dyad IDs in the output.
+.pseudo_dyad_names <- function(dyad_list) {
+  nms <- names(dyad_list)
+  if (is.null(nms)) {
+    return(NULL)
+  }
+  if (anyNA(nms) || any(nms == "")) {
+    cli::cli_abort(
+      "The names of {.arg dyad_list} must all be non-empty and not \\
+      {.val {NA}}, or the list must have no names."
+    )
+  }
+  dups <- unique(nms[duplicated(nms)])
+  if (length(dups) > 0) {
+    cli::cli_abort(c(
+      "The names of {.arg dyad_list} must be unique.",
+      "x" = "{.val {dups}} {?is/are} repeated."
+    ))
+  }
+  nms
 }
 
 # TRUE for a single, non-missing, positive whole number.

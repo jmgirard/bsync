@@ -4,14 +4,14 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M010: Strict dyad input and named pseudo-dyad sources
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** —   <!-- owner: plan · create/amend-via-gate; bsync's numbered invariants live in CLAUDE.md (3 binds here), no DESIGN IP/GP numbering yet -->
 - **Resolves:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Surface tier:** user-facing — changes how exported functions read `dyad_list` and what the pseudo-dyad generators return   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m010-strict-dyad-input   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -43,7 +43,7 @@ candidate row and are not added here.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets. -->
 
-- [ ] AC1: For a dyad that is a list or a data frame, `.extract_xy()`
+- [x] AC1: For a dyad that is a list or a data frame, `.extract_xy()`
       applies one rule. If the element (column) names contain `x` exactly
       once and `y` exactly once, it returns those two elements. If the names
       contain neither `x` nor `y`, or there are no names, it returns the
@@ -57,7 +57,7 @@ candidate row and are not added here.
       b)`, `list(x = a, b2 = b)`, `list(x = a, x = b, y = c)`, a data frame
       with two columns named `x` (`check.names = FALSE`), a one-column data
       frame, and a non-list dyad.
-- [ ] AC2: Every abort raised by `.extract_xy()` names the dyad's index in
+- [x] AC2: Every abort raised by `.extract_xy()` names the dyad's index in
       the user's `dyad_list`. `autotune_wcc()` reads every dyad before it
       samples. Thus a dyad that `.extract_xy()` rejects aborts the call also
       when the sample leaves it out. Tests assert the index in the message
@@ -66,7 +66,7 @@ candidate row and are not added here.
       through `autotune_wcc()` called with `n_tune_dyads = 2`. Each path is
       probed with two forms: `list(y = a, a2 = b)` and a one-column data
       frame.
-- [ ] AC3: A `dyad_list` counts as named when `names(dyad_list)` is
+- [x] AC3: A `dyad_list` counts as named when `names(dyad_list)` is
       non-NULL and every name is non-empty, not `NA`, and unique. With a
       named list, the `"sources"` data frame of `generate_surrogate_pseudo()`
       gains a character column `name`, the source dyad's name, and the
@@ -82,7 +82,7 @@ candidate row and are not added here.
       and assert that each name matches the row's integer index. Tests fire
       the empty-name, `NA`-name, and repeated-name aborts with a message
       matcher. Names that contain `:` or `|` are accepted as given.
-- [ ] AC4: The `dyad_list` roxygen of `generate_surrogate_pseudo()` (which
+- [x] AC4: The `dyad_list` roxygen of `generate_surrogate_pseudo()` (which
       `generate_pseudo_dyads()` inherits) and of `autotune_wcc()` states the
       AC1 rule. The `@return` of both generators states the name columns and
       when names appear. NEWS.md has an entry for the stricter reading and the
@@ -98,26 +98,29 @@ candidate row and are not added here.
 
 - AC1 → T1
 - AC2 → T1
-- AC3 → T2
+- AC3 → T2, T4
 - AC4 → T3
 
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits). -->
 
-- [ ] T1: Tests first in `tests/testthat/test-surrogate-pseudo.R` and
+- [x] T1: Tests first in `tests/testthat/test-surrogate-pseudo.R` and
       `test-autotune.R`. Rewrite `.extract_xy(dyad, index)` to the AC1 rule
       with `[[` on exact names, never `$`. Pass the index from
       `.pseudo_extract_dyads()`. In `autotune_wcc()`, extract every dyad
       before the `n_tune_dyads` sample (`R/autotune.R:161-177`) and run the
       multiverse on the extracted series.
-- [ ] T2: Tests first. Add a name check to `.pseudo_extract_dyads()` (or a
+- [x] T2: Tests first. Add a name check to `.pseudo_extract_dyads()` (or a
       sibling helper) that returns the names or `NULL`. Add the name columns
       to both `"sources"` data frames after any subsample, and set the matrix
       column names and list element names.
-- [ ] T3: Update the roxygen (`@md` is already on both generators; add it to
+- [x] T3: Update the roxygen (`@md` is already on both generators; add it to
       `autotune_wcc()` only if the block gains markdown), run
       `devtools::document()`, add the NEWS entry, run `devtools::test()` and
       `devtools::check()`, style with `air format`.
+- [x] T4: (review return 1) Extend the "unnamed dyad_list" test in
+      `test-surrogate-pseudo.R` to an integer `n_surrogates` and `n_pairs`
+      draw for both generators under both `keep_roles` values.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
@@ -132,9 +135,43 @@ candidate row and are not added here.
 - 2026-10-05: plan gate chose added `name` columns over converting the integer `dyad` columns to character because it keeps the M009 columns unchanged; falsified by users needing the name as the only key in `"sources"`.
 - 2026-10-05: criteria audit (full mode, fresh Opus reader) returned 4 findings on M010. Fixed: AC1 partial-match probe swapped to `list(yy = b, xx = a)`, which tells the two readings apart, and abort probes widened (`list(x = a, b2 = b)`, duplicate-`x` data frame). Fixed: AC2 narrowed to dyads that `.extract_xy()` rejects, two forms per path. Fixed: AC3 gains the `NA`-name probe, and names with `:` or `|` are accepted. Fixed: AC4 NEWS must name the inputs whose result changes without an error.
 - 2026-10-05: plan gate chose a NEWS entry over a per-call cli notice for inputs now read by name instead of by position, because after the upgrade the notice repeats on every correct call; falsified by users who miss the change and report shifted results.
+- 2026-10-05: implement started on branch `m010-strict-dyad-input`, cut from main at 3115dba.
+- 2026-10-05: T1 done. `.extract_xy(dyad, index)` applies the exact-name-else-position rule with abort messages that name the dyad index; `autotune_wcc()` extracts every dyad before sampling. New tests saw red first (7 failures), then the full suite passed (1579 tests). `air` restyled untouched code in `R/autotune.R` and `test-autotune.R`, which were never air-clean, so that restyle was dropped to keep the diff focused.
+- 2026-10-05: T2 done. New helper `.pseudo_dyad_names()` returns the names or NULL and aborts on empty, NA, or repeated names. Both generators add the name columns after any draw. On the pre-T2 code the new tests failed (45 failures), and on the new code the full suite passed (1710 tests). The M009 test that pinned the 4-column `generate_pseudo_dyads()` "sources" schema now pins the 6-column schema (AC3).
+- 2026-10-05: implementation choice: in `generate_pseudo_dyads()` the "sources" data frame is rebuilt with the name columns placed after each role column, which gives the AC3 column order.
+- 2026-10-05: T3 done. Roxygen for `dyad_list` (both generators and `autotune_wcc()`) and the two `@return` blocks updated. `autotune_wcc()` stays without `@md` and uses `\code{}`. NEWS has a "Stricter `dyad_list` reading" section. `devtools::document()` is clean on a second run, `devtools::check()` gives 0 errors, 0 warnings, 0 notes, and `spelling::spell_check_package()` finds nothing. `R/autotune.R` is still not air-clean, as it was on main.
+- 2026-10-05: the T2 commit swept in testthat failure files from the red run (`tests/testthat/_problems/`, `testthat-problems.rds`). They are removed and added to `.gitignore`.
+- 2026-10-05: claim audit: 44 claims read, 4 corrected — NEWS.md, R/autotune.R, R/surrogate_generation.R, man/*.Rd (the silent-change bullet named lists where only data frames change and missed `list(xval =, other =, yval =)`; "read and checked" narrowed to names and shape; NA names added to the naming rule). The same reader re-read the corrections and found them true, plus one stale test comment, which is now fixed. The autotune test also runs with `n_tune_dyads = 4`, so it covers the case where the bad dyad is sampled.
+- 2026-10-05: review return 1: AC3 requires the unnamed-list case under an integer `n_surrogates` / `n_pairs`, but the "unnamed dyad_list" test covers only the NULL draw for both generators. AC1, AC2, and AC4 probes are all present, and the two test files pass (42 tests, 0 failed).
+- 2026-10-05: minor amendment: T4 added for review return 1, Coverage AC3 → T2, T4.
+- 2026-10-05: T4 done. The unnamed-list test now loops over a NULL and an integer draw (`n_surrogates = 1`, `n_pairs = 3`) for both generators and both `keep_roles` values, and checks the source identity of each column or pair. The full suite passed (1806 tests). Status set to review.
+- 2026-10-05: step-7 approval: m010-strict-dyad-input approved for merge
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->
 
 ## Review
 <!-- owner: review · exclusive -->
+
+Pass 2, 2026-10-05, at 7d656db (branch contains origin/main 3115dba).
+
+- AC1 evidence: `test-surrogate-pseudo.R` "dyads are read by exact x/y names, else by position" (5 expectations, 0 failed) covers `list(y = b, x = a)`, a data frame `time, x, y`, `list(yy = b, xx = a)` read with x = b, `data.frame(p1, p2)`, and an unnamed list, all through `generate_surrogate_pseudo()`. "dyads with an unusable x/y naming or shape abort" (7 expectations, 0 failed) fires `list(y = a, a2 = b)`, `list(x = a, b2 = b)`, `list(x = a, x = b, y = a)`, a data frame with two `x` columns, a one-column data frame, `list(a)`, and a non-list dyad, each with a message matcher. Code: `R/autotune.R` `.extract_xy()` matches with `%in%` and `which()`, with no `$`.
+- AC2 evidence: "dyad reading errors name the dyad's index in dyad_list" (4 expectations, 0 failed) asserts "Dyad 3 in `dyad_list`" for `list(y = 1:20, a2 = 1:20)` and a one-column data frame at position 3 of 4, through both generators. `test-autotune.R` "autotune_wcc reads every dyad before sampling and names the bad one" (4 expectations, 0 failed) asserts the same message for both forms with `n_tune_dyads = 2` (seed 304 samples dyads 4 and 2, verified by `sample.int(4, 2)`) and with `n_tune_dyads = 4`.
+- AC3 evidence: "named dyad_list: generate_surrogate_pseudo() records names" (26 expectations, 0 failed) checks the `dyad, role, name` columns, character type, names equal to `names(dl)[dyad]`, column names `"<name>:<role>"`, and column source identity for both `keep_roles` values and an integer `n_surrogates`. "named dyad_list: generate_pseudo_dyads() records names" (88 expectations, 0 failed) checks the six-column order, the name/index match, element names `"<x_name>:<x_role>|<y_name>:<y_role>"`, and sample identity for both `keep_roles` values and `n_pairs` NULL or 3. "unnamed dyad_list ..." (104 expectations, 0 failed) checks `NA_character_` name columns and no names for both generators, both `keep_roles` values, and NULL or integer draws. "partly named, NA-named, or repeated names abort" (7 expectations, 0 failed) fires the empty, NA, and repeated aborts in both generators with message matchers, and accepts `a:b` and `c|d`. "NULL n_pairs returns every pairing" (219 expectations, 0 failed) keeps the integer source columns' meaning.
+- AC4 evidence: `generate_surrogate_pseudo()` `@param dyad_list` (which `generate_pseudo_dyads()` inherits) and the `autotune_wcc()` `@param dyad_list` state the AC1 rule. Both `@return` blocks state the name columns and when names appear. The NEWS.md section "Stricter `dyad_list` reading" names the silent-change inputs: data frames with `x`/`y` not first-two-in-order (`y, x`, `time, x, y`) and lists with names that only start with `x`/`y` (`list(yy = , xx = )`). `devtools::document()` writes nothing (0 files). `devtools::check()` gives 0 errors, 0 warnings, 0 notes. The full `devtools::test()` passed at 7d656db (1806 tests).
+- Consistency gate: `cairn_validate.py` all checks passed. `devtools::document()` no diff. `pkgdown::check_pkgdown()` reports no problems. README untouched by the branch. NEWS entry present with no milestone numbers. No new top-level files. `devtools::check()` 0/0/0.
+- spawned: diff-bug, blame-history, prior-review
+- diff-bug #1: `autotune_wcc()` dropped `dyad_list` names from `$dyad_multiverses`, because `xy_list` was built over `seq_along()` (verified: main gives `c("A","B")`, the branch gave NULL) — fix now, fixed 8c2e10b (`names(xy_list) <- names(dyad_list)`, test "keeps dyad_list names on the sampled multiverses" red then green).
+- diff-bug #2: pseudo-dyad element names can repeat when dyad names contain `:` or `|`, so the `@return` round-trip into a named `dyad_list` fails — fix now, fixed 8c2e10b (the `@return` now says the element names are labels that can repeat in that case. AC3 accepts separator characters as given).
+- diff-bug #3: a single data frame passed as `dyad_list` to `autotune_wcc()` gave "Dyad 1 ... must be a data frame or a list" — fix now, fixed 8c2e10b (the same abort as `.pseudo_extract_dyads()`, test red then green, NEWS line).
+- diff-bug #4: one dyad passed as `dyad_list` to the generators gives a confusing error — fix now, fixed 8c2e10b (the `.extract_xy()` abort adds the hint "If you passed a single dyad, wrap it in a list of dyads", test red then green).
+- diff-bug #5: `.pseudo_dyad_names()` runs before the `dyad` / `n_surrogates` / `n_pairs` checks, so a call with two problems reports the names error first — reject (planned change: no promise or test fixes the abort order, and the plan placed the name check with extraction).
+- diff-bug #6: one NEWS line runs past the file's wrap width — reject (style).
+- blame-history #1: data frames now read by name and partial-named lists now read by position, a silent change in results — reject (planned change, AC1 and the AC4 NEWS bullet).
+- blame-history #2: a data frame with one column named `x` or `y` now aborts — reject (planned change, AC1).
+- blame-history #3: all dyads are extracted before sampling, so a bad unsampled dyad now errors — reject (planned change, AC2; no RNG draw added, and the reviewer found no memory cost).
+- blame-history #4: the "sources" schema grows from 4 to 6 columns (2 to 3 for the matrix) — reject (planned change, AC3).
+- blame-history #5: empty, NA, or repeated dyad names now abort in the generators — reject (planned change, AC3).
+- blame-history #6: no recorded intent behind the old `$` partial matching or the positional fallback — noted (no conflict).
+- prior-review #1-5: M009's summary review is the only prior evidence, and the PR-comment probe returned `[]`. The diff resolves M009's two candidate rows and contradicts no past finding — noted.
+- Post-fix verification at 8c2e10b: `devtools::test()` passed (1809 tests), `devtools::check()` 0/0/0, `devtools::document()` regenerated only `generate_pseudo_dyads.Rd`, which is committed.
