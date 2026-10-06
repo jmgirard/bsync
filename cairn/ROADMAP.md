@@ -8,7 +8,7 @@ _Last hygiene check: 2026-10-05 (M010 merged and archived, 1 lesson added, no ne
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M011 | Add-one surrogate p-values | in-progress | — | normal | milestones/M011-add-one-p-value.md |
+| M011 | Add-one surrogate p-values | review | — | normal | milestones/M011-add-one-p-value.md |
 | M010 | Strict dyad input and named pseudo-dyad sources | done | — | normal | milestones/archive/M010-strict-dyad-input.md |
 | M009 | Pseudo-dyad surrogate generators | done | — | normal | milestones/archive/M009-pseudo-dyad-generators.md |
 | M008 | Phase synchrony estimator (wphase) | done | — | normal | milestones/archive/M008-phase-synchrony.md |

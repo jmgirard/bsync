@@ -79,8 +79,9 @@ report the add-one p-value (b + 1) / (n + 1), where n is the number of
 partner columns and b counts the partners that score at least as high as
 the real partner. With N dyads and \code{keep_roles = TRUE}, the smallest
 single-dyad p-value is therefore 1 / N, and \code{p < .05} needs at least 21
-dyads. When every partner is used, the p-value is the real partner's rank
-among the N series divided by N. If the real partner is no different from
+dyads. When every partner is used with \code{keep_roles = TRUE}, the p-value is
+the real partner's rank among the N series divided by N. If the real
+partner is no different from
 a stranger, each rank has chance 1 / N, so the test keeps its nominal
 size. With fewer than 21 dyads, prefer the sample-level comparison of
 \code{\link[=generate_pseudo_dyads]{generate_pseudo_dyads()}}. \code{n_surrogates = NULL} (the default) uses

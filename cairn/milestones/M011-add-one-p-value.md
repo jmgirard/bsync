@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M011: Add-one surrogate p-values
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -117,7 +117,7 @@ and segment shuffling stay on their candidate row.
       template, with its `INDEX.md` line (PDF on the shelf as
       `sources/phipson2010.pdf`). Update DESIGN.md §6 (step 3 and the
       Invariant 2 paragraph).
-- [ ] T4: As a finding aid, run `grep -rniE 'p-value|p_value|p value|tail'`
+- [x] T4: As a finding aid, run `grep -rniE 'p-value|p_value|p value|tail'`
       over `R/`, `vignettes/`, and `README.Rmd`, and log the hit count and
       the hits changed. Update the AC5 sites: wrapper roxygen, the
       `generate_surrogate_pseudo()` "How many surrogates" paragraph, the
@@ -144,6 +144,12 @@ and segment shuffling stay on their candidate row.
 - 2026-10-05: T1 and T2 share one checkpoint commit because T2 edits started before the T1 commit. The T4 wrapper roxygen edits in `R/surrogate_analysis.R` ride along in that commit. They add `@md` to the four wrapper blocks so the formula and the journal title render.
 - 2026-10-05: T3 done. `cairn/references/phipson2010.md` was written from PDF pp. 1 and 3 to 7, read directly. It anchors b / m (p. 3), its size (p. 4), the add-one formula (p. 6), and the exhaustive form (p. 7). `INDEX.md` has its line. DESIGN.md §6 step 3 states the formula, tails, and citation, and the Invariant 2 paragraph names the add-one form.
 - 2026-10-05: T4 in progress, checkpoint. The finding-aid grep found 88 hits before the edits and 103 after. Changed: four wrapper roxygen blocks, the `generate_surrogate_pseudo()` paragraph, the `R/multiverse.R` WDTW comment, and the surrogate-testing, wcc, wdtw, and wgranger vignettes. The wcc and pseudo-dyad prose was written against a sequential run of the vignette code: the wcc example gives b = 0, p = 1/1001, printed 0.001, and the circular null flags 7 of 10 dyads. README re-knit shows 0.0693. NEWS entry added, and Phipson and Smyth added to `inst/WORDLIST`. `air format` was not kept because it restyled about 26 untouched files. A candidate row records that. `devtools::check()` is running.
+- 2026-10-05: T4 done. `devtools::check()` gave Status OK, with 0 errors, 0 warnings, and 0 notes. A first run had one test-output NOTE because the spelling test ran before the WORDLIST edit. `devtools::document()` leaves no diff.
+- 2026-10-05: delegation: a fresh Opus reader (general-purpose agent) ran the claim audit. It read the added lines, ran the vignette code sequentially, and ran the changed test files.
+- claim audit: 86 claims read, 4 corrected — vignettes/wgranger-workflow.Rmd, vignettes/wdtw-workflow.Rmd, vignettes/surrogate-testing.Rmd, R/surrogate_generation.R
+- 2026-10-05: claim audit fixes. The F-statistics in the wgranger prose are now 159.48 and 133.12. The wdtw hard-coded output and prose are now 27.043 and 57.0134. Both were also stale on main. The size sentence in the surrogate-testing vignette now names the exchangeability condition. The pseudo-dyad roxygen rank sentence now names `keep_roles = TRUE`. The same reader re-read all four once, and all four passed.
+- 2026-10-05: the plan gate approved the switch as a default change on a 0.x package, and no argument exists to deprecate. That approval is taken as the pre-1.0 waiver of a deprecation cycle. NEWS states the change.
+- 2026-10-05: all tasks done, status review.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->

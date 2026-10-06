@@ -50,7 +50,7 @@ Regardless of the generation method, the logic of the **bsync** surrogate pipeli
 
 1. **Decouple:** Generate a matrix of $N$ null time series that remove the synchrony while keeping the individual characteristics (or, for pseudo-dyads, that replace the partner with a person from another dyad).
 2. **Evaluate:** Run your chosen synchrony metric (WCC, WDTW, or WGC) against every column in that matrix.
-3. **Compare:** Calculate the empirical p-value as $(b + 1) / (n + 1)$, where $n$ is the number of surrogates and $b$ counts the surrogate results that are as extreme as, or more extreme than, your observed result (Phipson & Smyth, 2010). The $+ 1$ counts the observed result as one more draw from the null. So the p-value is never 0, its smallest value is $1 / (n + 1)$, and the test rejects no more often than its nominal rate when there is no synchrony.
+3. **Compare:** Calculate the empirical p-value as $(b + 1) / (n + 1)$, where $n$ is the number of surrogates and $b$ counts the surrogate results that are as extreme as, or more extreme than, your observed result (Phipson & Smyth, 2010). The $+ 1$ counts the observed result as one more draw from the null. So the p-value is never 0, and its smallest value is $1 / (n + 1)$. When the observed result is one more draw from the same null as the surrogates, the test rejects no more often than its nominal rate.
 
 ```{r example, eval = FALSE}
 library(bsync)
