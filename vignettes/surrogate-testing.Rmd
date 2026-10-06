@@ -42,7 +42,7 @@ A pseudo-dyad pairs one person's series with a partner from a *different* dyad: 
 * **How it works:** The partner series is real data, recorded under the same task timeline. Series of unequal length are cropped start-aligned, so sample `t` of both series sits at the same task time. `generate_pseudo_dyads()` crops each pair to its shorter series. `generate_surrogate_pseudo()` crops longer partners to the length of the target's `y`, and excludes shorter partners with a warning. Start alignment assumes that every dyad was sampled at the same rate and that sample 1 of every series is the same task onset. Resample and trim first if that is not true.
 * **Which null it tests:** Circular shifts and phase randomization break all time alignment. If the task itself makes both people move at the same moments (a trial starts, a video plays), that shared movement looks like synchrony against those nulls. A pseudo-dyad partner went through the same task, so the pseudo-dyad null keeps task-driven co-movement. A significant result then means "more synchronous than with a stranger in the same setting."
 * **When to use it:** When you have a sample of dyads that did the same task, and you want to separate interaction-specific synchrony from synchrony that the task produces.
-* **Important Note:** A sample of N dyads gives each target at most N - 1 partners (2(N - 1) with `keep_roles = FALSE`). The smallest p-value of one dyad is 1 / (n + 1) for n partners (Section 2 gives the formula). With `keep_roles = TRUE` it is therefore never below 1 / N, so `p < .05` needs at least 21 dyads. With `keep_roles = FALSE` the floor is 1 / (2N - 1), so `p < .05` needs at least 11 dyads. The sample-level comparison in Section 3 uses all N(N - 1) pseudo-dyads.
+* **Important Note:** A sample of N dyads gives each target at most N - 1 partners (2(N - 1) with `keep_roles = FALSE`). The smallest p-value of one dyad is 1 / (n + 1) for n partners (Section 2 gives the formula). With `keep_roles = TRUE` it is therefore never below 1 / N, so `p <= .05` needs at least 20 dyads. With `keep_roles = FALSE` the floor is 1 / (2N - 1), so `p <= .05` needs at least 11 dyads. The sample-level comparison in Section 3 uses all N(N - 1) pseudo-dyads.
 
 ## 2. Theoretical Pipeline
 
@@ -113,14 +113,14 @@ p_pseudo <- vapply(seq_len(n_dyads), function(i) {
   test_dyad(i, generate_surrogate_pseudo(task_only, dyad = i))
 }, numeric(1))
 
-# Dyads called significant at .05 by the circular-shift null, out of 10
-sum(p_circular < 0.05)
+# Dyads called significant (p <= .05) by the circular-shift null, out of 10
+sum(p_circular <= 0.05)
 
 # Pseudo-dyad p-values, smallest first
 sort(p_pseudo)
 ```
 
-The circular-shift null breaks the shared task timeline, so it reads task-driven co-movement as synchrony: it calls `r sum(p_circular < 0.05)` of the 10 dyads significant. The pseudo-dyad null keeps that timeline. Each pseudo-dyad p-value is $(b + 1) / (9 + 1)$, where $b$ counts the strangers who score at least as high as the real partner. So the p-value is the real partner's rank among the 10 series divided by 10, and it can only be 0.1, 0.2, and so on up to 1. With 10 dyads, no single-dyad pseudo-dyad test can reach `p < .05`. If the real partner is no different from a stranger, each rank has chance 1/10, so the test keeps its nominal size. With N dyads the smallest single-dyad p-value is 1/N, so `p < .05` needs at least 21 dyads. With fewer dyads, use the sample-level comparison below.
+The circular-shift null breaks the shared task timeline, so it reads task-driven co-movement as synchrony: it calls `r sum(p_circular <= 0.05)` of the 10 dyads significant. The pseudo-dyad null keeps that timeline. Each pseudo-dyad p-value is $(b + 1) / (9 + 1)$, where $b$ counts the strangers who score at least as high as the real partner. So the p-value is the real partner's rank among the 10 series divided by 10, and it can only be 0.1, 0.2, and so on up to 1. With 10 dyads, no single-dyad pseudo-dyad test can reach `p <= .05`. If the real partner is no different from a stranger, each rank has chance 1/10, so the test keeps its nominal size. With N dyads the smallest single-dyad p-value is 1/N, so `p <= .05` needs at least 20 dyads. With fewer dyads, use the sample-level comparison below.
 
 For a sample-level comparison, `generate_pseudo_dyads()` builds every role-keeping pairing (the `x` of one dyad with the `y` of another: 10 × 9 = 90 pseudo-dyads). Compute the same statistic on the real dyads and on the pseudo-dyads, then compare the two distributions. Here we add a real coupling to each dyad: person B follows person A by 10 samples.
 
@@ -150,7 +150,7 @@ The real dyads score higher than the pseudo-dyads, because only real partners sh
 
 ## 4. Best Practices
 
-* **Permutation Count:** For a stable p-value, we recommend at least 1,000 permutations. Using fewer (e.g., 100) is fine for rapid exploratory analysis, but the smallest possible p-value is $1 / (n + 1)$: about .0099 with 100 surrogates, and about .001 with 1,000. Below 20 surrogates, no result can reach $p < .05$.
+* **Permutation Count:** For a stable p-value, we recommend at least 1,000 permutations. Using fewer (e.g., 100) is fine for rapid exploratory analysis, but the smallest possible p-value is $1 / (n + 1)$: about .0099 with 100 surrogates, and about .001 with 1,000. A result counts as significant at `p <= .05`, so below 19 surrogates no result can be significant.
 * **Power and Speed:** Surrogate analysis is "embarrassingly parallel." For heavy analyses like WDTW, always use the `future` package to distribute these 1,000+ calculations across your machine's CPU cores.
 * **Interpretation:** A significant p-value does not mean the behavior is *causal*; it only means the observed degree of synchrony is statistically unlikely to have occurred if the two participants were moving independently. For a pseudo-dyad null, it means more synchrony than with a stranger in the same setting.
 

@@ -13,7 +13,7 @@ identical `window_sec`, `lag_sec`, `increment_pct`, `statistic`, and
 `surrogate_method` arguments).}
 
 \item{sig_pct}{Minimum proportion of dyads in which a cell must be
-significant (p < .05) to pass the detectability gate. Default `0.5`.}
+significant (p <= .05) to pass the detectability gate. Default `0.5`.}
 
 \item{iqr_penalty}{Penalty weight on cross-dyad IQR of ES in the score
 `median(ES) - iqr_penalty * IQR(ES)`. Default `0.5`.}

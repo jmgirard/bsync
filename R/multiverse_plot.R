@@ -7,15 +7,28 @@
 # Uses only ggplot2 (already in Imports) + grid (base R recommended package).
 # No additional CRAN dependencies needed.
 
+# Valid cells of the grid, sorted by ES, with their rank and significance.
+# Significance uses is_significant(), so an NA p-value is not significant.
+multiverse_plot_data <- function(x) {
+  gd <- x$grid[!is.na(x$grid$es), ]
+  if (nrow(gd) == 0) {
+    cli::cli_abort("No valid cells to plot (all ES values are NA).")
+  }
+  gd <- gd[order(gd$es), ]
+  gd$spec_rank <- seq_len(nrow(gd))
+  gd$significant <- is_significant(gd$p)
+  gd
+}
+
 #' Plot a synchrony multiverse specification curve
 #'
 #' Draws a Simonsohn-style specification curve for a `bsync_multiverse` object.
 #' The top panel shows effect sizes sorted from smallest to largest, with
-#' significant cells (p < .05) highlighted. The bottom panel is a choice
+#' significant cells (p <= .05) highlighted. The bottom panel is a choice
 #' dashboard showing which analytic choices each specification used.
 #'
 #' @param x A `bsync_multiverse` object.
-#' @param sig_color Color for significant cells (p < .05). Default: `"#2166AC"`.
+#' @param sig_color Color for significant cells (p <= .05). Default: `"#2166AC"`.
 #' @param insig_color Color for non-significant cells. Default: `"grey60"`.
 #' @param active_color Fill for active choice tiles. Default: `"#2166AC"`.
 #' @param point_size Size of ES points. Default: `1.5`.
@@ -35,15 +48,7 @@ plot.bsync_multiverse <- function(
   top_frac = 0.55,
   ...
 ) {
-  gd <- x$grid[!is.na(x$grid$es), ]
-  if (nrow(gd) == 0) {
-    cli::cli_abort("No valid cells to plot (all ES values are NA).")
-  }
-
-  # Sort by ES
-  gd <- gd[order(gd$es), ]
-  gd$spec_rank <- seq_len(nrow(gd))
-  gd$significant <- gd$p < 0.05
+  gd <- multiverse_plot_data(x)
 
   # ------------------------------------------------------------------
   # Top panel: ES by spec rank
@@ -60,7 +65,7 @@ plot.bsync_multiverse <- function(
     ggplot2::scale_color_manual(
       values = c("FALSE" = insig_color, "TRUE" = sig_color),
       labels = c("FALSE" = "No", "TRUE" = "Yes"),
-      name   = "p < .05"
+      name   = "p <= .05"
     ) +
     ggplot2::labs(
       x = NULL,

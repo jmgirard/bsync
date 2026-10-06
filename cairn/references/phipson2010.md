@@ -14,8 +14,11 @@ Drawn", and its p. 1 says "Published 31 October 2010; corrected 9 February 2011"
 
 **Role.** This note is the source for the surrogate p-value formula that every
 `*_surrogate()` wrapper returns (D-001). It also gives the reason for the
-`n_surrogates < 20` warning in `synchrony_multiverse()`, because the smallest
-add-one p-value is 1 / (n + 1).
+p <= .05 significance rule (D-002): test size is defined as P(p̂ ≤ α) on p. 4,
+and the add-one form gives "a test with the correct size" on p. 6. The
+few-surrogates warning in `synchrony_multiverse()` fires below 19 surrogates,
+because the smallest add-one p-value is 1 / (n + 1) (corrected M012: was
+`n_surrogates < 20`).
 
 ## Extracted values
 
@@ -42,6 +45,8 @@ add-one p-value is 1 / (n + 1).
 - `R/surrogate_analysis.R`, the p-value line in `wcc_surrogate()`,
   `wdtw_surrogate()`, `wgranger_surrogate()` (both directions), and
   `wphase_surrogate()`. These compute (b + 1) / (n + 1), p. 6.
+- `R/surrogate_analysis.R`, `is_significant()` (rejects at p <= .05, pp. 4, 6)
+  and `significance_reachable()` (the smallest add-one p-value, 1 / (n + 1)).
 - `R/multiverse.R`, `warn_few_surrogates()`. It uses the smallest add-one
   p-value, 1 / (n + 1).
 - `tests/testthat/test-surrogate.R`, the tests "all four wrappers return

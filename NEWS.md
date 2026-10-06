@@ -1,6 +1,6 @@
 # bsync (development version)
 
-## Add-one surrogate p-values (changes reported results)
+## Add-one surrogate p-values and the p <= .05 rule (changes reported results)
 
 * `wcc_surrogate()`, `wdtw_surrogate()`, `wgranger_surrogate()` (both
   directions), and `wphase_surrogate()` now return the add-one p-value
@@ -11,11 +11,26 @@
   the surrogate distribution, the test rejects no more often than its nominal
   level. The b / n form gave 0 when b = 0 and rejected too often. A
   single-dyad pseudo-dyad test (`keep_roles = TRUE`) with N dyads gives p of
-  at least 1 / N. So p < .05 needs at least 21 dyads.
+  at least 1 / N. So p <= .05 needs at least 20 dyads.
+* The rule for a significant surrogate p-value is now p <= .05. The four
+  surrogate print methods and the `synchrony_multiverse()` summary and print
+  use it. `plot.bsync_multiverse()` and the detectability gate of
+  `autotune_wcc()` and `select_specification()` also use it. If n + 1 is a
+  multiple of 20, an add-one p-value can be exactly .05 (for example, 4 of
+  99 surrogates). Such a result is now significant. A test that rejects at
+  p <= .05 keeps its nominal size (Phipson & Smyth, 2010). An NA p-value is
+  never significant. The `synchrony_multiverse()` summary counts a computable
+  cell with an NA p-value as not significant, and `plot.bsync_multiverse()`
+  draws it as not significant. `select_specification()` leaves a dyad
+  with an NA p-value out of the significance rate.
 * The four surrogate print methods show the p-value rounded to 4 digits in
   fixed notation. If that rounding gives 0, they show `< 0.0001`.
-* If `n_surrogates < 20`, `synchrony_multiverse()` now warns, because no
-  cell can then reach p < .05. `autotune_wcc()` gives this warning
+* The four surrogate print methods no longer fail on an NA p-value. They say
+  that no significance call was made, and `print()` of a
+  `wgranger_surrogate()` result names the direction. When `n_surrogates` is
+  below 19, they note that no result can reach p <= .05.
+* If `n_surrogates` is below 19, `synchrony_multiverse()` now warns, because
+  no cell can then reach p <= .05. `autotune_wcc()` gives this warning
   once per call.
 
 ## New estimator: windowed phase synchrony

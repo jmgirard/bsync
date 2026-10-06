@@ -584,6 +584,52 @@ format_p_value <- function(p) {
   format(p_round, scientific = FALSE, digits = 15)
 }
 
+# The one significance rule for add-one surrogate p-values (D-002). The size of
+# a Monte Carlo test is P(p <= alpha), and the add-one p-value keeps it at or
+# below alpha (phipson2010, pp. 4, 6), so a p-value equal to alpha passes. An
+# NA p-value is never significant. Vectorized for the multiverse callers.
+is_significant <- function(p) {
+  !is.na(p) & p <= 0.05
+}
+
+# The smallest add-one p-value is 1 / (n_surrogates + 1). It reaches .05 at
+# 19 surrogates, so below that no result can be significant.
+significance_reachable <- function(n_surrogates) {
+  is_significant(1 / (n_surrogates + 1))
+}
+
+# Print the significance call for one p-value. An NA p-value (for example, an
+# observed statistic that could not be computed) gets no call. `direction`
+# names the test when an object holds more than one.
+print_significance_call <- function(p, yes, no, direction = NULL) {
+  if (is.na(p)) {
+    what <- if (is.null(direction)) "" else paste0(" for ", direction)
+    cli::cli_alert_warning(
+      "No significance call{what}: the p-value is NA."
+    )
+  } else if (is_significant(p)) {
+    cli::cli_alert_success("{yes}")
+  } else {
+    cli::cli_alert_warning("{no}")
+  }
+}
+
+# Notes on the number of surrogates, shared by the surrogate print methods.
+print_surrogate_count_notes <- function(n_surrogates) {
+  if (!is.na(n_surrogates) && !significance_reachable(n_surrogates)) {
+    p_min <- round(1 / (n_surrogates + 1), 3)
+    cli::cli_alert_info(
+      "With {n_surrogates} surrogate{?s}, the smallest possible p-value is \\
+      {p_min}, so no result can reach p <= .05."
+    )
+  }
+  if (n_surrogates < 1000) {
+    cli::cli_alert_info(
+      "Note: {n_surrogates} permutations may be too few for stable p-values.\n\tConsider setting `n_surrogates >= 1000` for final reporting."
+    )
+  }
+}
+
 #' Print method for wcc_surr objects
 #'
 #' @param x An object of class "wcc_surr".
@@ -616,21 +662,12 @@ print.wcc_surr <- function(x, ...) {
     )
   ))
 
-  if (x$p_value < 0.05) {
-    cli::cli_alert_success(
-      "Observed synchrony is significantly greater than chance."
-    )
-  } else {
-    cli::cli_alert_warning(
-      "Observed synchrony is not significantly different from chance."
-    )
-  }
-
-  if (x$n_surrogates < 1000) {
-    cli::cli_alert_info(
-      "Note: {x$n_surrogates} permutations may be too few for stable p-values.\n\tConsider setting `n_surrogates >= 1000` for final reporting."
-    )
-  }
+  print_significance_call(
+    x$p_value,
+    yes = "Observed synchrony is significantly greater than chance.",
+    no = "Observed synchrony is not significantly different from chance."
+  )
+  print_surrogate_count_notes(x$n_surrogates)
 
   invisible(x)
 }
@@ -653,21 +690,12 @@ print.wdtw_surr <- function(x, ...) {
     "Empirical p-value" = "{p_disp}"
   ))
 
-  if (x$p_value < 0.05) {
-    cli::cli_alert_success(
-      "Observed cost is significantly lower than chance (stronger alignment)."
-    )
-  } else {
-    cli::cli_alert_warning(
-      "Observed cost is not significantly different from chance."
-    )
-  }
-
-  if (x$n_surrogates < 1000) {
-    cli::cli_alert_info(
-      "Note: {x$n_surrogates} permutations may be too few for stable p-values.\n\tConsider setting `n_surrogates >= 1000` for final reporting."
-    )
-  }
+  print_significance_call(
+    x$p_value,
+    yes = "Observed cost is significantly lower than chance (stronger alignment).",
+    no = "Observed cost is not significantly different from chance."
+  )
+  print_surrogate_count_notes(x$n_surrogates)
 
   invisible(x)
 }
@@ -692,15 +720,12 @@ print.wgranger_surr <- function(x, ...) {
     "Empirical p-value" = "{p_disp_xy}"
   ))
 
-  if (x$p_value_xy < 0.05) {
-    cli::cli_alert_success(
-      "Predictive power (x -> y) is significantly greater than chance."
-    )
-  } else {
-    cli::cli_alert_warning(
-      "Predictive power (x -> y) is not significantly different from chance."
-    )
-  }
+  print_significance_call(
+    x$p_value_xy,
+    yes = "Predictive power (x -> y) is significantly greater than chance.",
+    no = "Predictive power (x -> y) is not significantly different from chance.",
+    direction = "x -> y"
+  )
 
   cli::cli_h2("Direction: y -> x")
   cli::cli_dl(c(
@@ -709,21 +734,13 @@ print.wgranger_surr <- function(x, ...) {
     "Empirical p-value" = "{p_disp_yx}"
   ))
 
-  if (x$p_value_yx < 0.05) {
-    cli::cli_alert_success(
-      "Predictive power (y -> x) is significantly greater than chance."
-    )
-  } else {
-    cli::cli_alert_warning(
-      "Predictive power (y -> x) is not significantly different from chance."
-    )
-  }
-
-  if (x$n_surrogates < 1000) {
-    cli::cli_alert_info(
-      "Note: {x$n_surrogates} permutations may be too few for stable p-values.\n\tConsider setting `n_surrogates >= 1000` for final reporting."
-    )
-  }
+  print_significance_call(
+    x$p_value_yx,
+    yes = "Predictive power (y -> x) is significantly greater than chance.",
+    no = "Predictive power (y -> x) is not significantly different from chance.",
+    direction = "y -> x"
+  )
+  print_surrogate_count_notes(x$n_surrogates)
 
   invisible(x)
 }
@@ -746,21 +763,12 @@ print.wphase_surr <- function(x, ...) {
     "Empirical p-value" = "{p_disp}"
   ))
 
-  if (x$p_value < 0.05) {
-    cli::cli_alert_success(
-      "Observed phase synchrony is significantly greater than chance."
-    )
-  } else {
-    cli::cli_alert_warning(
-      "Observed phase synchrony is not significantly different from chance."
-    )
-  }
-
-  if (x$n_surrogates < 1000) {
-    cli::cli_alert_info(
-      "Note: {x$n_surrogates} permutations may be too few for stable p-values.\n\tConsider setting `n_surrogates >= 1000` for final reporting."
-    )
-  }
+  print_significance_call(
+    x$p_value,
+    yes = "Observed phase synchrony is significantly greater than chance.",
+    no = "Observed phase synchrony is not significantly different from chance."
+  )
+  print_surrogate_count_notes(x$n_surrogates)
 
   invisible(x)
 }
