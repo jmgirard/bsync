@@ -585,3 +585,72 @@ test_that("the sources attribute matches column contents for keep_roles = TRUE",
   expect_true(all(srcs$role == "y"))
   expect_equal(paste0(srcs$dyad, srcs$role), column_sources(mat, dl))
 })
+
+# =========================================================================
+# --- Dyad reading rule (shared by both generators and autotune_wcc) -------
+# =========================================================================
+
+# Read one probe dyad through generate_surrogate_pseudo(): the probe sits at
+# position 2, dyad 1 is the target, and keep_roles = FALSE returns the
+# probe's x and y as the two columns, labeled by the "sources" attribute.
+read_probe <- function(probe) {
+  dl <- list(list(x = stats::rnorm(20), y = stats::rnorm(20)), probe)
+  mat <- generate_surrogate_pseudo(dl, dyad = 1, keep_roles = FALSE)
+  src <- attr(mat, "sources")
+  list(
+    x = unname(mat[, src$role == "x"]),
+    y = unname(mat[, src$role == "y"])
+  )
+}
+
+test_that("dyads are read by exact x/y names, else by position", {
+  set.seed(301)
+  a <- stats::rnorm(20)
+  b <- stats::rnorm(20)
+  t <- seq_len(20) / 10
+
+  # Both names present once: read by name, wherever they sit.
+  expect_equal(read_probe(list(y = b, x = a)), list(x = a, y = b))
+  expect_equal(
+    read_probe(data.frame(time = t, x = a, y = b)),
+    list(x = a, y = b)
+  )
+  # Names that only start with x or y are not matched: read by position.
+  expect_equal(read_probe(list(yy = b, xx = a)), list(x = b, y = a))
+  expect_equal(
+    read_probe(data.frame(p1 = a, p2 = b)),
+    list(x = a, y = b)
+  )
+  # No names: read by position.
+  expect_equal(read_probe(list(a, b)), list(x = a, y = b))
+})
+
+test_that("dyads with an unusable x/y naming or shape abort", {
+  set.seed(302)
+  a <- stats::rnorm(20)
+  b <- stats::rnorm(20)
+  dup_x <- data.frame(a, b, a)
+  names(dup_x) <- c("x", "x", "y")
+
+  name_msg <- "names .*x.* and .*y"
+  expect_error(read_probe(list(y = a, a2 = b)), name_msg)
+  expect_error(read_probe(list(x = a, b2 = b)), name_msg)
+  expect_error(read_probe(list(x = a, x = b, y = a)), name_msg)
+  expect_error(read_probe(dup_x), name_msg)
+  expect_error(read_probe(data.frame(p1 = a)), "at least two")
+  expect_error(read_probe(list(a)), "at least two")
+  expect_error(read_probe(a), "must be a data frame or a list")
+})
+
+test_that("dyad reading errors name the dyad's index in dyad_list", {
+  set.seed(303)
+  good <- function() list(x = stats::rnorm(20), y = stats::rnorm(20))
+  for (bad in list(list(y = 1:20, a2 = 1:20), data.frame(p1 = 1:20))) {
+    dl <- list(good(), good(), bad, good())
+    expect_error(
+      generate_surrogate_pseudo(dl, dyad = 1),
+      "Dyad 3 in `dyad_list`"
+    )
+    expect_error(generate_pseudo_dyads(dl), "Dyad 3 in `dyad_list`")
+  }
+})

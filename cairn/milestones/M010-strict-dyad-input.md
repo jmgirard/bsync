@@ -4,14 +4,14 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M010: Strict dyad input and named pseudo-dyad sources
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** —   <!-- owner: plan · create/amend-via-gate; bsync's numbered invariants live in CLAUDE.md (3 binds here), no DESIGN IP/GP numbering yet -->
 - **Resolves:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Surface tier:** user-facing — changes how exported functions read `dyad_list` and what the pseudo-dyad generators return   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m010-strict-dyad-input   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -104,7 +104,7 @@ candidate row and are not added here.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits). -->
 
-- [ ] T1: Tests first in `tests/testthat/test-surrogate-pseudo.R` and
+- [x] T1: Tests first in `tests/testthat/test-surrogate-pseudo.R` and
       `test-autotune.R`. Rewrite `.extract_xy(dyad, index)` to the AC1 rule
       with `[[` on exact names, never `$`. Pass the index from
       `.pseudo_extract_dyads()`. In `autotune_wcc()`, extract every dyad
@@ -132,6 +132,8 @@ candidate row and are not added here.
 - 2026-10-05: plan gate chose added `name` columns over converting the integer `dyad` columns to character because it keeps the M009 columns unchanged; falsified by users needing the name as the only key in `"sources"`.
 - 2026-10-05: criteria audit (full mode, fresh Opus reader) returned 4 findings on M010. Fixed: AC1 partial-match probe swapped to `list(yy = b, xx = a)`, which tells the two readings apart, and abort probes widened (`list(x = a, b2 = b)`, duplicate-`x` data frame). Fixed: AC2 narrowed to dyads that `.extract_xy()` rejects, two forms per path. Fixed: AC3 gains the `NA`-name probe, and names with `:` or `|` are accepted. Fixed: AC4 NEWS must name the inputs whose result changes without an error.
 - 2026-10-05: plan gate chose a NEWS entry over a per-call cli notice for inputs now read by name instead of by position, because after the upgrade the notice repeats on every correct call; falsified by users who miss the change and report shifted results.
+- 2026-10-05: implement started on branch `m010-strict-dyad-input`, cut from main at 3115dba.
+- 2026-10-05: T1 done. `.extract_xy(dyad, index)` applies the exact-name-else-position rule with abort messages that name the dyad index; `autotune_wcc()` extracts every dyad before sampling. New tests saw red first (7 failures), then the full suite passed (1579 tests). `air` restyled untouched code in `R/autotune.R` and `test-autotune.R`, which were never air-clean, so that restyle was dropped to keep the diff focused.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->

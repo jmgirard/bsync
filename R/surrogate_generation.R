@@ -471,7 +471,7 @@ generate_pseudo_dyads <- function(
     )
   }
   lapply(seq_along(dyad_list), function(i) {
-    xy <- .extract_xy(dyad_list[[i]])
+    xy <- .extract_xy(dyad_list[[i]], i)
     if (!is.numeric(xy$x) || !is.numeric(xy$y)) {
       cli::cli_abort(
         "Both series of dyad {i} in {.arg dyad_list} must be numeric."

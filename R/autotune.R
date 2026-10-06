@@ -158,6 +158,13 @@ autotune_wcc <- function(
   # Default lag_sec: SUSY ceiling (window / 2)
   lag_sec_use <- lag_sec %||% (window_sec / 2)
 
+  # Read every dyad before sampling, so a malformed dyad aborts the call even
+  # when the sample would leave it out, and the abort names its true index.
+  xy_list <- lapply(
+    seq_along(dyad_list),
+    function(i) .extract_xy(dyad_list[[i]], i)
+  )
+
   # Sample dyads
   n_total <- length(dyad_list)
   n_use <- min(n_tune_dyads, n_total)
@@ -167,14 +174,13 @@ autotune_wcc <- function(
   } else {
     tune_idx <- seq_len(n_total)
   }
-  tune_list <- dyad_list[tune_idx]
+  tune_list <- xy_list[tune_idx]
 
   cli::cli_inform("Running synchrony_multiverse() on {n_use} dyad(s) \\
     ({length(window_sec)} window x {length(lag_sec_use)} lag cells each)...")
 
   # Run multiverse on each dyad
-  mv_list <- lapply(tune_list, function(dyad) {
-    xy <- .extract_xy(dyad)
+  mv_list <- lapply(tune_list, function(xy) {
     synchrony_multiverse(
       x = xy$x,
       y = xy$y,
@@ -338,24 +344,42 @@ select_specification <- function(mv_list, sig_pct = 0.5, iqr_penalty = 0.5) {
 
 
 # .extract_xy() ----------------------------------------------------------------
-# Internal helper: pull x and y from a dyad element (data.frame with 2+ cols
-# or list with $x and $y).
+# Internal helper: pull x and y from one dyad of a dyad_list (a data frame or
+# a list). One rule for both shapes, with exact name matching only:
+#   - `x` and `y` each named exactly once -> read by name, in any position;
+#   - neither `x` nor `y` named (or no names) -> the first two elements;
+#   - any other count of exact `x`/`y` names -> abort (no silent role swap).
+# `index` is the dyad's position in the user's dyad_list, named in every
+# abort so the user can find the bad dyad.
 
-.extract_xy <- function(dyad) {
-  if (is.data.frame(dyad)) {
-    if (ncol(dyad) < 2) {
-      cli::cli_abort("Each dyad data frame must have at least two columns.")
-    }
-    list(x = dyad[[1]], y = dyad[[2]])
-  } else if (is.list(dyad)) {
-    if (!is.null(dyad$x) && !is.null(dyad$y)) {
-      list(x = dyad$x, y = dyad$y)
-    } else if (length(dyad) >= 2) {
-      list(x = dyad[[1]], y = dyad[[2]])
-    } else {
-      cli::cli_abort("Each dyad must be a data frame or a list with at least two elements.")
-    }
-  } else {
-    cli::cli_abort("Each dyad must be a data frame or a list.")
+.extract_xy <- function(dyad, index) {
+  if (!is.list(dyad)) {
+    cli::cli_abort(
+      "Dyad {index} in {.arg dyad_list} must be a data frame or a list."
+    )
   }
+  nm <- names(dyad)
+  n_x <- sum(nm %in% "x")
+  n_y <- sum(nm %in% "y")
+  if (n_x == 1 && n_y == 1) {
+    return(list(
+      x = dyad[[which(nm %in% "x")]],
+      y = dyad[[which(nm %in% "y")]]
+    ))
+  }
+  if (n_x > 0 || n_y > 0) {
+    cli::cli_abort(c(
+      "Dyad {index} in {.arg dyad_list} names {.val x} {n_x} time{?s} and \\
+      {.val y} {n_y} time{?s}.",
+      "i" = "Name each exactly once, or use neither name to read the first \\
+      two elements by position."
+    ))
+  }
+  if (length(dyad) < 2) {
+    cli::cli_abort(
+      "Dyad {index} in {.arg dyad_list} must have at least two elements \\
+      (columns)."
+    )
+  }
+  list(x = dyad[[1]], y = dyad[[2]])
 }
