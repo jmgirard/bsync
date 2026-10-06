@@ -82,6 +82,8 @@ Make every surrogate significance call in bsync come from one internal p <= .05 
 - 2026-10-06: review return 1: AC5 fails as written. The `p_value_xy`-NA and `p_value_yx`-NA wgranger cases in "print methods make no significance call on an NA p-value" (`tests/testthat/test-surrogate.R`) never assert that `print()` returns `x` invisibly.
 - 2026-10-06: T6 added for review return 1 (minor amendment: new task, Coverage AC5 → T2, T6). T6 done: both single-NA wgranger cases now assert `expect_no_error` and `expect_invisible`. The test passes with 27 expectations. Status set to review.
 - 2026-10-06: step-7 approval: m012-significance-rule approved for merge
+- 2026-10-06: resume: PR #7 open with checks green, no merge yet. Re-entered at step 1 (route c), PR conversation read, chip re-posed.
+- 2026-10-06: step-7 approval: m012-significance-rule approved for merge (re-posed chip)
 
 ## Decisions
 
