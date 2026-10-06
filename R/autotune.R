@@ -190,19 +190,28 @@ autotune_wcc <- function(
   cli::cli_inform("Running synchrony_multiverse() on {n_use} dyad(s) \\
     ({length(window_sec)} window x {length(lag_sec_use)} lag cells each)...")
 
+  # Give the few-surrogates warning once here, and muffle the copy that
+  # each per-dyad synchrony_multiverse() call would give.
+  if (rlang::is_integerish(n_surrogates, n = 1) && n_surrogates >= 1) {
+    warn_few_surrogates(n_surrogates)
+  }
+
   # Run multiverse on each dyad
   mv_list <- lapply(tune_list, function(xy) {
-    synchrony_multiverse(
-      x = xy$x,
-      y = xy$y,
-      estimator = "wcc",
-      sample_rate = sample_rate,
-      window_sec = window_sec,
-      lag_sec = lag_sec_use,
-      increment_pct = increment_pct,
-      statistic = statistic,
-      surrogate_method = surrogate_method,
-      n_surrogates = n_surrogates
+    withCallingHandlers(
+      synchrony_multiverse(
+        x = xy$x,
+        y = xy$y,
+        estimator = "wcc",
+        sample_rate = sample_rate,
+        window_sec = window_sec,
+        lag_sec = lag_sec_use,
+        increment_pct = increment_pct,
+        statistic = statistic,
+        surrogate_method = surrogate_method,
+        n_surrogates = n_surrogates
+      ),
+      bsync_few_surrogates = function(w) invokeRestart("muffleWarning")
     )
   })
 

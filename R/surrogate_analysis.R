@@ -12,8 +12,11 @@
 #' Calculate Surrogate Windowed Cross-Correlations
 #'
 #' @details
-#' The p-value is the proportion of surrogates whose aggregate statistic is **at least as
-#' large as** the observed statistic. The aggregate — either `"mean_abs_z"` or `"peak"` —
+#' The p-value is the add-one form p = (b + 1) / (n + 1) (Phipson & Smyth, 2010), where n
+#' is the number of surrogate columns and b is the number of surrogates whose aggregate
+#' statistic is **at least as large as** the observed statistic. The `+ 1` counts the
+#' observed data as one more draw from the null, so the p-value is never 0. Its smallest
+#' value is 1 / (n + 1). The aggregate — either `"mean_abs_z"` or `"peak"` —
 #' is computed identically on the observed data and every surrogate via the same internal
 #' helper, so the null distribution and the observed value are guaranteed to be directly
 #' comparable (Invariant 2: surrogate nulls match the observed statistic).
@@ -33,6 +36,11 @@
 #' @param statistic A character string specifying the aggregate statistic; must match the value
 #'   passed to `wcc()`. `"mean_abs_z"` (default) or `"peak"`. See `wcc()` for details.
 #' @return A list object of class "wcc_surr".
+#' @references Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never be
+#'   zero: calculating exact p-values when permutations are randomly drawn. *Statistical
+#'   Applications in Genetics and Molecular Biology*, 9(1), Article 39.
+#'   \doi{10.2202/1544-6115.1585}
+#' @md
 #' @examples
 #' \donttest{
 #' # Two-step pipeline: generate a null matrix, then test the observed WCC
@@ -113,7 +121,7 @@ wcc_surrogate <- function(
     compute_fn = wcc_compute, fun_value = numeric(1)
   )
 
-  p_val <- sum(surrogate_zs >= obs_z) / n_surrogates
+  p_val <- (sum(surrogate_zs >= obs_z) + 1) / (n_surrogates + 1)
 
   out <- list(
     observed_z = obs_z,
@@ -133,8 +141,11 @@ wcc_surrogate <- function(
 #' Calculate Surrogate Windowed Dynamic Time Warping (WDTW)
 #'
 #' @details
-#' The p-value is the proportion of surrogates whose aggregate statistic is **at most as
-#' large as** the observed statistic (lower DTW distance = better alignment). The aggregate
+#' The p-value is the add-one form p = (b + 1) / (n + 1) (Phipson & Smyth, 2010), where n
+#' is the number of surrogate columns and b is the number of surrogates whose aggregate
+#' statistic is **at most as large as** the observed statistic (lower DTW distance = better
+#' alignment). The `+ 1` counts the observed data as one more draw from the null, so the
+#' p-value is never 0. Its smallest value is 1 / (n + 1). The aggregate
 #' is `mean(dtw_dist)` over all window × lag combinations — the same quantity stored in
 #' `wdtw_res$aggregate[["mean_distance"]]` — computed identically on both the observed data and every
 #' surrogate, so the null distribution and the observed value are directly comparable.
@@ -157,6 +168,11 @@ wcc_surrogate <- function(
 #' @param fast_method Logical. If `TRUE`, severely reduces computation time by only evaluating
 #'   surrogate alignments at lag 0. **See Details for the statistical caveat.** Default is `FALSE`.
 #' @return A list object of class "wdtw_surr".
+#' @references Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never be
+#'   zero: calculating exact p-values when permutations are randomly drawn. *Statistical
+#'   Applications in Genetics and Molecular Biology*, 9(1), Article 39.
+#'   \doi{10.2202/1544-6115.1585}
+#' @md
 #' @examples
 #' \donttest{
 #' # DTW runs n_surrogates + 1 times, so this example uses a short subset and a
@@ -271,7 +287,7 @@ wdtw_surrogate <- function(
     compute_fn = wdtw_compute, fun_value = numeric(1)
   )
 
-  p_val <- sum(surrogate_costs <= obs_cost) / n_surrogates
+  p_val <- (sum(surrogate_costs <= obs_cost) + 1) / (n_surrogates + 1)
 
   out <- list(
     observed_cost = obs_cost,
@@ -291,9 +307,12 @@ wdtw_surrogate <- function(
 #' Calculate Surrogate Windowed Granger Causality
 #'
 #' @details
-#' Two p-values are returned: one for x → y and one for y → x. Each is the proportion of
-#' surrogates whose mean F-statistic across windows is **at least as large as** the
-#' corresponding observed mean F-statistic. Both null distributions are built with the same
+#' Two p-values are returned: one for x → y and one for y → x. Each is the add-one form
+#' p = (b + 1) / (n + 1) (Phipson & Smyth, 2010), where n is the number of surrogate columns
+#' and b is the number of surrogates whose mean F-statistic across windows is **at least as
+#' large as** the corresponding observed mean F-statistic. The `+ 1` counts the observed
+#' data as one more draw from the null, so neither p-value is ever 0. The smallest value is
+#' 1 / (n + 1). Both null distributions are built with the same
 #' aggregate (`mean(f_xy)` and `mean(f_yx)`) as the observed statistics stored in
 #' `wgranger_res$results_df`, so the null and observed values are directly comparable.
 #'
@@ -305,6 +324,11 @@ wdtw_surrogate <- function(
 #' @param ar_order A positive integer specifying the Autoregressive (AR) order. Default is 1.
 #' @param window_increment A positive integer indicating the step size for the rolling window. Default is 1.
 #' @return A list object of class "wgranger_surr".
+#' @references Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never be
+#'   zero: calculating exact p-values when permutations are randomly drawn. *Statistical
+#'   Applications in Genetics and Molecular Biology*, 9(1), Article 39.
+#'   \doi{10.2202/1544-6115.1585}
+#' @md
 #' @examples
 #' \donttest{
 #' y_surr <- generate_surrogate_circular(sim_dyad$x_B, n_surrogates = 100)
@@ -381,9 +405,9 @@ wgranger_surrogate <- function(
   surrogate_f_xy <- surr_matrix["f_xy", ]
   surrogate_f_yx <- surr_matrix["f_yx", ]
 
-  # 4. Empirical p-values
-  p_val_xy <- sum(surrogate_f_xy >= obs_f_xy) / n_surrogates
-  p_val_yx <- sum(surrogate_f_yx >= obs_f_yx) / n_surrogates
+  # 4. Add-one empirical p-values, (b + 1) / (n + 1)
+  p_val_xy <- (sum(surrogate_f_xy >= obs_f_xy) + 1) / (n_surrogates + 1)
+  p_val_yx <- (sum(surrogate_f_yx >= obs_f_yx) + 1) / (n_surrogates + 1)
 
   out <- list(
     observed_f_xy = obs_f_xy,
@@ -406,8 +430,11 @@ wgranger_surrogate <- function(
 #' Calculate Surrogate Windowed Phase Synchrony
 #'
 #' @details
-#' The p-value is the proportion of surrogates whose aggregate statistic is **at least as
-#' large as** the observed statistic. The aggregate -- the mean phase-locking value over
+#' The p-value is the add-one form p = (b + 1) / (n + 1) (Phipson & Smyth, 2010), where n
+#' is the number of surrogate columns and b is the number of surrogates whose aggregate
+#' statistic is **at least as large as** the observed statistic. The `+ 1` counts the
+#' observed data as one more draw from the null, so the p-value is never 0. Its smallest
+#' value is 1 / (n + 1). The aggregate -- the mean phase-locking value over
 #' all window x lag combinations (`mean_plv`) -- is computed identically on the observed
 #' data and every surrogate via the same internal helper, so the null distribution and
 #' the observed value are directly comparable (Invariant 2: surrogate nulls match the
@@ -429,6 +456,11 @@ wgranger_surrogate <- function(
 #' @param window_increment A positive integer indicating the window shift increment. Default is 1.
 #' @param lag_increment A positive integer indicating the lag shift increment. Default is 1.
 #' @return A list object of class "wphase_surr".
+#' @references Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never be
+#'   zero: calculating exact p-values when permutations are randomly drawn. *Statistical
+#'   Applications in Genetics and Molecular Biology*, 9(1), Article 39.
+#'   \doi{10.2202/1544-6115.1585}
+#' @md
 #' @examples
 #' \donttest{
 #' # Two-step pipeline: generate a null matrix, then test the observed synchrony
@@ -511,7 +543,7 @@ wphase_surrogate <- function(
     compute_fn = wphase_compute, fun_value = numeric(1)
   )
 
-  p_val <- sum(surrogate_plvs >= obs_plv) / n_surrogates
+  p_val <- (sum(surrogate_plvs >= obs_plv) + 1) / (n_surrogates + 1)
 
   out <- list(
     observed_z = obs_plv,
@@ -528,6 +560,16 @@ wphase_surrogate <- function(
 # === S3 PRINT METHODS ====================================================
 # =========================================================================
 
+# Display a p-value rounded to 4 digits, in fixed notation. A value that
+# rounds to 0 shows as "< 0.0001"; the add-one p-value itself is never 0.
+format_p_value <- function(p) {
+  p_round <- round(p, 4)
+  if (!is.na(p_round) && p_round == 0) {
+    return("< 0.0001")
+  }
+  format(p_round, scientific = FALSE)
+}
+
 #' Print method for wcc_surr objects
 #'
 #' @param x An object of class "wcc_surr".
@@ -537,11 +579,7 @@ wphase_surrogate <- function(
 print.wcc_surr <- function(x, ...) {
   cli::cli_h1("WCC Surrogate Analysis (Pseudo-Synchrony)")
 
-  if (x$p_value == 0) {
-    p_disp <- paste0("< ", 1 / x$n_surrogates)
-  } else {
-    p_disp <- as.character(round(x$p_value, 4))
-  }
+  p_disp <- format_p_value(x$p_value)
 
   agg_label <- if (x$settings$statistic == "peak") {
     "Mean Peak Abs. Fisher's Z"
@@ -592,11 +630,7 @@ print.wcc_surr <- function(x, ...) {
 print.wdtw_surr <- function(x, ...) {
   cli::cli_h1("WDTW Surrogate Analysis (Pseudo-Synchrony)")
 
-  if (x$p_value == 0) {
-    p_disp <- paste0("< ", 1 / x$n_surrogates)
-  } else {
-    p_disp <- as.character(round(x$p_value, 4))
-  }
+  p_disp <- format_p_value(x$p_value)
 
   cli::cli_dl(c(
     "Permutations" = "{x$n_surrogates}",
@@ -633,16 +667,8 @@ print.wdtw_surr <- function(x, ...) {
 print.wgranger_surr <- function(x, ...) {
   cli::cli_h1("Windowed Granger Surrogate Analysis")
 
-  if (x$p_value_xy == 0) {
-    p_disp_xy <- paste0("< ", 1 / x$n_surrogates)
-  } else {
-    p_disp_xy <- as.character(round(x$p_value_xy, 4))
-  }
-  if (x$p_value_yx == 0) {
-    p_disp_yx <- paste0("< ", 1 / x$n_surrogates)
-  } else {
-    p_disp_yx <- as.character(round(x$p_value_yx, 4))
-  }
+  p_disp_xy <- format_p_value(x$p_value_xy)
+  p_disp_yx <- format_p_value(x$p_value_yx)
 
   cli::cli_h2("Direction: x -> y")
   cli::cli_dl(c(
@@ -697,11 +723,7 @@ print.wgranger_surr <- function(x, ...) {
 print.wphase_surr <- function(x, ...) {
   cli::cli_h1("Windowed Phase Synchrony Surrogate Analysis (Pseudo-Synchrony)")
 
-  if (x$p_value == 0) {
-    p_disp <- paste0("< ", 1 / x$n_surrogates)
-  } else {
-    p_disp <- as.character(round(x$p_value, 4))
-  }
+  p_disp <- format_p_value(x$p_value)
 
   cli::cli_dl(c(
     "Permutations" = "{x$n_surrogates}",

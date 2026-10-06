@@ -4,14 +4,14 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M011: Add-one surrogate p-values
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** —   <!-- owner: plan · create/amend-via-gate; bsync's numbered invariants live in CLAUDE.md (2 and 3 bind here), no DESIGN IP/GP numbering yet -->
 - **Resolves:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Surface tier:** user-facing — changes the p-value that every exported surrogate wrapper returns   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m011-add-one-p-value   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -100,13 +100,13 @@ and segment shuffling stay on their candidate row.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits). -->
 
-- [ ] T1: Tests first in `tests/testthat/test-surrogate.R` (AC1) and
+- [x] T1: Tests first in `tests/testthat/test-surrogate.R` (AC1) and
       `test-surrogate-pseudo.R` (AC2). Change the five p-value lines in
       `R/surrogate_analysis.R` to `(b + 1) / (n_surrogates + 1)`. Update the
       seeded pin (`test-surrogate.R:462`) to the add-one values from the same
       seed, with `(b + 1) / (99 + 1)` in a comment. Fix any other test whose
       expected p-value the change moves.
-- [ ] T2: Tests first. Replace the `p_value == 0` branches of the print
+- [x] T2: Tests first. Replace the `p_value == 0` branches of the print
       methods with the AC3 display. Add the `n_surrogates < 20` warning to
       `synchrony_multiverse()`, and make `autotune_wcc()` give it once (for
       example, warn up front and muffle the per-dyad copies). Update tests in `test-multiverse.R` and
@@ -138,6 +138,10 @@ and segment shuffling stay on their candidate row.
 - 2026-10-05: plan gate chose the same add-one form for the exhaustive pseudo-dyad null over a separate rank form because with every partner used, (b + 1) / (n + 1) is the observed partner's rank among the N series, so one formula covers both; falsified by a source that defines a different exact p-value for exhaustive enumeration.
 - 2026-10-05: criteria audit (full mode, fresh Opus reader) returned 6 findings on M011, all fixed. Print display gives `< 0.0001` where rounding to 4 digits would print 0 (AC3). The simulation tests one dyad per replicate, so the p-values are independent, with at least 200 replicates and a 0.15 cutoff that separates b/n from the add-one form (AC2). AC1 is scoped to finite statistics and probes b = 0 in both wgranger directions. `autotune_wcc()` warns once (AC4). The grep-sweep domain and the work-log recording act moved from the criterion to T4, and AC5 now names its doc sites, including DESIGN §6's Invariant 2 paragraph. The seeded pin criterion (an instrument) folded into T1.
 - 2026-10-05: plan gate left CLAUDE.md Invariant 2 unedited because its wording ("the p-value is its tail") still holds under the add-one form; falsified by a reviewer reading it as b / n.
+- 2026-10-05: implement started. Branch m011-add-one-p-value cut from main at f06719a, in sync with origin.
+- 2026-10-05: T1 done. The five p-value lines now use (b + 1) / (n + 1). AC1 tests count b with a loop for all five statistics, with 19 circular surrogates. A bidirectional VAR(1) dyad gives b = 0 for all five, and an independent dyad gives 0 < b < 19 for all five. The AC2 test uses 400 replicates (about 10 s, skip_on_cran). Run against b / n, it failed the p >= 0.1 check and the 0.15 share (0.205). The seeded pin is now (91 + 1) / 100 and (83 + 1) / 100. The multiverse snapshot test moved from 9 to 20 surrogates because at 9 no cell can reach p < .05. The new snapshot shows 6 of 12 cells significant, median ES 1.41.
+- 2026-10-05: T2 done. The four print methods use a new internal `format_p_value()`, which rounds to 4 digits in fixed notation and shows `< 0.0001` when that rounding gives 0. The test also pins p = 1e-4 as "0.0001" because `as.character()` printed "1e-04". The new `warn_few_surrogates()` in `R/multiverse.R` gives a cli warning of class `bsync_few_surrogates`. `autotune_wcc()` gives it once up front and muffles that class in the per-dyad calls. With the class removed as a planted defect, the once-per-call test saw 4 warnings. Multiverse tests at 9 or 19 surrogates moved to 20, the odd-length phase test moved from 10 to 20, and the 5-surrogate autotune test now expects the warning. Full suite clean (NOT_CRAN).
+- 2026-10-05: T1 and T2 share one checkpoint commit because T2 edits started before the T1 commit. The T4 wrapper roxygen edits in `R/surrogate_analysis.R` ride along in that commit. They add `@md` to the four wrapper blocks so the formula and the journal title render.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->

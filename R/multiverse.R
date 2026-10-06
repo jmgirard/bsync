@@ -16,6 +16,25 @@
 
 # select_specification() is the Phase B helper; defined in autotune.R
 
+# The multiverse and autotune_wcc() call a cell significant at p < .05. The
+# add-one p-value (b + 1) / (n_surrogates + 1) is at least
+# 1 / (n_surrogates + 1), so below 20 surrogates no cell can pass. The class
+# lets autotune_wcc() give this warning once instead of once per dyad.
+warn_few_surrogates <- function(n_surrogates) {
+  if (n_surrogates >= 20) {
+    return(invisible(NULL))
+  }
+  p_min <- round(1 / (n_surrogates + 1), 3)
+  cli::cli_warn(
+    c(
+      "With {n_surrogates} surrogate{?s}, the smallest possible p-value is \\
+      {.code 1 / (n_surrogates + 1)} = {p_min}, so no cell can reach p < .05.",
+      "i" = "Use {.code n_surrogates >= 20}, and >= 1000 for reporting."
+    ),
+    class = "bsync_few_surrogates"
+  )
+}
+
 
 # synchrony_multiverse() -------------------------------------------------------
 
@@ -146,6 +165,7 @@ synchrony_multiverse <- function(
   if (!rlang::is_integerish(n_surrogates, n = 1) || n_surrogates < 1) {
     cli::cli_abort("{.arg n_surrogates} must be a single positive integer.")
   }
+  warn_few_surrogates(n_surrogates)
 
   is_granger <- estimator == "wgranger"
 

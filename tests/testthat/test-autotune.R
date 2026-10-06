@@ -201,10 +201,14 @@ test_that("select_specification: emits warning when gate is not met", {
   set.seed(5)
   x <- stats::rnorm(100)
   y <- stats::rnorm(100)
-  mv <- synchrony_multiverse(
-    x = x, y = y, estimator = "wcc", sample_rate = 10,
-    window_sec = 1, lag_sec = 0.5,
-    n_surrogates = 5L # very few surrogates -> noisy null -> likely no significance
+  # 5 surrogates: smallest p is 1 / 6, so no cell is significant.
+  expect_warning(
+    mv <- synchrony_multiverse(
+      x = x, y = y, estimator = "wcc", sample_rate = 10,
+      window_sec = 1, lag_sec = 0.5,
+      n_surrogates = 5L
+    ),
+    class = "bsync_few_surrogates"
   )
 
   # Manually zero out significance so gate definitely fails
@@ -337,6 +341,40 @@ test_that("autotune_wcc keeps dyad_list names on the sampled multiverses", {
     n_tune_dyads = 2L
   )))
   expect_identical(names(res$dyad_multiverses), names(dl)[idx])
+})
+
+test_that("autotune_wcc gives the few-surrogates warning once per call", {
+  # Every warning message the call gives; messages muffled.
+  warnings_from <- function(expr) {
+    msgs <- character()
+    withCallingHandlers(
+      suppressMessages(expr),
+      warning = function(w) {
+        msgs <<- c(msgs, conditionMessage(w))
+        invokeRestart("muffleWarning")
+      }
+    )
+    msgs
+  }
+  run <- function(n_surr) {
+    set.seed(306)
+    dl <- replicate(
+      3,
+      list(x = stats::rnorm(100), y = stats::rnorm(100)),
+      simplify = FALSE
+    )
+    warnings_from(autotune_wcc(
+      dyad_list = dl,
+      sample_rate = 10,
+      window_sec = 2,
+      lag_sec = 0.5,
+      n_surrogates = n_surr
+    ))
+  }
+  pattern <- "smallest possible p-value is `1 / \\(n_surrogates \\+ 1\\)` = 0.05"
+  # 3 dyads, so 3 synchrony_multiverse() calls, but one warning.
+  expect_identical(sum(grepl(pattern, run(19L))), 1L)
+  expect_identical(sum(grepl("smallest possible p-value", run(20L))), 0L)
 })
 
 test_that("autotune_wcc rejects a single data frame as dyad_list", {

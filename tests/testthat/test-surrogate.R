@@ -75,7 +75,7 @@ test_that("synchrony_multiverse runs on odd-length series with phase surrogates"
     x, y,
     estimator = "wcc", sample_rate = 30,
     window_sec = 1, lag_sec = 0.3,
-    n_surrogates = 10, surrogate_method = "phase"
+    n_surrogates = 20, surrogate_method = "phase"
   )
   expect_s3_class(mv, "bsync_multiverse")
   expect_gte(mv$robustness$n_valid, 1L)
@@ -286,6 +286,57 @@ test_that("Print methods return silently and output text", {
   expect_message(print(mock_wcc_obj), "too few for stable p-values")
 })
 
+# Every "Empirical p-value: <value>" shown by a print method, read from the
+# message stream (cli writes there when not interactive).
+printed_p_values <- function(obj) {
+  out <- paste(testthat::capture_messages(print(obj)), collapse = "")
+  m <- regmatches(out, gregexpr("Empirical p-value: [^\n]+", out))[[1]]
+  sub("Empirical p-value: ", "", m, fixed = TRUE)
+}
+
+mock_surr <- function(class_name, p) {
+  base <- list(n_surrogates = 99999, settings = list(statistic = "mean_abs_z"))
+  obj <- switch(class_name,
+    wcc_surr = ,
+    wphase_surr = c(base, list(
+      observed_z = 0.8, surrogate_z = c(0.1, 0.2), p_value = p
+    )),
+    wdtw_surr = c(base, list(
+      observed_cost = 10, surrogate_cost = c(20, 25), p_value = p
+    )),
+    wgranger_surr = c(base, list(
+      observed_f_xy = 5, surrogate_f_xy = c(1, 2), p_value_xy = p[1],
+      observed_f_yx = 5, surrogate_f_yx = c(1, 2), p_value_yx = p[2]
+    ))
+  )
+  structure(obj, class = c(class_name, "list"))
+}
+
+test_that("print methods show p rounded to 4 digits, or < 0.0001", {
+  # 0.123456 rounds to 0.1235. 1e-5 rounds to 0, so it shows "< 0.0001"
+  # (the smallest add-one p-value with 99999 surrogates is 1 / 100000).
+  # 1e-4 shows in fixed notation, not "1e-04".
+  cases <- list(c(0.123456, "0.1235"), c(1e-5, "< 0.0001"), c(1e-4, "0.0001"))
+  for (cls in c("wcc_surr", "wdtw_surr", "wphase_surr")) {
+    for (cs in cases) {
+      expect_identical(
+        printed_p_values(mock_surr(cls, as.numeric(cs[1]))),
+        cs[2],
+        label = paste(cls, cs[1])
+      )
+    }
+  }
+  # wgranger: each direction shows its own p-value, in x -> y, y -> x order.
+  expect_identical(
+    printed_p_values(mock_surr("wgranger_surr", c(0.123456, 1e-5))),
+    c("0.1235", "< 0.0001")
+  )
+  expect_identical(
+    printed_p_values(mock_surr("wgranger_surr", c(1e-5, 0.123456))),
+    c("< 0.0001", "0.1235")
+  )
+})
+
 # M4 acceptance-criteria tests ------------------------------------------------
 
 test_that("M4: wcc_surrogate observed_z matches wcc() fisher_z exactly (Invariant 2)", {
@@ -452,6 +503,8 @@ test_that("AC4: seeded surrogate p-values are reproducible (regression guard)", 
   # Frozen against the current implementation on a fixed seed; guards against a
   # tail-direction flip or off-by-one in the empirical p-value count. AR(1)
   # series give a non-boundary p-value that actually exercises tail counting.
+  # Add-one form (b + 1) / (n + 1), Phipson & Smyth (2010, p. 6); the b counts
+  # (91 and 83 of 99) are unchanged from the earlier b / n pin.
   set.seed(20260629)
   n <- 120
   x <- as.numeric(stats::arima.sim(list(ar = 0.5), n))
@@ -459,10 +512,81 @@ test_that("AC4: seeded surrogate p-values are reproducible (regression guard)", 
 
   y_surr <- generate_surrogate_circular(y, n_surrogates = 99, lag_max = 5)
   res_wcc <- wcc_surrogate(x, y, y_surrogates = y_surr, window_size = 30, lag_max = 5)
-  expect_equal(res_wcc$p_value, 91 / 99, tolerance = 1e-12)
+  expect_equal(res_wcc$p_value, (91 + 1) / (99 + 1), tolerance = 1e-12)
 
   res_wdtw <- wdtw_surrogate(x, y, y_surrogates = y_surr, window_size = 30, lag_max = 5)
-  expect_equal(res_wdtw$p_value, 83 / 99, tolerance = 1e-12)
+  expect_equal(res_wdtw$p_value, (83 + 1) / (99 + 1), tolerance = 1e-12)
+})
+
+# Add-one p-value, Phipson & Smyth (2010, p. 6): p = (b + 1) / (n + 1), where
+# n is the number of surrogate columns and b counts surrogate statistics at
+# least as extreme as the observed one. b is counted here with a plain loop,
+# independent of the wrappers' vectorized sum.
+count_at_least_as_extreme <- function(observed, surrogates, tail) {
+  b <- 0
+  for (s in surrogates) {
+    if (tail == "upper" && s >= observed) b <- b + 1
+    if (tail == "lower" && s <= observed) b <- b + 1
+  }
+  b
+}
+
+# Run all four wrappers on one dyad and 19 circular-shift surrogates; return
+# each statistic's observed value, surrogate draws, p-value, and tail.
+add_one_probe <- function(x, y, seed) {
+  set.seed(seed)
+  ys <- generate_surrogate_circular(y, n_surrogates = 19, lag_max = 4)
+  args <- list(window_size = 40, lag_max = 4, window_increment = 10)
+  wc <- do.call(wcc_surrogate, c(list(x, y, ys), args))
+  wd <- do.call(wdtw_surrogate, c(list(x, y, ys), args))
+  wg <- wgranger_surrogate(x, y, ys, window_size = 40, window_increment = 10)
+  wp <- do.call(wphase_surrogate, c(list(x, y, ys), args))
+  list(
+    n = ncol(ys),
+    stats = list(
+      wcc = list(wc$observed_z, wc$surrogate_z, wc$p_value, "upper"),
+      wdtw = list(wd$observed_cost, wd$surrogate_cost, wd$p_value, "lower"),
+      wgranger_xy = list(wg$observed_f_xy, wg$surrogate_f_xy, wg$p_value_xy, "upper"),
+      wgranger_yx = list(wg$observed_f_yx, wg$surrogate_f_yx, wg$p_value_yx, "upper"),
+      wphase = list(wp$observed_z, wp$surrogate_z, wp$p_value, "upper")
+    )
+  )
+}
+
+check_add_one <- function(probe, b_ok) {
+  for (nm in names(probe$stats)) {
+    s <- probe$stats[[nm]]
+    b <- count_at_least_as_extreme(s[[1]], s[[2]], s[[4]])
+    expect_true(b_ok(b), label = paste(nm, "b =", b))
+    expect_equal(s[[3]], (b + 1) / (probe$n + 1), tolerance = 1e-12, label = nm)
+  }
+}
+
+test_that("all four wrappers return (b + 1) / (n + 1) when b = 0", {
+  # Bidirectional VAR(1) coupling (x <-> y, 0.6 each way): every statistic,
+  # both Granger directions included, beats all 19 shifted surrogates.
+  set.seed(1)
+  n <- 200
+  e1 <- rnorm(n)
+  e2 <- rnorm(n)
+  x <- numeric(n)
+  y <- numeric(n)
+  for (t in 2:n) {
+    x[t] <- 0.6 * y[t - 1] + e1[t]
+    y[t] <- 0.6 * x[t - 1] + e2[t]
+  }
+  probe <- add_one_probe(x, y, seed = 2)
+  check_add_one(probe, function(b) b == 0)
+  # b = 0 gives the smallest possible p-value, 1 / 20, never 0.
+  expect_equal(probe$stats$wcc[[3]], 1 / 20, tolerance = 1e-12)
+})
+
+test_that("all four wrappers return (b + 1) / (n + 1) when 0 < b < n", {
+  set.seed(2)
+  x <- rnorm(200)
+  y <- rnorm(200)
+  probe <- add_one_probe(x, y, seed = 102)
+  check_add_one(probe, function(b) b > 0 && b < 19)
 })
 
 test_that("AC4: WDTW fast_method evaluates observed windows at lag 0 (no over-count)", {
@@ -649,8 +773,8 @@ test_that("Invariant 6: wphase_surrogate is reproducible under set.seed", {
 test_that("wphase surrogate p-values are calibrated under the null (Type I)", {
   skip_on_cran()
   # 200 seeded replicates of independent white-noise pairs, n_surrogates = 99.
-  # With B = 99 surrogates, p <= .05 iff at most 4 surrogates >= observed,
-  # which has probability exactly 5/100 under exchangeability. Over R = 200
+  # With B = 99 surrogates, p = (b + 1) / 100 <= .05 iff at most 4 surrogates
+  # >= observed, which has probability exactly 5/100 under exchangeability. Over R = 200
   # replicates the rejection count is Binomial(200, .05): mean 10,
   # SE = sqrt(200 * .05 * .95) = 3.08; a +/- 3 SE band is 10 +/- 9.25,
   # so integer counts in [1, 19].
