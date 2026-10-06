@@ -19,7 +19,7 @@ read by name, in any position. If its names contain neither \code{x} nor \code{y
 or it has no names, its first two elements are read as \code{x} and \code{y}. Any
 other use of the names \code{x} and \code{y} is an error. Names are never matched
 partially. If \code{dyad_list} itself is named, the names identify the dyads
-in the output, so every name must be non-empty and unique.}
+in the output, so every name must be non-empty, not \code{NA}, and unique.}
 
 \item{dyad}{A single integer: the index of the target dyad in \code{dyad_list}.}
 

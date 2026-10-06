@@ -24,8 +24,8 @@ an element's names contain \code{x} and \code{y} exactly once each, those
 two elements are read by name, in any position. If its names contain
 neither \code{x} nor \code{y}, or it has no names, its first two elements
 are read as \code{x} and \code{y}. Any other use of the names \code{x}
-and \code{y} is an error. Names are never matched partially. Every dyad
-is read and checked before any dyads are sampled.}
+and \code{y} is an error. Names are never matched partially. The names
+and shape of every dyad are checked before any dyads are sampled.}
 
 \item{sample_rate}{Single positive number; sampling rate in Hz, used to
 convert `window_sec` and `lag_sec` to samples.}

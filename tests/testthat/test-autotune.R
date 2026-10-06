@@ -299,17 +299,20 @@ test_that("autotune_wcc reads every dyad before sampling and names the bad one",
   for (bad in list(list(y = 1:200, a2 = 1:200), data.frame(p1 = 1:200))) {
     set.seed(304)
     dl <- list(good(), good(), bad, good())
-    # n_tune_dyads = 2 samples two of four dyads; the bad dyad must abort the
-    # call whether or not it is sampled, and the message names index 3.
-    expect_error(
-      autotune_wcc(
-        dyad_list = dl,
-        sample_rate = 10,
-        window_sec = 2,
-        n_surrogates = 20L,
-        n_tune_dyads = 2L
-      ),
-      "Dyad 3 in `dyad_list`"
-    )
+    # The bad dyad must abort the call whether or not it is sampled, and the
+    # message names index 3. n_tune_dyads = 4 uses every dyad;
+    # n_tune_dyads = 2 with this seed samples dyads that leave dyad 3 out.
+    for (n_tune in c(2L, 4L)) {
+      expect_error(
+        autotune_wcc(
+          dyad_list = dl,
+          sample_rate = 10,
+          window_sec = 2,
+          n_surrogates = 20L,
+          n_tune_dyads = n_tune
+        ),
+        "Dyad 3 in `dyad_list`"
+      )
+    }
   }
 })

@@ -192,7 +192,7 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #'   or it has no names, its first two elements are read as `x` and `y`. Any
 #'   other use of the names `x` and `y` is an error. Names are never matched
 #'   partially. If `dyad_list` itself is named, the names identify the dyads
-#'   in the output, so every name must be non-empty and unique.
+#'   in the output, so every name must be non-empty, not `NA`, and unique.
 #' @param dyad A single integer: the index of the target dyad in `dyad_list`.
 #' @param n_surrogates `NULL` (default) to use every eligible partner, or a
 #'   single positive integer to draw that many without replacement.
