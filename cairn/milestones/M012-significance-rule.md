@@ -81,6 +81,7 @@ Make every surrogate significance call in bsync come from one internal p <= .05 
 - 2026-10-06: T5 done: `devtools::check()` gave 0 errors, 0 warnings, and 0 notes, on the tree before the claim-audit text fixes. After those fixes, `devtools::document()` leaves no diff and `tools::checkRd()` is clean on `man/autotune_wcc.Rd`. Air ran only on `R/surrogate_generation.R`, the one touched file that was air-clean before. Status set to review.
 - 2026-10-06: review return 1: AC5 fails as written. The `p_value_xy`-NA and `p_value_yx`-NA wgranger cases in "print methods make no significance call on an NA p-value" (`tests/testthat/test-surrogate.R`) never assert that `print()` returns `x` invisibly.
 - 2026-10-06: T6 added for review return 1 (minor amendment: new task, Coverage AC5 → T2, T6). T6 done: both single-NA wgranger cases now assert `expect_no_error` and `expect_invisible`. The test passes with 27 expectations. Status set to review.
+- 2026-10-06: step-7 approval: m012-significance-rule approved for merge
 
 ## Decisions
 
