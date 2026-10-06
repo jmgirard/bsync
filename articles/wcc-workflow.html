@@ -397,16 +397,19 @@ time.</p>
 <span><span class="co">#&gt; Permutations: 1000</span></span>
 <span><span class="co">#&gt; Observed Mean Abs. Fisher's Z: 0.452</span></span>
 <span><span class="co">#&gt; Average Null Mean Abs. Fisher's Z: 0.3175</span></span>
-<span><span class="co">#&gt; Empirical p-value: &lt; 0.001</span></span>
+<span><span class="co">#&gt; Empirical p-value: 0.001</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Observed synchrony is significantly greater than chance.</span></span></code></pre></div>
-<p>The output provides an empirical p-value by calculating the
-proportion of surrogate Fisher’s Z scores that meet or exceed our
-observed Fisher’s Z. Because our observed synchrony (Z = 0.4506) was
-substantially higher than the average chance synchrony (Z = 0.3155) and
-higher than all 1,000 permutations, the empirical p-value is reported as
-&lt; .001. This statistically confirms that the coordination we observed
-between Person A and Person B is driven by genuine interactive behavior
-rather than the natural autocorrelation of the signals.</p>
+<p>The output provides an empirical p-value of (b + 1) / (n + 1), where
+n is the number of surrogates and b counts the surrogate Fisher’s Z
+scores that meet or exceed our observed Fisher’s Z. The <code>+ 1</code>
+counts the observed data as one more draw from the null, so the p-value
+is never 0. Our observed synchrony (Z = 0.452) was higher than the
+average chance synchrony (Z = 0.3175) and higher than all 1,000
+permutations. So b = 0, and the empirical p-value is 1 / 1001, printed
+as 0.001. This is the smallest p-value that 1,000 surrogates can give.
+This statistically confirms that the coordination we observed between
+Person A and Person B is driven by genuine interactive behavior rather
+than the natural autocorrelation of the signals.</p>
 </div>
 <div class="section level2">
 <h2 id="optima-extraction">5. Optima Extraction<a class="anchor" aria-label="anchor" href="#optima-extraction"></a>

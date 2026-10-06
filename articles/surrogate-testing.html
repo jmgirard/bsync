@@ -180,9 +180,13 @@ synchrony from synchrony that the task produces.</li>
 <li>
 <strong>Important Note:</strong> A sample of N dyads gives each
 target at most N - 1 partners (2(N - 1) with
-<code>keep_roles = FALSE</code>), so the p-value of one dyad has a
-resolution of 1 / (N - 1). The sample-level comparison in Section 3 uses
-all N(N - 1) pseudo-dyads.</li>
+<code>keep_roles = FALSE</code>). The smallest p-value of one dyad is 1
+/ (n + 1) for n partners (Section 2 gives the formula). With
+<code>keep_roles = TRUE</code> it is therefore never below 1 / N, so
+<code>p &lt; .05</code> needs at least 21 dyads. With
+<code>keep_roles = FALSE</code> the floor is 1 / (2N - 1), so
+<code>p &lt; .05</code> needs at least 11 dyads. The sample-level
+comparison in Section 3 uses all N(N - 1) pseudo-dyads.</li>
 </ul>
 </div>
 </div>
@@ -201,9 +205,14 @@ dyad).</li>
 <strong>Evaluate:</strong> Run your chosen synchrony metric (WCC,
 WDTW, or WGC) against every column in that matrix.</li>
 <li>
-<strong>Compare:</strong> Calculate the empirical p-value as the
-proportion of surrogate results that are as extreme as, or more extreme
-than, your observed result.</li>
+<strong>Compare:</strong> Calculate the empirical p-value as <span class="math inline">\((b + 1) / (n + 1)\)</span>, where <span class="math inline">\(n\)</span> is the number of surrogates and <span class="math inline">\(b\)</span> counts the surrogate results that are
+as extreme as, or more extreme than, your observed result (Phipson &amp;
+Smyth, 2010). The <span class="math inline">\(+ 1\)</span> counts the
+observed result as one more draw from the null. So the p-value is never
+0, and its smallest value is <span class="math inline">\(1 / (n +
+1)\)</span>. When the observed result is one more draw from the same
+null as the surrogates, the test rejects no more often than its nominal
+rate.</li>
 </ol>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jmgirard.github.io/bsync/">bsync</a></span><span class="op">)</span></span>
@@ -271,19 +280,26 @@ other nine dyads, ready for any surrogate wrapper.</p>
 <span>  <span class="fu">test_dyad</span><span class="op">(</span><span class="va">i</span>, <span class="fu"><a href="../reference/generate_surrogate_pseudo.html">generate_surrogate_pseudo</a></span><span class="op">(</span><span class="va">task_only</span>, dyad <span class="op">=</span> <span class="va">i</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Dyads called significant at .05, out of 10</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>circular <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">p_circular</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span>, pseudo <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">p_pseudo</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; circular   pseudo </span></span>
-<span><span class="co">#&gt;        9        2</span></span></code></pre></div>
+<span><span class="co"># Dyads called significant at .05 by the circular-shift null, out of 10</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">p_circular</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 7</span></span>
+<span></span>
+<span><span class="co"># Pseudo-dyad p-values, smallest first</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">p_pseudo</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  [1] 0.1 0.1 0.3 0.4 0.5 0.6 0.7 0.7 0.9 1.0</span></span></code></pre></div>
 <p>The circular-shift null breaks the shared task timeline, so it reads
-task-driven co-movement as synchrony. The pseudo-dyad null keeps that
-timeline, so it flags far fewer dyads. With nine partners per dyad,
-<code>p_value</code> can only be 0, 1/9, 2/9, and so on, and
-<code>p &lt; .05</code> means that the real partner beat all nine
-strangers. If the real partner is no different from a stranger, that
-happens with chance 1/10, so a single-dyad pseudo-dyad test at
-<code>p &lt; .05</code> has a false-positive rate of about 1/N for N
-dyads. With small samples, prefer the sample-level comparison below.</p>
+task-driven co-movement as synchrony: it calls 7 of the 10 dyads
+significant. The pseudo-dyad null keeps that timeline. Each pseudo-dyad
+p-value is <span class="math inline">\((b + 1) / (9 + 1)\)</span>, where
+<span class="math inline">\(b\)</span> counts the strangers who score at
+least as high as the real partner. So the p-value is the real partner’s
+rank among the 10 series divided by 10, and it can only be 0.1, 0.2, and
+so on up to 1. With 10 dyads, no single-dyad pseudo-dyad test can reach
+<code>p &lt; .05</code>. If the real partner is no different from a
+stranger, each rank has chance 1/10, so the test keeps its nominal size.
+With N dyads the smallest single-dyad p-value is 1/N, so
+<code>p &lt; .05</code> needs at least 21 dyads. With fewer dyads, use
+the sample-level comparison below.</p>
 <p>For a sample-level comparison, <code><a href="../reference/generate_pseudo_dyads.html">generate_pseudo_dyads()</a></code>
 builds every role-keeping pairing (the <code>x</code> of one dyad with
 the <code>y</code> of another: 10 × 9 = 90 pseudo-dyads). Compute the
@@ -335,9 +351,10 @@ pseudo-dyads.</p>
 <li>
 <strong>Permutation Count:</strong> For a stable p-value, we
 recommend at least 1,000 permutations. Using fewer (e.g., 100) is fine
-for rapid exploratory analysis, but it will lack the granularity needed
-to report significance levels like <span class="math inline">\(p &lt;
-.001\)</span>.</li>
+for rapid exploratory analysis, but the smallest possible p-value is
+<span class="math inline">\(1 / (n + 1)\)</span>: about .0099 with 100
+surrogates, and about .001 with 1,000. Below 20 surrogates, no result
+can reach <span class="math inline">\(p &lt; .05\)</span>.</li>
 <li>
 <strong>Power and Speed:</strong> Surrogate analysis is
 “embarrassingly parallel.” For heavy analyses like WDTW, always use the
@@ -357,6 +374,10 @@ more synchrony than with a stranger in the same setting.</li>
 <p>Kleinbub, J. R., &amp; Ramseyer, F. T. (2020). rMEA: An R package to
 assess nonverbal synchronization in motion energy analysis time-series.
 <em>Psychotherapy Research</em>. <a href="https://doi.org/10.1080/10503307.2020.1844334" class="external-link uri">https://doi.org/10.1080/10503307.2020.1844334</a></p>
+<p>Phipson, B., &amp; Smyth, G. K. (2010). Permutation p-values should
+never be zero: calculating exact p-values when permutations are randomly
+drawn. <em>Statistical Applications in Genetics and Molecular
+Biology</em>, 9(1), Article 39. <a href="https://doi.org/10.2202/1544-6115.1585" class="external-link uri">https://doi.org/10.2202/1544-6115.1585</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

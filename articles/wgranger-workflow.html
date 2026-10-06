@@ -281,24 +281,28 @@ enough.</p>
 <span><span class="co">#&gt; Permutations: 1000</span></span>
 <span><span class="co">#&gt; Observed Mean F-statistic: 159.482</span></span>
 <span><span class="co">#&gt; Average Null F-statistic: 1.867</span></span>
-<span><span class="co">#&gt; Empirical p-value: 0.001</span></span>
+<span><span class="co">#&gt; Empirical p-value: 0.002</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Predictive power (x -&gt; y) is significantly greater than chance.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Direction: y -&gt; x</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Observed Mean F-statistic: 133.1204</span></span>
 <span><span class="co">#&gt; Average Null F-statistic: 1.8685</span></span>
-<span><span class="co">#&gt; Empirical p-value: 0.003</span></span>
+<span><span class="co">#&gt; Empirical p-value: 0.004</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Predictive power (y -&gt; x) is significantly greater than chance.</span></span></code></pre></div>
-<p>The output provides empirical p-values by calculating the proportion
-of surrogate mean F-statistics that meet or exceed our observed mean
-F-statistics. In our simulated interaction, leadership was split evenly:
-Person A led for the first half and Person B led for the second half. As
-a result, the analysis correctly identifies significant predictive power
-in both directions over the course of the overall interaction. The
-observed F-statistics (161.27 and 134.87) vastly outperform the chance
-baseline (roughly 1.87), resulting in highly significant empirical
-p-values for both the x -&gt; y and y -&gt; x directions.</p>
+<p>The output provides an empirical p-value for each direction as (b +
+1) / (n + 1), where n is the number of surrogates and b counts the
+surrogate mean F-statistics that meet or exceed the observed mean
+F-statistic. The <code>+ 1</code> counts the observed data as one more
+draw from the null, so the p-value is never 0, and its smallest value
+with 1,000 surrogates is 1 / 1001. In our simulated interaction,
+leadership was split evenly: Person A led for the first half and Person
+B led for the second half. As a result, the analysis correctly
+identifies significant predictive power in both directions over the
+course of the overall interaction. The observed F-statistics (159.48 and
+133.12) vastly outperform the chance baseline (roughly 1.87), resulting
+in highly significant empirical p-values for both the x -&gt; y and y
+-&gt; x directions.</p>
 </div>
 <div class="section level2">
 <h2 id="visualizing-the-results">5. Visualizing the Results<a class="anchor" aria-label="anchor" href="#visualizing-the-results"></a>

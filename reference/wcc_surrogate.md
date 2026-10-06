@@ -31,12 +31,12 @@ wcc_surrogate(
 
 - y_surrogates:
 
-  A matrix of surrogate time series for \`y\` (columns are surrogates).
+  A matrix of surrogate time series for `y` (columns are surrogates).
 
 - time:
 
   An optional numeric vector representing the timestamps for the data.
-  Default is \`NULL\`.
+  Default is `NULL`.
 
 - window_size:
 
@@ -58,13 +58,16 @@ wcc_surrogate(
 - na.rm:
 
   A logical indicating whether to remove missing values. Default is
-  \`TRUE\`.
+  `TRUE`.
 
 - statistic:
 
   A character string specifying the aggregate statistic; must match the
-  value passed to \`wcc()\`. \`"mean_abs_z"\` (default) or \`"peak"\`.
-  See \`wcc()\` for details.
+  value passed to
+  [`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md).
+  `"mean_abs_z"` (default) or `"peak"`. See
+  [`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md) for
+  details.
 
 ## Value
 
@@ -72,15 +75,28 @@ A list object of class "wcc_surr".
 
 ## Details
 
-The p-value is the proportion of surrogates whose aggregate statistic is
-\*\*at least as large as\*\* the observed statistic. The aggregate —
-either \`"mean_abs_z"\` or \`"peak"\` — is computed identically on the
-observed data and every surrogate via the same internal helper, so the
-null distribution and the observed value are guaranteed to be directly
-comparable (Invariant 2: surrogate nulls match the observed statistic).
+The p-value is the add-one form p = (b + 1) / (n + 1) (Phipson & Smyth,
+2010), where n is the number of surrogate columns and b is the number of
+surrogates whose aggregate statistic is **at least as large as** the
+observed statistic. The `+ 1` counts the observed data as one more draw
+from the null, so the p-value is never 0. Its smallest value is 1 / (n +
+1). The aggregate — either `"mean_abs_z"` or `"peak"` — is computed
+identically on the observed data and every surrogate via the same
+internal helper, so the null distribution and the observed value are
+guaranteed to be directly comparable (Invariant 2: surrogate nulls match
+the observed statistic).
 
-Pass the same \`statistic\` value you used in \`wcc()\` so that
-\`observed_z\` and the surrogate draws use the same quantity.
+Pass the same `statistic` value you used in
+[`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md) so that
+`observed_z` and the surrogate draws use the same quantity.
+
+## References
+
+Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never be
+zero: calculating exact p-values when permutations are randomly drawn.
+*Statistical Applications in Genetics and Molecular Biology*, 9(1),
+Article 39.
+[doi:10.2202/1544-6115.1585](https://doi.org/10.2202/1544-6115.1585)
 
 ## Examples
 
@@ -101,7 +117,7 @@ res
 #> Permutations: 100
 #> Observed Mean Abs. Fisher's Z: 0.09
 #> Average Null Mean Abs. Fisher's Z: 0.0827
-#> Empirical p-value: < 0.01
+#> Empirical p-value: 0.0099
 #> ✔ Observed synchrony is significantly greater than chance.
 #> ℹ Note: 100 permutations may be too few for stable p-values.
 #> Consider setting `n_surrogates >= 1000` for final reporting.

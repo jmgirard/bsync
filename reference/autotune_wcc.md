@@ -69,7 +69,9 @@ autotune_wcc(
 - n_surrogates:
 
   Single positive integer; surrogates per cell per dyad. Default
-  \`100\`. Increase to \>= 1000 for reporting.
+  \`100\`. Increase to \>= 1000 for reporting. Below 20 the call warns
+  once, because no cell can then reach p \< .05 and the detectability
+  gate cannot pass.
 
 - n_tune_dyads:
 
@@ -220,7 +222,7 @@ tuned
 #> Window size: 320 samples (4 s)
 #> Max lag: 80 samples (1 s)
 #> Increment: 32 samples
-#> Sig. rate: 33.3% of dyads
+#> Sig. rate: 0% of dyads
 #> Median ES: 1.493 (IQR = 0.232)
 #> ℹ Tuned over 3 dyads; 3 cells passed the detectability gate. Per-dyad multiverses in $dyad_multiverses.
 #> ! These parameters were selected to maximize effect size. Re-testing synchrony with them on the same dyads is circular; confirm on held-out dyads or report the multiverse robustness. See `?autotune_wcc()`.

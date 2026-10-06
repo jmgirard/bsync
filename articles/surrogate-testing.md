@@ -81,9 +81,12 @@ pseudo-synchrony approach of the rMEA package (Kleinbub & Ramseyer,
   task, and you want to separate interaction-specific synchrony from
   synchrony that the task produces.
 - **Important Note:** A sample of N dyads gives each target at most N -
-  1 partners (2(N - 1) with `keep_roles = FALSE`), so the p-value of one
-  dyad has a resolution of 1 / (N - 1). The sample-level comparison in
-  Section 3 uses all N(N - 1) pseudo-dyads.
+  1 partners (2(N - 1) with `keep_roles = FALSE`). The smallest p-value
+  of one dyad is 1 / (n + 1) for n partners (Section 2 gives the
+  formula). With `keep_roles = TRUE` it is therefore never below 1 / N,
+  so `p < .05` needs at least 21 dyads. With `keep_roles = FALSE` the
+  floor is 1 / (2N - 1), so `p < .05` needs at least 11 dyads. The
+  sample-level comparison in Section 3 uses all N(N - 1) pseudo-dyads.
 
 ## 2. Theoretical Pipeline
 
@@ -96,9 +99,14 @@ surrogate pipeline remains consistent:
     another dyad).
 2.  **Evaluate:** Run your chosen synchrony metric (WCC, WDTW, or WGC)
     against every column in that matrix.
-3.  **Compare:** Calculate the empirical p-value as the proportion of
+3.  **Compare:** Calculate the empirical p-value as \\(b + 1) / (n +
+    1)\\, where \\n\\ is the number of surrogates and \\b\\ counts the
     surrogate results that are as extreme as, or more extreme than, your
-    observed result.
+    observed result (Phipson & Smyth, 2010). The \\+ 1\\ counts the
+    observed result as one more draw from the null. So the p-value is
+    never 0, and its smallest value is \\1 / (n + 1)\\. When the
+    observed result is one more draw from the same null as the
+    surrogates, the test rejects no more often than its nominal rate.
 
 ``` r
 
@@ -174,21 +182,27 @@ p_pseudo <- vapply(seq_len(n_dyads), function(i) {
   test_dyad(i, generate_surrogate_pseudo(task_only, dyad = i))
 }, numeric(1))
 
-# Dyads called significant at .05, out of 10
-c(circular = sum(p_circular < 0.05), pseudo = sum(p_pseudo < 0.05))
-#> circular   pseudo 
-#>        9        2
+# Dyads called significant at .05 by the circular-shift null, out of 10
+sum(p_circular < 0.05)
+#> [1] 7
+
+# Pseudo-dyad p-values, smallest first
+sort(p_pseudo)
+#>  [1] 0.1 0.1 0.3 0.4 0.5 0.6 0.7 0.7 0.9 1.0
 ```
 
 The circular-shift null breaks the shared task timeline, so it reads
-task-driven co-movement as synchrony. The pseudo-dyad null keeps that
-timeline, so it flags far fewer dyads. With nine partners per dyad,
-`p_value` can only be 0, 1/9, 2/9, and so on, and `p < .05` means that
-the real partner beat all nine strangers. If the real partner is no
-different from a stranger, that happens with chance 1/10, so a
-single-dyad pseudo-dyad test at `p < .05` has a false-positive rate of
-about 1/N for N dyads. With small samples, prefer the sample-level
-comparison below.
+task-driven co-movement as synchrony: it calls 7 of the 10 dyads
+significant. The pseudo-dyad null keeps that timeline. Each pseudo-dyad
+p-value is \\(b + 1) / (9 + 1)\\, where \\b\\ counts the strangers who
+score at least as high as the real partner. So the p-value is the real
+partner’s rank among the 10 series divided by 10, and it can only be
+0.1, 0.2, and so on up to 1. With 10 dyads, no single-dyad pseudo-dyad
+test can reach `p < .05`. If the real partner is no different from a
+stranger, each rank has chance 1/10, so the test keeps its nominal size.
+With N dyads the smallest single-dyad p-value is 1/N, so `p < .05` needs
+at least 21 dyads. With fewer dyads, use the sample-level comparison
+below.
 
 For a sample-level comparison,
 [`generate_pseudo_dyads()`](https://jmgirard.github.io/bsync/reference/generate_pseudo_dyads.md)
@@ -243,8 +257,9 @@ pseudo-dyads.
 
 - **Permutation Count:** For a stable p-value, we recommend at least
   1,000 permutations. Using fewer (e.g., 100) is fine for rapid
-  exploratory analysis, but it will lack the granularity needed to
-  report significance levels like \\p \< .001\\.
+  exploratory analysis, but the smallest possible p-value is \\1 / (n +
+  1)\\: about .0099 with 100 surrogates, and about .001 with 1,000.
+  Below 20 surrogates, no result can reach \\p \< .05\\.
 - **Power and Speed:** Surrogate analysis is “embarrassingly parallel.”
   For heavy analyses like WDTW, always use the `future` package to
   distribute these 1,000+ calculations across your machine’s CPU cores.
@@ -260,3 +275,8 @@ Kleinbub, J. R., & Ramseyer, F. T. (2020). rMEA: An R package to assess
 nonverbal synchronization in motion energy analysis time-series.
 *Psychotherapy Research*.
 <https://doi.org/10.1080/10503307.2020.1844334>
+
+Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never be
+zero: calculating exact p-values when permutations are randomly drawn.
+*Statistical Applications in Genetics and Molecular Biology*, 9(1),
+Article 39. <https://doi.org/10.2202/1544-6115.1585>

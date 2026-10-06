@@ -195,24 +195,27 @@ print(surrogate_results)
 #> Permutations: 1000
 #> Observed Mean F-statistic: 159.482
 #> Average Null F-statistic: 1.867
-#> Empirical p-value: 0.001
+#> Empirical p-value: 0.002
 #> ✔ Predictive power (x -> y) is significantly greater than chance.
 #> 
 #> ── Direction: y -> x ──
 #> 
 #> Observed Mean F-statistic: 133.1204
 #> Average Null F-statistic: 1.8685
-#> Empirical p-value: 0.003
+#> Empirical p-value: 0.004
 #> ✔ Predictive power (y -> x) is significantly greater than chance.
 ```
 
-The output provides empirical p-values by calculating the proportion of
-surrogate mean F-statistics that meet or exceed our observed mean
-F-statistics. In our simulated interaction, leadership was split evenly:
-Person A led for the first half and Person B led for the second half. As
-a result, the analysis correctly identifies significant predictive power
+The output provides an empirical p-value for each direction as (b + 1) /
+(n + 1), where n is the number of surrogates and b counts the surrogate
+mean F-statistics that meet or exceed the observed mean F-statistic. The
+`+ 1` counts the observed data as one more draw from the null, so the
+p-value is never 0, and its smallest value with 1,000 surrogates is 1 /
+1001. In our simulated interaction, leadership was split evenly: Person
+A led for the first half and Person B led for the second half. As a
+result, the analysis correctly identifies significant predictive power
 in both directions over the course of the overall interaction. The
-observed F-statistics (161.27 and 134.87) vastly outperform the chance
+observed F-statistics (159.48 and 133.12) vastly outperform the chance
 baseline (roughly 1.87), resulting in highly significant empirical
 p-values for both the x -\> y and y -\> x directions.
 

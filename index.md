@@ -213,7 +213,7 @@ surrogate_results
 #> Permutations: 100
 #> Observed Mean Abs. Fisher's Z: 1.071
 #> Average Null Mean Abs. Fisher's Z: 1.007
-#> Empirical p-value: 0.06
+#> Empirical p-value: 0.0693
 #> ! Observed synchrony is not significantly different from chance.
 #> ℹ Note: 100 permutations may be too few for stable p-values.
 #> Consider setting `n_surrogates >= 1000` for final reporting.

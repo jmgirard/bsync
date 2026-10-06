@@ -137,7 +137,9 @@ for other estimators.</p></dd>
 
 <dt id="arg-n-surrogates">n_surrogates<a class="anchor" aria-label="anchor" href="#arg-n-surrogates"></a></dt>
 <dd><p>Single positive integer; number of surrogates per cell.
-Default is `100`. Use &gt;= 1000 for reporting.</p></dd>
+Default is `100`. Use &gt;= 1000 for reporting. Below 20 the call warns,
+because the smallest possible p-value, 1 / (n_surrogates + 1), is then
+at least .05 and no cell can be significant.</p></dd>
 
 
 <dt id="arg-ar-order">ar_order<a class="anchor" aria-label="anchor" href="#arg-ar-order"></a></dt>

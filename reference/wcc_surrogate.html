@@ -87,11 +87,11 @@
 
 
 <dt id="arg-y-surrogates">y_surrogates<a class="anchor" aria-label="anchor" href="#arg-y-surrogates"></a></dt>
-<dd><p>A matrix of surrogate time series for `y` (columns are surrogates).</p></dd>
+<dd><p>A matrix of surrogate time series for <code>y</code> (columns are surrogates).</p></dd>
 
 
 <dt id="arg-time">time<a class="anchor" aria-label="anchor" href="#arg-time"></a></dt>
-<dd><p>An optional numeric vector representing the timestamps for the data. Default is `NULL`.</p></dd>
+<dd><p>An optional numeric vector representing the timestamps for the data. Default is <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-window-size">window_size<a class="anchor" aria-label="anchor" href="#arg-window-size"></a></dt>
@@ -111,12 +111,12 @@
 
 
 <dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
-<dd><p>A logical indicating whether to remove missing values. Default is `TRUE`.</p></dd>
+<dd><p>A logical indicating whether to remove missing values. Default is <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-statistic">statistic<a class="anchor" aria-label="anchor" href="#arg-statistic"></a></dt>
 <dd><p>A character string specifying the aggregate statistic; must match the value
-passed to `wcc()`. `"mean_abs_z"` (default) or `"peak"`. See `wcc()` for details.</p></dd>
+passed to <code><a href="wcc.html">wcc()</a></code>. <code>"mean_abs_z"</code> (default) or <code>"peak"</code>. See <code><a href="wcc.html">wcc()</a></code> for details.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -125,13 +125,23 @@ passed to `wcc()`. `"mean_abs_z"` (default) or `"peak"`. See `wcc()` for details
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The p-value is the proportion of surrogates whose aggregate statistic is **at least as
-large as** the observed statistic. The aggregate — either `"mean_abs_z"` or `"peak"` —
+    <p>The p-value is the add-one form p = (b + 1) / (n + 1) (Phipson &amp; Smyth, 2010), where n
+is the number of surrogate columns and b is the number of surrogates whose aggregate
+statistic is <strong>at least as large as</strong> the observed statistic. The <code>+ 1</code> counts the
+observed data as one more draw from the null, so the p-value is never 0. Its smallest
+value is 1 / (n + 1). The aggregate — either <code>"mean_abs_z"</code> or <code>"peak"</code> —
 is computed identically on the observed data and every surrogate via the same internal
 helper, so the null distribution and the observed value are guaranteed to be directly
 comparable (Invariant 2: surrogate nulls match the observed statistic).</p>
-<p>Pass the same `statistic` value you used in `wcc()` so that `observed_z` and the
+<p>Pass the same <code>statistic</code> value you used in <code><a href="wcc.html">wcc()</a></code> so that <code>observed_z</code> and the
 surrogate draws use the same quantity.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Phipson, B., &amp; Smyth, G. K. (2010). Permutation p-values should never be
+zero: calculating exact p-values when permutations are randomly drawn. <em>Statistical
+Applications in Genetics and Molecular Biology</em>, 9(1), Article 39.
+<a href="https://doi.org/10.2202/1544-6115.1585" class="external-link">doi:10.2202/1544-6115.1585</a></p>
     </div>
 
     <div class="section level2">
@@ -152,7 +162,7 @@ surrogate draws use the same quantity.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Permutations: 100</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Observed Mean Abs. Fisher's Z: 0.09</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Average Null Mean Abs. Fisher's Z: 0.0827</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Empirical p-value: &lt; 0.01</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Empirical p-value: 0.0099</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Observed synchrony is significantly greater than chance.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Note: 100 permutations may be too few for stable p-values.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Consider setting `n_surrogates &gt;= 1000` for final reporting.</span>

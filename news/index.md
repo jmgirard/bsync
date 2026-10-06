@@ -2,6 +2,30 @@
 
 ## bsync (development version)
 
+### Add-one surrogate p-values (changes reported results)
+
+- [`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md),
+  [`wdtw_surrogate()`](https://jmgirard.github.io/bsync/reference/wdtw_surrogate.md),
+  [`wgranger_surrogate()`](https://jmgirard.github.io/bsync/reference/wgranger_surrogate.md)
+  (both directions), and
+  [`wphase_surrogate()`](https://jmgirard.github.io/bsync/reference/wphase_surrogate.md)
+  now return the add-one p-value (b + 1) / (n + 1) (Phipson &
+  Smyth, 2010) in place of b / n. Here n is the number of surrogates and
+  b counts the surrogates at least as extreme as the observed statistic.
+  The p-value is never 0, and its smallest value is 1 / (n + 1). Under a
+  null where the observed data are one more draw from the surrogate
+  distribution, the test rejects no more often than its nominal level.
+  The b / n form gave 0 when b = 0 and rejected too often. A single-dyad
+  pseudo-dyad test (`keep_roles = TRUE`) with N dyads gives p of at
+  least 1 / N. So p \< .05 needs at least 21 dyads.
+- The four surrogate print methods show the p-value rounded to 4 digits
+  in fixed notation. If that rounding gives 0, they show `< 0.0001`.
+- If `n_surrogates < 20`,
+  [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
+  now warns, because no cell can then reach p \< .05.
+  [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  gives this warning once per call.
+
 ### New estimator: windowed phase synchrony
 
 - **[`wphase()`](https://jmgirard.github.io/bsync/reference/wphase.md)**

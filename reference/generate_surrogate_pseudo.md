@@ -87,14 +87,19 @@ This differs from rMEA's `shuffle()`, which mixes roles by default. Use
 `y` of every other dyad are then candidates, which doubles the pool.
 
 **How many surrogates.** A sample of N dyads offers at most N - 1
-partners per target (2(N - 1) with `keep_roles = FALSE`), so the p-value
-has a resolution of 1 / `ncol`. The wrappers report the share of
-partners that score at least as high as the real partner. If the real
-partner is no different from a stranger, it ranks first among the N
-series with chance 1 / N, so `p_value = 0` (and `p < .05`) occurs with
-chance about 1 / N: 10% with 10 dyads. With fewer than about 20 dyads,
-read single-dyad p-values with care and prefer the sample-level
-comparison of
+partners per target (2(N - 1) with `keep_roles = FALSE`). The wrappers
+report the add-one p-value (b + 1) / (n + 1), where n is the number of
+partner columns and b counts the partners that score at least as high as
+the real partner. The smallest possible p-value is 1 / (n + 1). With N
+dyads and `keep_roles = TRUE`, n is at most N - 1, so the single-dyad
+p-value is never below 1 / N, and `p < .05` needs at least 21 dyads.
+With `keep_roles = FALSE`, n is at most 2(N - 1), so the floor is 1 /
+(2N - 1) and `p < .05` needs at least 11 dyads. When every partner is
+used with `keep_roles = TRUE`, the p-value is the real partner's rank
+among the N series divided by N. If the real partner is no different
+from a stranger, each rank has chance 1 / N, so the test keeps its
+nominal size. With too few dyads to reach `p < .05`, prefer the
+sample-level comparison of
 [`generate_pseudo_dyads()`](https://jmgirard.github.io/bsync/reference/generate_pseudo_dyads.md).
 `n_surrogates = NULL` (the default) uses every eligible partner, with no
 random draw. An integer draws that many partners without replacement.
@@ -149,8 +154,8 @@ wcc_surrogate(
 #> Permutations: 2
 #> Observed Mean Abs. Fisher's Z: 1.3057
 #> Average Null Mean Abs. Fisher's Z: 0.0871
-#> Empirical p-value: < 0.5
-#> ✔ Observed synchrony is significantly greater than chance.
+#> Empirical p-value: 0.3333
+#> ! Observed synchrony is not significantly different from chance.
 #> ℹ Note: 2 permutations may be too few for stable p-values.
 #> Consider setting `n_surrogates >= 1000` for final reporting.
 # }

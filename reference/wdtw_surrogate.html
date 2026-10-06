@@ -88,11 +88,11 @@
 
 
 <dt id="arg-y-surrogates">y_surrogates<a class="anchor" aria-label="anchor" href="#arg-y-surrogates"></a></dt>
-<dd><p>A matrix of surrogate time series for `y` (columns are surrogates).</p></dd>
+<dd><p>A matrix of surrogate time series for <code>y</code> (columns are surrogates).</p></dd>
 
 
 <dt id="arg-time">time<a class="anchor" aria-label="anchor" href="#arg-time"></a></dt>
-<dd><p>An optional numeric vector representing the timestamps for the data. Default is `NULL`.</p></dd>
+<dd><p>An optional numeric vector representing the timestamps for the data. Default is <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-window-size">window_size<a class="anchor" aria-label="anchor" href="#arg-window-size"></a></dt>
@@ -112,16 +112,16 @@
 
 
 <dt id="arg-scale-method">scale_method<a class="anchor" aria-label="anchor" href="#arg-scale-method"></a></dt>
-<dd><p>Character string specifying how to standardize the data. Default is `"global"`.</p></dd>
+<dd><p>Character string specifying how to standardize the data. Default is <code>"global"</code>.</p></dd>
 
 
 <dt id="arg-distance-metric">distance_metric<a class="anchor" aria-label="anchor" href="#arg-distance-metric"></a></dt>
-<dd><p>Character string specifying the local cost function. Default is `"L2"`.</p></dd>
+<dd><p>Character string specifying the local cost function. Default is <code>"L2"</code>.</p></dd>
 
 
 <dt id="arg-fast-method">fast_method<a class="anchor" aria-label="anchor" href="#arg-fast-method"></a></dt>
-<dd><p>Logical. If `TRUE`, severely reduces computation time by only evaluating
-surrogate alignments at lag 0. **See Details for the statistical caveat.** Default is `FALSE`.</p></dd>
+<dd><p>Logical. If <code>TRUE</code>, severely reduces computation time by only evaluating
+surrogate alignments at lag 0. <strong>See Details for the statistical caveat.</strong> Default is <code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -130,15 +130,27 @@ surrogate alignments at lag 0. **See Details for the statistical caveat.** Defau
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The p-value is the proportion of surrogates whose aggregate statistic is **at most as
-large as** the observed statistic (lower DTW distance = better alignment). The aggregate
-is `mean(dtw_dist)` over all window × lag combinations — the same quantity stored in
-`wdtw_res$aggregate[["mean_distance"]]` — computed identically on both the observed data and every
+    <p>The p-value is the add-one form p = (b + 1) / (n + 1) (Phipson &amp; Smyth, 2010), where n
+is the number of surrogate columns and b is the number of surrogates whose aggregate
+statistic is <strong>at most as large as</strong> the observed statistic (lower DTW distance = better
+alignment). The <code>+ 1</code> counts the observed data as one more draw from the null, so the
+p-value is never 0. Its smallest value is 1 / (n + 1). The aggregate
+is <code>mean(dtw_dist)</code> over all window × lag combinations — the same quantity stored in
+<code>wdtw_res$aggregate[["mean_distance"]]</code> — computed identically on both the observed data and every
 surrogate, so the null distribution and the observed value are directly comparable.</p>
-<p>**`fast_method` warning:** when `fast_method = TRUE`, surrogates are evaluated at lag 0
+<p><strong><code>fast_method</code> warning:</strong> when <code>fast_method = TRUE</code>, surrogates are evaluated at lag 0
 only, while the observed statistic is computed over all lags. The null and observed
 aggregates therefore cover different lag ranges, making the resulting p-value
-approximate. Use only for quick exploratory checks, never for reporting.</p>
+approximate. The observed statistic is then not one more draw from the surrogate
+null, so the size guarantee of the add-one form does not hold. Use only for quick
+exploratory checks, never for reporting.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Phipson, B., &amp; Smyth, G. K. (2010). Permutation p-values should never be
+zero: calculating exact p-values when permutations are randomly drawn. <em>Statistical
+Applications in Genetics and Molecular Biology</em>, 9(1), Article 39.
+<a href="https://doi.org/10.2202/1544-6115.1585" class="external-link">doi:10.2202/1544-6115.1585</a></p>
     </div>
 
     <div class="section level2">
@@ -163,8 +175,8 @@ approximate. Use only for quick exploratory checks, never for reporting.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Permutations: 19</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Observed Mean Cost: 27.8222</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Average Null Cost: 29.8241</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Empirical p-value: &lt; 0.0526315789473684</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Observed cost is significantly lower than chance (stronger alignment).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Empirical p-value: 0.05</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Observed cost is not significantly different from chance.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Note: 19 permutations may be too few for stable p-values.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Consider setting `n_surrogates &gt;= 1000` for final reporting.</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
