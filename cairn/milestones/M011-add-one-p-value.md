@@ -113,7 +113,7 @@ and segment shuffling stay on their candidate row.
       `test-autotune.R` that use fewer than 20 surrogates: raise the count or
       expect the warning, and keep any assertion that needs a significant
       cell valid.
-- [ ] T3: Author `cairn/references/phipson2010.md` from the source-note
+- [x] T3: Author `cairn/references/phipson2010.md` from the source-note
       template, with its `INDEX.md` line (PDF on the shelf as
       `sources/phipson2010.pdf`). Update DESIGN.md §6 (step 3 and the
       Invariant 2 paragraph).
@@ -142,6 +142,7 @@ and segment shuffling stay on their candidate row.
 - 2026-10-05: T1 done. The five p-value lines now use (b + 1) / (n + 1). AC1 tests count b with a loop for all five statistics, with 19 circular surrogates. A bidirectional VAR(1) dyad gives b = 0 for all five, and an independent dyad gives 0 < b < 19 for all five. The AC2 test uses 400 replicates (about 10 s, skip_on_cran). Run against b / n, it failed the p >= 0.1 check and the 0.15 share (0.205). The seeded pin is now (91 + 1) / 100 and (83 + 1) / 100. The multiverse snapshot test moved from 9 to 20 surrogates because at 9 no cell can reach p < .05. The new snapshot shows 6 of 12 cells significant, median ES 1.41.
 - 2026-10-05: T2 done. The four print methods use a new internal `format_p_value()`, which rounds to 4 digits in fixed notation and shows `< 0.0001` when that rounding gives 0. The test also pins p = 1e-4 as "0.0001" because `as.character()` printed "1e-04". The new `warn_few_surrogates()` in `R/multiverse.R` gives a cli warning of class `bsync_few_surrogates`. `autotune_wcc()` gives it once up front and muffles that class in the per-dyad calls. With the class removed as a planted defect, the once-per-call test saw 4 warnings. Multiverse tests at 9 or 19 surrogates moved to 20, the odd-length phase test moved from 10 to 20, and the 5-surrogate autotune test now expects the warning. Full suite clean (NOT_CRAN).
 - 2026-10-05: T1 and T2 share one checkpoint commit because T2 edits started before the T1 commit. The T4 wrapper roxygen edits in `R/surrogate_analysis.R` ride along in that commit. They add `@md` to the four wrapper blocks so the formula and the journal title render.
+- 2026-10-05: T3 done. `cairn/references/phipson2010.md` was written from PDF pp. 1 and 3 to 7, read directly. It anchors b / m (p. 3), its size (p. 4), the add-one formula (p. 6), and the exhaustive form (p. 7). `INDEX.md` has its line. DESIGN.md §6 step 3 states the formula, tails, and citation, and the Invariant 2 paragraph names the add-one form.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->

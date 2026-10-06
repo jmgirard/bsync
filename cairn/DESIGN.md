@@ -184,10 +184,16 @@ Analysis wrappers (`wcc_surrogate()`, `wdtw_surrogate()`, `wgranger_surrogate()`
 1. Compute the **observed aggregate statistic**.
 2. Recompute that **same statistic** on each surrogate column (parallelized via `future.apply`,
    `future.seed = TRUE`).
-3. Report the empirical p-value as the tail proportion.
+3. Report the add-one p-value p = (b + 1) / (n + 1). Here n is the number of surrogates, and b
+   counts the surrogate statistics at least as extreme as the observed one. The tail is upper for
+   wcc, wgranger, and wphase, and lower for wdtw. This is the exact Monte Carlo p-value,
+   `cairn/references/phipson2010.md` (p. 6). It is never 0, and its smallest value is
+   1 / (n + 1). The b / n form it replaced can be 0 and exceeds the nominal size (p. 4). D-001,
+   corrected M011.
 
 **Invariant 2 (matched null).** The statistic used for the observed value and for every surrogate
-must be identical; the p-value is its tail. Changing the observed statistic changes the null in
+must be identical; the p-value is its tail, counted in the add-one form of step 3 (phipson2010,
+p. 6; corrected M011). Changing the observed statistic changes the null in
 lockstep. (This is why the selectable WCC statistic — §9, M4 — threads through both `wcc()` and
 `wcc_surrogate()`.)
 
