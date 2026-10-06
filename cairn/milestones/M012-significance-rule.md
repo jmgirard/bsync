@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M012: One significance rule (p <= .05) and surrogate print edges
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -59,7 +59,7 @@ Make every surrogate significance call in bsync come from one internal p <= .05 
 - [x] T2: Route the five comparisons in the four print methods through `is_significant()`. Add the NA-p message and the few-surrogates note to each. Extend the `mock_surr()` tests in `tests/testthat/test-surrogate.R` per class, asserting with `expect_message` (cli writes to the message stream). The existing `< 1000` note prints at 18 and at 19, so match the new note by its own text.
 - [x] T3: Route `R/multiverse.R:398,412`, `R/multiverse_plot.R:46`, and `R/autotune.R:338` through the helper, with the AC4 tests. Move `warn_few_surrogates()` (`R/multiverse.R:24,32`) to 19 and update its message and comment. Update the labels at `R/multiverse.R:566` and `R/multiverse_plot.R:63`. Rewrite the test at `tests/testthat/test-multiverse.R:52` for 18 and 19, and add the `autotune_wcc()` case. Re-record the vdiffr snapshot `_snaps/multiverse/multiverse-spec-curve.svg` and make sure that its diff changes only the legend label.
 - [x] T4: Update roxygen (`R/multiverse.R:87`, `R/autotune.R:83-90,289`, `R/multiverse_plot.R:14,18`, `R/surrogate_generation.R:177-187`), then run `devtools::document()`. Update `vignettes/surrogate-testing.Rmd` (lines 45, 117, 123, 153, including the code `sum(p_circular < 0.05)`) and `vignettes/choosing-parameters.Rmd:214`. Rewrite the NEWS.md development entries in place. State the new rule without quoting the old `<` form, because sweep (b) covers NEWS.md.
-- [ ] T5: Run `spelling::spell_check_package()`, `devtools::test()`, and `devtools::check()`. Run `air format` only on touched files that were air-clean before the edit.
+- [x] T5: Run `spelling::spell_check_package()`, `devtools::test()`, and `devtools::check()`. Run `air format` only on touched files that were air-clean before the edit.
 
 ## Work log
 
@@ -77,6 +77,7 @@ Make every surrogate significance call in bsync come from one internal p <= .05 
 - 2026-10-06: T5 in progress: spelling clean after the vignette's `$p \le .05$` became code, and `devtools::test()` passes with no failures or skips. `devtools::check()` is running. Checkpoint before the claim-audit re-read and the check result.
 - 2026-10-06: claim audit: 56 claims read, 4 corrected — tests/testthat/test-surrogate.R, R/autotune.R (+ man/autotune_wcc.Rd), NEWS.md, cairn/references/phipson2010.md. The same pass corrected the stale "below 20" in cairn/DESIGN.md:247. Re-read of the corrections pending.
 - 2026-10-06: claim audit re-read: all 5 corrections OK. NEWS now says "computable cell", per the reader's optional point.
+- 2026-10-06: T5 done: `devtools::check()` gave 0 errors, 0 warnings, and 0 notes, on the tree before the claim-audit text fixes. After those fixes, `devtools::document()` leaves no diff and `tools::checkRd()` is clean on `man/autotune_wcc.Rd`. Air ran only on `R/surrogate_generation.R`, the one touched file that was air-clean before. Status set to review.
 
 ## Decisions
 
