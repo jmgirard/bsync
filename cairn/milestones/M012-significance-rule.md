@@ -120,3 +120,8 @@ Pass 2, 2026-10-06, branch head 018c0ec, still synced with origin/main 9eff39c.
 - prior-review #2: the per-window Granger summary keeps `< 0.05` — reject, planned change (Scope Out, D-002).
 - Fix-now commit c1eceb5 settles diff-bug #1, #2, and #3 and blame-history #2, and adds the brace test.
 - AC7 (at c1eceb5, the final tree): `NOT_CRAN=true devtools::test()` reports 17 files, 244 tests, 0 failed, 0 errors, 0 skipped. `devtools::document()` leaves no diff. `devtools::check()` gives 0 errors, 0 warnings, 0 notes. NEWS.md line 15 states "The rule for a significant surrogate p-value is now p <= .05".
+
+Resume, 2026-10-06, branch head f0b9ed1 (PR head 2d62844), still synced with origin/main 9eff39c. PR #7 is open, and its 9 checks pass.
+
+- conversation: codecov[bot] PR — patch coverage 98.88%, with 1 line in `R/multiverse_plot.R` not covered. The line is the all-NA `cli_abort()` that the branch moved into `multiverse_plot_data()`, and no test on main reached it either — follow-up, new candidate row "Test the all-NA error in `plot.bsync_multiverse()`".
+- The PR has no reviews and no unresolved threads.
