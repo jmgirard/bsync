@@ -21,3 +21,18 @@ add-one form is the exact Monte Carlo p-value and keeps the nominal size
 (phipson2010, pp. 4, 6). The cost is that the smallest p-value is
 1 / (n + 1), so a pseudo-dyad test needs at least 21 dyads to reach
 p < .05. The user approved this default change at the M011 plan gate.
+
+### D-002: Surrogate significance calls use p <= .05 (narrows D-001's 21-dyad floor)
+
+2026-10-06, M012 plan. Every significance call that bsync makes on an
+add-one surrogate p-value counts p <= .05 as significant, through one
+internal helper. Rationale: the size of a Monte Carlo test is
+P(p <= alpha), and the add-one p-value keeps that at or below alpha
+(phipson2010, pp. 4, 6). With `<`, a result whose p is exactly .05, for
+example b = 4 of n = 99, is not significant, and the test is more
+conservative than its nominal size. This changes the floors that D-001
+states. A pseudo-dyad test with `keep_roles = TRUE` needs at least 20
+dyads, not 21. The few-surrogates warning starts below 19 surrogates, not
+below 20. Per-window parametric Granger p-values in `wgranger()` are not
+add-one p-values and keep `< .05`. The user chose `<=` at the M012 plan
+gate.
