@@ -410,6 +410,14 @@ test_that("print methods call p = .05 significant", {
   expect_no_match(out, "significantly greater", fixed = TRUE)
 })
 
+test_that("print_significance_call() prints braces in its messages literally", {
+  expect_message(
+    print_significance_call(0.01, yes = "a {b} c", no = "n"),
+    "a {b} c",
+    fixed = TRUE
+  )
+})
+
 test_that("print methods note when no result can reach p <= .05", {
   note <- "so no result can reach p <= .05"
   for (cls in c(names(yes_text), "wgranger_surr")) {

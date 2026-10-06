@@ -608,15 +608,15 @@ print_significance_call <- function(p, yes, no, direction = NULL) {
       "No significance call{what}: the p-value is NA."
     )
   } else if (is_significant(p)) {
-    cli::cli_alert_success(yes)
+    cli::cli_alert_success("{yes}")
   } else {
-    cli::cli_alert_warning(no)
+    cli::cli_alert_warning("{no}")
   }
 }
 
 # Notes on the number of surrogates, shared by the surrogate print methods.
 print_surrogate_count_notes <- function(n_surrogates) {
-  if (!significance_reachable(n_surrogates)) {
+  if (!is.na(n_surrogates) && !significance_reachable(n_surrogates)) {
     p_min <- round(1 / (n_surrogates + 1), 3)
     cli::cli_alert_info(
       "With {n_surrogates} surrogate{?s}, the smallest possible p-value is \\

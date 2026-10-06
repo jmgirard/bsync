@@ -20,7 +20,8 @@
   99 surrogates). Such a result is now significant. A test that rejects at
   p <= .05 keeps its nominal size (Phipson & Smyth, 2010). An NA p-value is
   never significant. The `synchrony_multiverse()` summary counts a computable
-  cell with an NA p-value as not significant. `select_specification()` leaves a dyad
+  cell with an NA p-value as not significant, and `plot.bsync_multiverse()`
+  draws it as not significant. `select_specification()` leaves a dyad
   with an NA p-value out of the significance rate.
 * The four surrogate print methods show the p-value rounded to 4 digits in
   fixed notation. If that rounding gives 0, they show `< 0.0001`.
