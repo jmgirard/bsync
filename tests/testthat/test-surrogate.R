@@ -294,8 +294,8 @@ printed_p_values <- function(obj) {
   sub("Empirical p-value: ", "", m, fixed = TRUE)
 }
 
-mock_surr <- function(class_name, p) {
-  base <- list(n_surrogates = 99999, settings = list(statistic = "mean_abs_z"))
+mock_surr <- function(class_name, p, n = 99999) {
+  base <- list(n_surrogates = n, settings = list(statistic = "mean_abs_z"))
   obj <- switch(class_name,
     wcc_surr = ,
     wphase_surr = c(base, list(
@@ -349,6 +349,76 @@ test_that("is_significant() counts p <= .05 and never NA", {
     c(TRUE, TRUE, FALSE, FALSE, TRUE)
   )
   expect_identical(significance_reachable(c(18, 19, 100)), c(FALSE, TRUE, TRUE))
+})
+
+printed_messages <- function(obj) {
+  paste(testthat::capture_messages(print(obj)), collapse = "")
+}
+
+# Each class's significance call for a significant result.
+yes_text <- c(
+  wcc_surr = "Observed synchrony is significantly greater",
+  wdtw_surr = "Observed cost is significantly lower",
+  wphase_surr = "Observed phase synchrony is significantly greater"
+)
+
+test_that("print methods make no significance call on an NA p-value", {
+  for (cls in names(yes_text)) {
+    obj <- mock_surr(cls, NA_real_)
+    expect_no_error(out <- printed_messages(obj))
+    expect_match(out, "No significance call: the p-value is NA.", fixed = TRUE)
+    expect_no_match(out, "significantly", fixed = TRUE)
+    expect_invisible(suppressMessages(print(obj)))
+  }
+
+  # wgranger: the message names the NA direction, and the other direction
+  # still gets its call.
+  xy_na <- printed_messages(mock_surr("wgranger_surr", c(NA, 0.01)))
+  expect_match(xy_na, "No significance call for x -> y", fixed = TRUE)
+  expect_match(xy_na, "(y -> x) is significantly greater", fixed = TRUE)
+  expect_no_match(xy_na, "(x -> y) is", fixed = TRUE)
+
+  yx_na <- printed_messages(mock_surr("wgranger_surr", c(0.01, NA)))
+  expect_match(yx_na, "No significance call for y -> x", fixed = TRUE)
+  expect_match(yx_na, "(x -> y) is significantly greater", fixed = TRUE)
+  expect_no_match(yx_na, "(y -> x) is", fixed = TRUE)
+
+  both_na <- mock_surr("wgranger_surr", c(NA, NA))
+  expect_no_error(out <- printed_messages(both_na))
+  expect_match(out, "No significance call for x -> y", fixed = TRUE)
+  expect_match(out, "No significance call for y -> x", fixed = TRUE)
+  expect_no_match(out, "significantly", fixed = TRUE)
+  expect_invisible(suppressMessages(print(both_na)))
+})
+
+test_that("print methods call p = .05 significant", {
+  for (cls in names(yes_text)) {
+    expect_match(
+      printed_messages(mock_surr(cls, 0.05)), yes_text[[cls]],
+      fixed = TRUE, label = cls
+    )
+  }
+  out <- printed_messages(mock_surr("wgranger_surr", c(0.05, 0.05)))
+  expect_match(out, "(x -> y) is significantly greater", fixed = TRUE)
+  expect_match(out, "(y -> x) is significantly greater", fixed = TRUE)
+  # Just above .05 is not significant.
+  out <- printed_messages(mock_surr("wgranger_surr", c(0.0501, 0.0501)))
+  expect_no_match(out, "significantly greater", fixed = TRUE)
+})
+
+test_that("print methods note when no result can reach p <= .05", {
+  note <- "so no result can reach p <= .05"
+  for (cls in c(names(yes_text), "wgranger_surr")) {
+    p <- if (cls == "wgranger_surr") c(1, 1) else 1
+    expect_match(
+      printed_messages(mock_surr(cls, p, n = 18)), note,
+      fixed = TRUE, label = paste(cls, 18)
+    )
+    expect_no_match(
+      printed_messages(mock_surr(cls, p, n = 19)), note,
+      fixed = TRUE, label = paste(cls, 19)
+    )
+  }
 })
 
 test_that("a surrogate matrix with no columns aborts in every wrapper", {
