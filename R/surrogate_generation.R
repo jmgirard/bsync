@@ -232,6 +232,7 @@ generate_surrogate_pseudo <- function(
   keep_roles = TRUE
 ) {
   dyads <- .pseudo_extract_dyads(dyad_list)
+  dyad_names <- .pseudo_dyad_names(dyad_list)
   if (!.is_count(dyad) || dyad > length(dyads)) {
     cli::cli_abort(
       "{.arg dyad} must be a single index into {.arg dyad_list} \\
@@ -306,6 +307,14 @@ generate_surrogate_pseudo <- function(
     surr_mat[, j] <- dyads[[pool$dyad[j]]][[pool$role[j]]][seq_len(n_y)]
   }
   rownames(pool) <- NULL
+  pool$name <- if (is.null(dyad_names)) {
+    rep(NA_character_, nrow(pool))
+  } else {
+    dyad_names[pool$dyad]
+  }
+  if (!is.null(dyad_names)) {
+    colnames(surr_mat) <- paste0(pool$name, ":", pool$role)
+  }
   attr(surr_mat, "sources") <- pool
 
   surr_mat
@@ -386,6 +395,7 @@ generate_pseudo_dyads <- function(
   keep_roles = TRUE
 ) {
   dyads <- .pseudo_extract_dyads(dyad_list)
+  dyad_names <- .pseudo_dyad_names(dyad_list)
   if (!is.null(n_pairs) && !.is_count(n_pairs)) {
     cli::cli_abort("{.arg n_pairs} must be NULL or a single positive integer.")
   }
@@ -449,6 +459,29 @@ generate_pseudo_dyads <- function(
       (start-aligned)."
     )
   }
+  name_of <- function(d) {
+    if (is.null(dyad_names)) rep(NA_character_, length(d)) else dyad_names[d]
+  }
+  pairs <- data.frame(
+    x_dyad = pairs$x_dyad,
+    x_role = pairs$x_role,
+    x_name = name_of(pairs$x_dyad),
+    y_dyad = pairs$y_dyad,
+    y_role = pairs$y_role,
+    y_name = name_of(pairs$y_dyad),
+    stringsAsFactors = FALSE
+  )
+  if (!is.null(dyad_names)) {
+    names(out) <- paste0(
+      pairs$x_name,
+      ":",
+      pairs$x_role,
+      "|",
+      pairs$y_name,
+      ":",
+      pairs$y_role
+    )
+  }
   attr(out, "sources") <- pairs
 
   out
@@ -485,6 +518,30 @@ generate_pseudo_dyads <- function(
     }
     list(x = as.double(xy$x), y = as.double(xy$y))
   })
+}
+
+# The dyad names of a dyad_list: a character vector when every name is
+# non-empty, not NA, and unique; NULL when the list has no names. Any other
+# naming aborts, because the names are used as dyad IDs in the output.
+.pseudo_dyad_names <- function(dyad_list) {
+  nms <- names(dyad_list)
+  if (is.null(nms)) {
+    return(NULL)
+  }
+  if (anyNA(nms) || any(nms == "")) {
+    cli::cli_abort(
+      "The names of {.arg dyad_list} must all be non-empty and not \\
+      {.val {NA}}, or the list must have no names."
+    )
+  }
+  dups <- unique(nms[duplicated(nms)])
+  if (length(dups) > 0) {
+    cli::cli_abort(c(
+      "The names of {.arg dyad_list} must be unique.",
+      "x" = "{.val {dups}} {?is/are} repeated."
+    ))
+  }
+  nms
 }
 
 # TRUE for a single, non-missing, positive whole number.

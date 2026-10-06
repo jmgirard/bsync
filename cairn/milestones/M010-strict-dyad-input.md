@@ -110,7 +110,7 @@ candidate row and are not added here.
       `.pseudo_extract_dyads()`. In `autotune_wcc()`, extract every dyad
       before the `n_tune_dyads` sample (`R/autotune.R:161-177`) and run the
       multiverse on the extracted series.
-- [ ] T2: Tests first. Add a name check to `.pseudo_extract_dyads()` (or a
+- [x] T2: Tests first. Add a name check to `.pseudo_extract_dyads()` (or a
       sibling helper) that returns the names or `NULL`. Add the name columns
       to both `"sources"` data frames after any subsample, and set the matrix
       column names and list element names.
@@ -134,6 +134,8 @@ candidate row and are not added here.
 - 2026-10-05: plan gate chose a NEWS entry over a per-call cli notice for inputs now read by name instead of by position, because after the upgrade the notice repeats on every correct call; falsified by users who miss the change and report shifted results.
 - 2026-10-05: implement started on branch `m010-strict-dyad-input`, cut from main at 3115dba.
 - 2026-10-05: T1 done. `.extract_xy(dyad, index)` applies the exact-name-else-position rule with abort messages that name the dyad index; `autotune_wcc()` extracts every dyad before sampling. New tests saw red first (7 failures), then the full suite passed (1579 tests). `air` restyled untouched code in `R/autotune.R` and `test-autotune.R`, which were never air-clean, so that restyle was dropped to keep the diff focused.
+- 2026-10-05: T2 done. New helper `.pseudo_dyad_names()` returns the names or NULL and aborts on empty, NA, or repeated names. Both generators add the name columns after any draw. On the pre-T2 code the new tests failed (45 failures), and on the new code the full suite passed (1710 tests). The M009 test that pinned the 4-column `generate_pseudo_dyads()` "sources" schema now pins the 6-column schema (AC3).
+- 2026-10-05: implementation choice: in `generate_pseudo_dyads()` the "sources" data frame is rebuilt with the name columns placed after each role column, which gives the AC3 column order.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->
