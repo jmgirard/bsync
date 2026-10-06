@@ -46,7 +46,9 @@ starting range.}
 or `"circular"`.}
 
 \item{n_surrogates}{Single positive integer; surrogates per cell per dyad.
-Default `100`. Increase to >= 1000 for reporting.}
+Default `100`. Increase to >= 1000 for reporting. Below 20 the call
+warns once, because no cell can then reach p < .05 and the
+detectability gate cannot pass.}
 
 \item{n_tune_dyads}{Maximum number of dyads to use. If
 `length(dyad_list) > n_tune_dyads`, a random sample is taken. Default

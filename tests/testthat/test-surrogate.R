@@ -335,6 +335,22 @@ test_that("print methods show p rounded to 4 digits, or < 0.0001", {
     printed_p_values(mock_surr("wgranger_surr", c(1e-5, 0.123456))),
     c("< 0.0001", "0.1235")
   )
+  # The display does not depend on getOption("digits").
+  op <- options(digits = 3)
+  on.exit(options(op), add = TRUE)
+  expect_identical(printed_p_values(mock_surr("wcc_surr", 0.123456)), "0.1235")
+})
+
+test_that("a surrogate matrix with no columns aborts in every wrapper", {
+  # (0 + 1) / (0 + 1) would report p = 1 as if it were a result.
+  x <- rnorm(60)
+  y <- rnorm(60)
+  empty <- matrix(numeric(0), nrow = 60, ncol = 0)
+  msg <- "must have at least one column"
+  expect_error(wcc_surrogate(x, y, empty, window_size = 20, lag_max = 3), msg)
+  expect_error(wdtw_surrogate(x, y, empty, window_size = 20, lag_max = 3), msg)
+  expect_error(wgranger_surrogate(x, y, empty, window_size = 20), msg)
+  expect_error(wphase_surrogate(x, y, empty, window_size = 20, lag_max = 3), msg)
 })
 
 # M4 acceptance-criteria tests ------------------------------------------------

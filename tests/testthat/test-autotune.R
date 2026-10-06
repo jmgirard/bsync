@@ -371,10 +371,45 @@ test_that("autotune_wcc gives the few-surrogates warning once per call", {
       n_surrogates = n_surr
     ))
   }
-  pattern <- "smallest possible p-value is `1 / \\(n_surrogates \\+ 1\\)` = 0.05"
+  # \\s+ so the match survives cli line wrapping at any width.
+  pattern <- paste0(
+    "smallest\\s+possible\\s+p-value\\s+is\\s+",
+    "`1\\s+/\\s+\\(n_surrogates\\s+\\+\\s+1\\)`\\s+=\\s+0\\.05"
+  )
   # 3 dyads, so 3 synchrony_multiverse() calls, but one warning.
   expect_identical(sum(grepl(pattern, run(19L))), 1L)
-  expect_identical(sum(grepl("smallest possible p-value", run(20L))), 0L)
+  expect_identical(sum(grepl("smallest\\s+possible", run(20L))), 0L)
+
+  # The muffle catches only the few-surrogates class: a different warning
+  # from each per-dyad call still reaches the caller, once per dyad.
+  real_mv <- synchrony_multiverse
+  local_mocked_bindings(
+    synchrony_multiverse = function(...) {
+      warning("planted per-dyad warning")
+      real_mv(...)
+    },
+    .package = "bsync"
+  )
+  msgs <- run(19L)
+  expect_identical(sum(msgs == "planted per-dyad warning"), 3L)
+  expect_identical(sum(grepl(pattern, msgs)), 1L)
+})
+
+test_that("autotune_wcc aborts with guidance on a missing n_surrogates", {
+  dl <- replicate(
+    2,
+    list(x = stats::rnorm(100), y = stats::rnorm(100)),
+    simplify = FALSE
+  )
+  expect_error(
+    suppressMessages(autotune_wcc(
+      dl,
+      sample_rate = 10,
+      window_sec = 2,
+      n_surrogates = NA_integer_
+    )),
+    "must be a single positive integer"
+  )
 })
 
 test_that("autotune_wcc rejects a single data frame as dyad_list", {

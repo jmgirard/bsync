@@ -62,11 +62,38 @@ test_that("fewer than 20 surrogates warns that no cell can reach p < .05", {
   # 1 / (19 + 1) = 0.05, so p < .05 is out of reach.
   expect_warning(
     run(19L),
-    "smallest possible p-value is `1 / \\(n_surrogates \\+ 1\\)` = 0.05",
+    paste0(
+      "smallest\\s+possible\\s+p-value\\s+is\\s+",
+      "`1\\s+/\\s+\\(n_surrogates\\s+\\+\\s+1\\)`\\s+=\\s+0\\.05"
+    ),
     class = "bsync_few_surrogates"
   )
   set.seed(14)
-  expect_no_warning(run(20L), message = "smallest possible p-value")
+  expect_no_warning(run(20L), message = "smallest\\s+possible")
+})
+
+test_that("bad arguments abort before the few-surrogates warning", {
+  s <- make_test_series(n = 100)
+  # Missing lag_sec aborts with no few-surrogates warning first.
+  expect_no_warning(
+    try(
+      synchrony_multiverse(
+        s$x, s$y,
+        estimator = "wcc", sample_rate = 10,
+        window_sec = 2, n_surrogates = 5L
+      ),
+      silent = TRUE
+    ),
+    class = "bsync_few_surrogates"
+  )
+  expect_error(
+    synchrony_multiverse(
+      s$x, s$y,
+      estimator = "wcc", sample_rate = 10,
+      window_sec = 2, lag_sec = 0.5, n_surrogates = NA_integer_
+    ),
+    "must be a single positive integer"
+  )
 })
 
 test_that("AC1: Invariant 7 — bsync_multiverse carries no raw input or surrogate draws", {

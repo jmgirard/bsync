@@ -76,6 +76,9 @@ wcc_surrogate <- function(
       "{.arg y_surrogates} must have the same number of rows as length of {.arg y}."
     )
   }
+  if (ncol(y_surrogates) < 1) {
+    cli::cli_abort("{.arg y_surrogates} must have at least one column.")
+  }
 
   n_surrogates <- ncol(y_surrogates)
 
@@ -153,7 +156,9 @@ wcc_surrogate <- function(
 #' **`fast_method` warning:** when `fast_method = TRUE`, surrogates are evaluated at lag 0
 #' only, while the observed statistic is computed over all lags. The null and observed
 #' aggregates therefore cover different lag ranges, making the resulting p-value
-#' approximate. Use only for quick exploratory checks, never for reporting.
+#' approximate. The observed statistic is then not one more draw from the surrogate
+#' null, so the size guarantee of the add-one form does not hold. Use only for quick
+#' exploratory checks, never for reporting.
 #'
 #' @param x A numeric vector containing the reference time series.
 #' @param y A numeric vector containing the query time series.
@@ -216,6 +221,9 @@ wdtw_surrogate <- function(
     cli::cli_abort(
       "{.arg y_surrogates} must have the same number of rows as length of {.arg y}."
     )
+  }
+  if (ncol(y_surrogates) < 1) {
+    cli::cli_abort("{.arg y_surrogates} must have at least one column.")
   }
 
   n_surrogates <- ncol(y_surrogates)
@@ -358,6 +366,9 @@ wgranger_surrogate <- function(
       "{.arg y_surrogates} must have the same number of rows as length of {.arg y}."
     )
   }
+  if (ncol(y_surrogates) < 1) {
+    cli::cli_abort("{.arg y_surrogates} must have at least one column.")
+  }
 
   n_surrogates <- ncol(y_surrogates)
 
@@ -493,6 +504,9 @@ wphase_surrogate <- function(
       "{.arg y_surrogates} must have the same number of rows as length of {.arg y}."
     )
   }
+  if (ncol(y_surrogates) < 1) {
+    cli::cli_abort("{.arg y_surrogates} must have at least one column.")
+  }
   if (anyNA(y_surrogates)) {
     cli::cli_abort(c(
       "{.arg y_surrogates} must not contain missing values.",
@@ -567,7 +581,7 @@ format_p_value <- function(p) {
   if (!is.na(p_round) && p_round == 0) {
     return("< 0.0001")
   }
-  format(p_round, scientific = FALSE)
+  format(p_round, scientific = FALSE, digits = 15)
 }
 
 #' Print method for wcc_surr objects

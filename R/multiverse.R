@@ -84,7 +84,9 @@ warn_few_surrogates <- function(n_surrogates) {
 #' @param surrogate_method Character vector; surrogate generator(s): `"phase"`
 #'   (preserves power spectrum) and/or `"circular"` (preserves autocorrelation).
 #' @param n_surrogates Single positive integer; number of surrogates per cell.
-#'   Default is `100`. Use >= 1000 for reporting.
+#'   Default is `100`. Use >= 1000 for reporting. Below 20 the call warns,
+#'   because the smallest possible p-value, 1 / (n_surrogates + 1), is then
+#'   at least .05 and no cell can be significant.
 #' @param ar_order Single positive integer; AR order for `"wgranger"`. Default
 #'   is `1L`.
 #' @param scale_method Character string; scaling for `"wdtw"`. Default is
@@ -162,10 +164,10 @@ synchrony_multiverse <- function(
   if (!is.numeric(increment_pct) || any(increment_pct <= 0) || any(increment_pct > 1)) {
     cli::cli_abort("{.arg increment_pct} must be a numeric vector in (0, 1].")
   }
-  if (!rlang::is_integerish(n_surrogates, n = 1) || n_surrogates < 1) {
+  if (!rlang::is_integerish(n_surrogates, n = 1) || is.na(n_surrogates) ||
+    n_surrogates < 1) {
     cli::cli_abort("{.arg n_surrogates} must be a single positive integer.")
   }
-  warn_few_surrogates(n_surrogates)
 
   is_granger <- estimator == "wgranger"
 
@@ -179,6 +181,8 @@ synchrony_multiverse <- function(
       cli::cli_abort("{.arg lag_sec} must be a positive numeric vector.")
     }
   }
+  # After every argument check, so a call that aborts gives no warning first.
+  warn_few_surrogates(n_surrogates)
 
   n <- length(x)
 

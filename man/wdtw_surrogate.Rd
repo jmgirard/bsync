@@ -61,7 +61,9 @@ surrogate, so the null distribution and the observed value are directly comparab
 \strong{\code{fast_method} warning:} when \code{fast_method = TRUE}, surrogates are evaluated at lag 0
 only, while the observed statistic is computed over all lags. The null and observed
 aggregates therefore cover different lag ranges, making the resulting p-value
-approximate. Use only for quick exploratory checks, never for reporting.
+approximate. The observed statistic is then not one more draw from the surrogate
+null, so the size guarantee of the add-one form does not hold. Use only for quick
+exploratory checks, never for reporting.
 }
 \examples{
 \donttest{
