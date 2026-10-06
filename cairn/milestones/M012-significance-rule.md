@@ -41,7 +41,7 @@ Make every surrogate significance call in bsync come from one internal p <= .05 
 - [x] AC4: Tests show that a p-value of exactly .05 counts as significant, and an NA p-value does not, in three places: `n_significant` of the multiverse summary, the significance marking of `plot.bsync_multiverse()`, and the significance rate of `select_specification()`.
 - [x] AC5: Tests cover six NA cases: `print.wcc_surr()`, `print.wdtw_surr()`, and `print.wphase_surr()` with an NA p-value, and `print.wgranger_surr()` with `p_value_xy` NA, with `p_value_yx` NA, and with both NA. In each case, printing gives no error and returns `x` invisibly. Each NA p-value gives a message that no significance call was made. For wgranger, that message names the NA direction, and the other direction's call still prints.
 - [x] AC6: Tests show that each print method calls p = .05 significant, wgranger in both directions. Tests also show that each print method prints the new note that no result can reach p <= .05 at `n_surrogates = 18`, and not at 19. The tests match the note by its own text.
-- [ ] AC7: `devtools::test()` passes, `devtools::document()` leaves no diff, `devtools::check()` gives 0 errors and 0 warnings, and the NEWS.md development section states the `p <= .05` rule.
+- [x] AC7: `devtools::test()` passes, `devtools::document()` leaves no diff, `devtools::check()` gives 0 errors and 0 warnings, and the NEWS.md development section states the `p <= .05` rule.
 
 ## Coverage
 
@@ -100,15 +100,15 @@ Pass 2, 2026-10-06, branch head 018c0ec, still synced with origin/main 9eff39c.
 - AC5: "print methods make no significance call on an NA p-value" passes with 27 expectations. It covers wcc, wdtw, and wphase with NA p, and wgranger with `p_value_xy` NA, with `p_value_yx` NA, and with both NA. Each case asserts no error, the "No significance call" message, and `expect_invisible()`. The wgranger cases also assert the named direction and the other direction's call.
 - Consistency gate: `cairn_validate.py` exit 0 (all checks passed). `devtools::document()` leaves no diff. README.Rmd is untouched by the branch. `pkgdown::check_pkgdown()` reports no problems. The branch adds no top-level files. NEWS.md has the development-section entries. `NOT_CRAN=true devtools::test()`: 17 files, 243 tests, 0 failed, 0 errors, 0 skipped. `devtools::check()` at 018c0ec: 0 errors, 0 warnings, 0 notes.
 - spawned: diff-bug, blame-history, prior-review
-- diff-bug #1: `plot.bsync_multiverse()` now draws an NA-p cell as not significant (before, NA color), and NEWS does not say so — fix now (NEWS clause).
-- diff-bug #2: `print_significance_call()` passes `yes`/`no` to cli as format strings, so a brace in a future message errors (probe confirmed "object 'b' not found") — fix now (`"{yes}"`/`"{no}"`, plus a test).
-- diff-bug #3: an NA `n_surrogates` prints a misleading "With NA surrogate" note before the old `< 1000` error. Only hand-built objects reach it — fix now (skip the note on NA).
+- diff-bug #1: `plot.bsync_multiverse()` now draws an NA-p cell as not significant (before, NA color), and NEWS does not say so — fix now (NEWS clause), fixed c1eceb5.
+- diff-bug #2: `print_significance_call()` passes `yes`/`no` to cli as format strings, so a brace in a future message errors (probe confirmed "object 'b' not found") — fix now (`"{yes}"`/`"{no}"`, plus a test), fixed c1eceb5.
+- diff-bug #3: an NA `n_surrogates` prints a misleading "With NA surrogate" note before the old `< 1000` error. Only hand-built objects reach it — fix now (skip the note on NA), fixed c1eceb5.
 - diff-bug #4: a vector `p` errors in `print_significance_call()` — reject, false as a defect: every surrogate object holds a scalar p, and the old code behaved the same.
 - diff-bug #5: the autotune 19-surrogate case asserts absence by message text, and the AC4 plot test calls `multiverse_plot_data()` on a bare list — reject, false as a defect: the 19 case collects every warning the call gives, and `plot.bsync_multiverse()` calls `multiverse_plot_data()` (`R/multiverse_plot.R`), which the snapshot test runs.
 - diff-bug #6: `R/surrogate_generation.R:183` is an 87-character roxygen line — reject, style.
 - diff-bug #7: for `estimator = "wgranger"`, the multiverse summary and plot read only the x -> y `p` and ignore `p_yx`. The code before the branch did the same — follow-up, new candidate row "Multiverse summary and plot ignore the y -> x Granger direction".
 - blame-history #1: the re-recorded snapshot changes legend x-coordinates and rewrites tick labels — reject, false: the 32 SVG text labels match except the legend title, and the tick labels (2.5, 10.0, 12.5) are present. Coordinates move because the wider legend title narrows the panel by 0.65 px.
-- blame-history #2: the plot NA-p color change, which NEWS does not mention — fix now (same fix as diff-bug #1).
+- blame-history #2: the plot NA-p color change, which NEWS does not mention — fix now (same fix as diff-bug #1), fixed c1eceb5.
 - blame-history #3: the new note prints before the `< 1000` note, changing output order — reject, false as a defect: no test or doc depends on the order, and the suite is green.
 - blame-history #4: `format_p_value()` rounding survives, and the call uses the raw p — reject, false: the reviewer reports no defect.
 - blame-history #5: `wgranger()` per-window p-values keep `< 0.05` — reject, planned change (Scope Out, D-002).
@@ -117,3 +117,5 @@ Pass 2, 2026-10-06, branch head 018c0ec, still synced with origin/main 9eff39c.
 - blame-history #8: the long roxygen line, D-001's old text, and unticked AC5/AC7 boxes — reject: the line is style, D-001 is append-only history narrowed by D-002, and the boxes are expected at the gate.
 - prior-review #1: the wrappers still give no call-time note for too few surrogates — reject, planned change (plan-gate choice, work log).
 - prior-review #2: the per-window Granger summary keeps `< 0.05` — reject, planned change (Scope Out, D-002).
+- Fix-now commit c1eceb5 settles diff-bug #1, #2, and #3 and blame-history #2, and adds the brace test.
+- AC7 (at c1eceb5, the final tree): `NOT_CRAN=true devtools::test()` reports 17 files, 244 tests, 0 failed, 0 errors, 0 skipped. `devtools::document()` leaves no diff. `devtools::check()` gives 0 errors, 0 warnings, 0 notes. NEWS.md line 15 states "The rule for a significant surrogate p-value is now p <= .05".
