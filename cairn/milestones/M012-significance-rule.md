@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M012: One significance rule (p <= .05) and surrogate print edges
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -31,16 +31,16 @@ Make every surrogate significance call in bsync come from one internal p <= .05 
 
 ## Acceptance criteria
 
-- [ ] AC1: A unit test shows `is_significant(c((4 + 1) / (99 + 1), 1 / 20, 0.0501, NA_real_, 0.01))` returns `c(TRUE, TRUE, FALSE, FALSE, TRUE)`.
-- [ ] AC2: Four text sweeps hold.
+- [x] AC1: A unit test shows `is_significant(c((4 + 1) / (99 + 1), 1 / 20, 0.0501, NA_real_, 0.01))` returns `c(TRUE, TRUE, FALSE, FALSE, TRUE)`.
+- [x] AC2: Four text sweeps hold.
       (a) `grep -rnE '<=? *0\.05' R/` lists exactly one line outside `R/wgranger.R` and `R/wgranger_plot.R`, and that line is in the body of `is_significant()`.
       (b) `grep -rnE '< *0?\.05' R/ man/ vignettes/ NEWS.md README.Rmd` lists only lines in `R/wgranger.R`, `R/wgranger_plot.R`, and `man/` pages generated from them.
       (c) `grep -rnE '21 dyads|[Bb]elow 20|n_surrogates *[<>]=? *20' R/ man/ vignettes/ NEWS.md` lists nothing.
       (d) `grep -n 'p <= \.05'` lists at least one line in each of `R/multiverse.R` and `R/multiverse_plot.R`. `grep -n '20 dyads'` lists at least one line in each of `R/surrogate_generation.R`, `vignettes/surrogate-testing.Rmd`, and `NEWS.md`.
-- [ ] AC3: Tests show that `synchrony_multiverse()` warns with class `bsync_few_surrogates` at `n_surrogates = 18` and not at 19. Tests show that `autotune_wcc()` gives that warning once at 18 and not at 19.
-- [ ] AC4: Tests show that a p-value of exactly .05 counts as significant, and an NA p-value does not, in three places: `n_significant` of the multiverse summary, the significance marking of `plot.bsync_multiverse()`, and the significance rate of `select_specification()`.
+- [x] AC3: Tests show that `synchrony_multiverse()` warns with class `bsync_few_surrogates` at `n_surrogates = 18` and not at 19. Tests show that `autotune_wcc()` gives that warning once at 18 and not at 19.
+- [x] AC4: Tests show that a p-value of exactly .05 counts as significant, and an NA p-value does not, in three places: `n_significant` of the multiverse summary, the significance marking of `plot.bsync_multiverse()`, and the significance rate of `select_specification()`.
 - [ ] AC5: Tests cover six NA cases: `print.wcc_surr()`, `print.wdtw_surr()`, and `print.wphase_surr()` with an NA p-value, and `print.wgranger_surr()` with `p_value_xy` NA, with `p_value_yx` NA, and with both NA. In each case, printing gives no error and returns `x` invisibly. Each NA p-value gives a message that no significance call was made. For wgranger, that message names the NA direction, and the other direction's call still prints.
-- [ ] AC6: Tests show that each print method calls p = .05 significant, wgranger in both directions. Tests also show that each print method prints the new note that no result can reach p <= .05 at `n_surrogates = 18`, and not at 19. The tests match the note by its own text.
+- [x] AC6: Tests show that each print method calls p = .05 significant, wgranger in both directions. Tests also show that each print method prints the new note that no result can reach p <= .05 at `n_surrogates = 18`, and not at 19. The tests match the note by its own text.
 - [ ] AC7: `devtools::test()` passes, `devtools::document()` leaves no diff, `devtools::check()` gives 0 errors and 0 warnings, and the NEWS.md development section states the `p <= .05` rule.
 
 ## Coverage
@@ -78,7 +78,17 @@ Make every surrogate significance call in bsync come from one internal p <= .05 
 - 2026-10-06: claim audit: 56 claims read, 4 corrected — tests/testthat/test-surrogate.R, R/autotune.R (+ man/autotune_wcc.Rd), NEWS.md, cairn/references/phipson2010.md. The same pass corrected the stale "below 20" in cairn/DESIGN.md:247. Re-read of the corrections pending.
 - 2026-10-06: claim audit re-read: all 5 corrections OK. NEWS now says "computable cell", per the reader's optional point.
 - 2026-10-06: T5 done: `devtools::check()` gave 0 errors, 0 warnings, and 0 notes, on the tree before the claim-audit text fixes. After those fixes, `devtools::document()` leaves no diff and `tools::checkRd()` is clean on `man/autotune_wcc.Rd`. Air ran only on `R/surrogate_generation.R`, the one touched file that was air-clean before. Status set to review.
+- 2026-10-06: review return 1: AC5 fails as written. The `p_value_xy`-NA and `p_value_yx`-NA wgranger cases in "print methods make no significance call on an NA p-value" (`tests/testthat/test-surrogate.R`) never assert that `print()` returns `x` invisibly.
 
 ## Decisions
 
 ## Review
+
+Pass 1, 2026-10-06, branch head 95b00b0, synced with origin/main 9eff39c.
+
+- AC1: `test-surrogate.R` "is_significant() counts p <= .05 and never NA" passes (2 expectations). Its first expectation is the AC1 vector, word for word. With the old `<` rule planted, it fails (T1 work log).
+- AC2: (a) lists `R/surrogate_analysis.R:592`, the body line of `is_significant()`, and `R/wgranger.R:96,97,100`. (b) lists only `R/wgranger.R:96,97,100`. (c) lists nothing (grep exit 1). (d) `p <= .05` count: `R/multiverse.R` 5, `R/multiverse_plot.R` 3. `20 dyads` count: `R/surrogate_generation.R` 1, `vignettes/surrogate-testing.Rmd` 2, `NEWS.md` 1.
+- AC3: `test-multiverse.R` "fewer than 19 surrogates warns ..." passes: a `bsync_few_surrogates` warning at 18 and `expect_no_condition(class =)` at 19. `test-autotune.R` "autotune_wcc gives the few-surrogates warning once per call" passes: 1 warning at 18 and 0 at 19, with `NOT_CRAN=true`.
+- AC4: `test-multiverse.R` "the multiverse counts p = .05 as significant and NA p as not" passes. `n_significant` is 1 of 3 valid cells (p = .05 counted, NA p not counted), and `multiverse_plot_data()` marks `c(FALSE, TRUE)` for the NA and .05 cells. `test-autotune.R` "select_specification counts p = .05 ..." passes: the rate is 0.5 for p = .05, NA, .5, so the NA dyad is not counted as significant.
+- AC5: FAILS as written. "print methods make no significance call on an NA p-value" passes, but it asserts `expect_invisible()` only for wcc, wdtw, wphase, and wgranger with both NA. The `p_value_xy`-NA and `p_value_yx`-NA wgranger cases never check that `print()` returns `x` invisibly. Returned to implement (review return 1).
+- AC6: "print methods call p = .05 significant" passes (wcc, wdtw, wphase, and wgranger in both directions). "print methods note when no result can reach p <= .05" passes for all four classes at 18 (present) and 19 (absent), matched by the note's own text "so no result can reach p <= .05".
