@@ -24,7 +24,7 @@ test_that("AC1: synchrony_multiverse returns bsync_multiverse with correct struc
     sample_rate = 10,
     window_sec = c(2, 3),
     lag_sec = 1,
-    n_surrogates = 19L
+    n_surrogates = 20L
   )
 
   expect_s3_class(res, "bsync_multiverse")
@@ -49,13 +49,60 @@ test_that("AC1: synchrony_multiverse returns bsync_multiverse with correct struc
   expect_true(all(res$grid$lag_max <= floor(res$grid$window_size / 2L), na.rm = TRUE))
 })
 
+test_that("fewer than 20 surrogates warns that no cell can reach p < .05", {
+  s <- make_test_series(n = 100)
+  run <- function(n_surr) {
+    synchrony_multiverse(
+      s$x, s$y,
+      estimator = "wcc", sample_rate = 10,
+      window_sec = 2, lag_sec = 0.5, n_surrogates = n_surr
+    )
+  }
+  set.seed(14)
+  # 1 / (19 + 1) = 0.05, so p < .05 is out of reach.
+  expect_warning(
+    run(19L),
+    paste0(
+      "smallest\\s+possible\\s+p-value\\s+is\\s+",
+      "`1\\s+/\\s+\\(n_surrogates\\s+\\+\\s+1\\)`\\s+=\\s+0\\.05"
+    ),
+    class = "bsync_few_surrogates"
+  )
+  set.seed(14)
+  expect_no_warning(run(20L), message = "smallest\\s+possible")
+})
+
+test_that("bad arguments abort before the few-surrogates warning", {
+  s <- make_test_series(n = 100)
+  # Missing lag_sec aborts with no few-surrogates warning first.
+  expect_no_warning(
+    try(
+      synchrony_multiverse(
+        s$x, s$y,
+        estimator = "wcc", sample_rate = 10,
+        window_sec = 2, n_surrogates = 5L
+      ),
+      silent = TRUE
+    ),
+    class = "bsync_few_surrogates"
+  )
+  expect_error(
+    synchrony_multiverse(
+      s$x, s$y,
+      estimator = "wcc", sample_rate = 10,
+      window_sec = 2, lag_sec = 0.5, n_surrogates = NA_integer_
+    ),
+    "must be a single positive integer"
+  )
+})
+
 test_that("AC1: Invariant 7 — bsync_multiverse carries no raw input or surrogate draws", {
   s <- make_test_series()
   set.seed(2)
   res <- synchrony_multiverse(
     s$x, s$y,
     estimator = "wcc", sample_rate = 10,
-    window_sec = 2, lag_sec = 0.5, n_surrogates = 9L
+    window_sec = 2, lag_sec = 0.5, n_surrogates = 20L
   )
   # No raw data stored
   nms <- names(res)
@@ -72,7 +119,7 @@ test_that("AC1: lag_max cap is applied and reported per cell", {
   res <- synchrony_multiverse(
     s$x, s$y,
     estimator = "wcc", sample_rate = 10,
-    window_sec = 3, lag_sec = 5, n_surrogates = 9L
+    window_sec = 3, lag_sec = 5, n_surrogates = 20L
   )
   # lag_max should be at most floor(30/2) = 15
   expect_true(all(res$grid$lag_max <= 15L, na.rm = TRUE))
@@ -132,7 +179,7 @@ test_that("AC2: WDTW — ES uses lower-tail polarity (null_mean - obs) / null_sd
   res <- synchrony_multiverse(
     s$x, s$y,
     estimator = "wdtw", sample_rate = 10,
-    window_sec = 2, lag_sec = 0.5, n_surrogates = 19L
+    window_sec = 2, lag_sec = 0.5, n_surrogates = 20L
   )
   row1 <- res$grid[1, ]
   # Verify ES polarity: for WDTW, ES > 0 means observed < null_mean (better alignment)
@@ -146,7 +193,7 @@ test_that("AC2: Granger — ES uses upper-tail polarity for x→y", {
   res <- synchrony_multiverse(
     s$x, s$y,
     estimator = "wgranger", sample_rate = 10,
-    window_sec = 2, n_surrogates = 19L
+    window_sec = 2, n_surrogates = 20L
   )
   row1 <- res$grid[1, ]
   expected_es <- (row1$observed - row1$null_mean) / row1$null_sd
@@ -178,7 +225,7 @@ test_that("AC3: generate_surrogate_phase called once per method, not per cell", 
     window_sec = c(2, 3, 4), # 3 cells, all sharing "phase"
     lag_sec = 0.5,
     surrogate_method = "phase",
-    n_surrogates = 9L
+    n_surrogates = 20L
   )
   # Should be called exactly once for "phase", not 3 times (one per cell)
   expect_equal(call_count, 1L)
@@ -210,7 +257,7 @@ test_that("AC3: Two methods generate two matrices, not 2 × n_cells", {
     window_sec = c(2, 3),
     lag_sec = 0.5,
     surrogate_method = c("phase", "circular"),
-    n_surrogates = 9L
+    n_surrogates = 20L
   )
   expect_equal(phase_calls, 1L)
   expect_equal(circ_calls, 1L)
@@ -227,7 +274,7 @@ test_that("AC4: Granger grid has no lag axis; has es_xy/p_xy/es_yx/p_yx columns"
   res <- synchrony_multiverse(
     s$x, s$y,
     estimator = "wgranger", sample_rate = 10,
-    window_sec = c(2, 3), n_surrogates = 9L
+    window_sec = c(2, 3), n_surrogates = 20L
   )
   expect_true(all(is.na(res$grid$lag_sec)))
   expect_true(all(is.na(res$grid$lag_max)))
@@ -241,7 +288,7 @@ test_that("AC4: WDTW smoke test — grid has correct columns, n_windows > 0", {
   res <- synchrony_multiverse(
     s$x, s$y,
     estimator = "wdtw", sample_rate = 10,
-    window_sec = 2, lag_sec = 0.5, n_surrogates = 9L
+    window_sec = 2, lag_sec = 0.5, n_surrogates = 20L
   )
   expect_s3_class(res, "bsync_multiverse")
   expect_true(res$grid$n_windows[1] > 0L)
@@ -259,7 +306,7 @@ test_that("AC5: print, summary, tidy, glance, as_tibble work on bsync_multiverse
   res <- synchrony_multiverse(
     s$x, s$y,
     estimator = "wcc", sample_rate = 10,
-    window_sec = 2, lag_sec = 0.5, n_surrogates = 9L
+    window_sec = 2, lag_sec = 0.5, n_surrogates = 20L
   )
 
   expect_invisible(print(res))
@@ -287,7 +334,7 @@ test_that("AC5: plot.bsync_multiverse runs without error (vdiffr snapshot)", {
     window_sec = c(2, 3, 4),
     lag_sec = c(0.5, 1),
     statistic = c("mean_abs_z", "peak"),
-    n_surrogates = 9L
+    n_surrogates = 20L # smallest p = 1 / 21 < .05, so cells can be significant
   )
   vdiffr::expect_doppelganger(
     "multiverse-spec-curve",
@@ -363,7 +410,7 @@ test_that("Cells too short to compute appear as NA in grid", {
     estimator = "wcc", sample_rate = 10,
     window_sec = c(1, 20), # 1s = ok, 20s = too short
     lag_sec = 0.5,
-    n_surrogates = 9L
+    n_surrogates = 20L
   ))
   expect_equal(nrow(res$grid), 2L)
   # The too-short cell should have NA es

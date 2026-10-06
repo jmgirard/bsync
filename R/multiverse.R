@@ -16,6 +16,25 @@
 
 # select_specification() is the Phase B helper; defined in autotune.R
 
+# The multiverse and autotune_wcc() call a cell significant at p < .05. The
+# add-one p-value (b + 1) / (n_surrogates + 1) is at least
+# 1 / (n_surrogates + 1), so below 20 surrogates no cell can pass. The class
+# lets autotune_wcc() give this warning once instead of once per dyad.
+warn_few_surrogates <- function(n_surrogates) {
+  if (n_surrogates >= 20) {
+    return(invisible(NULL))
+  }
+  p_min <- round(1 / (n_surrogates + 1), 3)
+  cli::cli_warn(
+    c(
+      "With {n_surrogates} surrogate{?s}, the smallest possible p-value is \\
+      {.code 1 / (n_surrogates + 1)} = {p_min}, so no cell can reach p < .05.",
+      "i" = "Use {.code n_surrogates >= 20}, and >= 1000 for reporting."
+    ),
+    class = "bsync_few_surrogates"
+  )
+}
+
 
 # synchrony_multiverse() -------------------------------------------------------
 
@@ -65,7 +84,9 @@
 #' @param surrogate_method Character vector; surrogate generator(s): `"phase"`
 #'   (preserves power spectrum) and/or `"circular"` (preserves autocorrelation).
 #' @param n_surrogates Single positive integer; number of surrogates per cell.
-#'   Default is `100`. Use >= 1000 for reporting.
+#'   Default is `100`. Use >= 1000 for reporting. Below 20 the call warns,
+#'   because the smallest possible p-value, 1 / (n_surrogates + 1), is then
+#'   at least .05 and no cell can be significant.
 #' @param ar_order Single positive integer; AR order for `"wgranger"`. Default
 #'   is `1L`.
 #' @param scale_method Character string; scaling for `"wdtw"`. Default is
@@ -143,7 +164,8 @@ synchrony_multiverse <- function(
   if (!is.numeric(increment_pct) || any(increment_pct <= 0) || any(increment_pct > 1)) {
     cli::cli_abort("{.arg increment_pct} must be a numeric vector in (0, 1].")
   }
-  if (!rlang::is_integerish(n_surrogates, n = 1) || n_surrogates < 1) {
+  if (!rlang::is_integerish(n_surrogates, n = 1) || is.na(n_surrogates) ||
+    n_surrogates < 1) {
     cli::cli_abort("{.arg n_surrogates} must be a single positive integer.")
   }
 
@@ -159,6 +181,8 @@ synchrony_multiverse <- function(
       cli::cli_abort("{.arg lag_sec} must be a positive numeric vector.")
     }
   }
+  # After every argument check, so a call that aborts gives no warning first.
+  warn_few_surrogates(n_surrogates)
 
   n <- length(x)
 
@@ -461,7 +485,7 @@ synchrony_multiverse <- function(
   } else {
     NA_real_
   }
-  # p = proportion of surrogates <= obs (lower tail)
+  # p = (b + 1) / (n + 1), b = surrogates with cost <= obs (lower tail)
   p <- surr_res$p_value
   n_r <- build_surface_grid(
     n_x = length(x), window_size = window_size,

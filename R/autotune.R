@@ -80,7 +80,9 @@
 #' @param surrogate_method Character; surrogate generator: `"phase"` (default)
 #'   or `"circular"`.
 #' @param n_surrogates Single positive integer; surrogates per cell per dyad.
-#'   Default `100`. Increase to >= 1000 for reporting.
+#'   Default `100`. Increase to >= 1000 for reporting. Below 20 the call
+#'   warns once, because no cell can then reach p < .05 and the
+#'   detectability gate cannot pass.
 #' @param n_tune_dyads Maximum number of dyads to use. If
 #'   `length(dyad_list) > n_tune_dyads`, a random sample is taken. Default
 #'   `30`.
@@ -157,6 +159,10 @@ autotune_wcc <- function(
   if (!rlang::is_integerish(n_tune_dyads, n = 1) || n_tune_dyads < 1) {
     cli::cli_abort("{.arg n_tune_dyads} must be a single positive integer.")
   }
+  if (!rlang::is_integerish(n_surrogates, n = 1) || is.na(n_surrogates) ||
+    n_surrogates < 1) {
+    cli::cli_abort("{.arg n_surrogates} must be a single positive integer.")
+  }
   if (!is.numeric(sig_pct) || length(sig_pct) != 1 ||
     sig_pct < 0 || sig_pct > 1) {
     cli::cli_abort("{.arg sig_pct} must be a single number in [0, 1].")
@@ -190,19 +196,26 @@ autotune_wcc <- function(
   cli::cli_inform("Running synchrony_multiverse() on {n_use} dyad(s) \\
     ({length(window_sec)} window x {length(lag_sec_use)} lag cells each)...")
 
+  # Give the few-surrogates warning once here, and muffle the copy that
+  # each per-dyad synchrony_multiverse() call would give.
+  warn_few_surrogates(n_surrogates)
+
   # Run multiverse on each dyad
   mv_list <- lapply(tune_list, function(xy) {
-    synchrony_multiverse(
-      x = xy$x,
-      y = xy$y,
-      estimator = "wcc",
-      sample_rate = sample_rate,
-      window_sec = window_sec,
-      lag_sec = lag_sec_use,
-      increment_pct = increment_pct,
-      statistic = statistic,
-      surrogate_method = surrogate_method,
-      n_surrogates = n_surrogates
+    withCallingHandlers(
+      synchrony_multiverse(
+        x = xy$x,
+        y = xy$y,
+        estimator = "wcc",
+        sample_rate = sample_rate,
+        window_sec = window_sec,
+        lag_sec = lag_sec_use,
+        increment_pct = increment_pct,
+        statistic = statistic,
+        surrogate_method = surrogate_method,
+        n_surrogates = n_surrogates
+      ),
+      bsync_few_surrogates = function(w) invokeRestart("muffleWarning")
     )
   })
 

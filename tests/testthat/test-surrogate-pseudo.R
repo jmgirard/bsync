@@ -490,6 +490,41 @@ test_that("pseudo-dyad list elements work as estimator input", {
   expect_s3_class(res, "wcc_res")
 })
 
+test_that("the add-one pseudo-dyad p-value keeps its size under the null", {
+  skip_on_cran()
+  # Phipson & Smyth (2010, pp. 4, 6). Each replicate draws N = 10 uncoupled
+  # white-noise dyads and tests dyad 1 against all 9 of its partners. Under
+  # this exchangeable null the observed statistic's rank among the 10 is
+  # uniform, so p = (b + 1) / (9 + 1) takes each value k / 10, k = 1..10,
+  # with chance 1 / 10. With R = 400 replicates a share with true value q has
+  # binomial SE sqrt(q * (1 - q) / 400): 0.015 at q = 0.1, 0.025 at q = 0.5.
+  # The b / n form puts chance 0.2 at or below 0.15 and can return 0.
+  set.seed(20261005)
+  n_reps <- 400
+  rep_seeds <- sample.int(.Machine$integer.max, n_reps)
+  pvals <- vapply(
+    rep_seeds,
+    function(s) {
+      set.seed(s)
+      dl <- make_dyads(lengths = rep(100, 10))
+      ys <- generate_surrogate_pseudo(dl, dyad = 1, keep_roles = TRUE)
+      wcc_surrogate(
+        dl[[1]]$x,
+        dl[[1]]$y,
+        ys,
+        window_size = 20,
+        lag_max = 3,
+        window_increment = 10
+      )$p_value
+    },
+    numeric(1)
+  )
+  expect_true(all(pvals >= 0.1))
+  se <- function(q) sqrt(q * (1 - q) / n_reps)
+  expect_lte(abs(mean(pvals <= 0.15) - 0.1), 3 * se(0.1))
+  expect_lte(abs(mean(pvals <= 0.5) - 0.5), 3 * se(0.5))
+})
+
 # =========================================================================
 # --- Regressions from the claim audit ------------------------------------
 # =========================================================================
