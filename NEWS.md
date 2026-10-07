@@ -10,9 +10,8 @@
   `print()`, `glance()`, and `names(aggregate)` show which one was used.
 * New article, `vignette("wphase-workflow")`: band-pass filtering before
   phase extraction, `wphase()`, a circular-shift surrogate test, the
-  `"peak"` statistic, optima, and plots. It also shows that for rhythmic
-  signals the relative phase tracks the lead–lag better than the lag of the
-  highest PLV.
+  `"peak"` statistic, optima, and plots. In its simulated example, the
+  relative phase tracks the lead–lag better than the lag of the highest PLV.
 
 ## Segment-shuffling surrogates
 

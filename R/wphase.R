@@ -51,11 +51,10 @@
 #'   between successive lags. (default = `1`)
 #' @param statistic A character string naming how to aggregate the PLV
 #'   surface into a single number. `"mean_plv"` (default) takes the mean PLV
-#'   over **all** windows and lags. It summarizes the whole surface and is the
-#'   value `wphase()` reported before this argument existed. `"peak"` takes
-#'   the largest PLV across lags **within each window**, then averages those
-#'   per-window values. This is the rMEA *best-lag* convention (Boker et al.,
-#'   2002) that [wcc()] uses for its own `"peak"` statistic, applied to PLV.
+#'   over **all** windows and lags, so it summarizes the whole surface.
+#'   `"peak"` takes the largest PLV across lags **within each window**, then
+#'   averages those per-window values. This is the best-lag definition that
+#'   [wcc()] uses for its own `"peak"` statistic, applied to PLV.
 #'   It suits a dyad whose lead–lag shifts across windows, where the mean
 #'   over all lags dilutes the lag at which phases lock. Pass the same value
 #'   to [wphase_surrogate()] so that the null distribution matches.

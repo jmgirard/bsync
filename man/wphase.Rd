@@ -39,11 +39,10 @@ between successive lags. (default = \code{1})}
 
 \item{statistic}{A character string naming how to aggregate the PLV
 surface into a single number. \code{"mean_plv"} (default) takes the mean PLV
-over \strong{all} windows and lags. It summarizes the whole surface and is the
-value \code{wphase()} reported before this argument existed. \code{"peak"} takes
-the largest PLV across lags \strong{within each window}, then averages those
-per-window values. This is the rMEA \emph{best-lag} convention (Boker et al.,
-2002) that \code{\link[=wcc]{wcc()}} uses for its own \code{"peak"} statistic, applied to PLV.
+over \strong{all} windows and lags, so it summarizes the whole surface.
+\code{"peak"} takes the largest PLV across lags \strong{within each window}, then
+averages those per-window values. This is the best-lag definition that
+\code{\link[=wcc]{wcc()}} uses for its own \code{"peak"} statistic, applied to PLV.
 It suits a dyad whose lead–lag shifts across windows, where the mean
 over all lags dilutes the lag at which phases lock. Pass the same value
 to \code{\link[=wphase_surrogate]{wphase_surrogate()}} so that the null distribution matches.}

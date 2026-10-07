@@ -76,7 +76,7 @@ person_B <- cos(phase_B) + 0.25 * drift() + rnorm(n, sd = 0.3)
 
 A band-pass filter keeps one frequency band and removes the rest. Here we keep 0.3 to 0.7 Hz, a band around the shared rhythm. In your own data, choose the band from theory about the behavior or from the power spectrum (see `vignette("determine-downsampling")` for `evaluate_signal_power()`).
 
-We use a second-order Butterworth filter from the **gsignal** package and apply it with `filtfilt()`, which runs the filter forward and then backward. This zero-phase filtering does not shift the timing of the signal, which matters when timing is the thing you measure.
+We use a Butterworth band-pass filter from the **gsignal** package (`butter()` with `n = 2`, which gives a 4th-order band-pass) and apply it with `filtfilt()`, which runs the filter forward and then backward. This zero-phase filtering does not shift the timing of the signal, which matters when timing is the thing you measure.
 
 ```{r band-pass}
 bp_filter <- gsignal::butter(2, c(0.3, 0.7) / (fs / 2), type = "pass")
@@ -106,7 +106,7 @@ round(c(
 ), 3)
 ```
 
-The two independent series reach a mean PLV of `r round(plv_indep_raw, 3)` without filtering, and the coupled dyad reaches only `r round(plv_dyad_raw, 3)`. On unfiltered data, the drift decides the PLV, not the coupling. After filtering, the independent pair drops to `r round(plv_indep_filt, 3)`. That value is still well above 0, because two narrowband signals keep similar phases over a short window by chance. This is why a surrogate test (Section 5) is needed to judge any PLV.
+The two independent series reach a mean PLV of `r round(plv_indep_raw, 3)` without filtering, and the coupled dyad reaches only `r round(plv_dyad_raw, 3)`. Two series that share nothing score higher than a coupled pair, so a PLV on unfiltered data does not measure coupling. After filtering, the independent pair drops to `r round(plv_indep_filt, 3)`. That value is still well above 0, because two narrowband signals keep similar phases over a short window by chance. This is why a surrogate test (Section 5) is needed to judge any PLV.
 
 ## 4. Calculating Windowed Phase Synchrony on the Filtered Pair
 
@@ -184,7 +184,7 @@ surr_peak <- wphase_surrogate(
 print(surr_peak)
 ```
 
-With the peak statistic, the observed value is `r round(surr_peak$observed_z, 3)` against a surrogate average of `r round(mean(surr_peak$surrogate_z), 3)`, and p = `r round(surr_peak$p_value, 4)`. The peak statistic is larger than the mean statistic for the surrogates as well as for the observed data, so compare each observed value only with the null of its own statistic. Choose the statistic before you look at the results.
+With the peak statistic, the observed value is `r round(surr_peak$observed_z, 3)` against a surrogate average of `r round(mean(surr_peak$surrogate_z), 3)`, and p = `r round(surr_peak$p_value, 4)`. The peak statistic is at least as large as the mean statistic for the observed data and for `r sum(surr_peak$surrogate_z >= surr_mean$surrogate_z)` of the `r length(surr_peak$surrogate_z)` surrogates, so compare each observed value only with the null of its own statistic. Choose the statistic before you look at the results.
 
 ## 7. Optima Extraction
 
@@ -207,7 +207,7 @@ cor_rel_phase <- cor(lag0$lead_A_sec, lead_sec[lag0$i + 75])
 round(c(optimum_lag = cor_optima, rel_phase_lead = cor_rel_phase), 2)
 ```
 
-The PLV optima correlate `r round(cor_optima, 2)` with the true lead, and the lead read from the relative phase at lag 0 correlates `r round(cor_rel_phase, 2)`. For phase synchrony, read the lead–lag from the relative phase. Use the optima as a rough guide, and do not pass them to `leadership_asymmetry()` without checking them against the relative phase.
+The PLV optima correlate `r round(cor_optima, 2)` with the true lead, and the lead read from the relative phase at lag 0 correlates `r round(cor_rel_phase, 2)`. Of the `r nrow(wphase_optima)` optima, `r sum(abs(wphase_optima$optimum_lag) == 10)` sit at the edge of the lag range (-10 or 10 samples), where the search has no room on one side. In this example, the relative phase is the better reading of the lead–lag. `leadership_asymmetry()` accepts `wphase` optima, but check them against the relative phase before you use them for a leadership index.
 
 ## 8. Visualizing the Results
 
@@ -234,7 +234,7 @@ median_min_plv <- median(vapply(plv_by_window, min, numeric(1)))
 median_max_plv <- median(vapply(plv_by_window, max, numeric(1)))
 ```
 
-The heatmap is high across most lags in every window. Across windows, the median of the lowest PLV in a window is `r round(median_min_plv, 2)`, and the median of the highest is `r round(median_max_plv, 2)`. This is the flat lag profile described in Section 7.
+The PLV changes little across lags within a window. Across windows, the median of the lowest PLV in a window is `r round(median_min_plv, 2)`, and the median of the highest is `r round(median_max_plv, 2)`. This is the flat lag profile described in Section 7.
 
 ## See also
 
