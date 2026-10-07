@@ -76,6 +76,7 @@ Add an exported segment-shuffling surrogate generator that reorders whole segmen
 - 2026-10-07: T3 finding: the planned design is liberal. Size runs used 1000 independent AR(1) pairs (phi 0.7), 19 surrogates, `wcc_surrogate()` with window 32 and lag 4, at p <= .05. With orders that keep no segment in place and segment = window = increment, the rate was 0.090 at 8 segments, 0.118 at 5, and 0.073 at 20. With a 3-sample increment (the multiverse default of 10%), it was 0.104. Phase surrogates gave 0.055 to 0.059.
 - 2026-10-07: T3 finding: two causes. (1) Orders that keep no segment in place are not a group with the identity, so the surrogates resemble each other more than the observed series. Drawing any order except the identity gave 0.049 at 5 segments and 0.068 at 8. (2) Lagged windows cross segment boundaries, so the observed series keeps continuity that the surrogates lose. With segment = window + 2 * lag_max = increment, every lagged window stays in one segment. Both fixes together gave 0.049 at 8 segments and 0.043 at 5, and 0.060 with a 3-sample increment.
 - 2026-10-07: stop: the fix changes the Goal (no segment in place) and the multiverse segment size the question set chose (the window size). The user decides between a re-plan, an escalation, and the plan as written.
+- 2026-10-07: user chose escalation to a Fable review through /milestone-brief before any re-plan.
 
 ## Decisions
 
