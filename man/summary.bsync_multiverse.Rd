@@ -4,15 +4,19 @@
 \alias{summary.bsync_multiverse}
 \title{Summary method for bsync_multiverse objects}
 \usage{
-\method{summary}{bsync_multiverse}(object, ...)
+\method{summary}{bsync_multiverse}(object, direction = c("xy", "yx"), ...)
 }
 \arguments{
-\item{object}{A `bsync_multiverse` object.}
+\item{object}{A \code{bsync_multiverse} object.}
+
+\item{direction}{For a Granger result (\code{estimator = "wgranger"}), the
+direction to report: \code{"xy"} (x -> y, the default) or \code{"yx"} (y -> x).
+Other estimators have one direction only, so \code{"yx"} is an error for them.}
 
 \item{...}{Additional arguments (not used).}
 }
 \value{
-Returns `object` invisibly.
+Returns \code{object} invisibly.
 }
 \description{
 Summary method for bsync_multiverse objects

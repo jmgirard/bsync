@@ -1,5 +1,23 @@
 # bsync (development version)
 
+## Both Granger directions in multiverse summaries and plots
+
+* `synchrony_multiverse(estimator = "wgranger")` now also returns
+  `$robustness_yx`, the robustness summary of the y -> x direction. It has the
+  same fields as `$robustness`, which stays x -> y.
+* `print()`, `summary()`, `glance()`, and `plot()` for `bsync_multiverse`
+  objects take a `direction` argument: `"xy"` (x -> y, the default) or `"yx"`
+  (y -> x). Before, these methods reported x -> y only. For a Granger result,
+  `print()` and `summary()` show a "Direction" line, `glance()` has a
+  `direction` column, and the plot title names the direction. `"yx"` on a WCC
+  or WDTW result is an error. WCC and WDTW results, printed summaries,
+  `glance()` columns, and plots do not change.
+* A Granger result made before this change has no `$robustness_yx`. With
+  `direction = "yx"`, the methods compute it from the grid's `es_yx` and
+  `p_yx` columns.
+* `summary()` of a `bsync_multiverse` object prints "ES range: none" when no
+  cell has a computable ES, in place of `[Inf, -Inf]` and a warning.
+
 ## Add-one surrogate p-values and the p <= .05 rule (changes reported results)
 
 * `wcc_surrogate()`, `wdtw_surrogate()`, `wgranger_surrogate()` (both

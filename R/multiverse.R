@@ -9,8 +9,10 @@
 #  - Surrogate reuse: one y_surrogates matrix per unique surrogate_method,
 #    reused across every cell sharing it (efficiency seam from M5)
 #  - ES polarity: WCC/Granger = upper-tail (higher better), WDTW = lower-tail
-#  - Granger has two directional statistics (f_xy / f_yx); result columns
-#    es_xy/p_xy/es_yx/p_yx are added when estimator = "wgranger"
+#  - Granger has two directional statistics (f_xy / f_yx). The columns
+#    observed/null_mean/null_sd/es/p hold x -> y, and the matching _yx
+#    columns are added for y -> x when estimator = "wgranger", along with a
+#    $robustness_yx summary
 #  - bsync_multiverse result is light (Invariant 7): tidy grid + settings +
 #    robustness summary; no raw surrogate draws, no raw input stored
 
@@ -95,7 +97,11 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'
 #' **Granger direction.** When `estimator = "wgranger"`, two sets of statistics
 #' are returned: primary (`observed`, `null_mean`, `null_sd`, `es`, `p`) refer to
-#' x -> y; additional columns `es_yx` and `p_yx` give y -> x.
+#' x -> y; additional columns `observed_yx`, `null_mean_yx`, `null_sd_yx`,
+#' `es_yx`, and `p_yx` give y -> x. `$robustness` summarizes x -> y and
+#' `$robustness_yx` summarizes y -> x. The `print()`, `summary()`, `glance()`,
+#' and `plot()` methods report x -> y by default; pass `direction = "yx"` to
+#' report y -> x.
 #'
 #' @param x Numeric vector; the reference time series.
 #' @param y Numeric vector; the query time series (same length as `x`).
@@ -131,13 +137,16 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'     \item{`$grid`}{[tibble::tibble()] with one row per parameter cell:
 #'       specification columns, `window_size`/`lag_max`/`window_increment`
 #'       (samples), `n_windows`, `observed`, `null_mean`, `null_sd`, `es`, `p`
-#'       (plus `es_yx`/`p_yx` for Granger).}
+#'       (x -> y for Granger, plus `observed_yx`, `null_mean_yx`, `null_sd_yx`,
+#'       `es_yx`, and `p_yx` for y -> x).}
 #'     \item{`$settings`}{Named list of call-level inputs.}
 #'     \item{`$robustness`}{Named list: `n_cells` (total specifications in the
-#'       grid), `n_valid` (cells that produced a computable ES; the rest were
-#'       skipped as too short), `n_significant`, `pct_significant` (over
+#'       grid), `n_valid` (cells with a computable ES in that direction; the
+#'       rest were skipped as too short or gave an NA ES), `n_significant`, `pct_significant` (over
 #'       `n_valid`), `median_es`, `iqr_es`, `sign_consistent` (proportion of
-#'       significant cells with ES > 0).}
+#'       significant cells with ES > 0). For Granger it summarizes x -> y.}
+#'     \item{`$robustness_yx`}{Granger only: the same fields as
+#'       `$robustness`, computed from `es_yx` and `p_yx` (y -> x).}
 #'   }
 #' @seealso [autotune_wcc()], [suggest_wcc_params()], [plot.bsync_multiverse()],
 #'   [tidy.bsync_multiverse()], [glance.bsync_multiverse()]
@@ -433,7 +442,68 @@ synchrony_multiverse <- function(
   )
 
   out <- list(grid = grid_tbl, settings = settings, robustness = robustness)
+  if (is_granger) {
+    out$robustness_yx <- multiverse_robustness(
+      n_cells, es_yx_vec, p_yx_vec, skipped_vec
+    )
+  }
   structure(out, class = c("bsync_multiverse", "list"))
+}
+
+# One Granger direction of a bsync_multiverse result. "xy" reads `es`/`p` and
+# `$robustness`; "yx" reads `es_yx`/`p_yx` and `$robustness_yx`, which only
+# Granger results carry. `label` is NULL for non-Granger results, so methods
+# print no direction line for them.
+multiverse_direction <- function(x, direction = c("xy", "yx"),
+                                 call = rlang::caller_env()) {
+  direction <- rlang::arg_match(
+    direction, c("xy", "yx"),
+    error_arg = "direction", error_call = call
+  )
+  estimator <- x$settings$estimator
+  if (is.null(estimator)) estimator <- "unknown"
+  is_granger <- identical(estimator, "wgranger")
+  if (direction == "yx" && !is_granger) {
+    cli::cli_abort(
+      c(
+        "{.code direction = \"yx\"} needs a Granger result.",
+        "x" = "This result's estimator is {.val {estimator}}, which has one \\
+        direction only."
+      ),
+      call = call
+    )
+  }
+  if (direction == "xy") {
+    return(list(
+      direction = direction, es = x$grid$es, p = x$grid$p,
+      robustness = x$robustness,
+      label = if (is_granger) "x -> y" else NULL
+    ))
+  }
+  if (!all(c("es_yx", "p_yx") %in% names(x$grid))) {
+    cli::cli_abort(
+      c(
+        "{.code direction = \"yx\"} needs the {.field es_yx} and \\
+        {.field p_yx} grid columns.",
+        "x" = "This Granger result's grid does not have them."
+      ),
+      call = call
+    )
+  }
+  # A Granger result made before $robustness_yx existed, or built by hand,
+  # gets the summary computed here from the grid. Skipped cells have NA ES,
+  # so no cell needs to be marked as skipped.
+  robustness <- x$robustness_yx
+  if (is.null(robustness)) {
+    n_cells <- nrow(x$grid)
+    robustness <- multiverse_robustness(
+      n_cells, x$grid$es_yx, x$grid$p_yx, rep(FALSE, n_cells)
+    )
+  }
+  list(
+    direction = direction, es = x$grid$es_yx, p = x$grid$p_yx,
+    robustness = robustness, label = "y -> x"
+  )
 }
 
 
@@ -562,14 +632,22 @@ synchrony_multiverse <- function(
 #' Print method for bsync_multiverse objects
 #'
 #' @param x A `bsync_multiverse` object.
+#' @param direction For a Granger result (`estimator = "wgranger"`), the
+#'   direction to report: `"xy"` (x -> y, the default) or `"yx"` (y -> x).
+#'   Other estimators have one direction only, so `"yx"` is an error for them.
 #' @param ... Additional arguments (not used).
 #' @return Returns `x` invisibly.
+#' @md
 #' @export
-print.bsync_multiverse <- function(x, ...) {
+print.bsync_multiverse <- function(x, direction = c("xy", "yx"), ...) {
+  dir <- multiverse_direction(x, direction)
   s <- x$settings
-  rb <- x$robustness
+  rb <- dir$robustness
 
   cli::cli_h1("Synchrony Multiverse Analysis ({s$estimator})")
+  if (!is.null(dir$label)) {
+    cli::cli_dl(c("Direction" = "{dir$label}"))
+  }
   cli::cli_dl(c(
     "Specifications" = "{rb$n_cells} ({rb$n_valid} computable)",
     "Surrogates per cell" = "{s$n_surrogates}",
@@ -584,20 +662,30 @@ print.bsync_multiverse <- function(x, ...) {
 #' Summary method for bsync_multiverse objects
 #'
 #' @param object A `bsync_multiverse` object.
+#' @param direction For a Granger result (`estimator = "wgranger"`), the
+#'   direction to report: `"xy"` (x -> y, the default) or `"yx"` (y -> x).
+#'   Other estimators have one direction only, so `"yx"` is an error for them.
 #' @param ... Additional arguments (not used).
 #' @return Returns `object` invisibly.
+#' @md
 #' @export
-summary.bsync_multiverse <- function(object, ...) {
-  print(object)
+summary.bsync_multiverse <- function(object, direction = c("xy", "yx"), ...) {
+  dir <- multiverse_direction(object, direction)
+  print(object, direction = dir$direction)
 
   cli::cli_h2("Specification Grid")
   cli::cli_text(
-    "{nrow(object$grid)} total cells (including {sum(is.na(object$grid$es))} skipped/NA)"
+    "{nrow(object$grid)} total cells (including {sum(is.na(dir$es))} skipped/NA)"
   )
 
-  es_range <- range(object$grid$es, na.rm = TRUE)
+  es_range <- if (any(!is.na(dir$es))) {
+    r <- round(range(dir$es, na.rm = TRUE), 3)
+    paste0("[", r[1], ", ", r[2], "]")
+  } else {
+    "none (no computable ES)"
+  }
   cli::cli_dl(c(
-    "ES range"     = "[{round(es_range[1], 3)}, {round(es_range[2], 3)}]",
+    "ES range"     = "{es_range}",
     "Sample rate"  = "{object$settings$sample_rate} Hz"
   ))
 

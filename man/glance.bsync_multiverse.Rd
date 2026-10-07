@@ -4,15 +4,20 @@
 \alias{glance.bsync_multiverse}
 \title{One-row robustness summary of a bsync_multiverse object}
 \usage{
-\method{glance}{bsync_multiverse}(x, ...)
+\method{glance}{bsync_multiverse}(x, direction = c("xy", "yx"), ...)
 }
 \arguments{
-\item{x}{A `bsync_multiverse` object from [synchrony_multiverse()].}
+\item{x}{A \code{bsync_multiverse} object from \code{\link[=synchrony_multiverse]{synchrony_multiverse()}}.}
+
+\item{direction}{For a Granger result (\code{estimator = "wgranger"}), the
+direction to summarize: \code{"xy"} (x -> y, the default) or \code{"yx"} (y -> x).
+Other estimators have one direction only, so \code{"yx"} is an error for them.}
 
 \item{...}{Additional arguments (not used).}
 }
 \value{
-A one-row [tibble::tibble()].
+A one-row \code{\link[tibble:tibble]{tibble::tibble()}}. For a Granger result, a \code{direction}
+column after \code{estimator} names the direction summarized.
 }
 \description{
 Returns a single-row tibble summarising robustness across the specification
@@ -20,6 +25,6 @@ curve: the number of cells, significance rate, median effect size, IQR, and
 sign-consistency.
 }
 \seealso{
-[tidy.bsync_multiverse()], [as_tibble.bsync_multiverse()],
-  [synchrony_multiverse()]
+\code{\link[=tidy.bsync_multiverse]{tidy.bsync_multiverse()}}, \code{\link[=as_tibble.bsync_multiverse]{as_tibble.bsync_multiverse()}},
+\code{\link[=synchrony_multiverse]{synchrony_multiverse()}}
 }

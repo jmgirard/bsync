@@ -1,14 +1,14 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M013)._
+_Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M014)._
 _Last hygiene check: 2026-10-06 (M012 merged and archived, M009 row pruned, 1 lesson added, 2 candidate rows added in M012, validate green)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M013 | Granger multiverse summary and plot for both directions | planned | — | normal | milestones/M013-granger-multiverse-direction.md |
+| M013 | Granger multiverse summary and plot for both directions | review | — | normal | milestones/M013-granger-multiverse-direction.md |
 | M012 | One significance rule (p <= .05) and surrogate print edges | done | — | normal | milestones/archive/M012-significance-rule.md |
 | M011 | Add-one surrogate p-values | done | — | normal | milestones/archive/M011-add-one-p-value.md |
 | M010 | Strict dyad input and named pseudo-dyad sources | done | — | normal | milestones/archive/M010-strict-dyad-input.md |
@@ -21,7 +21,7 @@ _Last hygiene check: 2026-10-06 (M012 merged and archived, M009 row pruned, 1 le
 - Selectable wphase aggregate statistic (the M4 wcc pattern: `statistic =` argument, null matched to observed) — added 2026-08-29 — M008 Out
 - mne_connectivity PLV pipeline pin: M008's frozen pin uses MNE's analytic signal + the Lachaux formula, not mne_connectivity's own PLV pipeline (different spectral estimation; unmatchable at 1e-6); a tolerance-banded comparison against the toolbox's shipped PLV would close the convention gap the pin leaves. Promote when a definitional question about the PLV convention actually arises — added 2026-08-29 — M008 review F3
 - pick_optima local search with lag_increment > 1: pick_optima_cpp hard-errors unless each window carries exactly 2*lag_max+1 lags, so `search_method = "local"` fails for any estimator surface built with lag_increment > 1 (pre-existing, all estimators; surfaced by M008's whitelist extension). Promote when a user hits it or the next optima-touching milestone — added 2026-08-29 — M008 review F13
-- Enable roxygen markdown package-wide: DESCRIPTION sets no roxygen markdown option, so `[fn()]` links, `**bold**`, and backticks in existing roxygen render as raw text in `man/*.Rd`. M009's two new functions use a per-block `@md` instead. Turning it on regenerates every Rd file, so check the output. M011 added `@md` to the four `*_surrogate()` wrappers — added 2026-10-05 — M009 T6
+- Enable roxygen markdown package-wide: DESCRIPTION sets no roxygen markdown option, so `[fn()]` links, `**bold**`, and backticks in existing roxygen render as raw text in `man/*.Rd`. M009's two new functions use a per-block `@md` instead. Turning it on regenerates every Rd file, so check the output. M011 added `@md` to the four `*_surrogate()` wrappers. M013 added `@md` to the four `bsync_multiverse` methods, but the `synchrony_multiverse()` block still renders its new `$robustness_yx` text raw — added 2026-10-05 — M009 T6, M013 review (diff-bug #6)
 - Apply `air format` repo-wide in one formatting-only commit: `air format R tests` restyles about 26 files the change did not touch (observed 2026-10-05), so per-milestone formatting adds unrelated churn — added 2026-10-05 — M011 T4
 - Wavelet coherence estimator: cross-wavelet / wavelet coherence for nonstationary time–frequency lead–lag across scales — added 2026-08-29 — legacy DESIGN §15 M9
 - CRQA / MEA conventions: cross-recurrence quantification analysis and MEA-style windowed cross-correlation conveniences — added 2026-08-29 — legacy DESIGN §15 M10

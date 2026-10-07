@@ -4,15 +4,19 @@
 \alias{print.bsync_multiverse}
 \title{Print method for bsync_multiverse objects}
 \usage{
-\method{print}{bsync_multiverse}(x, ...)
+\method{print}{bsync_multiverse}(x, direction = c("xy", "yx"), ...)
 }
 \arguments{
-\item{x}{A `bsync_multiverse` object.}
+\item{x}{A \code{bsync_multiverse} object.}
+
+\item{direction}{For a Granger result (\code{estimator = "wgranger"}), the
+direction to report: \code{"xy"} (x -> y, the default) or \code{"yx"} (y -> x).
+Other estimators have one direction only, so \code{"yx"} is an error for them.}
 
 \item{...}{Additional arguments (not used).}
 }
 \value{
-Returns `x` invisibly.
+Returns \code{x} invisibly.
 }
 \description{
 Print method for bsync_multiverse objects
