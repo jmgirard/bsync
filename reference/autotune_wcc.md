@@ -63,9 +63,19 @@ autotune_wcc(
 
 - surrogate_method:
 
-  Character; surrogate generator: `"phase"` (default), `"circular"`, or
-  `"iaaft"`. `"iaaft"` needs every `y` without missing values. See
-  [`synchrony_multiverse`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md).
+  Character; surrogate generator: `"phase"` (default), `"circular"`,
+  `"iaaft"`, or `"segment"`. `"iaaft"` needs every `y` without missing
+  values. A `"segment"` cell uses segments of
+  `window_size + 2 * lag_max` samples and steps its windows one segment
+  at a time, so `increment_pct` does not apply to it. A segment cell
+  with fewer than 4 segments is skipped with a warning. A cell with k
+  segments uses `min(n_surrogates, k! - 1)` surrogates, so a cell with 4
+  segments uses `min(n_surrogates, 23)`. The default `lag_sec` is
+  crossed with every window, so a segment is not always twice the
+  window. See
+  [`synchrony_multiverse`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
+  and
+  [`generate_surrogate_segment`](https://jmgirard.github.io/bsync/reference/generate_surrogate_segment.md).
 
 - n_surrogates:
 
@@ -195,7 +205,9 @@ collapsing to the point estimate.
 \[synchrony_multiverse()\], \[suggest_wcc_params()\],
 \[select_specification()\];
 [`generate_surrogate_iaaft`](https://jmgirard.github.io/bsync/reference/generate_surrogate_iaaft.md)
-for the `"iaaft"` method
+for the `"iaaft"` method;
+[`generate_surrogate_segment`](https://jmgirard.github.io/bsync/reference/generate_surrogate_segment.md)
+for the `"segment"` method
 
 ## Examples
 

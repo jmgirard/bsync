@@ -137,7 +137,21 @@ autocorrelation), and/or <code>"iaaft"</code> (preserves the power spectrum
 exactly and the value distribution closely;
 <code><a href="generate_surrogate_iaaft.html">generate_surrogate_iaaft</a></code> with its default
 <code>match = "spectrum"</code>). <code>"iaaft"</code> needs <code>y</code> without
-missing values.</p></dd>
+missing values. <code>"segment"</code> (<code><a href="generate_surrogate_segment.html">generate_surrogate_segment</a></code>)
+reorders segments of <code>y</code>. A segment cell uses segments of
+<code>window_size + 2 * lag_max</code> samples (<code>window_size</code> for
+<code>"wgranger"</code>) and steps its windows one segment at a time, so that
+every lagged window lies inside one segment. <code>increment_pct</code> does
+not apply to segment cells: the grid has one segment row per window,
+lag, and statistic, with <code>increment_pct</code> <code>NA</code>. A segment cell
+with fewer than 4 segments cannot reach p &lt;= .05, so it is skipped with
+a warning, as is a cell whose segment is a single sample. A cell with
+k segments uses <code>min(n_surrogates, k! - 1)</code>
+surrogates, because k segments have k! - 1 orders other than the
+original: a cell with 4 segments uses <code>min(n_surrogates, 23)</code>
+surrogates, and 5 and 6 segments allow 119 and 719. The samples after
+the last whole segment stay in place (see
+<code><a href="generate_surrogate_segment.html">generate_surrogate_segment</a></code>).</p></dd>
 
 
 <dt id="arg-n-surrogates">n_surrogates<a class="anchor" aria-label="anchor" href="#arg-n-surrogates"></a></dt>
@@ -196,13 +210,16 @@ Default is `"L2"`.</p></dd>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>**Grid construction.** Each vector argument (`window_sec`, `lag_sec`,
 `increment_pct`, `statistic`, `surrogate_method`) is crossed into a full
-parameter grid. Seconds are converted to samples per cell; `lag_max` is
+parameter grid, except that <code>"segment"</code> cells are not crossed with
+`increment_pct` (see `surrogate_method`). Seconds are converted to samples
+per cell; `lag_max` is
 hard-capped at `floor(window_size / 2)` to preserve statistical reliability.
-Cells where the series is too short are silently skipped and appear as `NA`
-rows in the output grid.</p>
+Cells where the series is too short are skipped with a message and appear
+as `NA` rows in the output grid.</p>
 <p>**Surrogate reuse.** One surrogate matrix is generated per unique
 `surrogate_method` and reused across every cell sharing that method; surrogate
-cost does not multiply by grid size.</p>
+cost does not multiply by grid size. For <code>"segment"</code>, one matrix is
+generated per distinct segment size.</p>
 <p>**Effect size polarity.** For WCC and Granger, higher values indicate stronger
 synchrony (upper-tail test): `ES = (obs - null_mean) / null_sd`. For WDTW,
 lower distance is better (lower-tail test): `ES = (null_mean - obs) / null_sd`.
@@ -219,7 +236,8 @@ report y -&gt; x.</p>
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>[autotune_wcc()], [suggest_wcc_params()], [plot.bsync_multiverse()],
   [tidy.bsync_multiverse()], [glance.bsync_multiverse()];
-  <code><a href="generate_surrogate_iaaft.html">generate_surrogate_iaaft</a></code> for the <code>"iaaft"</code> method</p></div>
+  <code><a href="generate_surrogate_iaaft.html">generate_surrogate_iaaft</a></code> for the <code>"iaaft"</code> method;
+  <code><a href="generate_surrogate_segment.html">generate_surrogate_segment</a></code> for the <code>"segment"</code> method</p></div>
     </div>
 
     <div class="section level2">
@@ -242,13 +260,13 @@ report y -&gt; x.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Specifications: 3 (3 computable)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Surrogates per cell: 50</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Significant (p &lt;= .05): 0 of 3 (0%)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Median ES: 1.193 [IQR: 0.491]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Median ES: 1.077 [IQR: 0.422]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Sign-consistent (sig. cells): NA%</span>
 <span class="r-in"><span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mv</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 9</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   estimator n_cells n_valid n_significant pct_significant median_es iqr_es</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> wcc             3       3             0               0      1.19  0.491</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> wcc             3       3             0               0      1.08  0.422</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2 more variables: sign_consistent &lt;dbl&gt;, n_surrogates &lt;dbl&gt;</span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>

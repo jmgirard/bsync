@@ -94,8 +94,8 @@ meaningful.</p>
 <div class="section level2">
 <h2 id="choosing-a-surrogate-method">1. Choosing a Surrogate Method<a class="anchor" aria-label="anchor" href="#choosing-a-surrogate-method"></a>
 </h2>
-<p>The <strong>bsync</strong> package provides four methods for
-generating null data. The first three work within one dyad. The fourth
+<p>The <strong>bsync</strong> package provides five methods for
+generating null data. The first four work within one dyad. The fifth
 needs a sample of dyads. Choosing the right one depends on the nature of
 your signal and on the null hypothesis you want to test.</p>
 <div class="section level3">
@@ -186,7 +186,77 @@ steps until each surrogate stops changing.</li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="pseudo-dyads-generate_surrogate_pseudo-generate_pseudo_dyads">1.4 Pseudo-Dyads (<code>generate_surrogate_pseudo</code>,
+<h3 id="segment-shuffling-generate_surrogate_segment">1.4 Segment Shuffling (<code>generate_surrogate_segment</code>)<a class="anchor" aria-label="anchor" href="#segment-shuffling-generate_surrogate_segment"></a>
+</h3>
+<p>Segment shuffling cuts the signal into segments of
+<code>segment_size</code> samples and puts the segments in a new order.
+It follows the segment cut of the SUSY package (Tschacher &amp; Meier,
+2020).</p>
+<ul>
+<li>
+<strong>How it works:</strong> The series has k =
+<code>floor(length(y) / segment_size)</code> segments, cut from sample
+1. Each surrogate takes an order drawn uniformly from all orders other
+than the original, and no order is drawn twice. A surrogate can
+therefore leave a segment in place. The samples after the last whole
+segment (the tail) stay in place at the end, and missing values move
+with their segments.</li>
+<li>
+<strong>Which null it tests:</strong> Each segment keeps its own
+values, autocorrelation, and any trend inside it. Only the time at which
+each segment of <code>y</code> occurred changes. A significant result
+means that the segment of <code>y</code> that occurred alongside a
+window of <code>x</code> resembles that window more than the other
+segments of <code>y</code> do.</li>
+<li>
+<strong>Windows must lie inside segments:</strong> A window that
+crosses a segment boundary is continuous in the real series but not in a
+surrogate, and the test then rejects a true null too often. For
+<code><a href="../reference/wcc.html">wcc()</a></code>, <code><a href="../reference/wdtw.html">wdtw()</a></code>, and <code><a href="../reference/wphase.html">wphase()</a></code>, use
+<code>segment_size &gt;= window_size + 2 * lag_max</code> and
+<code>window_increment = segment_size</code>. For
+<code><a href="../reference/wgranger.html">wgranger()</a></code>, use
+<code>segment_size = window_size = window_increment</code>.
+<code><a href="../reference/wphase.html">wphase()</a></code> takes the Hilbert transform of the whole series,
+so a segment test of phase synchrony is approximate even with aligned
+windows. <code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code> and
+<code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code> use these settings for
+<code>surrogate_method = "segment"</code>, and they skip a cell with
+fewer than 4 segments.</li>
+<li>
+<strong>Why not “no segment in place”:</strong> SUSY compares each
+segment with the segments of the other series at other positions. A
+surrogate rule that moves every segment does not keep the add-one
+p-value exact. The package’s size test (file
+<code>tests/testthat/test-surrogate-calibration.R</code> in the package
+source repository, run on 2026-10-07) uses 1000 pairs of independent
+AR(1) series with 5 segments and 19 surrogates. In it, a rule that moves
+every segment rejected a true null in 10.0% of pairs at a nominal 5%,
+and the bsync rule in 5.6%. bsync does not reproduce SUSY’s effect size
+or its numbers.</li>
+<li>
+<strong>Important Note:</strong> The series needs at least 4
+segments for a test to reach <code>p &lt;= .05</code>, because 3
+segments have only 5 orders other than the original. With 4 segments
+there are 23 orders, so the smallest p-value is 1/24.</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jmgirard.github.io/bsync/">bsync</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Windows of 96 samples with lags up to 10 need segments of at least</span></span>
+<span><span class="co"># 96 + 2 * 10 = 116 samples: 20 segments of sim_dyad's 2400 samples.</span></span>
+<span><span class="va">surr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_surrogate_segment.html">generate_surrogate_segment</a></span><span class="op">(</span><span class="va">sim_dyad</span><span class="op">$</span><span class="va">x_B</span>, segment_size <span class="op">=</span> <span class="fl">116</span>, n_surrogates <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span>
+<span><span class="co">#&gt; The last 80 samples of `y` do not fill a whole segment and stay in</span></span>
+<span><span class="co">#&gt; place.</span></span>
+<span><span class="va">seg_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wcc_surrogate.html">wcc_surrogate</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">x_A</span>, y <span class="op">=</span> <span class="va">sim_dyad</span><span class="op">$</span><span class="va">x_B</span>, y_surrogates <span class="op">=</span> <span class="va">surr</span>,</span>
+<span>  window_size <span class="op">=</span> <span class="fl">96</span>, lag_max <span class="op">=</span> <span class="fl">10</span>, window_increment <span class="op">=</span> <span class="fl">116</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">seg_test</span><span class="op">$</span><span class="va">p_value</span></span>
+<span><span class="co">#&gt; [1] 0.17</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="pseudo-dyads-generate_surrogate_pseudo-generate_pseudo_dyads">1.5 Pseudo-Dyads (<code>generate_surrogate_pseudo</code>,
 <code>generate_pseudo_dyads</code>)<a class="anchor" aria-label="anchor" href="#pseudo-dyads-generate_surrogate_pseudo-generate_pseudo_dyads"></a>
 </h3>
 <p>A pseudo-dyad pairs one person’s series with a partner from a
@@ -207,12 +277,13 @@ series is the same task onset. Resample and trim first if that is not
 true.</li>
 <li>
 <strong>Which null it tests:</strong> Circular shifts, phase
-randomization, and IAAFT break all time alignment. If the task itself
-makes both people move at the same moments (a trial starts, a video
-plays), that shared movement looks like synchrony against those nulls. A
-pseudo-dyad partner went through the same task, so the pseudo-dyad null
-keeps task-driven co-movement. A significant result then means “more
-synchronous than with a stranger in the same setting.”</li>
+randomization, IAAFT, and segment shuffling break the time alignment
+between the two series. If the task itself makes both people move at the
+same moments (a trial starts, a video plays), that shared movement looks
+like synchrony against those nulls. A pseudo-dyad partner went through
+the same task, so the pseudo-dyad null keeps task-driven co-movement. A
+significant result then means “more synchronous than with a stranger in
+the same setting.”</li>
 <li>
 <strong>When to use it:</strong> When you have a sample of dyads
 that did the same task, and you want to separate interaction-specific
@@ -254,7 +325,7 @@ observed result as one more draw from the null. So the p-value is never
 null as the surrogates, the test rejects no more often than its nominal
 rate.</li>
 </ol>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jmgirard.github.io/bsync/">bsync</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 1. Generate 1000 surrogates using your preferred method</span></span>
@@ -285,7 +356,7 @@ element is a data frame (first two columns are <code>x</code> and
 Here we simulate a sample of 10 dyads that did the same task. Every
 person follows one shared task timeline, plus independent noise. The
 dyads have no interaction-specific coupling at all.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jmgirard.github.io/bsync/">bsync</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
 <span></span>
@@ -303,7 +374,7 @@ dyads have no interaction-specific coupling at all.</p>
 against pseudo-dyad surrogates. <code><a href="../reference/generate_surrogate_pseudo.html">generate_surrogate_pseudo()</a></code>
 returns a matrix whose columns are the <code>y</code> series of the
 other nine dyads, ready for any surrogate wrapper.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_dyad</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">i</span>, <span class="va">y_surrogates</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">d</span> <span class="op">&lt;-</span> <span class="va">task_only</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span></span>
 <span>  <span class="fu"><a href="../reference/wcc_surrogate.html">wcc_surrogate</a></span><span class="op">(</span></span>
@@ -346,7 +417,7 @@ the <code>y</code> of another: 10 × 9 = 90 pseudo-dyads). Compute the
 same statistic on the real dyads and on the pseudo-dyads, then compare
 the two distributions. Here we add a real coupling to each dyad: person
 B follows person A by 10 samples.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">coupled</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_dyads</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">own</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/smooth.html" class="external-link">smooth</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span>, <span class="fl">5</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -421,6 +492,9 @@ drawn. <em>Statistical Applications in Genetics and Molecular
 Biology</em>, 9(1), Article 39. <a href="https://doi.org/10.2202/1544-6115.1585" class="external-link uri">https://doi.org/10.2202/1544-6115.1585</a></p>
 <p>Schreiber, T., &amp; Schmitz, A. (1996). Improved surrogate data for
 nonlinearity tests. <em>Physical Review Letters</em>, 77(4), 635-638. <a href="https://doi.org/10.1103/PhysRevLett.77.635" class="external-link uri">https://doi.org/10.1103/PhysRevLett.77.635</a></p>
+<p>Tschacher, W., &amp; Meier, D. (2020). Physiological synchrony in
+psychotherapy sessions. <em>Psychotherapy Research</em>, 30(5), 558-573.
+<a href="https://doi.org/10.1080/10503307.2019.1612114" class="external-link uri">https://doi.org/10.1080/10503307.2019.1612114</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

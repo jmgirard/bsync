@@ -112,9 +112,10 @@ nonlinearity tests. *Physical Review Letters*, 77(4), 635-638.
 
 ## See also
 
-[`generate_surrogate_phase()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md)
+[`generate_surrogate_phase()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md),
+[`generate_surrogate_circular()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.md),
 and
-[`generate_surrogate_circular()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.md)
+[`generate_surrogate_segment()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_segment.md)
 for the other within-dyad nulls;
 [`generate_surrogate_pseudo()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_pseudo.md)
 for the between-dyad null;

@@ -75,7 +75,21 @@ synchrony_multiverse(
   closely;
   [`generate_surrogate_iaaft`](https://jmgirard.github.io/bsync/reference/generate_surrogate_iaaft.md)
   with its default `match = "spectrum"`). `"iaaft"` needs `y` without
-  missing values.
+  missing values. `"segment"`
+  ([`generate_surrogate_segment`](https://jmgirard.github.io/bsync/reference/generate_surrogate_segment.md))
+  reorders segments of `y`. A segment cell uses segments of
+  `window_size + 2 * lag_max` samples (`window_size` for `"wgranger"`)
+  and steps its windows one segment at a time, so that every lagged
+  window lies inside one segment. `increment_pct` does not apply to
+  segment cells: the grid has one segment row per window, lag, and
+  statistic, with `increment_pct` `NA`. A segment cell with fewer than 4
+  segments cannot reach p \<= .05, so it is skipped with a warning, as
+  is a cell whose segment is a single sample. A cell with k segments
+  uses `min(n_surrogates, k! - 1)` surrogates, because k segments have
+  k! - 1 orders other than the original: a cell with 4 segments uses
+  `min(n_surrogates, 23)` surrogates, and 5 and 6 segments allow 119
+  and 719. The samples after the last whole segment stay in place (see
+  [`generate_surrogate_segment`](https://jmgirard.github.io/bsync/reference/generate_surrogate_segment.md)).
 
 - n_surrogates:
 
@@ -136,14 +150,17 @@ A \`bsync_multiverse\` object with:
 
 \*\*Grid construction.\*\* Each vector argument (\`window_sec\`,
 \`lag_sec\`, \`increment_pct\`, \`statistic\`, \`surrogate_method\`) is
-crossed into a full parameter grid. Seconds are converted to samples per
-cell; \`lag_max\` is hard-capped at \`floor(window_size / 2)\` to
-preserve statistical reliability. Cells where the series is too short
-are silently skipped and appear as \`NA\` rows in the output grid.
+crossed into a full parameter grid, except that `"segment"` cells are
+not crossed with \`increment_pct\` (see \`surrogate_method\`). Seconds
+are converted to samples per cell; \`lag_max\` is hard-capped at
+\`floor(window_size / 2)\` to preserve statistical reliability. Cells
+where the series is too short are skipped with a message and appear as
+\`NA\` rows in the output grid.
 
 \*\*Surrogate reuse.\*\* One surrogate matrix is generated per unique
 \`surrogate_method\` and reused across every cell sharing that method;
-surrogate cost does not multiply by grid size.
+surrogate cost does not multiply by grid size. For `"segment"`, one
+matrix is generated per distinct segment size.
 
 \*\*Effect size polarity.\*\* For WCC and Granger, higher values
 indicate stronger synchrony (upper-tail test): \`ES = (obs - null_mean)
@@ -166,7 +183,9 @@ statistics are returned: primary (\`observed\`, \`null_mean\`,
 \[plot.bsync_multiverse()\], \[tidy.bsync_multiverse()\],
 \[glance.bsync_multiverse()\];
 [`generate_surrogate_iaaft`](https://jmgirard.github.io/bsync/reference/generate_surrogate_iaaft.md)
-for the `"iaaft"` method
+for the `"iaaft"` method;
+[`generate_surrogate_segment`](https://jmgirard.github.io/bsync/reference/generate_surrogate_segment.md)
+for the `"segment"` method
 
 ## Examples
 
@@ -189,13 +208,13 @@ mv
 #> Specifications: 3 (3 computable)
 #> Surrogates per cell: 50
 #> Significant (p <= .05): 0 of 3 (0%)
-#> Median ES: 1.193 [IQR: 0.491]
+#> Median ES: 1.077 [IQR: 0.422]
 #> Sign-consistent (sig. cells): NA%
 glance(mv)
 #> # A tibble: 1 × 9
 #>   estimator n_cells n_valid n_significant pct_significant median_es iqr_es
 #>   <chr>       <int>   <int>         <int>           <dbl>     <dbl>  <dbl>
-#> 1 wcc             3       3             0               0      1.19  0.491
+#> 1 wcc             3       3             0               0      1.08  0.422
 #> # ℹ 2 more variables: sign_consistent <dbl>, n_surrogates <dbl>
 # }
 ```

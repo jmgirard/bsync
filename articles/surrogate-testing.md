@@ -12,10 +12,10 @@ meaningful.
 
 ## 1. Choosing a Surrogate Method
 
-The **bsync** package provides four methods for generating null data.
-The first three work within one dyad. The fourth needs a sample of
-dyads. Choosing the right one depends on the nature of your signal and
-on the null hypothesis you want to test.
+The **bsync** package provides five methods for generating null data.
+The first four work within one dyad. The fifth needs a sample of dyads.
+Choosing the right one depends on the nature of your signal and on the
+null hypothesis you want to test.
 
 ### 1.1 Circular Shift (`generate_surrogate_circular`)
 
@@ -85,7 +85,74 @@ and the value distribution of the original signal.
   IAAFT is slower than the other within-dyad methods because it repeats
   the two steps until each surrogate stops changing.
 
-### 1.4 Pseudo-Dyads (`generate_surrogate_pseudo`, `generate_pseudo_dyads`)
+### 1.4 Segment Shuffling (`generate_surrogate_segment`)
+
+Segment shuffling cuts the signal into segments of `segment_size`
+samples and puts the segments in a new order. It follows the segment cut
+of the SUSY package (Tschacher & Meier, 2020).
+
+- **How it works:** The series has k = `floor(length(y) / segment_size)`
+  segments, cut from sample 1. Each surrogate takes an order drawn
+  uniformly from all orders other than the original, and no order is
+  drawn twice. A surrogate can therefore leave a segment in place. The
+  samples after the last whole segment (the tail) stay in place at the
+  end, and missing values move with their segments.
+- **Which null it tests:** Each segment keeps its own values,
+  autocorrelation, and any trend inside it. Only the time at which each
+  segment of `y` occurred changes. A significant result means that the
+  segment of `y` that occurred alongside a window of `x` resembles that
+  window more than the other segments of `y` do.
+- **Windows must lie inside segments:** A window that crosses a segment
+  boundary is continuous in the real series but not in a surrogate, and
+  the test then rejects a true null too often. For
+  [`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md),
+  [`wdtw()`](https://jmgirard.github.io/bsync/reference/wdtw.md), and
+  [`wphase()`](https://jmgirard.github.io/bsync/reference/wphase.md),
+  use `segment_size >= window_size + 2 * lag_max` and
+  `window_increment = segment_size`. For
+  [`wgranger()`](https://jmgirard.github.io/bsync/reference/wgranger.md),
+  use `segment_size = window_size = window_increment`.
+  [`wphase()`](https://jmgirard.github.io/bsync/reference/wphase.md)
+  takes the Hilbert transform of the whole series, so a segment test of
+  phase synchrony is approximate even with aligned windows.
+  [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
+  and
+  [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  use these settings for `surrogate_method = "segment"`, and they skip a
+  cell with fewer than 4 segments.
+- **Why not “no segment in place”:** SUSY compares each segment with the
+  segments of the other series at other positions. A surrogate rule that
+  moves every segment does not keep the add-one p-value exact. The
+  package’s size test (file
+  `tests/testthat/test-surrogate-calibration.R` in the package source
+  repository, run on 2026-10-07) uses 1000 pairs of independent AR(1)
+  series with 5 segments and 19 surrogates. In it, a rule that moves
+  every segment rejected a true null in 10.0% of pairs at a nominal 5%,
+  and the bsync rule in 5.6%. bsync does not reproduce SUSY’s effect
+  size or its numbers.
+- **Important Note:** The series needs at least 4 segments for a test to
+  reach `p <= .05`, because 3 segments have only 5 orders other than the
+  original. With 4 segments there are 23 orders, so the smallest p-value
+  is 1/24.
+
+``` r
+
+library(bsync)
+
+# Windows of 96 samples with lags up to 10 need segments of at least
+# 96 + 2 * 10 = 116 samples: 20 segments of sim_dyad's 2400 samples.
+surr <- generate_surrogate_segment(sim_dyad$x_B, segment_size = 116, n_surrogates = 99)
+#> The last 80 samples of `y` do not fill a whole segment and stay in
+#> place.
+seg_test <- wcc_surrogate(
+  x = sim_dyad$x_A, y = sim_dyad$x_B, y_surrogates = surr,
+  window_size = 96, lag_max = 10, window_increment = 116
+)
+seg_test$p_value
+#> [1] 0.17
+```
+
+### 1.5 Pseudo-Dyads (`generate_surrogate_pseudo`, `generate_pseudo_dyads`)
 
 A pseudo-dyad pairs one person’s series with a partner from a
 *different* dyad: two people who never interacted. This is the
@@ -103,13 +170,14 @@ pseudo-synchrony approach of the rMEA package (Kleinbub & Ramseyer,
   shorter partners with a warning. Start alignment assumes that every
   dyad was sampled at the same rate and that sample 1 of every series is
   the same task onset. Resample and trim first if that is not true.
-- **Which null it tests:** Circular shifts, phase randomization, and
-  IAAFT break all time alignment. If the task itself makes both people
-  move at the same moments (a trial starts, a video plays), that shared
-  movement looks like synchrony against those nulls. A pseudo-dyad
-  partner went through the same task, so the pseudo-dyad null keeps
-  task-driven co-movement. A significant result then means “more
-  synchronous than with a stranger in the same setting.”
+- **Which null it tests:** Circular shifts, phase randomization, IAAFT,
+  and segment shuffling break the time alignment between the two series.
+  If the task itself makes both people move at the same moments (a trial
+  starts, a video plays), that shared movement looks like synchrony
+  against those nulls. A pseudo-dyad partner went through the same task,
+  so the pseudo-dyad null keeps task-driven co-movement. A significant
+  result then means “more synchronous than with a stranger in the same
+  setting.”
 - **When to use it:** When you have a sample of dyads that did the same
   task, and you want to separate interaction-specific synchrony from
   synchrony that the task produces.
@@ -318,3 +386,7 @@ Article 39. <https://doi.org/10.2202/1544-6115.1585>
 Schreiber, T., & Schmitz, A. (1996). Improved surrogate data for
 nonlinearity tests. *Physical Review Letters*, 77(4), 635-638.
 <https://doi.org/10.1103/PhysRevLett.77.635>
+
+Tschacher, W., & Meier, D. (2020). Physiological synchrony in
+psychotherapy sessions. *Psychotherapy Research*, 30(5), 558-573.
+<https://doi.org/10.1080/10503307.2019.1612114>

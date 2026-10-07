@@ -29,9 +29,10 @@ A matrix where each column is a surrogate time series.
 
 ## See also
 
-[`generate_surrogate_phase`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md)
+[`generate_surrogate_phase`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md),
+[`generate_surrogate_iaaft`](https://jmgirard.github.io/bsync/reference/generate_surrogate_iaaft.md),
 and
-[`generate_surrogate_iaaft`](https://jmgirard.github.io/bsync/reference/generate_surrogate_iaaft.md)
+[`generate_surrogate_segment`](https://jmgirard.github.io/bsync/reference/generate_surrogate_segment.md)
 for the other within-dyad nulls;
 [`generate_surrogate_pseudo`](https://jmgirard.github.io/bsync/reference/generate_surrogate_pseudo.md)
 for the between-dyad null.

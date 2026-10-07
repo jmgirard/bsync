@@ -127,9 +127,9 @@ res
 #> ── WDTW Surrogate Analysis (Pseudo-Synchrony) ──────────────────────────────────
 #> Permutations: 19
 #> Observed Mean Cost: 27.8222
-#> Average Null Cost: 30.2834
-#> Empirical p-value: 0.05
-#> ✔ Observed cost is significantly lower than chance (stronger alignment).
+#> Average Null Cost: 30.0503
+#> Empirical p-value: 0.15
+#> ! Observed cost is not significantly different from chance.
 #> ℹ Note: 19 permutations may be too few for stable p-values.
 #> Consider setting `n_surrogates >= 1000` for final reporting.
 # }

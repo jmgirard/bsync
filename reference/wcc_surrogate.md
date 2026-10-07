@@ -116,7 +116,7 @@ res
 #> ── WCC Surrogate Analysis (Pseudo-Synchrony) ───────────────────────────────────
 #> Permutations: 100
 #> Observed Mean Abs. Fisher's Z: 0.09
-#> Average Null Mean Abs. Fisher's Z: 0.0826
+#> Average Null Mean Abs. Fisher's Z: 0.0827
 #> Empirical p-value: 0.0099
 #> ✔ Observed synchrony is significantly greater than chance.
 #> ℹ Note: 100 permutations may be too few for stable p-values.

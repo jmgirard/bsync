@@ -108,7 +108,7 @@ res
 #> ── Windowed Phase Synchrony Surrogate Analysis (Pseudo-Synchrony) ──────────────
 #> Permutations: 100
 #> Observed Mean PLV: 0.9993
-#> Average Null Mean PLV: 0.9798
+#> Average Null Mean PLV: 0.9795
 #> Empirical p-value: 0.0099
 #> ✔ Observed phase synchrony is significantly greater than chance.
 #> ℹ Note: 100 permutations may be too few for stable p-values.
