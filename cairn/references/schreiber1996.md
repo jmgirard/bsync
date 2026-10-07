@@ -47,8 +47,8 @@ process that its calibration test uses.
   replacement) as the data" and have spectra "practically indistinguishable"
   from the data's, p. 2.
 - Discrepancy measure. The relative discrepancy at iteration i is
-  sum_k (S_hat_k^(i) - S_hat_k)^2 / sum_k S_hat_k^2, with S_hat_k the
-  spectrum smoothed over 21 bins for the figure. "for the generation of
+  sum_k (S_hat_k^(i) - S_hat_k)^2 / sum_k S_hat_k^2. Here S_hat_k^2 is the
+  power smoothed over 21 bins, so S_hat_k is on the amplitude scale. "for the generation of
   surrogates no smoothing is performed", pp. 2-3.
 - Convergence. The discrepancy falls roughly like 1/i until an N-dependent
   saturation value, p. 3, Fig. 2. The initial discrepancy of a random

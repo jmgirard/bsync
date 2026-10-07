@@ -98,11 +98,13 @@ iaaft_reference <- function(y, n_surrogates, max_iter) {
   list(values = values, spectrum = spectrum)
 }
 
-# Unsmoothed relative spectral discrepancy (schreiber1996, pp. 2-3).
+# Relative spectral discrepancy (schreiber1996, p. 3) without the paper's
+# 21-bin smoothing: sum_k (S_k(s) - S_k(y))^2 / sum_k S_k(y)^2, where S_k is
+# the square root of the power at bin k (the Fourier amplitude).
 spectral_discrepancy <- function(s, y) {
-  s2 <- Mod(dft_plain(s))^2
-  y2 <- Mod(dft_plain(y))^2
-  sum((s2 - y2)^2) / sum(y2^2)
+  s_amp <- Mod(dft_plain(s))
+  y_amp <- Mod(dft_plain(y))
+  sum((s_amp - y_amp)^2) / sum(y_amp^2)
 }
 
 # A correlated, skewed test series: AR(1) observed through a cube.

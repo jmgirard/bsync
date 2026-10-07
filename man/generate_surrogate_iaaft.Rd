@@ -73,8 +73,8 @@ form rejected 21 of 200 pairs (10.5\%). The package test
 \code{tests/testthat/test-surrogate-calibration.R} repeats this check.
 
 \strong{\code{max_iter}.} The spectral error falls about as 1 / i over the first
-iterations, and the paper's Fig. 2 runs to 1000 iterations (p. 3). The default
-\code{1000} is a cap on run time, not a target. A surrogate that reaches
+iterations (p. 3), and the paper's Fig. 2 runs to 1000 iterations (p. 2).
+The default \code{1000} is a cap on run time, not a target. A surrogate that reaches
 \code{max_iter} without a fixed point is still returned, and the call warns
 with the number of such surrogates.
 

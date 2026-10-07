@@ -93,6 +93,8 @@ Add an exported IAAFT surrogate generator that keeps the value distribution and 
 - 2026-10-06: T4 speed change: the rank step now ranks all active columns in one stable `order()` call in place of `apply(rank)`. Output was identical (`identical()`) on four inputs for both forms, and 20 calls at n = 512 went from 1.92 s to 1.22 s.
 - 2026-10-06: T5 done: `"iaaft"` in the `synchrony_multiverse()` choices and generation branch, and in both functions' docs. Neither roxygen block uses markdown, so the new text uses Rd markup (`\code{\link{}}`) for the link to render. Three tests in `test-multiverse.R` cover AC6. Full suite: 277 tests, 0 failed.
 - 2026-10-06: T6 done: roxygen gives the measured rates with their design and date, the vignette has section 1.3 IAAFT (pseudo-dyads became 1.4), plus the `_pkgdown.yml` row, NEWS, the README reference, three WORDLIST words, and DESIGN §2, §6, §13, §14 #8. `spelling::spell_check_package()` finds 0 words. `pkgdown::check_pkgdown()` finds no problems. `build_readme()` also rewrote `man/figures/README-example-plot-1.png`, which this change does not affect, so that file was restored.
+- 2026-10-06: T7 in progress: `air format` left the new and air-clean files unchanged. Two lintr line-length hits of this branch were fixed; the other hits are in older code. `devtools::check()` is running.
+- 2026-10-06: claim audit: 38 claims read, 2 corrected — `R/surrogate_generation.R` (the Fig. 2 page cite is p. 2, the 1/i statement p. 3), `tests/testthat/test-surrogate-iaaft.R` (`spectral_discrepancy()` now uses the paper's amplitude scale; the AC3 test still passes). The reader's re-read of the two corrections is pending.
 
 ## Decisions
 

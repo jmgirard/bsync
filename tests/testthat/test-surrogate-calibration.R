@@ -39,7 +39,7 @@ iaaft_null_p <- function(match, n_pairs = 400, n = 512, seed = 20261006) {
   )
 }
 
-test_that("IAAFT spectrum form keeps the size of a WCC test; values form does not", {
+test_that("IAAFT spectrum form keeps WCC test size; values form does not", {
   skip_on_cran()
   p_spectrum <- iaaft_null_p("spectrum")
   expect_length(p_spectrum, 400)
