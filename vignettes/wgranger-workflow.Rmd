@@ -174,7 +174,7 @@ By applying Windowed Granger Causality, we have successfully extracted a rigorou
 
 - `vignette("choosing-parameters")` for tools to choose and validate `window_size` and `ar_order`,
   including a `synchrony_multiverse()` parameter sweep that works with WGC
-- `vignette("surrogate-testing")` for a deeper treatment of circular-shift vs. phase-randomization
-  surrogate methods and best practices for permutation count
+- `vignette("surrogate-testing")` for a deeper treatment of circular-shift, phase-randomization,
+  IAAFT, and pseudo-dyad surrogate methods and best practices for permutation count
 - `vignette("wcc-workflow")` for the Windowed Cross-Correlation workflow, which shares the same
   surrogate pipeline and tidy interface

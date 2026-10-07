@@ -271,6 +271,29 @@ test_that("IAAFT rejects invalid input", {
     generate_surrogate_iaaft(y, match = "phase"),
     "match.*must be one of"
   )
+  expect_error(
+    generate_surrogate_iaaft(y, match = c("values", "spectrum")),
+    "match.*must be a single value"
+  )
+})
+
+test_that("the IAAFT warning is classed and pluralized", {
+  set.seed(502)
+  y <- ar_cube(200)
+  w <- expect_warning(
+    generate_surrogate_iaaft(y, n_surrogates = 1, max_iter = 1),
+    class = "bsync_iaaft_unconverged"
+  )
+  expect_match(conditionMessage(w), "1 of 1 surrogate did not converge")
+  expect_identical(w$n_unconverged, 1L)
+  expect_identical(w$max_iter, 1)
+})
+
+test_that("IAAFT rejects a series whose Fourier transform overflows", {
+  expect_error(
+    generate_surrogate_iaaft(c(1e308, -1e308, 1e308, 2, 3)),
+    "Fourier transform of .*y.* overflows"
+  )
 })
 
 test_that("the IAAFT missing-value error points to impute_ts_gaps()", {

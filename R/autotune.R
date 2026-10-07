@@ -77,8 +77,9 @@
 #' @param increment_pct Numeric; window increment as a fraction of window size
 #'   (e.g., `0.1` = 10\% step). Default is `0.1`.
 #' @param statistic Character; WCC aggregate statistic. Default `"mean_abs_z"`.
-#' @param surrogate_method Character; surrogate generator: `"phase"`
-#'   (default), `"circular"`, or \code{"iaaft"}. See
+#' @param surrogate_method Character; surrogate generator: \code{"phase"}
+#'   (default), \code{"circular"}, or \code{"iaaft"}. \code{"iaaft"} needs
+#'   every \code{y} without missing values. See
 #'   \code{\link{synchrony_multiverse}}.
 #' @param n_surrogates Single positive integer; surrogates per cell per dyad.
 #'   Default `100`. Increase to >= 1000 for reporting. Below 19 the call
@@ -109,7 +110,8 @@
 #'     \item{`dyad_multiverses`}{List of `bsync_multiverse` objects, one per dyad.}
 #'   }
 #' @seealso [synchrony_multiverse()], [suggest_wcc_params()],
-#'   [select_specification()]
+#'   [select_specification()]; \code{\link{generate_surrogate_iaaft}} for
+#'   the \code{"iaaft"} method
 #' @examples
 #' \donttest{
 #' # Tune across a small multi-dyad list (here three copies of one dyad).
@@ -194,6 +196,22 @@ autotune_wcc <- function(
   }
   tune_list <- xy_list[tune_idx]
 
+  # IAAFT cannot take NA, so name every sampled dyad that has one up front.
+  if ("iaaft" %in% surrogate_method) {
+    has_na <- vapply(tune_list, function(xy) anyNA(xy$y), logical(1))
+    if (any(has_na)) {
+      bad <- tune_idx[has_na]
+      n_bad <- length(bad)
+      cli::cli_abort(c(
+        "{.code surrogate_method = \"iaaft\"} needs every {.arg y} without \\
+        missing values.",
+        "x" = "{cli::qty(n_bad)}Dyad{?s} {bad} of {.arg dyad_list} \\
+        {cli::qty(n_bad)}{?has/have} missing values in {.arg y}.",
+        "i" = "Fill gaps first, for example with {.fn impute_ts_gaps}."
+      ))
+    }
+  }
+
   cli::cli_inform("Running synchrony_multiverse() on {n_use} dyad(s) \\
     ({length(window_sec)} window x {length(lag_sec_use)} lag cells each)...")
 
@@ -201,9 +219,12 @@ autotune_wcc <- function(
   # each per-dyad synchrony_multiverse() call would give.
   warn_few_surrogates(n_surrogates)
 
-  # Run multiverse on each dyad
+  # Run multiverse on each dyad. IAAFT non-convergence is counted per dyad
+  # and reported once after the loop.
+  n_unconverged_dyads <- 0L
   mv_list <- lapply(tune_list, function(xy) {
-    withCallingHandlers(
+    unconverged <- FALSE
+    res <- withCallingHandlers(
       synchrony_multiverse(
         x = xy$x,
         y = xy$y,
@@ -216,9 +237,26 @@ autotune_wcc <- function(
         surrogate_method = surrogate_method,
         n_surrogates = n_surrogates
       ),
-      bsync_few_surrogates = function(w) invokeRestart("muffleWarning")
+      bsync_few_surrogates = function(w) invokeRestart("muffleWarning"),
+      bsync_iaaft_unconverged = function(w) {
+        unconverged <<- TRUE
+        invokeRestart("muffleWarning")
+      }
     )
+    if (unconverged) n_unconverged_dyads <<- n_unconverged_dyads + 1L
+    res
   })
+  if (n_unconverged_dyads > 0) {
+    cli::cli_warn(
+      c(
+        "Some IAAFT surrogates did not converge in {n_unconverged_dyads} of \\
+        {n_use} dyad{?s}.",
+        "i" = "They still match the spectrum of {.arg y} exactly. Their \\
+        values are a little less close to the values of {.arg y}."
+      ),
+      class = "bsync_iaaft_unconverged"
+    )
+  }
 
   # Apply selection rule
   sel <- select_specification(

@@ -44,6 +44,8 @@ test_that("IAAFT spectrum form keeps WCC test size; values form does not", {
   p_spectrum <- iaaft_null_p("spectrum")
   expect_length(p_spectrum, 400)
   expect_lte(mean(p_spectrum <= 0.05), 0.08)
+  # A null that collapsed toward y (p near 1) would also pass the bound.
+  expect_gte(mean(p_spectrum <= 0.05), 0.01)
 
   # The generator draws the same random numbers for both forms, so the first
   # 200 pairs here are the first 200 pairs above.

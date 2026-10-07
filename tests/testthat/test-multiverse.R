@@ -487,14 +487,117 @@ test_that("autotune_wcc() runs with surrogate_method = 'iaaft'", {
   skip_on_cran()
   dyads <- list(make_test_series(seed = 1), make_test_series(seed = 2))
   set.seed(23)
-  res <- suppressWarnings(autotune_wcc(
-    dyads,
-    sample_rate = 10, window_sec = c(2, 3), lag_sec = 0.5,
-    surrogate_method = "iaaft", n_surrogates = 19L
-  ))
+  # Keep the warnings, so an IAAFT warning cannot hide in a blanket muffle.
+  warns <- list()
+  res <- withCallingHandlers(
+    autotune_wcc(
+      dyads,
+      sample_rate = 10, window_sec = c(2, 3), lag_sec = 0.5,
+      surrogate_method = "iaaft", n_surrogates = 19L
+    ),
+    warning = function(w) {
+      warns[[length(warns) + 1]] <<- w
+      invokeRestart("muffleWarning")
+    }
+  )
   methods <- unlist(lapply(res$dyad_multiverses, function(m) {
     m$grid$surrogate_method
   }))
   expect_gt(length(methods), 0)
   expect_true(all(methods == "iaaft"))
+  expect_false(any(vapply(
+    warns, inherits, logical(1), "bsync_iaaft_unconverged"
+  )))
+})
+
+# Run the real generator with max_iter = 1, so every column is unconverged.
+local_unconverged_iaaft <- function(env = parent.frame()) {
+  real_iaaft <- bsync::generate_surrogate_iaaft
+  local_mocked_bindings(
+    generate_surrogate_iaaft = function(y, n_surrogates = 100, ...) {
+      real_iaaft(y, n_surrogates = n_surrogates, max_iter = 1)
+    },
+    .package = "bsync",
+    .env = env
+  )
+}
+
+test_that("the multiverse restates IAAFT non-convergence without max_iter", {
+  s <- make_test_series()
+  local_unconverged_iaaft()
+  set.seed(24)
+  w <- expect_warning(
+    synchrony_multiverse(
+      s$x, s$y,
+      estimator = "wcc", sample_rate = 10,
+      window_sec = 3, lag_sec = 0.5,
+      surrogate_method = "iaaft", n_surrogates = 19L
+    ),
+    class = "bsync_iaaft_unconverged"
+  )
+  expect_match(conditionMessage(w), "19 of 19 IAAFT surrogates")
+  expect_match(conditionMessage(w), "still match the spectrum")
+  expect_no_match(conditionMessage(w), "max_iter")
+})
+
+test_that("autotune_wcc() reports IAAFT non-convergence once per run", {
+  skip_on_cran()
+  dyads <- list(make_test_series(seed = 1), make_test_series(seed = 2))
+  local_unconverged_iaaft()
+  set.seed(25)
+  warns <- list()
+  withCallingHandlers(
+    autotune_wcc(
+      dyads,
+      sample_rate = 10, window_sec = 3, lag_sec = 0.5,
+      surrogate_method = "iaaft", n_surrogates = 19L
+    ),
+    warning = function(w) {
+      warns[[length(warns) + 1]] <<- w
+      invokeRestart("muffleWarning")
+    }
+  )
+  unconv <- Filter(function(w) inherits(w, "bsync_iaaft_unconverged"), warns)
+  expect_length(unconv, 1)
+  expect_match(conditionMessage(unconv[[1]]), "in 2 of 2 dyads")
+})
+
+test_that("iaaft with NA in y aborts the multiverse and autotune up front", {
+  s <- make_test_series()
+  y_na <- s$y
+  y_na[10] <- NA
+  expect_error(
+    synchrony_multiverse(
+      s$x, y_na,
+      estimator = "wcc", sample_rate = 10,
+      window_sec = 3, lag_sec = 0.5,
+      surrogate_method = c("circular", "iaaft"), n_surrogates = 19L
+    ),
+    "surrogate_method = \"iaaft\".* needs .*y.* without missing"
+  )
+  dyads <- list(
+    make_test_series(seed = 1),
+    list(x = s$x, y = y_na),
+    make_test_series(seed = 3)
+  )
+  expect_error(
+    autotune_wcc(
+      dyads,
+      sample_rate = 10, window_sec = 3, lag_sec = 0.5,
+      surrogate_method = "iaaft", n_surrogates = 19L
+    ),
+    "Dyad 2 of .*dyad_list.* has missing values"
+  )
+})
+
+test_that("iaaft accepts a one-column matrix y in the multiverse", {
+  s <- make_test_series()
+  set.seed(26)
+  res <- synchrony_multiverse(
+    s$x, matrix(s$y),
+    estimator = "wcc", sample_rate = 10,
+    window_sec = 3, lag_sec = 0.5,
+    surrogate_method = "iaaft", n_surrogates = 19L
+  )
+  expect_false(is.na(res$grid$p))
 })

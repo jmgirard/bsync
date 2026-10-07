@@ -51,8 +51,11 @@ of \code{y} while it keeps the phases, and transforms back. This is the
 spectrum-adjusted series. The iteration then rank-orders it, so that the
 series takes exactly the values of \code{y}. A surrogate stops when the
 rank-ordering no longer changes it, which is where the iteration ends
-(Schreiber & Schmitz, 1996, p. 2). For a finite series, the spectrum and
-the values cannot both match exactly (p. 2).
+(Schreiber & Schmitz, 1996, p. 2). Apart from a cyclic shift of \code{y}, a
+finite series in general cannot match the spectrum and the values both
+exactly (p. 2). A very short series has few orderings, and its surrogates
+can be cyclic shifts or reversals of \code{y}, which break little of its
+structure.
 
 \strong{\code{match}.} \code{"spectrum"} (the default) returns the last spectrum-adjusted
 series. Its Fourier amplitudes equal those of \code{y} exactly, and its values
@@ -68,15 +71,19 @@ level, and the spectrum form is the default. In a size check run on
 2026-10-06 (independent pairs of AR(1) series x_n = 0.7 x_(n-1) + e_n
 observed as x_n^3, length 512, 19 surrogates per pair, \code{\link[=wcc_surrogate]{wcc_surrogate()}}
 with \code{window_size = 32}, \code{lag_max = 4}, \code{window_increment = 16}), the
-spectrum form rejected 17 of 400 pairs (4.25\%) at p <= .05. The values
-form rejected 21 of 200 pairs (10.5\%). The package test
-\code{tests/testthat/test-surrogate-calibration.R} repeats this check.
+spectrum form rejected 17 of 400 pairs (4.25\%) at p <= .05. On the first
+200 of those pairs, the values form rejected 21 (10.5\%) and the spectrum
+form 9 (4.5\%). The package's own tests repeat this check.
 
 \strong{\code{max_iter}.} The spectral error falls about as 1 / i over the first
 iterations (p. 3), and the paper's Fig. 2 runs to 1000 iterations (p. 2).
 The default \code{1000} is a cap on run time, not a target. A surrogate that
 reaches \code{max_iter} without a fixed point is still returned, and the call
-warns with the number of such surrogates.
+warns with the number of such surrogates. Long series need more
+iterations: on one AR(1)-cube series of 10000 samples (run 2026-10-06),
+4 of 5 surrogates had not reached the fixed point at 1000 iterations.
+With the default \code{match}, such surrogates still match the spectrum
+exactly.
 
 \strong{Missing values.} The Fourier transform cannot take \code{NA}, so \code{y} must
 be complete. Fill gaps first, for example with \code{\link[=impute_ts_gaps]{impute_ts_gaps()}}.

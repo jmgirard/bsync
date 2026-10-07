@@ -36,3 +36,9 @@ odd-length series are handled natively.
 surr <- generate_surrogate_phase(sim_dyad$x_B, n_surrogates = 100)
 dim(surr)
 }
+\seealso{
+\code{\link{generate_surrogate_iaaft}}, which also keeps the
+  value distribution, and \code{\link{generate_surrogate_circular}} for
+  the other within-dyad nulls; \code{\link{generate_surrogate_pseudo}}
+  for the between-dyad null.
+}
