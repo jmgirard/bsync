@@ -8,7 +8,7 @@ _Last hygiene check: 2026-10-07 (M013 merged and archived, M010 row pruned, 1 le
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M014 | IAAFT surrogate generator | in-progress | — | normal | milestones/M014-iaaft-surrogates.md |
+| M014 | IAAFT surrogate generator | review | — | normal | milestones/M014-iaaft-surrogates.md |
 | M015 | Segment-shuffling surrogate generator | planned | M014 | normal | milestones/M015-segment-shuffle-surrogates.md |
 | M013 | Granger multiverse summary and plot for both directions | done | — | normal | milestones/archive/M013-granger-multiverse-direction.md |
 | M012 | One significance rule (p <= .05) and surrogate print edges | done | — | normal | milestones/archive/M012-significance-rule.md |

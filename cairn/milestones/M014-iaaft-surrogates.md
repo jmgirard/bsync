@@ -1,6 +1,6 @@
 # M014: IAAFT surrogate generator
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -57,7 +57,7 @@ Add an exported IAAFT surrogate generator that keeps the value distribution and 
 - [x] T4: Write the AC4 calibration test with the design AC4 names. Record the observed rejection rate and the run time in the work log.
 - [x] T5: Add `"iaaft"` to the `surrogate_method` choices and the generation branch in `synchrony_multiverse()` (`R/multiverse.R:192`, `R/multiverse.R:279`). Add it to the `autotune_wcc()` docs (`R/autotune.R:80`). Write the AC6 tests.
 - [x] T6: Write roxygen with `@md`, `@references`, and `@seealso` links both ways with the other generators. The roxygen gives the reason for the default, the measured `"values"` rejection rate, and "close" as measured (closer to the values of `y` than a phase surrogate, on a skewed AR series). Reword DESIGN §6 so that each `match` form keeps one property exactly and the other closely. Add the `_pkgdown.yml` row, the vignette section, the NEWS entry, and the WORDLIST words. Update the method count in section 1 of the vignette. Update DESIGN §2, §6, §13 (oracle records), and §14 #8. Run `devtools::document()`.
-- [ ] T7: Run `devtools::test()`, `spelling::spell_check_package()`, `pkgdown::check_pkgdown()`, and `devtools::check()`. Run `air format` only on files that were air-clean before the edit.
+- [x] T7: Run `devtools::test()`, `spelling::spell_check_package()`, `pkgdown::check_pkgdown()`, and `devtools::check()`. Run `air format` only on files that were air-clean before the edit.
 
 ## Work log
 
@@ -95,6 +95,8 @@ Add an exported IAAFT surrogate generator that keeps the value distribution and 
 - 2026-10-06: T6 done: roxygen gives the measured rates with their design and date, the vignette has section 1.3 IAAFT (pseudo-dyads became 1.4), plus the `_pkgdown.yml` row, NEWS, the README reference, three WORDLIST words, and DESIGN §2, §6, §13, §14 #8. `spelling::spell_check_package()` finds 0 words. `pkgdown::check_pkgdown()` finds no problems. `build_readme()` also rewrote `man/figures/README-example-plot-1.png`, which this change does not affect, so that file was restored.
 - 2026-10-06: T7 in progress: `air format` left the new and air-clean files unchanged. Two lintr line-length hits of this branch were fixed; the other hits are in older code. `devtools::check()` is running.
 - 2026-10-06: claim audit: 38 claims read, 2 corrected — `R/surrogate_generation.R` (the Fig. 2 page cite is p. 2, the 1/i statement p. 3), `tests/testthat/test-surrogate-iaaft.R` (`spectral_discrepancy()` now uses the paper's amplitude scale; the AC3 test still passes). The reader's re-read of the two corrections is pending.
+- 2026-10-06: claim audit re-read: both corrections OK. The reader also flagged one 82-character roxygen line, rewrapped in `7f31563`; the IAAFT block now has no lint hits.
+- 2026-10-06: T7 done: `devtools::check()` on `7f31563` gave 0 errors, 0 warnings, 0 notes (2m 14s). Status set to review.
 
 ## Decisions
 
