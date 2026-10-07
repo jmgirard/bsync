@@ -69,8 +69,13 @@ synchrony_multiverse(
 
 - surrogate_method:
 
-  Character vector; surrogate generator(s): \`"phase"\` (preserves power
-  spectrum) and/or \`"circular"\` (preserves autocorrelation).
+  Character vector; surrogate generator(s): `"phase"` (preserves power
+  spectrum), `"circular"` (preserves autocorrelation), and/or `"iaaft"`
+  (preserves the power spectrum exactly and the value distribution
+  closely;
+  [`generate_surrogate_iaaft`](https://jmgirard.github.io/bsync/reference/generate_surrogate_iaaft.md)
+  with its default `match = "spectrum"`). `"iaaft"` needs `y` without
+  missing values.
 
 - n_surrogates:
 
@@ -159,7 +164,9 @@ statistics are returned: primary (\`observed\`, \`null_mean\`,
 
 \[autotune_wcc()\], \[suggest_wcc_params()\],
 \[plot.bsync_multiverse()\], \[tidy.bsync_multiverse()\],
-\[glance.bsync_multiverse()\]
+\[glance.bsync_multiverse()\];
+[`generate_surrogate_iaaft`](https://jmgirard.github.io/bsync/reference/generate_surrogate_iaaft.md)
+for the `"iaaft"` method
 
 ## Examples
 
@@ -182,13 +189,13 @@ mv
 #> Specifications: 3 (3 computable)
 #> Surrogates per cell: 50
 #> Significant (p <= .05): 0 of 3 (0%)
-#> Median ES: 1.329 [IQR: 0.32]
+#> Median ES: 1.193 [IQR: 0.491]
 #> Sign-consistent (sig. cells): NA%
 glance(mv)
 #> # A tibble: 1 × 9
 #>   estimator n_cells n_valid n_significant pct_significant median_es iqr_es
 #>   <chr>       <int>   <int>         <int>           <dbl>     <dbl>  <dbl>
-#> 1 wcc             3       3             0               0      1.33  0.320
+#> 1 wcc             3       3             0               0      1.19  0.491
 #> # ℹ 2 more variables: sign_consistent <dbl>, n_surrogates <dbl>
 # }
 ```

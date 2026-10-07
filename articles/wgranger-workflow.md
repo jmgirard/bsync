@@ -286,8 +286,9 @@ data.
   [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
   parameter sweep that works with WGC
 - [`vignette("surrogate-testing")`](https://jmgirard.github.io/bsync/articles/surrogate-testing.md)
-  for a deeper treatment of circular-shift vs. phase-randomization
-  surrogate methods and best practices for permutation count
+  for a deeper treatment of circular-shift, phase-randomization, IAAFT,
+  and pseudo-dyad surrogate methods and best practices for permutation
+  count
 - [`vignette("wcc-workflow")`](https://jmgirard.github.io/bsync/articles/wcc-workflow.md)
   for the Windowed Cross-Correlation workflow, which shares the same
   surrogate pipeline and tidy interface

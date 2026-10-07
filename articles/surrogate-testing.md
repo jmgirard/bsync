@@ -12,10 +12,10 @@ meaningful.
 
 ## 1. Choosing a Surrogate Method
 
-The **bsync** package provides three methods for generating null data.
-The first two work within one dyad. The third needs a sample of dyads.
-Choosing the right one depends on the nature of your signal and on the
-null hypothesis you want to test.
+The **bsync** package provides four methods for generating null data.
+The first three work within one dyad. The fourth needs a sample of
+dyads. Choosing the right one depends on the nature of your signal and
+on the null hypothesis you want to test.
 
 ### 1.1 Circular Shift (`generate_surrogate_circular`)
 
@@ -52,7 +52,40 @@ reconstructs the signal.
   circular shifting. It is significantly more computationally expensive
   to generate than circular shifts.
 
-### 1.3 Pseudo-Dyads (`generate_surrogate_pseudo`, `generate_pseudo_dyads`)
+### 1.3 IAAFT (`generate_surrogate_iaaft`)
+
+The iterative amplitude-adjusted Fourier transform (IAAFT) of Schreiber
+& Schmitz (1996) builds a surrogate that matches both the power spectrum
+and the value distribution of the original signal.
+
+- **How it works:** Each surrogate starts as a random shuffle of the
+  signal. The method then alternates two steps. It gives the series the
+  original Fourier amplitudes, and then it rank-orders the series so
+  that it takes the original values. It stops when the rank-ordering no
+  longer changes the series, or after `max_iter` rounds (1000 by
+  default). Long signals can reach that cap, and the call then warns.
+- **Which form it returns:** For a finite signal, the two properties in
+  general cannot both match exactly. With `match = "spectrum"` (the
+  default), the spectrum matches exactly and the values match closely.
+  With `match = "values"`, the values match exactly and the spectrum
+  matches closely. The rank step lowers the autocorrelation a little,
+  and in the package’s size check a WCC test against the `"values"` form
+  rejected a true null in 21 of 200 pairs (10.5%) at a nominal 5%. On
+  the same 200 pairs, the default form rejected 9 (4.5%).
+  [`?generate_surrogate_iaaft`](https://jmgirard.github.io/bsync/reference/generate_surrogate_iaaft.md)
+  gives the design of that check.
+- **When to use it:** For skewed or bounded signals, such as motion
+  energy, where phase randomization would make the surrogate values
+  Gaussian. Against IAAFT surrogates, a significant result cannot come
+  from the value distribution or the autocorrelation of one signal
+  alone.
+- **Important Note:** The signal must have no missing values. Fill gaps
+  first with
+  [`impute_ts_gaps()`](https://jmgirard.github.io/bsync/reference/impute_ts_gaps.md).
+  IAAFT is slower than the other within-dyad methods because it repeats
+  the two steps until each surrogate stops changing.
+
+### 1.4 Pseudo-Dyads (`generate_surrogate_pseudo`, `generate_pseudo_dyads`)
 
 A pseudo-dyad pairs one person’s series with a partner from a
 *different* dyad: two people who never interacted. This is the
@@ -70,13 +103,13 @@ pseudo-synchrony approach of the rMEA package (Kleinbub & Ramseyer,
   shorter partners with a warning. Start alignment assumes that every
   dyad was sampled at the same rate and that sample 1 of every series is
   the same task onset. Resample and trim first if that is not true.
-- **Which null it tests:** Circular shifts and phase randomization break
-  all time alignment. If the task itself makes both people move at the
-  same moments (a trial starts, a video plays), that shared movement
-  looks like synchrony against those nulls. A pseudo-dyad partner went
-  through the same task, so the pseudo-dyad null keeps task-driven
-  co-movement. A significant result then means “more synchronous than
-  with a stranger in the same setting.”
+- **Which null it tests:** Circular shifts, phase randomization, and
+  IAAFT break all time alignment. If the task itself makes both people
+  move at the same moments (a trial starts, a video plays), that shared
+  movement looks like synchrony against those nulls. A pseudo-dyad
+  partner went through the same task, so the pseudo-dyad null keeps
+  task-driven co-movement. A significant result then means “more
+  synchronous than with a stranger in the same setting.”
 - **When to use it:** When you have a sample of dyads that did the same
   task, and you want to separate interaction-specific synchrony from
   synchrony that the task produces.
@@ -281,3 +314,7 @@ Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never be
 zero: calculating exact p-values when permutations are randomly drawn.
 *Statistical Applications in Genetics and Molecular Biology*, 9(1),
 Article 39. <https://doi.org/10.2202/1544-6115.1585>
+
+Schreiber, T., & Schmitz, A. (1996). Improved surrogate data for
+nonlinearity tests. *Physical Review Letters*, 77(4), 635-638.
+<https://doi.org/10.1103/PhysRevLett.77.635>

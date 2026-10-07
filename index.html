@@ -250,7 +250,7 @@
 </tr>
 <tr>
 <td><a href="https://jmgirard.github.io/bsync/articles/surrogate-testing.html">Surrogate testing</a></td>
-<td>Circular-shift vs. phase-randomization vs. pseudo-dyads; best practices</td>
+<td>Circular-shift vs. phase-randomization vs. IAAFT vs. pseudo-dyads; best practices</td>
 </tr>
 <tr>
 <td><a href="https://jmgirard.github.io/bsync/articles/determine-downsampling.html">Downsampling</a></td>
@@ -322,6 +322,11 @@
 <p>The use of circular-shifted surrogate data to establish a statistical baseline for true interpersonal synchrony was popularized in behavioral research by:</p>
 <ul>
 <li>Ramseyer, F., &amp; Tschacher, W. (2011). Nonverbal synchrony in psychotherapy: Coordinated body movement reflects relationship quality and outcome. <em>Journal of Consulting and Clinical Psychology, 79</em>(3), 284-295.</li>
+</ul>
+<p>The IAAFT generator (<code><a href="reference/generate_surrogate_iaaft.html">generate_surrogate_iaaft()</a></code>) implements the iterative amplitude-adjusted Fourier transform of:</p>
+<ul>
+<li>Schreiber, T., &amp; Schmitz, A. (1996). Improved surrogate data for nonlinearity tests. <em>Physical Review Letters, 77</em>(4), 635-638. <a href="https://doi.org/10.1103/PhysRevLett.77.635" class="external-link uri">https://doi.org/10.1103/PhysRevLett.77.635</a>
+</li>
 </ul>
 <p>The pseudo-dyad generators (<code><a href="reference/generate_surrogate_pseudo.html">generate_surrogate_pseudo()</a></code>, <code><a href="reference/generate_pseudo_dyads.html">generate_pseudo_dyads()</a></code>) follow the between-dyad shuffling convention of the rMEA package:</p>
 <ul>

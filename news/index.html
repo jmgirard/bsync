@@ -56,6 +56,12 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="bsync-development-version">bsync (development version)<a class="anchor" aria-label="anchor" href="#bsync-development-version"></a></h2>
 <div class="section level3">
+<h3 id="iaaft-surrogates-development-version">IAAFT surrogates<a class="anchor" aria-label="anchor" href="#iaaft-surrogates-development-version"></a></h3>
+<ul><li>New <code><a href="../reference/generate_surrogate_iaaft.html">generate_surrogate_iaaft()</a></code> builds surrogates with the iterative amplitude-adjusted Fourier transform (IAAFT) of Schreiber &amp; Schmitz (1996). Each surrogate matches both the power spectrum and the value distribution of the series. With <code>match = "spectrum"</code> (the default), the Fourier amplitudes match exactly and the values match closely. With <code>match = "values"</code>, the values match exactly and the spectrum matches closely. The spectrum form is the default because, in a WCC size check, the values form rejected a true null in 21 of 200 pairs (10.5%) at a nominal 5%, and the spectrum form in 9 of the same 200 pairs (4.5%). <code>max_iter</code> (default 1000) caps the iterations, and the call warns when a surrogate reaches it. A series with <code>NA</code> is an error.</li>
+<li>
+<code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code> and <code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code> accept <code>surrogate_method = "iaaft"</code>. It needs <code>y</code> without missing values, and the call stops with an error that says so. <code><a href="../reference/autotune_wcc.html">autotune_wcc()</a></code> reports IAAFT non-convergence once for the whole run.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="both-granger-directions-in-multiverse-summaries-and-plots-development-version">Both Granger directions in multiverse summaries and plots<a class="anchor" aria-label="anchor" href="#both-granger-directions-in-multiverse-summaries-and-plots-development-version"></a></h3>
 <ul><li>
 <code>synchrony_multiverse(estimator = "wgranger")</code> now also returns <code>$robustness_yx</code>, the robustness summary of the y -&gt; x direction. It has the same fields as <code>$robustness</code>, which stays x -&gt; y.</li>

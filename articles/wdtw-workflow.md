@@ -342,8 +342,9 @@ leadership from Person A to Person B perfectly clear.
   for tools to choose and validate `window_size` and `lag_max` for any
   estimator, including a parameter-sweep specification curve
 - [`vignette("surrogate-testing")`](https://jmgirard.github.io/bsync/articles/surrogate-testing.md)
-  for a deeper treatment of circular-shift vs. phase-randomization
-  surrogate methods and best practices for permutation count
+  for a deeper treatment of circular-shift, phase-randomization, IAAFT,
+  and pseudo-dyad surrogate methods and best practices for permutation
+  count
 - [`vignette("wcc-workflow")`](https://jmgirard.github.io/bsync/articles/wcc-workflow.md)
   for the Windowed Cross-Correlation workflow, which shares the same
   optima and leadership pipeline

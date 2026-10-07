@@ -485,6 +485,7 @@ psychotherapy sessions. *Psychotherapy Research*, *30*(5), 558–573.
 - [`vignette("wcc-workflow")`](https://jmgirard.github.io/bsync/articles/wcc-workflow.md)
   for the full WCC analytical pipeline
 - [`vignette("surrogate-testing")`](https://jmgirard.github.io/bsync/articles/surrogate-testing.md)
-  for details on circular-shift vs. phase-randomization surrogates
+  for details on circular-shift, phase-randomization, IAAFT, and
+  pseudo-dyad surrogates
 - [`vignette("determine-downsampling")`](https://jmgirard.github.io/bsync/articles/determine-downsampling.md)
   for PSD-based guidance on choosing a sample rate

@@ -131,8 +131,13 @@ for other estimators.</p></dd>
 
 
 <dt id="arg-surrogate-method">surrogate_method<a class="anchor" aria-label="anchor" href="#arg-surrogate-method"></a></dt>
-<dd><p>Character vector; surrogate generator(s): `"phase"`
-(preserves power spectrum) and/or `"circular"` (preserves autocorrelation).</p></dd>
+<dd><p>Character vector; surrogate generator(s):
+<code>"phase"</code> (preserves power spectrum), <code>"circular"</code> (preserves
+autocorrelation), and/or <code>"iaaft"</code> (preserves the power spectrum
+exactly and the value distribution closely;
+<code><a href="generate_surrogate_iaaft.html">generate_surrogate_iaaft</a></code> with its default
+<code>match = "spectrum"</code>). <code>"iaaft"</code> needs <code>y</code> without
+missing values.</p></dd>
 
 
 <dt id="arg-n-surrogates">n_surrogates<a class="anchor" aria-label="anchor" href="#arg-n-surrogates"></a></dt>
@@ -213,7 +218,8 @@ report y -&gt; x.</p>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>[autotune_wcc()], [suggest_wcc_params()], [plot.bsync_multiverse()],
-  [tidy.bsync_multiverse()], [glance.bsync_multiverse()]</p></div>
+  [tidy.bsync_multiverse()], [glance.bsync_multiverse()];
+  <code><a href="generate_surrogate_iaaft.html">generate_surrogate_iaaft</a></code> for the <code>"iaaft"</code> method</p></div>
     </div>
 
     <div class="section level2">
@@ -236,13 +242,13 @@ report y -&gt; x.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Specifications: 3 (3 computable)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Surrogates per cell: 50</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Significant (p &lt;= .05): 0 of 3 (0%)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Median ES: 1.329 [IQR: 0.32]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Median ES: 1.193 [IQR: 0.491]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Sign-consistent (sig. cells): NA%</span>
 <span class="r-in"><span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mv</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 9</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   estimator n_cells n_valid n_significant pct_significant median_es iqr_es</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> wcc             3       3             0               0      1.33  0.320</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> wcc             3       3             0               0      1.19  0.491</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2 more variables: sign_consistent &lt;dbl&gt;, n_surrogates &lt;dbl&gt;</span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>

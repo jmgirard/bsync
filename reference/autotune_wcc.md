@@ -63,8 +63,9 @@ autotune_wcc(
 
 - surrogate_method:
 
-  Character; surrogate generator: \`"phase"\` (default) or
-  \`"circular"\`.
+  Character; surrogate generator: `"phase"` (default), `"circular"`, or
+  `"iaaft"`. `"iaaft"` needs every `y` without missing values. See
+  [`synchrony_multiverse`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md).
 
 - n_surrogates:
 
@@ -192,7 +193,9 @@ collapsing to the point estimate.
 ## See also
 
 \[synchrony_multiverse()\], \[suggest_wcc_params()\],
-\[select_specification()\]
+\[select_specification()\];
+[`generate_surrogate_iaaft`](https://jmgirard.github.io/bsync/reference/generate_surrogate_iaaft.md)
+for the `"iaaft"` method
 
 ## Examples
 

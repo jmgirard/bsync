@@ -27,6 +27,15 @@ generate_surrogate_circular(y, n_surrogates = 100, lag_max = NULL)
 
 A matrix where each column is a surrogate time series.
 
+## See also
+
+[`generate_surrogate_phase`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md)
+and
+[`generate_surrogate_iaaft`](https://jmgirard.github.io/bsync/reference/generate_surrogate_iaaft.md)
+for the other within-dyad nulls;
+[`generate_surrogate_pseudo`](https://jmgirard.github.io/bsync/reference/generate_surrogate_pseudo.md)
+for the between-dyad null.
+
 ## Examples
 
 ``` r

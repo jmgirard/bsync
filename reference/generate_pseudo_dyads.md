@@ -95,9 +95,10 @@ for a per-dyad surrogate matrix, which
 and
 [`wphase_surrogate()`](https://jmgirard.github.io/bsync/reference/wphase_surrogate.md)
 accept;
-[`generate_surrogate_circular()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.md)
+[`generate_surrogate_circular()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.md),
+[`generate_surrogate_phase()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md),
 and
-[`generate_surrogate_phase()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md)
+[`generate_surrogate_iaaft()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_iaaft.md)
 for within-dyad nulls;
 [`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md),
 [`wdtw()`](https://jmgirard.github.io/bsync/reference/wdtw.md),

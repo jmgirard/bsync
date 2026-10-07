@@ -39,6 +39,15 @@ original for any signal, including negative-mean signals. Conjugate
 symmetry is enforced on the remaining bins so the inverse transform is
 real. Both even- and odd-length series are handled natively.
 
+## See also
+
+[`generate_surrogate_iaaft`](https://jmgirard.github.io/bsync/reference/generate_surrogate_iaaft.md),
+which also keeps the value distribution, and
+[`generate_surrogate_circular`](https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.md)
+for the other within-dyad nulls;
+[`generate_surrogate_pseudo`](https://jmgirard.github.io/bsync/reference/generate_surrogate_pseudo.md)
+for the between-dyad null.
+
 ## Examples
 
 ``` r

@@ -117,9 +117,10 @@ nonverbal synchronization in motion energy analysis time-series.
 
 [`generate_pseudo_dyads()`](https://jmgirard.github.io/bsync/reference/generate_pseudo_dyads.md)
 for the sample-wide set of pseudo-dyads;
-[`generate_surrogate_circular()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.md)
+[`generate_surrogate_circular()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_circular.md),
+[`generate_surrogate_phase()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md),
 and
-[`generate_surrogate_phase()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_phase.md)
+[`generate_surrogate_iaaft()`](https://jmgirard.github.io/bsync/reference/generate_surrogate_iaaft.md)
 for within-dyad nulls;
 [`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md),
 [`wdtw_surrogate()`](https://jmgirard.github.io/bsync/reference/wdtw_surrogate.md),
