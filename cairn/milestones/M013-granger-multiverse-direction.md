@@ -73,6 +73,7 @@ Let users read the y -> x direction of a Granger `synchrony_multiverse()` result
 - 2026-10-06: T6 spell check flagged "summarise" 3 times in the new roxygen. Changed to American spelling, and the spell check is clean.
 - 2026-10-06: claim audit: 60 claims read, 4 corrected — vignettes/choosing-parameters.Rmd, tests/testthat/test-multiverse.R, NEWS.md, R/multiverse.R.
 - 2026-10-06: T6 done. `devtools::check()` at 78434ef gave 0 errors, 0 warnings, 0 notes. After the claim-audit commit, `devtools::test()` gives 1969 pass, 0 fail, and `devtools::document()` gives no diff. Status set to review.
+- 2026-10-06: step-7 approval: m013-granger-multiverse-direction approved for merge
 
 ## Decisions
 
