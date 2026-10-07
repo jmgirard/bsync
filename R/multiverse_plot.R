@@ -57,7 +57,8 @@ multiverse_plot_title <- function(rb, label = NULL) {
 #' @param direction For a Granger result (`estimator = "wgranger"`), the
 #'   direction to plot: `"xy"` (x -> y, the default) or `"yx"` (y -> x). The
 #'   title names the direction. Other estimators have one direction only, so
-#'   `"yx"` is an error for them.
+#'   `"yx"` is an error for them. Pass it by name (`direction = "yx"`): it
+#'   comes after the color and size arguments.
 #' @param ... Additional arguments (not used).
 #' @return Returns `x` invisibly; draws to the active graphics device.
 #' @seealso [synchrony_multiverse()], [tidy.bsync_multiverse()],

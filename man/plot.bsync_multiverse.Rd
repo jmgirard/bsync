@@ -32,7 +32,8 @@ Default: \code{0.55}.}
 \item{direction}{For a Granger result (\code{estimator = "wgranger"}), the
 direction to plot: \code{"xy"} (x -> y, the default) or \code{"yx"} (y -> x). The
 title names the direction. Other estimators have one direction only, so
-\code{"yx"} is an error for them.}
+\code{"yx"} is an error for them. Pass it by name (\code{direction = "yx"}): it
+comes after the color and size arguments.}
 
 \item{...}{Additional arguments (not used).}
 }

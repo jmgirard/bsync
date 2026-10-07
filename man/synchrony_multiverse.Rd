@@ -75,8 +75,8 @@ A `bsync_multiverse` object with:
       `es_yx`, and `p_yx` for y -> x).}
     \item{`$settings`}{Named list of call-level inputs.}
     \item{`$robustness`}{Named list: `n_cells` (total specifications in the
-      grid), `n_valid` (cells that produced a computable ES; the rest were
-      skipped as too short), `n_significant`, `pct_significant` (over
+      grid), `n_valid` (cells with a computable ES in that direction; the
+      rest were skipped as too short or gave an NA ES), `n_significant`, `pct_significant` (over
       `n_valid`), `median_es`, `iqr_es`, `sign_consistent` (proportion of
       significant cells with ES > 0). For Granger it summarizes x -> y.}
     \item{`$robustness_yx`}{Granger only: the same fields as

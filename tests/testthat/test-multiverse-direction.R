@@ -354,3 +354,61 @@ test_that("plot() stops when the chosen direction has no valid cells", {
   )
   expect_s3_class(multiverse_plot_data(no_xy, "yx"), "tbl_df")
 })
+
+
+# Granger results without $robustness_yx or the _yx columns ---------------------
+
+test_that("y -> x is computed from the grid when $robustness_yx is missing", {
+  # A Granger result saved before $robustness_yx existed. Some p_yx values
+  # are set significant, so sign_consistent is a number, not NA.
+  old <- granger_fixture()
+  old$robustness_yx <- NULL
+  old$grid$p_yx[c(1, 4, 6)] <- 0.01
+  expected <- expected_robustness(old$grid$es_yx, old$grid$p_yx)
+  expect_equal(expected$n_significant, 3L)
+  expect_false(is.na(expected$sign_consistent))
+
+  expect_equal(multiverse_direction(old, "yx")$robustness, expected)
+  gl <- glance(old, direction = "yx")
+  expect_named(gl, c("estimator", "direction", summary_cols, "n_surrogates"))
+  expect_equal(as.list(gl[summary_cols]), expected)
+  expect_line(function() print(old, direction = "yx"), sig_line(expected))
+  expect_identical(
+    multiverse_plot_title(multiverse_direction(old, "yx")$robustness),
+    multiverse_plot_title(expected)
+  )
+})
+
+test_that("y -> x stops with a message when the grid has no _yx columns", {
+  res <- granger_fixture()
+  res$grid$es_yx <- NULL
+  res$grid$p_yx <- NULL
+  msg <- "needs the es_yx and p_yx grid columns"
+  expect_error(glance(res, direction = "yx"), msg, class = "rlang_error")
+  expect_error(summary(res, direction = "yx"), msg, class = "rlang_error")
+  expect_error(plot(res, direction = "yx"), msg, class = "rlang_error")
+})
+
+test_that("the refusal names an unknown estimator when settings lack one", {
+  res <- small_multiverse("wcc")
+  res$settings$estimator <- NULL
+  expect_error(
+    glance(res, direction = "yx"),
+    "estimator is \"unknown\"",
+    class = "rlang_error"
+  )
+})
+
+test_that("summary() says 'none' when the direction has no computable ES", {
+  res <- granger_fixture()
+  res$grid$es_yx <- NA_real_
+  f <- function() summary(res, direction = "yx")
+  expect_no_warning(suppressMessages(f()))
+  expect_line(f, "ES range: none (no computable ES)")
+  expect_invisible(suppressMessages(f()))
+})
+
+test_that("summary(direction = 'yx') returns its input invisibly", {
+  res <- granger_fixture()
+  expect_invisible(suppressMessages(summary(res, direction = "yx")))
+})

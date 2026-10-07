@@ -141,8 +141,8 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'       `es_yx`, and `p_yx` for y -> x).}
 #'     \item{`$settings`}{Named list of call-level inputs.}
 #'     \item{`$robustness`}{Named list: `n_cells` (total specifications in the
-#'       grid), `n_valid` (cells that produced a computable ES; the rest were
-#'       skipped as too short), `n_significant`, `pct_significant` (over
+#'       grid), `n_valid` (cells with a computable ES in that direction; the
+#'       rest were skipped as too short or gave an NA ES), `n_significant`, `pct_significant` (over
 #'       `n_valid`), `median_es`, `iqr_es`, `sign_consistent` (proportion of
 #'       significant cells with ES > 0). For Granger it summarizes x -> y.}
 #'     \item{`$robustness_yx`}{Granger only: the same fields as
@@ -461,6 +461,7 @@ multiverse_direction <- function(x, direction = c("xy", "yx"),
     error_arg = "direction", error_call = call
   )
   estimator <- x$settings$estimator
+  if (is.null(estimator)) estimator <- "unknown"
   is_granger <- identical(estimator, "wgranger")
   if (direction == "yx" && !is_granger) {
     cli::cli_abort(
@@ -473,17 +474,36 @@ multiverse_direction <- function(x, direction = c("xy", "yx"),
     )
   }
   if (direction == "xy") {
-    list(
+    return(list(
       direction = direction, es = x$grid$es, p = x$grid$p,
       robustness = x$robustness,
       label = if (is_granger) "x -> y" else NULL
-    )
-  } else {
-    list(
-      direction = direction, es = x$grid$es_yx, p = x$grid$p_yx,
-      robustness = x$robustness_yx, label = "y -> x"
+    ))
+  }
+  if (!all(c("es_yx", "p_yx") %in% names(x$grid))) {
+    cli::cli_abort(
+      c(
+        "{.code direction = \"yx\"} needs the {.field es_yx} and \\
+        {.field p_yx} grid columns.",
+        "x" = "This Granger result's grid does not have them."
+      ),
+      call = call
     )
   }
+  # A Granger result made before $robustness_yx existed, or built by hand,
+  # gets the summary computed here from the grid. Skipped cells have NA ES,
+  # so no cell needs to be marked as skipped.
+  robustness <- x$robustness_yx
+  if (is.null(robustness)) {
+    n_cells <- nrow(x$grid)
+    robustness <- multiverse_robustness(
+      n_cells, x$grid$es_yx, x$grid$p_yx, rep(FALSE, n_cells)
+    )
+  }
+  list(
+    direction = direction, es = x$grid$es_yx, p = x$grid$p_yx,
+    robustness = robustness, label = "y -> x"
+  )
 }
 
 
@@ -658,9 +678,14 @@ summary.bsync_multiverse <- function(object, direction = c("xy", "yx"), ...) {
     "{nrow(object$grid)} total cells (including {sum(is.na(dir$es))} skipped/NA)"
   )
 
-  es_range <- range(dir$es, na.rm = TRUE)
+  es_range <- if (any(!is.na(dir$es))) {
+    r <- round(range(dir$es, na.rm = TRUE), 3)
+    paste0("[", r[1], ", ", r[2], "]")
+  } else {
+    "none (no computable ES)"
+  }
   cli::cli_dl(c(
-    "ES range"     = "[{round(es_range[1], 3)}, {round(es_range[2], 3)}]",
+    "ES range"     = "{es_range}",
     "Sample rate"  = "{object$settings$sample_rate} Hz"
   ))
 
