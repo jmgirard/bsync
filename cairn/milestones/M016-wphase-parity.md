@@ -29,14 +29,14 @@ Bring `wphase()` to the level of the other estimators: a selectable aggregate st
 
 ## Acceptance criteria
 
-- [ ] AC1: `wphase()` and `wphase_surrogate()` accept `statistic = "mean_plv"` (the default) and `statistic = "peak"`. Tests in `tests/testthat/test-wphase.R` compute the `"peak"` value with an explicit loop (per-window maximum PLV across lags, then the mean over windows) and find `wphase(..., statistic = "peak")$aggregate` equal to it within 1e-12 in two cases:
+- [x] AC1: `wphase()` and `wphase_surrogate()` accept `statistic = "mean_plv"` (the default) and `statistic = "peak"`. Tests in `tests/testthat/test-wphase.R` compute the `"peak"` value with an explicit loop (per-window maximum PLV across lags, then the mean over windows) and find `wphase(..., statistic = "peak")$aggregate` equal to it within 1e-12 in two cases:
       (a) a hand-built phase pair with default increments and no `time`,
       (b) `window_increment = 2`, `lag_increment = 3`, and a `time` vector with one tied pair of timestamps.
       With no `statistic` argument, `wphase()$aggregate` is `identical()` to `base::mean(results_df$plv, na.rm = TRUE)` in both cases.
-- [ ] AC2: For each `statistic` value and each AC1 case, a test runs `wphase_surrogate()` on a 3-column surrogate matrix. It finds each `surrogate_z[j]` equal to `wphase(x, y_surrogates[, j], statistic = )$aggregate` within 1e-12, and `observed_z` for `"peak"` equal to the AC1 explicit-loop value.
-- [ ] AC3: A test finds that an unknown `statistic` value makes `wphase()` and `wphase_surrogate()` stop with an error that matches "should be one of".
-- [ ] AC4: For each `statistic` value, a test finds the value in `settings$statistic`, `names(aggregate)`, and `glance()$statistic` of a `wphase_res`. Asserted with `expect_message()` (LESSONS M008), `print()` of a `wphase_res` shows "Mean PLV" or "Mean Peak PLV", and `print()` of a `wphase_surr` shows "Observed Mean PLV" / "Average Null Mean PLV" or "Observed Mean Peak PLV" / "Average Null Mean Peak PLV".
-- [ ] AC5: `vignettes/wphase-workflow.Rmd` exists and is listed under articles in `_pkgdown.yml` next to `wgranger-workflow`. Its section headings cover these 8 topics:
+- [x] AC2: For each `statistic` value and each AC1 case, a test runs `wphase_surrogate()` on a 3-column surrogate matrix. It finds each `surrogate_z[j]` equal to `wphase(x, y_surrogates[, j], statistic = )$aggregate` within 1e-12, and `observed_z` for `"peak"` equal to the AC1 explicit-loop value.
+- [x] AC3: A test finds that an unknown `statistic` value makes `wphase()` and `wphase_surrogate()` stop with an error that matches "should be one of".
+- [x] AC4: For each `statistic` value, a test finds the value in `settings$statistic`, `names(aggregate)`, and `glance()$statistic` of a `wphase_res`. Asserted with `expect_message()` (LESSONS M008), `print()` of a `wphase_res` shows "Mean PLV" or "Mean Peak PLV", and `print()` of a `wphase_surr` shows "Observed Mean PLV" / "Average Null Mean PLV" or "Observed Mean Peak PLV" / "Average Null Mean Peak PLV".
+- [x] AC5: `vignettes/wphase-workflow.Rmd` exists and is listed under articles in `_pkgdown.yml` next to `wgranger-workflow`. Its section headings cover these 8 topics:
       (1) what windowed phase synchrony measures and its narrowband assumption,
       (2) band-pass filtering before phase extraction,
       (3) `wphase()` on the filtered pair,
@@ -45,8 +45,8 @@ Bring `wphase()` to the level of the other estimators: a selectable aggregate st
       (6) `pick_optima()`,
       (7) plots,
       (8) a See also list. Every result its prose states (a PLV, a p-value, a window count) comes from inline R code or chunk output.
-- [ ] AC6: NEWS.md has an entry for the `statistic` argument and the new article, with no milestone numbers.
-- [ ] AC7: `devtools::document()` produces no diff, `pkgdown::check_pkgdown()` passes, and `devtools::check()` gives 0 errors and 0 warnings (any NOTE justified in the Review section).
+- [x] AC6: NEWS.md has an entry for the `statistic` argument and the new article, with no milestone numbers.
+- [x] AC7: `devtools::document()` produces no diff, `pkgdown::check_pkgdown()` passes, and `devtools::check()` gives 0 errors and 0 warnings (any NOTE justified in the Review section).
 
 ## Coverage
 
@@ -84,3 +84,15 @@ Bring `wphase()` to the level of the other estimators: a selectable aggregate st
 ## Decisions
 
 ## Review
+
+Evidence gathered 2026-10-07 at 2e7faad, branch current with origin/main (8abadee).
+
+- AC1: `test_file("test-wphase.R")` gives 16 tests, 0 failed, 0 errors, 0 skipped. Test at line 361 runs both cases from `stat_cases()`: (a) the hand-built pair (default increments, no `time`), and (b) `window_increment = 2`, `lag_increment = 3`, and `time` with starts 6 and 8 tied. It checks `"peak"` against `peak_plv_loop()` with `expect_lt(abs(diff), 1e-12)` and the default with `expect_identical(..., base::mean(results_df$plv, na.rm = TRUE))`. In T2, grouping by the time-mapped `i` failed this test.
+- AC2: the same run passes the test at line 375. For both cases, both statistics, and a 3-column `generate_surrogate_circular()` matrix, it checks each `surrogate_z[j]` against `wphase(x, y_surrogates[, j], statistic = )$aggregate` within 1e-12, and `observed_z` for `"peak"` against `peak_plv_loop()`. In T2, a surrogate side fixed to `"mean_plv"` gave 6 failures.
+- AC3: the same run passes the test at line 423. `wphase(..., statistic = "median")` and `wphase_surrogate(..., statistic = "median")` each raise an error matching "should be one of". Before T2, the same test failed with "unused argument (statistic = ...)".
+- AC4: the same run passes the test at line 398. For `"mean_plv"` and `"peak"` it checks `settings$statistic`, `names(aggregate)`, and `glance()$statistic` with `expect_identical`. With `expect_message(..., fixed = TRUE)` it finds "Mean PLV" / "Mean Peak PLV" in the `wphase_res` print and "Observed …" / "Average Null …" with the same labels in the `wphase_surr` print. It also finds no "Mean PLV" in the `"peak"` card.
+- AC5: `vignettes/wphase-workflow.Rmd` exists, and `_pkgdown.yml:32` lists `wphase-workflow` directly after `wgranger-workflow`. Headings (`grep '^##'`) map to the 8 topics as follows. (1) §1 "What is Windowed Phase Synchrony?" with §1.1 "The Narrowband Assumption". (2) §3 "Band-Pass Filtering Before Phase Extraction". (3) §4 "Calculating Windowed Phase Synchrony on the Filtered Pair". (4) §5 "Surrogate Testing for Significance", which calls `wphase_surrogate()`. (5) §6 "The Peak Statistic". (6) §7 "Optima Extraction". (7) §8 "Visualizing the Results". (8) "See also". An awk sweep of prose lines (outside chunks) that carry decimals or "p =" found every result as inline R. The remaining literals are simulation or setup parameters (0.5 Hz, 7.5 cycles, the simulated ±0.5 s lead). The article built inside `devtools::check()`.
+- AC6: NEWS.md "Windowed phase synchrony" (lines 3-15) has one bullet for the `statistic` argument and one for `vignette("wphase-workflow")`. `grep -n "M0" ` over those lines finds no milestone number, and `test-doc-hygiene.R` passed inside `check()`.
+- AC7: `devtools::document()` left `git status` clean. `pkgdown::check_pkgdown()` reported "No problems found". `devtools::check()` at 2e7faad gave 0 errors, 0 warnings, and 0 notes.
+
+Consistency gate: `cairn_validate.py` exit 0 ("all checks passed"). No principle changed, so `cairn_impact` was skipped. Profile slot results: `document()` gives no diff. Generated files are not hand-edited (man/ comes from `document()`). The branch does not touch README.Rmd or README.md. `check_pkgdown()` passes. The NEWS entry is present. There are no new top-level files. `check()` gives 0/0/0.
