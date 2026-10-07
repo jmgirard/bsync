@@ -1,6 +1,6 @@
 # M015: Segment-shuffling surrogate generator
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M014
 - **Driving RR:** —
@@ -62,7 +62,7 @@ Add an exported segment-shuffling surrogate generator that reorders whole segmen
 - [x] T3: Write the AC4 size test in `test-surrogate-calibration.R`. Add a control on the 5-segment design: filter all 119 non-identity orders to the 44 with no segment in place and draw 19 per pair. Its rate must be above 0.07, so the test is shown able to fail. The control covers only the enumeration path. AC2 covers the rejection path. Record the observed rates in the work log.
 - [x] T4: Add `"segment"` to `synchrony_multiverse()` and `autotune_wcc()` (AC6). Build segment rows once per window, lag, and statistic. Run the fewer-than-4-segments check before the `min_n` guard. Generate one matrix per distinct s of the cells that are not skipped, and look it up per cell. Muffle the generator's tail and all-orders messages inside the multiverse. Give the aligned-design message a class, and in `autotune_wcc()` give it once per call, as `warn_few_surrogates()` is handled there. A test that calls `autotune_wcc()` needs series of at least 4 * s samples, because the default lag is window / 2.
 - [x] T5: Write roxygen with `@md`, `@references`, and `@seealso` links both ways with the other generators (AC7). Add the `_pkgdown.yml` row, the vignette section, the NEWS entry, and the WORDLIST words. Update the method count in section 1 of the vignette. Update DESIGN §2, §6, §13 (oracle records), and §14 #8. Run `devtools::document()`.
-- [ ] T6: Run `devtools::test()`, `spelling::spell_check_package()`, `pkgdown::check_pkgdown()`, and `devtools::check()` (AC8). Run `air format` only on files that were air-clean before the edit.
+- [x] T6: Run `devtools::test()`, `spelling::spell_check_package()`, `pkgdown::check_pkgdown()`, and `devtools::check()` (AC8). Run `air format` only on files that were air-clean before the edit.
 
 ## Work log
 
@@ -103,6 +103,7 @@ Add an exported segment-shuffling surrogate generator that reorders whole segmen
 - 2026-10-07: T5 done. Roxygen, cross-links, multiverse and autotune docs, vignette section 1.4 (pseudo-dyads now 1.5), NEWS, WORDLIST (`SUSY's`), and DESIGN §2/§6/§13/§14 #8 written. The window-count claim (k - 1, or k when the tail is segment_size - 1) was checked with `build_surface_grid()` at n = 100, 105, 118, 119, 120. The vignette's 10.0% and 5.6% figures come from the T3 run. The vignette renders against an installed build of the branch. A plain render fails at `library(bsync)`, because no current build is installed.
 - 2026-10-07: T6 in progress. `air format` was run on `R/surrogate_generation.R` and `tests/testthat/test-surrogate-calibration.R` (air-clean on main) and on the two new test files. `R/multiverse.R` and `R/autotune.R` were not air-clean on main and were left alone. Lint on `R/surrogate_generation.R`: 6 against 7 on main. The first `devtools::check()` (before the claim-audit fixes) gave 0 errors, 0 warnings, 0 notes.
 - 2026-10-07: claim audit: 125 claims read, 7 corrected — R/surrogate_generation.R (window count, fixed segments on average, group rule from 4 segments on), R/multiverse.R (k! - 1 cap, tail pointer, code comment), R/autotune.R (segment versus window), tests/testthat/test-surrogate-segment.R (2.2e-5). The re-read of the corrections found that the group rule starts at 4 segments, not 3. That fix was applied, and the reader's other re-read items were ok. The reader also noted that `n_surrogates` of 362879 or more aborts the multiverse at 9 or more segments. That setting is not realistic, so it was left as is.
+- 2026-10-07: T6 done at 3387667. `devtools::check()` gave 0 errors, 0 warnings, 0 notes (tests included). `spelling::spell_check_package()` found no words, `pkgdown::check_pkgdown()` passed, and `devtools::document()` left no diff. Status set to review.
 
 ## Decisions
 
