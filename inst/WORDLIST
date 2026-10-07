@@ -38,6 +38,7 @@ Granger
 grey
 gsignal
 hilbert
+IAAFT
 interpretability
 iqr
 Kleinbub
@@ -79,6 +80,8 @@ Runnable
 runnable
 Sakoe
 Savitzky
+Schmitz
+Schreiber
 sd
 Selectable
 sgolay

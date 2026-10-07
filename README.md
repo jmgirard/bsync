@@ -309,6 +309,13 @@ research by:
   and outcome. *Journal of Consulting and Clinical Psychology, 79*(3),
   284-295.
 
+The IAAFT generator (`generate_surrogate_iaaft()`) implements the
+iterative amplitude-adjusted Fourier transform of:
+
+- Schreiber, T., & Schmitz, A. (1996). Improved surrogate data for
+  nonlinearity tests. *Physical Review Letters, 77*(4), 635-638.
+  <https://doi.org/10.1103/PhysRevLett.77.635>
+
 The pseudo-dyad generators (`generate_surrogate_pseudo()`,
 `generate_pseudo_dyads()`) follow the between-dyad shuffling convention
 of the rMEA package:

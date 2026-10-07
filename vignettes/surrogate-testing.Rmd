@@ -20,7 +20,7 @@ Surrogate testing allows us to build an empirical null distribution—a "chance 
 
 ## 1. Choosing a Surrogate Method
 
-The **bsync** package provides three methods for generating null data. The first two work within one dyad. The third needs a sample of dyads. Choosing the right one depends on the nature of your signal and on the null hypothesis you want to test.
+The **bsync** package provides four methods for generating null data. The first three work within one dyad. The fourth needs a sample of dyads. Choosing the right one depends on the nature of your signal and on the null hypothesis you want to test.
 
 ### 1.1 Circular Shift (`generate_surrogate_circular`)
 The circular shift method takes a time series and shifts it by a random interval, wrapping the end of the series back to the beginning.
@@ -36,7 +36,15 @@ Phase randomization uses the Fourier Transform to decompose a signal into its fr
 * **When to use it:** This is the "gold standard" for highly oscillatory data (e.g., rhythmic postural sway, physiological signals like heart rate or respiration).
 * **Important Note:** Because this method creates an entirely new signal from frequency components, it is statistically more conservative than circular shifting. It is significantly more computationally expensive to generate than circular shifts.
 
-### 1.3 Pseudo-Dyads (`generate_surrogate_pseudo`, `generate_pseudo_dyads`)
+### 1.3 IAAFT (`generate_surrogate_iaaft`)
+The iterative amplitude-adjusted Fourier transform (IAAFT) of Schreiber & Schmitz (1996) builds a surrogate that matches both the power spectrum and the value distribution of the original signal.
+
+* **How it works:** Each surrogate starts as a random shuffle of the signal. The method then alternates two steps. It gives the series the original Fourier amplitudes, and then it rank-orders the series so that it takes the original values. It stops when the rank-ordering no longer changes the series.
+* **Which form it returns:** For a finite signal, the two properties cannot both match exactly. With `match = "spectrum"` (the default), the spectrum matches exactly and the values match closely. With `match = "values"`, the values match exactly and the spectrum matches closely. The rank step lowers the autocorrelation a little, and in the package's size check a WCC test against the `"values"` form rejected a true null in 10.5% of pairs at a nominal 5%. The default form rejected 4.25%. `?generate_surrogate_iaaft` gives the design of that check.
+* **When to use it:** For skewed or bounded signals, such as motion energy, where phase randomization would make the surrogate values Gaussian. Against IAAFT surrogates, a significant result cannot come from the value distribution or the autocorrelation of one signal alone.
+* **Important Note:** The signal must have no missing values. Fill gaps first with `impute_ts_gaps()`. IAAFT is slower than the other within-dyad methods because it repeats the two steps until each surrogate stops changing.
+
+### 1.4 Pseudo-Dyads (`generate_surrogate_pseudo`, `generate_pseudo_dyads`)
 A pseudo-dyad pairs one person's series with a partner from a *different* dyad: two people who never interacted. This is the pseudo-synchrony approach of the rMEA package (Kleinbub & Ramseyer, 2020).
 
 * **How it works:** The partner series is real data, recorded under the same task timeline. Series of unequal length are cropped start-aligned, so sample `t` of both series sits at the same task time. `generate_pseudo_dyads()` crops each pair to its shorter series. `generate_surrogate_pseudo()` crops longer partners to the length of the target's `y`, and excludes shorter partners with a warning. Start alignment assumes that every dyad was sampled at the same rate and that sample 1 of every series is the same task onset. Resample and trim first if that is not true.
@@ -164,3 +172,7 @@ Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never be zero:
 calculating exact p-values when permutations are randomly drawn. *Statistical
 Applications in Genetics and Molecular Biology*, 9(1), Article 39.
 https://doi.org/10.2202/1544-6115.1585
+
+Schreiber, T., & Schmitz, A. (1996). Improved surrogate data for nonlinearity
+tests. *Physical Review Letters*, 77(4), 635-638.
+https://doi.org/10.1103/PhysRevLett.77.635

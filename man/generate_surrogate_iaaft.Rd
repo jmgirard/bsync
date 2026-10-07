@@ -64,7 +64,13 @@ rank step lowers the autocorrelation slightly, and a synchrony statistic
 that grows with autocorrelation, such as the mean absolute Fisher z of
 \code{\link[=wcc]{wcc()}}, then reads high against these surrogates. So a test against
 \code{"values"} surrogates can reject a true null more often than its nominal
-level, and the spectrum form is the default.
+level, and the spectrum form is the default. In a size check run on
+2026-10-06 (independent pairs of AR(1) series x_n = 0.7 x_(n-1) + e_n
+observed as x_n^3, length 512, 19 surrogates per pair, \code{\link[=wcc_surrogate]{wcc_surrogate()}}
+with \code{window_size = 32}, \code{lag_max = 4}, \code{window_increment = 16}), the
+spectrum form rejected 17 of 400 pairs (4.25\%) at p <= .05. The values
+form rejected 21 of 200 pairs (10.5\%). The package test
+\code{tests/testthat/test-surrogate-calibration.R} repeats this check.
 
 \strong{\code{max_iter}.} The spectral error falls about as 1 / i over the first
 iterations, and the paper's Fig. 2 runs to 1000 iterations (p. 3). The default
