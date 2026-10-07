@@ -2,17 +2,16 @@
 
 _The only authority on milestone status. Grouped by status, not ID._
 _Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M018)._
-_Last hygiene check: 2026-10-07 (M015 merged and archived, M012 row pruned, RB01/RR01 archived, 3 lessons added, validate green)_
+_Last hygiene check: 2026-10-07 (M016 merged and archived, M013 row pruned, 3 lessons added, validate green)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M016 | wphase parity: selectable statistic and workflow article | review | — | normal | milestones/M016-wphase-parity.md |
 | M017 | Count every window that fits when window_increment > 1 | planned | — | normal | milestones/M017-window-count-fix.md |
+| M016 | wphase parity: selectable statistic and workflow article | done | — | normal | milestones/archive/M016-wphase-parity.md |
 | M015 | Segment-shuffling surrogate generator | done | M014 | normal | milestones/archive/M015-segment-shuffle-surrogates.md |
 | M014 | IAAFT surrogate generator | done | — | normal | milestones/archive/M014-iaaft-surrogates.md |
-| M013 | Granger multiverse summary and plot for both directions | done | — | normal | milestones/archive/M013-granger-multiverse-direction.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent
      terminal (done or dropped) rows — older ones live in milestones/archive/ + git -->
 
