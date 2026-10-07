@@ -289,3 +289,122 @@ test_that("print and summary methods run for wphase objects", {
   expect_message(print(opt), "Windowed Phase Synchrony Optima")
   expect_message(summary(opt), "Optimum Lag Distribution")
 })
+
+# Selectable aggregate statistic ---------------------------------------------
+#
+# Closed-form oracle for statistic = "peak": the definition wcc_aggregate()
+# uses for wcc's "peak" (R/wcc.R), applied to PLV. An explicit loop over the
+# Hilbert phases finds every window start that fits (start i with
+# i - lag_max >= 1 and i + window_size - 1 + lag_max <= n), takes the largest
+# PLV across lags in each window, and averages those per-window values.
+peak_plv_loop <- function(x, y, ws, lag_max, wi = 1, li = 1) {
+  phi_x <- Arg(gsignal::hilbert(x))
+  phi_y <- Arg(gsignal::hilbert(y))
+  n <- length(x)
+  lags <- seq(-lag_max, lag_max, by = li)
+  starts <- integer(0)
+  i <- 1 + lag_max
+  while (i + ws - 1 + lag_max <= n) {
+    starts <- c(starts, i)
+    i <- i + wi
+  }
+  peaks <- numeric(length(starts))
+  for (r in seq_along(starts)) {
+    best <- -Inf
+    for (tau in lags) {
+      s <- starts[r]
+      dphi <- phi_x[s:(s + ws - 1)] - phi_y[(s + tau):(s + tau + ws - 1)]
+      best <- max(best, Mod(mean(exp(1i * dphi))))
+    }
+    peaks[r] <- best
+  }
+  mean(peaks)
+}
+
+# Case (a): default increments, no time. y keeps a constant phase offset from
+# x in its first half and runs at another frequency in its second half, so
+# windows range from full locking to drifting phases.
+# Case (b): window_increment = 2, lag_increment = 3 with lag_max = 5 (lags
+# -5, -2, 1, 4), and a time vector in which window starts 7 and 9 share a
+# timestamp. n = 201 makes n - window_size - 2 * lag_max odd, so the window
+# count does not depend on how a partial last step is counted.
+stat_cases <- function() {
+  t <- 0:79
+  y_a <- c(
+    cos(2 * pi * 5 * t[1:40] / 80 + 0.6),
+    cos(2 * pi * 9 * t[41:80] / 80)
+  )
+  time_b <- as.numeric(seq_len(201))
+  time_b[9] <- time_b[7]
+  list(
+    a = list(
+      x = cos(2 * pi * 5 * t / 80), y = y_a, time = NULL,
+      ws = 16, lm = 2, wi = 1, li = 1
+    ),
+    b = list(
+      x = sim_dyad$z_A[1:201], y = sim_dyad$z_B[1:201], time = time_b,
+      ws = 32, lm = 5, wi = 2, li = 3
+    )
+  )
+}
+
+run_wphase_case <- function(cs, y = cs$y, ...) {
+  wphase(cs$x, y,
+    time = cs$time, window_size = cs$ws, lag_max = cs$lm,
+    window_increment = cs$wi, lag_increment = cs$li, ...
+  )
+}
+
+test_that("statistic = 'peak' matches the explicit-loop oracle; default stays the mean PLV", {
+  for (cs in stat_cases()) {
+    peak_ref <- peak_plv_loop(cs$x, cs$y, cs$ws, cs$lm, cs$wi, cs$li)
+    res_peak <- run_wphase_case(cs, statistic = "peak")
+    expect_lt(abs(res_peak$aggregate[[1]] - peak_ref), 1e-12)
+
+    res_default <- run_wphase_case(cs)
+    expect_identical(
+      res_default$aggregate[[1]],
+      base::mean(res_default$results_df$plv, na.rm = TRUE)
+    )
+  }
+})
+
+test_that("wphase_surrogate matches the null to the observed statistic", {
+  for (cs in stat_cases()) {
+    set.seed(11)
+    ys <- generate_surrogate_circular(cs$y, n_surrogates = 3)
+    for (st in c("mean_plv", "peak")) {
+      surr <- wphase_surrogate(cs$x, cs$y,
+        y_surrogates = ys, time = cs$time,
+        window_size = cs$ws, lag_max = cs$lm,
+        window_increment = cs$wi, lag_increment = cs$li,
+        statistic = st
+      )
+      for (j in 1:3) {
+        ref_j <- run_wphase_case(cs, y = ys[, j], statistic = st)$aggregate[[1]]
+        expect_lt(abs(surr$surrogate_z[j] - ref_j), 1e-12)
+      }
+      if (st == "peak") {
+        peak_ref <- peak_plv_loop(cs$x, cs$y, cs$ws, cs$lm, cs$wi, cs$li)
+        expect_lt(abs(surr$observed_z - peak_ref), 1e-12)
+      }
+    }
+  }
+})
+
+test_that("an unknown statistic stops wphase and wphase_surrogate", {
+  x <- sim_dyad$z_A[1:120]
+  y <- sim_dyad$z_B[1:120]
+  expect_error(
+    wphase(x, y, window_size = 32, lag_max = 4, statistic = "median"),
+    "should be one of"
+  )
+  ys <- matrix(y, ncol = 1)
+  expect_error(
+    wphase_surrogate(x, y,
+      y_surrogates = ys, window_size = 32, lag_max = 4,
+      statistic = "median"
+    ),
+    "should be one of"
+  )
+})

@@ -1,13 +1,13 @@
 # M016: wphase parity: selectable statistic and workflow article
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** user-facing — adds an exported argument and a pkgdown article
-- **Branch/PR:** —
+- **Branch/PR:** m016-wphase-parity
 
 ## Goal
 
@@ -60,7 +60,7 @@ Bring `wphase()` to the level of the other estimators: a selectable aggregate st
 
 ## Tasks
 
-- [ ] T1: Write the tests for AC1–AC3 in `tests/testthat/test-wphase.R` first. The hand-built pair uses phases with a known PLV per window and lag (for example a constant phase offset in some windows and scattered phases in others), so the explicit loop has a known answer.
+- [x] T1: Write the tests for AC1–AC3 in `tests/testthat/test-wphase.R` first. The hand-built pair uses phases with a known PLV per window and lag (for example a constant phase offset in some windows and scattered phases in others), so the explicit loop has a known answer.
 - [ ] T2: Add `statistic` to `wphase()` (`R/wphase.R:65`) and `wphase_surrogate()` (`R/surrogate_analysis.R`), with `match.arg()`. Extend `wphase_aggregate()` (`R/wphase.R:211`) to take the statistic and the window ids, as `wcc_aggregate()` does, and call it from both paths. Take the window ids from the grid positions before any `time` mapping, so that tied timestamps group windows the same way on the observed and surrogate sides. Keep the `"mean_plv"` path as `base::mean(plv, na.rm = TRUE)`. Document the argument with the reason for the default and the source of the `"peak"` definition.
 - [ ] T3: Carry the statistic into `settings`, `names(aggregate)`, and the `print()` labels of `print.wphase_res` and `print.wphase_surr`. Write the AC4 tests.
 - [ ] T4: Write `vignettes/wphase-workflow.Rmd` from the structure of `vignettes/wgranger-workflow.Rmd` and `wdtw-workflow.Rmd`. Show the effect of the band-pass on mean PLV with computed values, keep the surrogate chunk fast enough for `check()`, and do not set a `future` multisession plan (LESSONS M011). Add it to `_pkgdown.yml` and link it from the See also lists of the other workflow articles and from `wphase()` `@seealso`.
@@ -73,6 +73,7 @@ Bring `wphase()` to the level of the other estimators: a selectable aggregate st
 - 2026-10-07: plan gate chose band-pass with `gsignal::butter()` + `gsignal::filtfilt()` in the article over a new band-pass method in `smooth_signal()`, because no one asked for new API and gsignal is already imported; falsified by users needing band-pass often enough that the article's code is copied into analyses.
 - 2026-10-07: plan gate chose `"peak"` as the second statistic over other PLV summaries (median, lag-0 only) because it matches wcc's `statistic` values, so one argument means the same thing across estimators; falsified by a published PLV convention that defines a different per-window summary.
 - 2026-10-07: criteria audit (full mode, fresh Opus reader) returned 6 findings on M016, all fixed: AC1 pins the default path to `mean(results_df$plv, na.rm = TRUE)` instead of "the value on main" (M017 moves fixtures with increments above 1); AC1/AC2 add a case with increments above 1 and a tied `time`, and T2 takes window ids from grid positions; AC2 drops the trivially true `observed_z` clause for an explicit-loop check; AC3 matches "should be one of" only; AC4 names the print labels; AC5 limits the computed-number rule to results. The tied-time issue in `wcc()` "peak" became a `[low]` candidate row.
+- 2026-10-07: T1 done. Added 3 tests to `test-wphase.R` (peak oracle loop, matched null, unknown statistic). All 3 fail on main with "unused argument (statistic = ...)". Case (b) uses lag_max = 5 so the lags (-5, -2, 1, 4) are asymmetric, and n = 201 so its window count is the same before and after M017.
 
 ## Decisions
 
