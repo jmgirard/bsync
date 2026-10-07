@@ -51,7 +51,16 @@ autocorrelation), and/or \code{"iaaft"} (preserves the power spectrum
 exactly and the value distribution closely;
 \code{\link{generate_surrogate_iaaft}} with its default
 \code{match = "spectrum"}). \code{"iaaft"} needs \code{y} without
-missing values.}
+missing values. \code{"segment"} (\code{\link{generate_surrogate_segment}})
+reorders segments of \code{y}. A segment cell uses segments of
+\code{window_size + 2 * lag_max} samples (\code{window_size} for
+\code{"wgranger"}) and steps its windows one segment at a time, so that
+every lagged window lies inside one segment. \code{increment_pct} does
+not apply to segment cells: the grid has one segment row per window,
+lag, and statistic, with \code{increment_pct} \code{NA}. A segment cell
+with fewer than 4 segments cannot reach p <= .05, so it is skipped with
+a warning. A cell with 4 segments uses \code{min(n_surrogates, 23)}
+surrogates, because 4 segments have 23 orders other than the original.}
 
 \item{n_surrogates}{Single positive integer; number of surrogates per cell.
 Default is `100`. Use >= 1000 for reporting. A cell is significant at
@@ -104,7 +113,8 @@ rows in the output grid.
 
 **Surrogate reuse.** One surrogate matrix is generated per unique
 `surrogate_method` and reused across every cell sharing that method; surrogate
-cost does not multiply by grid size.
+cost does not multiply by grid size. For `"segment"`, one matrix is
+generated per distinct segment size.
 
 **Effect size polarity.** For WCC and Granger, higher values indicate stronger
 synchrony (upper-tail test): `ES = (obs - null_mean) / null_sd`. For WDTW,
@@ -139,5 +149,6 @@ glance(mv)
 \seealso{
 [autotune_wcc()], [suggest_wcc_params()], [plot.bsync_multiverse()],
   [tidy.bsync_multiverse()], [glance.bsync_multiverse()];
-  \code{\link{generate_surrogate_iaaft}} for the \code{"iaaft"} method
+  \code{\link{generate_surrogate_iaaft}} for the \code{"iaaft"} method;
+  \code{\link{generate_surrogate_segment}} for the \code{"segment"} method
 }

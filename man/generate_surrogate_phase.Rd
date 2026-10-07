@@ -38,7 +38,8 @@ dim(surr)
 }
 \seealso{
 \code{\link{generate_surrogate_iaaft}}, which also keeps the
-  value distribution, and \code{\link{generate_surrogate_circular}} for
-  the other within-dyad nulls; \code{\link{generate_surrogate_pseudo}}
+  value distribution, \code{\link{generate_surrogate_circular}}, and
+  \code{\link{generate_surrogate_segment}} for the other within-dyad
+  nulls; \code{\link{generate_surrogate_pseudo}}
   for the between-dyad null.
 }

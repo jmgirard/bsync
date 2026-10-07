@@ -1,5 +1,26 @@
 # bsync (development version)
 
+## Segment-shuffling surrogates
+
+* New `generate_surrogate_segment()` cuts a series into segments of
+  `segment_size` samples, from sample 1 as in the SUSY package (Tschacher &
+  Meier, 2020), and builds each surrogate by putting the segments in a new
+  order. Orders are drawn uniformly from all orders other than the original,
+  without repeats, so a surrogate can leave a segment in place. This keeps
+  the add-one p-value exact. The samples after the last whole segment stay in
+  place, and the call says how many there are. Missing values move with
+  their segments. With 3 segments or fewer, the call warns that no test can
+  reach p <= .05.
+* A segment test needs every window to lie inside one segment. For `wcc()`,
+  `wdtw()`, and `wphase()`, use `segment_size >= window_size + 2 * lag_max`
+  and `window_increment = segment_size`. For `wgranger()`, use
+  `segment_size = window_size = window_increment`.
+* `synchrony_multiverse()` and `autotune_wcc()` accept
+  `surrogate_method = "segment"`. A segment cell uses segments of
+  `window_size + 2 * lag_max` samples (`window_size` for Granger) and steps
+  its windows one segment at a time, so `increment_pct` does not apply to it.
+  A segment cell with fewer than 4 segments is skipped with a warning.
+
 ## IAAFT surrogates
 
 * New `generate_surrogate_iaaft()` builds surrogates with the iterative

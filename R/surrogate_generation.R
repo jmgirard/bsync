@@ -20,8 +20,9 @@
 #' # Build 100 circular-shift surrogates of one partner's signal
 #' surr <- generate_surrogate_circular(sim_dyad$x_B, n_surrogates = 100)
 #' dim(surr)
-#' @seealso \code{\link{generate_surrogate_phase}} and
-#'   \code{\link{generate_surrogate_iaaft}} for the other within-dyad nulls;
+#' @seealso \code{\link{generate_surrogate_phase}},
+#'   \code{\link{generate_surrogate_iaaft}}, and
+#'   \code{\link{generate_surrogate_segment}} for the other within-dyad nulls;
 #'   \code{\link{generate_surrogate_pseudo}} for the between-dyad null.
 #' @export
 generate_surrogate_circular <- function(y, n_surrogates = 100, lag_max = NULL) {
@@ -84,8 +85,9 @@ generate_surrogate_circular <- function(y, n_surrogates = 100, lag_max = NULL) {
 #' surr <- generate_surrogate_phase(sim_dyad$x_B, n_surrogates = 100)
 #' dim(surr)
 #' @seealso \code{\link{generate_surrogate_iaaft}}, which also keeps the
-#'   value distribution, and \code{\link{generate_surrogate_circular}} for
-#'   the other within-dyad nulls; \code{\link{generate_surrogate_pseudo}}
+#'   value distribution, \code{\link{generate_surrogate_circular}}, and
+#'   \code{\link{generate_surrogate_segment}} for the other within-dyad
+#'   nulls; \code{\link{generate_surrogate_pseudo}}
 #'   for the between-dyad null.
 #' @export
 generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
@@ -217,8 +219,9 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #' @references Schreiber, T., & Schmitz, A. (1996). Improved surrogate data
 #'   for nonlinearity tests. *Physical Review Letters*, 77(4), 635-638.
 #'   \doi{10.1103/PhysRevLett.77.635}
-#' @seealso [generate_surrogate_phase()] and [generate_surrogate_circular()]
-#'   for the other within-dyad nulls; [generate_surrogate_pseudo()] for the
+#' @seealso [generate_surrogate_phase()], [generate_surrogate_circular()],
+#'   and [generate_surrogate_segment()] for the other within-dyad nulls;
+#'   [generate_surrogate_pseudo()] for the
 #'   between-dyad null; [wcc_surrogate()], [wdtw_surrogate()],
 #'   [wgranger_surrogate()], [wphase_surrogate()].
 #' @examples
@@ -347,13 +350,100 @@ generate_surrogate_iaaft <- function(
 
 #' Generate Segment-Shuffling Surrogates
 #'
-#' @param y A numeric vector containing a time series.
+#' Cuts `y` into segments of `segment_size` samples and builds each
+#' surrogate by putting the segments in a new order. Each segment keeps its
+#' own values, autocorrelation, and any trend inside it. Only the time at
+#' which each segment occurred changes.
+#'
+#' @details
+#' **Which null this tests.** Each window of `x` has one segment of `y` that
+#' occurred alongside it. The test asks whether that segment resembles the
+#' window more than the other segments of `y` do. Under the null, the time
+#' at which each segment of `y` occurred carries no information about `x`,
+#' so any order of the segments is as good as the real one. The test is
+#' exact if the segments of `y` are exchangeable, which is close to true
+#' when a segment is long relative to the memory of `y`, and if every window
+#' lies inside one segment (see "Windows and segments").
+#'
+#' **Segments and orders.** The series has k = `floor(length(y) /
+#' segment_size)` segments, cut from sample 1. Segment i covers samples
+#' (i - 1) * `segment_size` + 1 to i * `segment_size`. Each surrogate takes
+#' an order drawn uniformly from all k! - 1 orders other than the original,
+#' and no order is drawn twice. So a surrogate can leave a segment in place:
+#' about one of the k segments, on average. This rule makes the add-one
+#' p-value of the surrogate wrappers exact. Orders that move every segment
+#' do not form a group with the original order, and a test against them
+#' rejects a true null too often. With up to 8 segments and an
+#' `n_surrogates` of at least k! - 1, the call returns all k! - 1 orders and
+#' says so. With 3 segments or fewer, k! - 1 is below 19, so no test can
+#' reach p <= .05, and the call warns.
+#'
+#' **The tail.** The last `length(y) - k * segment_size` samples do not fill
+#' a segment. They stay in place at the end of every surrogate, and the call
+#' says how many there are. Missing values move with their segments.
+#'
+#' **Windows and segments.** A window that crosses a segment boundary is
+#' continuous in `y` but not in a surrogate, and the test then rejects a true
+#' null too often. Every window and every lagged window lies inside one
+#' segment under these settings:
+#'
+#' * For [wcc()], [wdtw()], and [wphase()]: `segment_size >= window_size +
+#'   2 * lag_max` and `window_increment = segment_size`.
+#' * For [wgranger()]: `segment_size = window_size = window_increment`.
+#'
+#' The window grid then has k - 1 windows, or k windows when the tail is
+#' `segment_size - 1` samples. The remaining segment serves only as a source
+#' for the surrogates. [wphase()] takes the Hilbert transform of the whole
+#' series, so a segment test of phase synchrony is approximate even with
+#' aligned windows. [synchrony_multiverse()] and [autotune_wcc()] use these
+#' settings for `surrogate_method = "segment"`.
+#'
+#' **SUSY.** The segment cut follows the `susy()` function of the SUSY
+#' package (Tschacher & Meier, 2020). SUSY correlates each segment of one
+#' series with each segment of the other and compares the real pairs with
+#' the pairs of different segments. bsync instead builds full-length
+#' reordered series, so that every surrogate wrapper can use them. SUSY's
+#' pseudo pairs never match a segment with itself, but bsync's orders can
+#' leave a segment in place, which keeps the p-value exact. SUSY drops the
+#' tail, and bsync keeps it. bsync does not reproduce SUSY's effect size or
+#' its numbers. SUSY's rule `segment >= 2 * maxlag` has the analogue
+#' `segment_size >= window_size + 2 * lag_max`.
+#'
+#' @param y A numeric vector containing a time series. `NA` values are
+#'   allowed.
 #' @param segment_size A single whole number from 2 to
 #'   `floor(length(y) / 2)`: the segment length in samples.
 #' @param n_surrogates A single positive integer: the number of surrogates.
-#'   Default is `100`.
+#'   Default is `100`. Above 8 segments, it must be below k! - 1.
 #' @return A numeric matrix with `length(y)` rows and one column per
-#'   surrogate.
+#'   surrogate, ready to pass as `y_surrogates` to [wcc_surrogate()] and the
+#'   other surrogate wrappers. It has `n_surrogates` columns, or k! - 1
+#'   columns if that is fewer.
+#' @references Tschacher, W., & Meier, D. (2020). Physiological synchrony in
+#'   psychotherapy sessions. *Psychotherapy Research*, 30(5), 558-573.
+#'   \doi{10.1080/10503307.2019.1612114}
+#' @seealso [generate_surrogate_circular()], [generate_surrogate_phase()],
+#'   and [generate_surrogate_iaaft()] for the other within-dyad nulls;
+#'   [generate_surrogate_pseudo()] for the between-dyad null;
+#'   [wcc_surrogate()], [wdtw_surrogate()], [wgranger_surrogate()],
+#'   [wphase_surrogate()].
+#' @examples
+#' # Windows of 96 samples with lags up to 10 need segments of at least
+#' # 96 + 2 * 10 = 116 samples: 20 segments of sim_dyad's 2400 samples.
+#' surr <- generate_surrogate_segment(
+#'   sim_dyad$x_B,
+#'   segment_size = 116,
+#'   n_surrogates = 19
+#' )
+#' dim(surr)
+#'
+#' \donttest{
+#' # Step the windows one segment at a time, so each lies inside a segment
+#' wcc_surrogate(
+#'   x = sim_dyad$x_A, y = sim_dyad$x_B, y_surrogates = surr,
+#'   window_size = 96, lag_max = 10, window_increment = 116
+#' )
+#' }
 #' @md
 #' @export
 generate_surrogate_segment <- function(y, segment_size, n_surrogates = 100) {
@@ -564,8 +654,8 @@ generate_surrogate_segment <- function(y, segment_size, n_surrogates = 100) {
 #'   time-series. *Psychotherapy Research*. \doi{10.1080/10503307.2020.1844334}
 #' @seealso [generate_pseudo_dyads()] for the sample-wide set of
 #'   pseudo-dyads; [generate_surrogate_circular()],
-#'   [generate_surrogate_phase()], and [generate_surrogate_iaaft()] for
-#'   within-dyad nulls; [wcc_surrogate()],
+#'   [generate_surrogate_phase()], [generate_surrogate_iaaft()], and
+#'   [generate_surrogate_segment()] for within-dyad nulls; [wcc_surrogate()],
 #'   [wdtw_surrogate()], [wgranger_surrogate()], [wphase_surrogate()].
 #' @examples
 #' # Three "dyads" built from sim_dyad's axes (a stand-in for a real sample)
@@ -735,8 +825,8 @@ generate_surrogate_pseudo <- function(
 #' @seealso [generate_surrogate_pseudo()] for a per-dyad surrogate matrix,
 #'   which [wcc_surrogate()], [wdtw_surrogate()], [wgranger_surrogate()], and
 #'   [wphase_surrogate()] accept; [generate_surrogate_circular()],
-#'   [generate_surrogate_phase()], and [generate_surrogate_iaaft()] for
-#'   within-dyad nulls; [wcc()], [wdtw()],
+#'   [generate_surrogate_phase()], [generate_surrogate_iaaft()], and
+#'   [generate_surrogate_segment()] for within-dyad nulls; [wcc()], [wdtw()],
 #'   [wgranger()], and [wphase()] to compute the statistic on each
 #'   pseudo-dyad.
 #' @examples

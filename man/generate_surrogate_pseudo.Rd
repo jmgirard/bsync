@@ -118,7 +118,7 @@ time-series. \emph{Psychotherapy Research}. \doi{10.1080/10503307.2020.1844334}
 \seealso{
 \code{\link[=generate_pseudo_dyads]{generate_pseudo_dyads()}} for the sample-wide set of
 pseudo-dyads; \code{\link[=generate_surrogate_circular]{generate_surrogate_circular()}},
-\code{\link[=generate_surrogate_phase]{generate_surrogate_phase()}}, and \code{\link[=generate_surrogate_iaaft]{generate_surrogate_iaaft()}} for
-within-dyad nulls; \code{\link[=wcc_surrogate]{wcc_surrogate()}},
+\code{\link[=generate_surrogate_phase]{generate_surrogate_phase()}}, \code{\link[=generate_surrogate_iaaft]{generate_surrogate_iaaft()}}, and
+\code{\link[=generate_surrogate_segment]{generate_surrogate_segment()}} for within-dyad nulls; \code{\link[=wcc_surrogate]{wcc_surrogate()}},
 \code{\link[=wdtw_surrogate]{wdtw_surrogate()}}, \code{\link[=wgranger_surrogate]{wgranger_surrogate()}}, \code{\link[=wphase_surrogate]{wphase_surrogate()}}.
 }

@@ -104,8 +104,9 @@ for nonlinearity tests. \emph{Physical Review Letters}, 77(4), 635-638.
 \doi{10.1103/PhysRevLett.77.635}
 }
 \seealso{
-\code{\link[=generate_surrogate_phase]{generate_surrogate_phase()}} and \code{\link[=generate_surrogate_circular]{generate_surrogate_circular()}}
-for the other within-dyad nulls; \code{\link[=generate_surrogate_pseudo]{generate_surrogate_pseudo()}} for the
+\code{\link[=generate_surrogate_phase]{generate_surrogate_phase()}}, \code{\link[=generate_surrogate_circular]{generate_surrogate_circular()}},
+and \code{\link[=generate_surrogate_segment]{generate_surrogate_segment()}} for the other within-dyad nulls;
+\code{\link[=generate_surrogate_pseudo]{generate_surrogate_pseudo()}} for the
 between-dyad null; \code{\link[=wcc_surrogate]{wcc_surrogate()}}, \code{\link[=wdtw_surrogate]{wdtw_surrogate()}},
 \code{\link[=wgranger_surrogate]{wgranger_surrogate()}}, \code{\link[=wphase_surrogate]{wphase_surrogate()}}.
 }

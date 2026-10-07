@@ -92,8 +92,8 @@ time-series. \emph{Psychotherapy Research}. \doi{10.1080/10503307.2020.1844334}
 \code{\link[=generate_surrogate_pseudo]{generate_surrogate_pseudo()}} for a per-dyad surrogate matrix,
 which \code{\link[=wcc_surrogate]{wcc_surrogate()}}, \code{\link[=wdtw_surrogate]{wdtw_surrogate()}}, \code{\link[=wgranger_surrogate]{wgranger_surrogate()}}, and
 \code{\link[=wphase_surrogate]{wphase_surrogate()}} accept; \code{\link[=generate_surrogate_circular]{generate_surrogate_circular()}},
-\code{\link[=generate_surrogate_phase]{generate_surrogate_phase()}}, and \code{\link[=generate_surrogate_iaaft]{generate_surrogate_iaaft()}} for
-within-dyad nulls; \code{\link[=wcc]{wcc()}}, \code{\link[=wdtw]{wdtw()}},
+\code{\link[=generate_surrogate_phase]{generate_surrogate_phase()}}, \code{\link[=generate_surrogate_iaaft]{generate_surrogate_iaaft()}}, and
+\code{\link[=generate_surrogate_segment]{generate_surrogate_segment()}} for within-dyad nulls; \code{\link[=wcc]{wcc()}}, \code{\link[=wdtw]{wdtw()}},
 \code{\link[=wgranger]{wgranger()}}, and \code{\link[=wphase]{wphase()}} to compute the statistic on each
 pseudo-dyad.
 }
