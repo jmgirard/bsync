@@ -126,28 +126,29 @@ Evidence gathered 2026-10-07 at 7d46c5c (origin/main 9f82936, unmoved).
 - AC8: `pkgdown::check_pkgdown()`: no problems. `spelling::spell_check_package()`: no spelling errors. `devtools::document()` left no diff in `man/` or `NAMESPACE`. `devtools::check()` at 7d46c5c: 0 errors, 0 warnings, 0 notes, so no note that main lacks. It runs the full test suite with 0 failures.
 - Consistency gate: `cairn_validate.py` passed (1 advisory: 8 criteria above the split guide). No principle changed, so `cairn_impact` was skipped. Toolchain gate: `document()` no diff, NEWS entry present, no new top-level files, check clean. The README.Rmd/README.md method list lacks segment (blame-history #7, fixed below).
 - spawned: diff-bug, blame-history, prior-review
-- diff-bug #1: `plot()` dashboard fills segment rows' Increment tiles with the NA grey (`active` is NA when `increment_pct` is NA) — fix now.
-- diff-bug #2: `autotune_wcc()` repeats `bsync_segment_skipped` once per dyad — fix now.
-- diff-bug #3: the grid `window_size` and `window_increment` became integer for every method (double on main) — fix now.
-- diff-bug #4: the autotune test has no skipped segment row, so "skipped or not" is not exercised — fix now.
-- diff-bug #5: `autotune_wcc()` tests `"segment" %in% surrogate_method` on the raw argument, so a partial name like `"seg"` loses the once-per-call message — fix now.
-- diff-bug #6: the aligned-design message fires when every segment cell is skipped — fix now.
+- diff-bug #1: `plot()` dashboard fills segment rows' Increment tiles with the NA grey (`active` is NA when `increment_pct` is NA) — fix now, fixed 6d3168b.
+- diff-bug #2: `autotune_wcc()` repeats `bsync_segment_skipped` once per dyad — fix now, fixed 6d3168b.
+- diff-bug #3: the grid `window_size` and `window_increment` became integer for every method (double on main) — fix now, fixed 6d3168b.
+- diff-bug #4: the autotune test has no skipped segment row, so "skipped or not" is not exercised — fix now, fixed 6d3168b.
+- diff-bug #5: `autotune_wcc()` tests `"segment" %in% surrogate_method` on the raw argument, so a partial name like `"seg"` loses the once-per-call message — fix now, fixed 6d3168b.
+- diff-bug #6: the aligned-design message fires when every segment cell is skipped — fix now, fixed 6d3168b.
 - diff-bug #7: print and glance report the requested `n_surrogates` although cells with 4 to 8 segments use at most k! - 1 — follow-up (new candidate row; the plan put a per-cell count out of scope).
-- diff-bug #8: the row dedup also collapses segment rows that repeat because the user repeated an input — fix now.
+- diff-bug #8: the row dedup also collapses segment rows that repeat because the user repeated an input — fix now, fixed 6d3168b.
 - diff-bug #9: the lag cap makes crossed cells identical in samples, which inflates robustness counts (pre-existing for every method) — follow-up (new candidate row).
-- diff-bug #10: `y_na` in the NA test is drawn before `set.seed()` — fix now.
-- diff-bug #11: the vignette points to a tests file that is not installed — fix now (name the source repository).
+- diff-bug #10: `y_na` in the NA test is drawn before `set.seed()` — fix now, fixed 6d3168b.
+- diff-bug #11: the vignette points to a tests file that is not installed — fix now (name the source repository), fixed 6d3168b.
 - diff-bug #12: the autotune result does not record which surrogate method won (pre-existing) — follow-up (new candidate row).
-- blame-history #1: same as diff-bug #1 — fix now.
+- blame-history #1: same as diff-bug #1 — fix now, fixed 6d3168b.
 - blame-history #2: same as diff-bug #7 — follow-up.
-- blame-history #3: same as diff-bug #2 — fix now.
-- blame-history #4: stale text: the multiverse header and `R/surrogate_engine.R` say one matrix per method, and the Grid construction paragraph says every argument is crossed and skipped cells are "silently" skipped — fix now.
-- blame-history #5: a window that rounds to 1 sample gives segment size 1, and the generator then aborts the whole multiverse call — fix now.
+- blame-history #3: same as diff-bug #2 — fix now, fixed 6d3168b.
+- blame-history #4: stale text: the multiverse header and `R/surrogate_engine.R` say one matrix per method, and the Grid construction paragraph says every argument is crossed and skipped cells are "silently" skipped — fix now, fixed 6d3168b.
+- blame-history #5: a window that rounds to 1 sample gives segment size 1, and the generator then aborts the whole multiverse call — fix now, fixed 6d3168b.
 - blame-history #6: the "Calibration tidy-up" candidate said to act at the next edit of the calibration file, which this branch made — follow-up (the row stays and its trigger is reworded).
-- blame-history #7: README.Rmd, `vignettes/bsync.Rmd`, and `vignettes/choosing-parameters.Rmd` list the surrogate methods without segment; the CLAUDE.md out-of-scope bullet still calls it a candidate — fix now for the docs; CLAUDE.md absorbed into the existing "Update CLAUDE.md for IAAFT" candidate row.
+- blame-history #7: README.Rmd, `vignettes/bsync.Rmd`, and `vignettes/choosing-parameters.Rmd` list the surrogate methods without segment; the CLAUDE.md out-of-scope bullet still calls it a candidate — fix now for the docs, fixed 6d3168b; CLAUDE.md absorbed into the existing "Update CLAUDE.md for IAAFT" candidate row.
 - blame-history #8: the vignette hard-codes the 10.0% and 5.6% rates — reject (false: the figures are pinned with their procedure and date, as the derived-figures rule asks, and the test is seeded).
-- blame-history #9: `max_lag_samp` repeats the lag formula that `l_samp_all` now holds — fix now.
-- prior-review #1: same as diff-bug #2 — fix now.
-- prior-review #2: the skip warning does not name the dyad inside `autotune_wcc()` — fix now (the aggregated autotune warning names the dyads).
-- prior-review #3: a new raw-backtick line in the non-`@md` `synchrony_multiverse()` block — fix now (`\code{}`).
+- blame-history #9: `max_lag_samp` repeats the lag formula that `l_samp_all` now holds — fix now, fixed 6d3168b.
+- prior-review #1: same as diff-bug #2 — fix now, fixed 6d3168b.
+- prior-review #2: the skip warning does not name the dyad inside `autotune_wcc()` — fix now (the aggregated autotune warning names the dyads), fixed 6d3168b.
+- prior-review #3: a new raw-backtick line in the non-`@md` `synchrony_multiverse()` block — fix now (`\code{}`), fixed 6d3168b.
 - prior-review #4: same as blame-history #8 — reject (false, pinned with procedure and date).
+- Fix verification at 6d3168b: `identical()` holds between main's and the branch's `synchrony_multiverse()` (same seed) for wcc with phase, circular, and IAAFT over 2 increments and 2 statistics, wdtw, wgranger, and an NA-laden circular case. `test-multiverse-segment.R` gained tests for the 1-sample skip, no message when every segment cell is skipped, repeated inputs, grid column types, a dashboard snapshot (checked by eye: no Increment tile active for segment specs), and an autotune run with a partial method name and one aggregated skip warning naming dyads 1, 2, and 3. Both segment test files pass.
