@@ -99,6 +99,7 @@ Add an exported IAAFT surrogate generator that keeps the value distribution and 
 - 2026-10-06: T7 done: `devtools::check()` on `7f31563` gave 0 errors, 0 warnings, 0 notes (2m 14s). Status set to review.
 - 2026-10-06: review: the plan's fixed-point stop was to be falsified by "typical series that do not converge within 1000 iterations". At 10000 samples, 4 of 5 surrogates did not converge (run 2026-10-06), so the condition holds for long series. Not a return: the spectrum-form output stays exact in its spectrum, and the warning is loud. The spectral-accuracy stop is filed as the candidate row "[low] IAAFT on long series".
 - 2026-10-06: review fix-now work for 22 findings (Review section), with D-003 and three candidate rows.
+- 2026-10-07: step-7 approval: m014-iaaft-surrogates approved for merge
 
 ## Decisions
 
