@@ -9,8 +9,10 @@
 #  - Surrogate reuse: one y_surrogates matrix per unique surrogate_method,
 #    reused across every cell sharing it (efficiency seam from M5)
 #  - ES polarity: WCC/Granger = upper-tail (higher better), WDTW = lower-tail
-#  - Granger has two directional statistics (f_xy / f_yx); result columns
-#    es_xy/p_xy/es_yx/p_yx are added when estimator = "wgranger"
+#  - Granger has two directional statistics (f_xy / f_yx). The columns es/p
+#    hold x -> y, and es_yx/p_yx (plus observed_yx, null_mean_yx,
+#    null_sd_yx) are added for y -> x when estimator = "wgranger", along with
+#    a $robustness_yx summary
 #  - bsync_multiverse result is light (Invariant 7): tidy grid + settings +
 #    robustness summary; no raw surrogate draws, no raw input stored
 
@@ -433,7 +435,48 @@ synchrony_multiverse <- function(
   )
 
   out <- list(grid = grid_tbl, settings = settings, robustness = robustness)
+  if (is_granger) {
+    out$robustness_yx <- multiverse_robustness(
+      n_cells, es_yx_vec, p_yx_vec, skipped_vec
+    )
+  }
   structure(out, class = c("bsync_multiverse", "list"))
+}
+
+# One Granger direction of a bsync_multiverse result. "xy" reads `es`/`p` and
+# `$robustness`; "yx" reads `es_yx`/`p_yx` and `$robustness_yx`, which only
+# Granger results carry. `label` is NULL for non-Granger results, so methods
+# print no direction line for them.
+multiverse_direction <- function(x, direction = c("xy", "yx"),
+                                 call = rlang::caller_env()) {
+  direction <- rlang::arg_match(
+    direction, c("xy", "yx"),
+    error_arg = "direction", error_call = call
+  )
+  estimator <- x$settings$estimator
+  is_granger <- identical(estimator, "wgranger")
+  if (direction == "yx" && !is_granger) {
+    cli::cli_abort(
+      c(
+        "{.code direction = \"yx\"} needs a Granger result.",
+        "x" = "This result's estimator is {.val {estimator}}, which has one \\
+        direction only."
+      ),
+      call = call
+    )
+  }
+  if (direction == "xy") {
+    list(
+      direction = direction, es = x$grid$es, p = x$grid$p,
+      robustness = x$robustness,
+      label = if (is_granger) "x -> y" else NULL
+    )
+  } else {
+    list(
+      direction = direction, es = x$grid$es_yx, p = x$grid$p_yx,
+      robustness = x$robustness_yx, label = "y -> x"
+    )
+  }
 }
 
 

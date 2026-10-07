@@ -1,13 +1,13 @@
 # M013: Granger multiverse summary and plot for both directions
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** user-facing — changes exported print, summary, glance, and plot methods
-- **Branch/PR:** —
+- **Branch/PR:** m013-granger-multiverse-direction
 
 ## Goal
 
@@ -50,7 +50,7 @@ Let users read the y -> x direction of a Granger `synchrony_multiverse()` result
 
 ## Tasks
 
-- [ ] T1: In `synchrony_multiverse()` (`R/multiverse.R:426`), compute `multiverse_robustness(n_cells, es_yx_vec, p_yx_vec, skipped_vec)` for Granger and store it as `$robustness_yx`. Add one internal helper that matches `direction` with `rlang::arg_match()`, stops for `"yx"` on a non-Granger result, and returns the matching robustness list and grid columns. Write the AC1 tests first. Pick a seed and series where `n_significant` and `median_es` differ between directions, and where at least one cell is significant in one direction only.
+- [x] T1: In `synchrony_multiverse()` (`R/multiverse.R:426`), compute `multiverse_robustness(n_cells, es_yx_vec, p_yx_vec, skipped_vec)` for Granger and store it as `$robustness_yx`. Add one internal helper that matches `direction` with `rlang::arg_match()`, stops for `"yx"` on a non-Granger result, and returns the matching robustness list and grid columns. Write the AC1 tests first. Pick a seed and series where `n_significant` and `median_es` differ between directions, and where at least one cell is significant in one direction only.
 - [ ] T2: Add `direction` to `glance.bsync_multiverse()` (`R/tidy.R:154`). Add the `direction` column for Granger only. Write the tests for AC2 and for the `glance()` part of AC5.
 - [ ] T3: Add `direction` to `print.bsync_multiverse()` (`R/multiverse.R:568`) and `summary.bsync_multiverse()` (`R/multiverse.R:590`). Add a direction line for Granger. For `"yx"`, `summary()` reads `es_yx` for the range and the skipped count. Write the tests for AC3 and for their parts of AC5.
 - [ ] T4: Add `direction` to `plot.bsync_multiverse()` and `multiverse_plot_data()` (`R/multiverse_plot.R:12`, `R/multiverse_plot.R:42`). Move the title text (`R/multiverse_plot.R:73`) into an internal helper. It reads the chosen robustness list and names the direction for Granger only, so the WCC title stays the same. Write the tests for AC4, AC6, and the plot part of AC5. Record the new vdiffr snapshot and look at it before the commit.
@@ -64,6 +64,8 @@ Let users read the y -> x direction of a Granger `synchrony_multiverse()` result
 - 2026-10-06: plan gate chose a `direction` argument (default `"xy"`) over always showing both directions, because the default output stays the same. Falsified by users who need both directions in one call, such as one `glance()` row per direction.
 - 2026-10-06: plan decided that `glance()` gets a `direction` column for Granger only, so WCC and WDTW columns do not change. The `es_xy` doc fix is in scope because the same vignette section shows the new call.
 - 2026-10-06: criteria audit (full mode, fresh Opus reader) returned 13 findings, and all 13 are fixed. Fixtures must differ in `n_significant`, `median_es`, ranking, and one significance call. All seven robustness fields are checked, and WDTW cases are added. The glance column list is written out. The plot title moves to a tested helper, and snapshot checks use `git diff`. AC6 uses hand-built grids. The `R/multiverse.R` header and a test title are named, and NOTEs are triaged. Proportionality: no finding.
+- 2026-10-06: implement started on branch `m013-granger-multiverse-direction`.
+- 2026-10-06: T1 done. `$robustness_yx` is set for Granger, and the `multiverse_direction()` helper matches `direction` and stops for `"yx"` on WCC or WDTW. The fixture is an AR(1) x driving y at lag 2, with no y -> x path: 8 cells, 6 significant x -> y and 0 y -> x. The header comment fix (part of T5) landed here. The touched R files were not air-clean on main, so only the new test file is air-formatted. Suite: 1921 pass, 0 fail.
 
 ## Decisions
 
