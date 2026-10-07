@@ -1,6 +1,6 @@
 # M015: Segment-shuffling surrogate generator
 
-- **Status:** in-progress
+- **Status:** blocked
 - **Priority:** normal
 - **Depends on:** M014
 - **Driving RR:** —
@@ -77,6 +77,7 @@ Add an exported segment-shuffling surrogate generator that reorders whole segmen
 - 2026-10-07: T3 finding: two causes. (1) Orders that keep no segment in place are not a group with the identity, so the surrogates resemble each other more than the observed series. Drawing any order except the identity gave 0.049 at 5 segments and 0.068 at 8. (2) Lagged windows cross segment boundaries, so the observed series keeps continuity that the surrogates lose. With segment = window + 2 * lag_max = increment, every lagged window stays in one segment. Both fixes together gave 0.049 at 8 segments and 0.043 at 5, and 0.060 with a 3-sample increment.
 - 2026-10-07: stop: the fix changes the Goal (no segment in place) and the multiverse segment size the question set chose (the window size). The user decides between a re-plan, an escalation, and the plan as written.
 - 2026-10-07: user chose escalation to a Fable review through /milestone-brief before any re-plan.
+- 2026-10-07: blocked on RB01 (`cairn/reviews/RB01-segment-surrogate-size.md`). The brief commit goes on the milestone branch, not main, because main still carries the M015 file at `planned`. The calibration script is inline in the brief, because the session scratchpad is not in the repo.
 
 ## Decisions
 
