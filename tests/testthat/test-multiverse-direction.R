@@ -66,6 +66,27 @@ expected_robustness <- function(es, p) {
   )
 }
 
+expect_yx_refused <- function(expr, estimator) {
+  expect_error(
+    expr,
+    paste0(
+      "needs a Granger result[\\s\\S]*estimator is \"",
+      estimator,
+      "\""
+    ),
+    class = "rlang_error",
+    perl = TRUE
+  )
+}
+
+expect_bad_direction <- function(expr) {
+  expect_error(
+    expr,
+    "`direction` must be one of \"xy\" or \"yx\", not \"zz\"",
+    class = "rlang_error"
+  )
+}
+
 robustness_fields <- c(
   "n_cells",
   "n_valid",
@@ -104,4 +125,52 @@ test_that("a Granger result carries $robustness_yx built from es_yx and p_yx", {
 test_that("WCC and WDTW results have no $robustness_yx", {
   expect_false("robustness_yx" %in% names(small_multiverse("wcc")))
   expect_false("robustness_yx" %in% names(small_multiverse("wdtw")))
+})
+
+
+# glance() ---------------------------------------------------------------------
+
+summary_cols <- c(
+  "n_cells",
+  "n_valid",
+  "n_significant",
+  "pct_significant",
+  "median_es",
+  "iqr_es",
+  "sign_consistent"
+)
+
+test_that("glance() reports the chosen Granger direction", {
+  res <- granger_fixture()
+
+  gl_xy <- glance(res)
+  expect_identical(gl_xy$direction, "xy")
+  expect_equal(as.list(gl_xy[summary_cols]), res$robustness)
+
+  gl_yx <- glance(res, direction = "yx")
+  expect_identical(gl_yx$direction, "yx")
+  expect_equal(as.list(gl_yx[summary_cols]), res$robustness_yx)
+  expect_false(gl_xy$n_significant == gl_yx$n_significant)
+})
+
+test_that("glance() columns of WCC and WDTW results do not change", {
+  cols <- c(
+    "estimator",
+    "n_cells",
+    "n_valid",
+    "n_significant",
+    "pct_significant",
+    "median_es",
+    "iqr_es",
+    "sign_consistent",
+    "n_surrogates"
+  )
+  expect_named(glance(small_multiverse("wcc")), cols)
+  expect_named(glance(small_multiverse("wdtw")), cols)
+})
+
+test_that("glance() refuses direction = 'yx' for one-direction estimators", {
+  expect_yx_refused(glance(small_multiverse("wcc"), direction = "yx"), "wcc")
+  expect_yx_refused(glance(small_multiverse("wdtw"), direction = "yx"), "wdtw")
+  expect_bad_direction(glance(granger_fixture(), direction = "zz"))
 })

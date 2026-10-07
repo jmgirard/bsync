@@ -146,14 +146,20 @@ tidy.bsync_multiverse <- function(x, ...) {
 #' sign-consistency.
 #'
 #' @param x A `bsync_multiverse` object from [synchrony_multiverse()].
+#' @param direction For a Granger result (`estimator = "wgranger"`), the
+#'   direction to summarise: `"xy"` (x -> y, the default) or `"yx"` (y -> x).
+#'   Other estimators have one direction only, so `"yx"` is an error for them.
 #' @param ... Additional arguments (not used).
-#' @return A one-row [tibble::tibble()].
+#' @return A one-row [tibble::tibble()]. For a Granger result, a `direction`
+#'   column after `estimator` names the direction summarised.
 #' @seealso [tidy.bsync_multiverse()], [as_tibble.bsync_multiverse()],
 #'   [synchrony_multiverse()]
+#' @md
 #' @exportS3Method generics::glance bsync_multiverse
-glance.bsync_multiverse <- function(x, ...) {
-  rb <- x$robustness
-  tibble::tibble(
+glance.bsync_multiverse <- function(x, direction = c("xy", "yx"), ...) {
+  dir <- multiverse_direction(x, direction)
+  rb <- dir$robustness
+  out <- tibble::tibble(
     estimator       = x$settings$estimator,
     n_cells         = rb$n_cells, # total specifications in the grid
     n_valid         = rb$n_valid, # cells with a computable (non-NA) ES
@@ -164,6 +170,10 @@ glance.bsync_multiverse <- function(x, ...) {
     sign_consistent = rb$sign_consistent,
     n_surrogates    = x$settings$n_surrogates
   )
+  if (!is.null(dir$label)) {
+    out <- tibble::add_column(out, direction = dir$direction, .after = "estimator")
+  }
+  out
 }
 
 
