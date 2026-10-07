@@ -96,3 +96,28 @@ Evidence gathered 2026-10-07 at 2e7faad, branch current with origin/main (8abade
 - AC7: `devtools::document()` left `git status` clean. `pkgdown::check_pkgdown()` reported "No problems found". `devtools::check()` at 2e7faad gave 0 errors, 0 warnings, and 0 notes.
 
 Consistency gate: `cairn_validate.py` exit 0 ("all checks passed"). No principle changed, so `cairn_impact` was skipped. Profile slot results: `document()` gives no diff. Generated files are not hand-edited (man/ comes from `document()`). The branch does not touch README.Rmd or README.md. `check_pkgdown()` passes. The NEWS entry is present. There are no new top-level files. `check()` gives 0/0/0.
+
+Independent review. spawned: diff-bug, blame-history, prior-review. The 22 findings were settled as 12 fixed, 2 sent to candidate rows, and 8 rejected. After the fixes, `devtools::test()` gave 314 tests and 0 failed, `devtools::check()` gave 0/0/0, and the spell check was clean.
+
+- prior-review #1: the new article is missing from the article lists in `vignettes/bsync.Rmd`, README, and `choosing-parameters.Rmd` — fix now: added to the bsync.Rmd and README "Where to go next" tables and to the choosing-parameters See also list, and README.md rebuilt (one added line), fixed d74beab. The getting-started estimator table had no wphase column before this branch, so that part became the candidate row "Getting-started estimator table lacks wphase".
+- prior-review #2: `@md` on the `wphase()` block re-renders its prose as markdown — reject (false as a defect): the diff-bug lens read `man/wphase.Rd` and found that the change fixes literal backticks and `[fn()]` that rendered raw on main. This follows the per-block pattern of M009/M011/M013.
+- prior-review #3: qualitative claims in the article (peak larger than mean for the surrogates, heatmap "high across most lags") are not computed — fix now: the peak-versus-mean comparison is now an inline count (1000 of 1000 surrogates), and the heatmap sentence states only what the inline medians show, fixed d74beab.
+- diff-bug #1: with tied `time`, `print()` / `glance()` / `pick_optima()` count windows by the time-mapped `i` (79) while the "peak" aggregate uses grid positions (80) — follow-up: the undercount was there before this branch. Absorbed into the candidate row "Tied timestamps merge windows".
+- diff-bug #2: the article's "drift decides the PLV, not the coupling" compares unlike pairs — fix now: it now says that two series that share nothing score higher than a coupled pair, so unfiltered PLV does not measure coupling. Fixed d74beab.
+- diff-bug #3: the article does not mention optima at the lag boundary — fix now: an inline count of optima at ±10 samples (44 of 206) is now stated without a causal claim, fixed d74beab.
+- diff-bug #4: the NEWS claim that relative phase tracks lead–lag better turns one simulation into a rule — fix now: it now says "In its simulated example", fixed d74beab.
+- diff-bug #5: "rMEA best-lag convention (Boker et al., 2002)" mixes sources — fix now for `wphase()`: the docs now call it the best-lag definition that `wcc()` uses, with no citation, fixed d74beab. The same wording in `wcc()` existed before this branch and became the candidate row "wcc "peak" citation".
+- diff-bug #6: "high across most lags in every window" is not computed — fix now: same fix as prior-review #3, fixed d74beab.
+- diff-bug #7: "second-order Butterworth" — fix now: it now says `butter()` with `n = 2` gives a 4th-order band-pass, fixed d74beab.
+- diff-bug #8: `wphase_aggregate()` treats any non-`"mean_plv"` value as `"peak"` — reject (planned change): T2 specified the shape of `wcc_aggregate()`, and both exported entry points validate with `match.arg()`.
+- diff-bug #9: the AC4 test leaks the extra cli lines of the surrogate print into the test output — reject (style): output noise only, and AC4 requires `expect_message()`.
+- diff-bug #10: the AC1 default check repeats the implementation's expression — reject (planned change): AC1 specifies exactly this `identical()` check, and the "peak" path has the explicit-loop oracle.
+- diff-bug #11: the history wording "the value `wphase()` reported before this argument existed" in the roxygen — fix now: removed, fixed d74beab.
+- blame-history #1: the article cautions against `leadership_asymmetry()` with wphase optima, which M008 made supported — fix now: the article now says the function accepts wphase optima and advises checking them against the relative phase first, fixed d74beab.
+- blame-history #2: "as `wcc(statistic = "peak")` does" is not exact under tied `time` — follow-up: the difference is wcc's tied-time grouping. Absorbed into the candidate row "Tied timestamps merge windows".
+- blame-history #3: the peak oracle never exercises the window that M017 will add — reject (false): `peak_plv_loop()` enumerates every fitting start on its own (`i + ws - 1 + lag_max <= n`), so it stays correct after M017. n = 201 only keeps the current grid equal to it.
+- blame-history #4: temporal wording in the roxygen — fix now: same fix as diff-bug #11, fixed d74beab.
+- blame-history #5: `wphase_aggregate()` falls into "peak" for any other value — reject (planned change): same as diff-bug #8.
+- blame-history #6: `@md` re-renders the whole Rd — reject (false as a defect): same as prior-review #2.
+- blame-history #7: NEWS overgeneralizes from one simulation — fix now: same fix as diff-bug #4, fixed d74beab.
+- blame-history #8: the shared `wphase_agg_label()` helper differs from wcc's inline labels — reject (style).
