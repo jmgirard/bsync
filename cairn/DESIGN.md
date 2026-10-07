@@ -254,6 +254,7 @@ announced via cli and documented in roxygen with its rationale.
 | `distance_metric` (WDTW) | `"L2"` | squared Euclidean local cost; `"L1"` for robustness. |
 | `ar_order` (Granger) | `1` | parsimonious; expose for users with a model rationale. Window must keep positive residual df. |
 | WCC aggregate statistic | **selectable**, default `"mean_abs_z"` | M4: keep mean \|Fisher-z\| over the surface (= SUSY's *mean absolute Z*; Tschacher & Meier 2020); add peak-per-window (the rMEA / Boker best-lag convention). Threads through observed + surrogate (Inv. 2). |
+| wphase aggregate statistic | **selectable**, default `"mean_plv"` | M016: keep the mean PLV over the surface (the pre-M016 value); add `"peak"` = per-window maximum PLV across lags, averaged over windows (the wcc `"peak"` definition applied to PLV). Window ids are grid positions, not timestamps. Threads through observed + surrogate (Inv. 2). |
 | surrogate method | none default — user picks | `phase` preserves spectrum (continuous data); `circular` preserves autocorrelation (behavioral data). Documented per data type. |
 | `n_surrogates` | `100` | enough to explore; **≥ 1000 advised for reporting** (the `print` method warns below 1000). `synchrony_multiverse()` and `autotune_wcc()` warn below 19, where the add-one p-value cannot reach p <= .05, the significance rule (D-002), and the surrogate `print` methods note it (corrected M012). |
 | smoothing | Savitzky–Golay, `sg_order = 3`, `window = 5` | zero-phase, preserves peak shape; order 2 for structural trends, > 3 overfits tracking noise. |

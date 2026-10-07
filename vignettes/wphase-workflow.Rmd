@@ -126,7 +126,7 @@ print(wphase_results)
 
 The `wphase()` function returns a list object of class `wphase_res`. Its `results_df` has one row per window (`i`, in samples) and lag (`tau`, in samples), with the `plv` and `rel_phase` of that cell.
 
-The relative phase carries the lead–lag information. At lag 0, a relative phase of φ radians means that Person A is ahead by φ / (2π × 0.5 Hz) seconds:
+The relative phase carries the lead–lag information. At lag 0, divide the relative phase (in radians) by `2 * pi * 0.5` (the rhythm frequency in radians per second) to get the lead of Person A in seconds:
 
 ```{r rel-phase}
 lag0 <- wphase_results$results_df[wphase_results$results_df$tau == 0, ]
