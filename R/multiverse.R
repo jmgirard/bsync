@@ -605,14 +605,22 @@ multiverse_direction <- function(x, direction = c("xy", "yx"),
 #' Print method for bsync_multiverse objects
 #'
 #' @param x A `bsync_multiverse` object.
+#' @param direction For a Granger result (`estimator = "wgranger"`), the
+#'   direction to report: `"xy"` (x -> y, the default) or `"yx"` (y -> x).
+#'   Other estimators have one direction only, so `"yx"` is an error for them.
 #' @param ... Additional arguments (not used).
 #' @return Returns `x` invisibly.
+#' @md
 #' @export
-print.bsync_multiverse <- function(x, ...) {
+print.bsync_multiverse <- function(x, direction = c("xy", "yx"), ...) {
+  dir <- multiverse_direction(x, direction)
   s <- x$settings
-  rb <- x$robustness
+  rb <- dir$robustness
 
   cli::cli_h1("Synchrony Multiverse Analysis ({s$estimator})")
+  if (!is.null(dir$label)) {
+    cli::cli_dl(c("Direction" = "{dir$label}"))
+  }
   cli::cli_dl(c(
     "Specifications" = "{rb$n_cells} ({rb$n_valid} computable)",
     "Surrogates per cell" = "{s$n_surrogates}",
@@ -627,18 +635,23 @@ print.bsync_multiverse <- function(x, ...) {
 #' Summary method for bsync_multiverse objects
 #'
 #' @param object A `bsync_multiverse` object.
+#' @param direction For a Granger result (`estimator = "wgranger"`), the
+#'   direction to report: `"xy"` (x -> y, the default) or `"yx"` (y -> x).
+#'   Other estimators have one direction only, so `"yx"` is an error for them.
 #' @param ... Additional arguments (not used).
 #' @return Returns `object` invisibly.
+#' @md
 #' @export
-summary.bsync_multiverse <- function(object, ...) {
-  print(object)
+summary.bsync_multiverse <- function(object, direction = c("xy", "yx"), ...) {
+  dir <- multiverse_direction(object, direction)
+  print(object, direction = dir$direction)
 
   cli::cli_h2("Specification Grid")
   cli::cli_text(
-    "{nrow(object$grid)} total cells (including {sum(is.na(object$grid$es))} skipped/NA)"
+    "{nrow(object$grid)} total cells (including {sum(is.na(dir$es))} skipped/NA)"
   )
 
-  es_range <- range(object$grid$es, na.rm = TRUE)
+  es_range <- range(dir$es, na.rm = TRUE)
   cli::cli_dl(c(
     "ES range"     = "[{round(es_range[1], 3)}, {round(es_range[2], 3)}]",
     "Sample rate"  = "{object$settings$sample_rate} Hz"

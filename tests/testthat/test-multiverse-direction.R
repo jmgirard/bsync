@@ -87,6 +87,12 @@ expect_bad_direction <- function(expr) {
   )
 }
 
+# print() and summary() write cli messages, one per line. This checks that one
+# of the lines contains `text` and drops the others.
+expect_line <- function(f, text) {
+  suppressMessages(expect_message(f(), text, fixed = TRUE))
+}
+
 robustness_fields <- c(
   "n_cells",
   "n_valid",
@@ -173,4 +179,68 @@ test_that("glance() refuses direction = 'yx' for one-direction estimators", {
   expect_yx_refused(glance(small_multiverse("wcc"), direction = "yx"), "wcc")
   expect_yx_refused(glance(small_multiverse("wdtw"), direction = "yx"), "wdtw")
   expect_bad_direction(glance(granger_fixture(), direction = "zz"))
+})
+
+
+# print() and summary() --------------------------------------------------------
+
+sig_line <- function(rb) {
+  paste0(
+    "Significant (p <= .05): ",
+    rb$n_significant,
+    " of ",
+    rb$n_valid
+  )
+}
+
+range_line <- function(es) {
+  r <- round(range(es, na.rm = TRUE), 3)
+  paste0("ES range: [", r[1], ", ", r[2], "]")
+}
+
+test_that("print() names the Granger direction and reports its counts", {
+  res <- granger_fixture()
+  expect_line(function() print(res), "Direction: x -> y")
+  expect_line(function() print(res), sig_line(res$robustness))
+  expect_line(function() print(res, direction = "yx"), "Direction: y -> x")
+  expect_line(
+    function() print(res, direction = "yx"),
+    sig_line(res$robustness_yx)
+  )
+  expect_invisible(suppressMessages(print(res, direction = "yx")))
+})
+
+test_that("summary() reports the es_yx range and NA count for y -> x", {
+  res <- granger_fixture()
+  expect_line(function() summary(res), "Direction: x -> y")
+  expect_line(function() summary(res), range_line(res$grid$es))
+
+  f <- function() summary(res, direction = "yx")
+  expect_line(f, "Direction: y -> x")
+  expect_line(f, sig_line(res$robustness_yx))
+  expect_line(f, range_line(res$grid$es_yx))
+  expect_false(range_line(res$grid$es_yx) == range_line(res$grid$es))
+
+  # The skipped/NA count reads the chosen direction's ES column.
+  res_na <- res
+  res_na$grid$es_yx[1:3] <- NA_real_
+  expect_line(
+    function() summary(res_na, direction = "yx"),
+    "(including 3 skipped/NA)"
+  )
+  expect_line(function() summary(res_na), "(including 0 skipped/NA)")
+})
+
+test_that("print() and summary() of a WCC result name no direction", {
+  res <- small_multiverse("wcc")
+  msgs <- testthat::capture_messages(summary(res))
+  expect_false(any(grepl("Direction", msgs, fixed = TRUE)))
+})
+
+test_that("print() and summary() refuse direction = 'yx' for WCC", {
+  res <- small_multiverse("wcc")
+  expect_yx_refused(print(res, direction = "yx"), "wcc")
+  expect_yx_refused(summary(res, direction = "yx"), "wcc")
+  expect_bad_direction(print(granger_fixture(), direction = "zz"))
+  expect_bad_direction(summary(granger_fixture(), direction = "zz"))
 })
