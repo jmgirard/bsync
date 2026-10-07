@@ -338,7 +338,148 @@ generate_surrogate_iaaft <- function(
 }
 
 # -------------------------------------------------------------------------
-# --- 4. Pseudo-Dyad Method (between dyads) -------------------------------
+# --- 4. Segment-Shuffling Method -----------------------------------------
+# -------------------------------------------------------------------------
+# M015. Convention: SUSY 0.1.0 susy() (Tschacher & Meier, 2020) -- k =
+# floor(n / segment_size) segments cut from sample 1 (cairn/references/
+# tschacher2020.md). bsync reorders the segments into a full-length series
+# and keeps the tail in place, where SUSY pairs segments and drops the tail.
+
+#' Generate Segment-Shuffling Surrogates
+#'
+#' @param y A numeric vector containing a time series.
+#' @param segment_size A single whole number from 2 to
+#'   `floor(length(y) / 2)`: the segment length in samples.
+#' @param n_surrogates A single positive integer: the number of surrogates.
+#'   Default is `100`.
+#' @return A numeric matrix with `length(y)` rows and one column per
+#'   surrogate.
+#' @md
+#' @export
+generate_surrogate_segment <- function(y, segment_size, n_surrogates = 100) {
+  if (!is.numeric(y) || !is.null(dim(y))) {
+    cli::cli_abort("{.arg y} must be a numeric vector.")
+  }
+  if (!.is_count(n_surrogates)) {
+    cli::cli_abort("{.arg n_surrogates} must be a single positive integer.")
+  }
+  if (!.is_count(segment_size) || segment_size < 2) {
+    cli::cli_abort(
+      "{.arg segment_size} must be a single whole number of at least 2."
+    )
+  }
+  n_y <- length(y)
+  half <- floor(n_y / 2)
+  if (segment_size > half) {
+    cli::cli_abort(c(
+      "{.arg segment_size} ({segment_size}) must be at most \\
+      {.code floor(length(y) / 2)} ({half}).",
+      "i" = "The series needs at least two segments."
+    ))
+  }
+
+  y <- as.double(y)
+  segment_size <- as.integer(segment_size)
+  k <- n_y %/% segment_size
+  n_orders <- .n_segment_orders(k)
+
+  if (k <= 8) {
+    # Few segments: list every order with no segment in place, then draw
+    # distinct rows from the list.
+    orders <- .segment_orders(k)
+    if (n_surrogates >= n_orders) {
+      cli::cli_inform(
+        "Returning all {n_orders} possible segment order{?s}, because \\
+        {.arg n_surrogates} ({n_surrogates}) is not below that number.",
+        class = "bsync_segment_all_orders"
+      )
+    } else {
+      orders <- orders[sample.int(n_orders, n_surrogates), , drop = FALSE]
+    }
+  } else {
+    # Many segments: draw orders and reject a fixed segment or a repeat.
+    if (n_surrogates >= n_orders) {
+      cli::cli_abort(
+        "{.arg n_surrogates} ({n_surrogates}) must be below the \\
+        {n_orders} possible orders of {k} segments."
+      )
+    }
+    orders <- matrix(0L, nrow = n_surrogates, ncol = k)
+    seen <- new.env(hash = TRUE, size = n_surrogates)
+    n_found <- 0L
+    while (n_found < n_surrogates) {
+      p <- sample.int(k)
+      if (any(p == seq_len(k))) {
+        next
+      }
+      key <- paste(p, collapse = ",")
+      if (!is.null(seen[[key]])) {
+        next
+      }
+      seen[[key]] <- TRUE
+      n_found <- n_found + 1L
+      orders[n_found, ] <- p
+    }
+  }
+
+  n_tail <- n_y - k * segment_size
+  if (n_tail > 0) {
+    cli::cli_inform(
+      "The last {n_tail} sample{?s} of {.arg y} do{?es/} not fill a whole \\
+      segment and stay in place.",
+      class = "bsync_segment_tail"
+    )
+  }
+
+  # Row index of each surrogate sample in y: segment orders[j, i] of y goes
+  # to position i, and the tail rows map to themselves.
+  offsets <- seq_len(segment_size)
+  tail_rows <- seq_len(n_tail) + k * segment_size
+  surr_mat <- matrix(0, nrow = n_y, ncol = nrow(orders))
+  for (j in seq_len(nrow(orders))) {
+    rows <- c(
+      rep((orders[j, ] - 1L) * segment_size, each = segment_size) + offsets,
+      tail_rows
+    )
+    surr_mat[, j] <- y[rows]
+  }
+  surr_mat
+}
+
+# Number of orders of k segments with no segment in its original place (the
+# derangement count): D(1) = 0, D(2) = 1, D(k) = (k - 1)(D(k - 1) + D(k - 2)).
+.n_segment_orders <- function(k) {
+  d <- c(0, 1)
+  if (k <= 2) {
+    return(d[k])
+  }
+  for (m in 3:k) {
+    d[m] <- (m - 1) * (d[m - 1] + d[m - 2])
+  }
+  d[k]
+}
+
+# Every order of 1..k with no segment in place, one per row, in lexicographic
+# order. Built one position at a time: each row extends by every value that
+# is unused and not equal to the position.
+.segment_orders <- function(k) {
+  orders <- matrix(integer(0), nrow = 1, ncol = 0)
+  for (pos in seq_len(k)) {
+    n_r <- nrow(orders)
+    ok <- matrix(TRUE, nrow = n_r, ncol = k)
+    for (c in seq_len(ncol(orders))) {
+      ok[cbind(seq_len(n_r), orders[, c])] <- FALSE
+    }
+    ok[, pos] <- FALSE
+    idx <- which(ok, arr.ind = TRUE)
+    idx <- idx[order(idx[, "row"], idx[, "col"]), , drop = FALSE]
+    orders <- cbind(orders[idx[, "row"], , drop = FALSE], idx[, "col"])
+  }
+  unname(orders)
+}
+
+# -------------------------------------------------------------------------
+# --- 5. Pseudo-Dyad Method (between dyads) -------------------------------
 # -------------------------------------------------------------------------
 # M009. Convention: rMEA shuffle() (Kleinbub & Ramseyer, 2020) -- pairs
 # series from different dyads and crops each pair to the shorter series,

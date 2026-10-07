@@ -52,7 +52,7 @@ Add an exported segment-shuffling surrogate generator that reorders whole segmen
 ## Tasks
 
 - [x] T1: Write `cairn/references/tschacher2020.md` from the source-note template. The source is the SUSY 0.1.0 code on the CRAN GitHub mirror (`R/susy.R`, mirror commit `02590aea0877f09411584827cecaa623e46b6e4f`). A copy is at `sources/susy-0.1.0-susy.R`. Extract the segment count (`round(size/range - 0.499999)`), the dropped tail, the two segment-size rules, and the all-pairs surrogate set. State where bsync departs, including the seconds-to-rows check and the segment count on complete cases. Add the INDEX.md line.
-- [ ] T2: Write the AC1, AC2, and AC4 tests first. Put the plain reference in the test file with an oracle provenance header (DESIGN §13). Then implement `generate_surrogate_segment()` next to the other within-dyad generators in `R/surrogate_generation.R`. For small k, enumerate every order with no fixed segment and sample from that list. For large k, reject repeated draws.
+- [x] T2: Write the AC1, AC2, and AC4 tests first. Put the plain reference in the test file with an oracle provenance header (DESIGN §13). Then implement `generate_surrogate_segment()` next to the other within-dyad generators in `R/surrogate_generation.R`. For small k, enumerate every order with no fixed segment and sample from that list. For large k, reject repeated draws.
 - [ ] T3: Write the AC3 calibration test. Pick the series length, segment size, and lag so that the test runs in under a minute. Record the observed rejection rate in the work log.
 - [ ] T4: Add `"segment"` to the `surrogate_method` choices in `synchrony_multiverse()` and to the `autotune_wcc()` docs. Generate one matrix per distinct window size and look it up per cell. Skip cells whose window is above half the series length, with the existing skip path (`R/multiverse.R`, about line 303). Write the AC5 tests.
 - [ ] T5: Write roxygen with `@md`, `@references`, and `@seealso` links both ways with the other generators. Add the `_pkgdown.yml` row, the vignette section, the NEWS entry, and the WORDLIST words. Update the method count in section 1 of the vignette. Update DESIGN §2, §6, §13 (oracle records), and §14 #8. Run `devtools::document()`.
@@ -70,6 +70,9 @@ Add an exported segment-shuffling surrogate generator that reorders whole segmen
 - 2026-10-06: oracle plan: closed-form (plain reimplementation, AC2), invariant (AC1, AC5), and simulation-coverage (AC3). `test-external-oracle.R` already pins the SUSY kernel, and this generator only reorders `y`.
 - 2026-10-07: implement started on branch m015-segment-shuffle-surrogates, cut from origin/main at 9f82936.
 - 2026-10-07: T1 done. `cairn/references/tschacher2020.md` written from SUSY 0.1.0 `R/susy.R`, `man/susy.Rd`, and `DESCRIPTION` (the DOI is read from `DESCRIPTION`). INDEX line added.
+- 2026-10-07: T2 choice: up to 8 segments (14833 orders at most), the generator lists every order with no fixed segment in lexicographic order and draws distinct rows with one `sample.int()`. Above 8, it draws `sample.int(k)` and rejects a fixed segment or a repeat. Above 8 segments, `n_surrogates` at or above the order count aborts, because listing 9! or more orders is too large.
+- 2026-10-07: T2 choice: the tail and all-orders messages are `cli_inform()` with the classes `bsync_segment_tail` and `bsync_segment_all_orders`. The tail message fires only when the tail is not empty.
+- 2026-10-07: T2 done. `generate_surrogate_segment()` and `tests/testthat/test-surrogate-segment.R` (AC1, AC2, AC4) added, with the `_pkgdown.yml` row. Planted defects (a fixed segment allowed, the tail moved) turned 5 and 36 expectations red. Full suite: 0 failures.
 
 ## Decisions
 
