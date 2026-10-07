@@ -381,11 +381,25 @@ generate_surrogate_segment <- function(y, segment_size, n_surrogates = 100) {
   y <- as.double(y)
   segment_size <- as.integer(segment_size)
   k <- n_y %/% segment_size
-  n_orders <- .n_segment_orders(k)
+  # Every order except the original (D-004): with the original order they
+  # form a group, which makes the add-one p-value exact.
+  n_orders <- factorial(k) - 1
+
+  if (n_orders < 19) {
+    cli::cli_warn(
+      c(
+        "{k} segments have only {n_orders} order{?s} other than the \\
+        original, so no test on these surrogates can reach p <= .05.",
+        "i" = "Use a smaller {.arg segment_size}, so that the series has at \\
+        least 4 segments."
+      ),
+      class = "bsync_segment_few_orders"
+    )
+  }
 
   if (k <= 8) {
-    # Few segments: list every order with no segment in place, then draw
-    # distinct rows from the list.
+    # Few segments: list every order except the original, then draw distinct
+    # rows from the list.
     orders <- .segment_orders(k)
     if (n_surrogates >= n_orders) {
       cli::cli_inform(
@@ -397,7 +411,7 @@ generate_surrogate_segment <- function(y, segment_size, n_surrogates = 100) {
       orders <- orders[sample.int(n_orders, n_surrogates), , drop = FALSE]
     }
   } else {
-    # Many segments: draw orders and reject a fixed segment or a repeat.
+    # Many segments: draw orders and reject the original order or a repeat.
     if (n_surrogates >= n_orders) {
       cli::cli_abort(
         "{.arg n_surrogates} ({n_surrogates}) must be below the \\
@@ -409,7 +423,7 @@ generate_surrogate_segment <- function(y, segment_size, n_surrogates = 100) {
     n_found <- 0L
     while (n_found < n_surrogates) {
       p <- sample.int(k)
-      if (any(p == seq_len(k))) {
+      if (all(p == seq_len(k))) {
         next
       }
       key <- paste(p, collapse = ",")
@@ -446,22 +460,9 @@ generate_surrogate_segment <- function(y, segment_size, n_surrogates = 100) {
   surr_mat
 }
 
-# Number of orders of k segments with no segment in its original place (the
-# derangement count): D(1) = 0, D(2) = 1, D(k) = (k - 1)(D(k - 1) + D(k - 2)).
-.n_segment_orders <- function(k) {
-  d <- c(0, 1)
-  if (k <= 2) {
-    return(d[k])
-  }
-  for (m in 3:k) {
-    d[m] <- (m - 1) * (d[m - 1] + d[m - 2])
-  }
-  d[k]
-}
-
-# Every order of 1..k with no segment in place, one per row, in lexicographic
-# order. Built one position at a time: each row extends by every value that
-# is unused and not equal to the position.
+# Every order of 1..k except the original, one per row, in lexicographic
+# order. Built one position at a time: each row extends by every unused
+# value. The original order is the first row, so it is dropped at the end.
 .segment_orders <- function(k) {
   orders <- matrix(integer(0), nrow = 1, ncol = 0)
   for (pos in seq_len(k)) {
@@ -470,12 +471,11 @@ generate_surrogate_segment <- function(y, segment_size, n_surrogates = 100) {
     for (c in seq_len(ncol(orders))) {
       ok[cbind(seq_len(n_r), orders[, c])] <- FALSE
     }
-    ok[, pos] <- FALSE
     idx <- which(ok, arr.ind = TRUE)
     idx <- idx[order(idx[, "row"], idx[, "col"]), , drop = FALSE]
     orders <- cbind(orders[idx[, "row"], , drop = FALSE], idx[, "col"])
   }
-  unname(orders)
+  unname(orders[-1, , drop = FALSE])
 }
 
 # -------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 # M015: Segment-shuffling surrogate generator
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M014
 - **Driving RR:** —
@@ -58,7 +58,7 @@ Add an exported segment-shuffling surrogate generator that reorders whole segmen
 ## Tasks
 
 - [x] T1: Write `cairn/references/tschacher2020.md` from the source-note template. The source is the SUSY 0.1.0 code on the CRAN GitHub mirror (`R/susy.R`, mirror commit `02590aea0877f09411584827cecaa623e46b6e4f`). A copy is at `sources/susy-0.1.0-susy.R`. Extract the segment count (`round(size/range - 0.499999)`), the dropped tail, the two segment-size rules, and the all-pairs surrogate set. State where bsync departs, including the seconds-to-rows check and the segment count on complete cases. Add the INDEX.md line.
-- [ ] T2: Rework `generate_surrogate_segment()` and `tests/testthat/test-surrogate-segment.R` to uniform non-identity orders (AC1, AC2, AC3, AC5), tests first. Up to 8 segments, list all k! permutations except the identity and draw distinct rows. Above 8, draw `sample.int(k)` and reject the identity and repeats. Update the oracle provenance header (DESIGN §13).
+- [x] T2: Rework `generate_surrogate_segment()` and `tests/testthat/test-surrogate-segment.R` to uniform non-identity orders (AC1, AC2, AC3, AC5), tests first. Up to 8 segments, list all k! permutations except the identity and draw distinct rows. Above 8, draw `sample.int(k)` and reject the identity and repeats. Update the oracle provenance header (DESIGN §13).
 - [ ] T3: Write the AC4 size test in `test-surrogate-calibration.R`. Add a control on the 5-segment design: filter all 119 non-identity orders to the 44 with no segment in place and draw 19 per pair. Its rate must be above 0.07, so the test is shown able to fail. The control covers only the enumeration path. AC2 covers the rejection path. Record the observed rates in the work log.
 - [ ] T4: Add `"segment"` to `synchrony_multiverse()` and `autotune_wcc()` (AC6). Build segment rows once per window, lag, and statistic. Run the fewer-than-4-segments check before the `min_n` guard. Generate one matrix per distinct s of the cells that are not skipped, and look it up per cell. Muffle the generator's tail and all-orders messages inside the multiverse. Give the aligned-design message a class, and in `autotune_wcc()` give it once per call, as `warn_few_surrogates()` is handled there. A test that calls `autotune_wcc()` needs series of at least 4 * s samples, because the default lag is window / 2.
 - [ ] T5: Write roxygen with `@md`, `@references`, and `@seealso` links both ways with the other generators (AC7). Add the `_pkgdown.yml` row, the vignette section, the NEWS entry, and the WORDLIST words. Update the method count in section 1 of the vignette. Update DESIGN §2, §6, §13 (oracle records), and §14 #8. Run `devtools::document()`.
@@ -95,6 +95,8 @@ Add an exported segment-shuffling surrogate generator that reorders whole segmen
 - 2026-10-07: criteria audit (full mode, second fresh Opus reader) on the re-cut wording: 11 findings, all applied. AC6 now has explicit reference calls, the row-dedup test with two methods and statistics, the skip test at 3 segments and above half the length with rows kept, and the skip warning naming the lag only for wcc and wdtw. AC7 states k - 1 or k windows and min(n_surrogates, 23). AC3 gained a pair-uniformity test, and AC1 gained an input above 8 segments. Narrower promise chosen: no criterion on per-dyad repetition in autotune_wcc(), which T4 handles.
 - 2026-10-07: 8 acceptance criteria, one above the split guide of about 7. Not split, because the generator, its size test, and the multiverse method ship as one reviewable change.
 - 2026-10-07: the re-plan commit goes on branch m015-segment-shuffle-surrogates, not main, because the RB01/RR01 records and the T1/T2 work live there. Review squash-merges all of it.
+- 2026-10-07: implement resumed on the re-cut plan. origin/main has not moved since the branch was cut (9f82936).
+- 2026-10-07: T2 done. The generator draws uniform non-identity orders and warns (class `bsync_segment_few_orders`) below 4 segments. The tests cover AC1, AC2, AC3, and AC5. Planted defects: orders with no segment in place made 11 of 13 tests fail, and consecutive rows from a random start made 2 fail (the reference test and the pair-uniformity test). Full suite: 0 failures.
 
 ## Decisions
 

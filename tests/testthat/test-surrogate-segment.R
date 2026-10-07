@@ -2,20 +2,25 @@ library(testthat)
 
 # Segment-shuffling surrogates. Convention source: SUSY 0.1.0 susy()
 # (Tschacher & Meier, 2020); source note cairn/references/tschacher2020.md.
+# Order rule: uniform over all orders except the original (D-004; review
+# cairn/reviews/archive/RR01-segment-surrogate-size.md, Q1).
 #
 # Oracle records (DESIGN.md section 13):
 #   segment-closed-form (closed-form): segment_reference() below, a plain
-#     reimplementation with explicit loops. It lists the orders with no fixed
-#     segment by stepping through every permutation in lexicographic order
-#     (next_permutation()), not by the generator's recursive build, and it
-#     uses the generator's random-number order: up to 8 segments, one
-#     sample.int(n_orders, n_surrogates) draw from that list; above 8, one
-#     sample.int(k) per try until n_surrogates distinct orders are accepted.
-#     Asserted in the "matches the plain reference" test.
+#     reimplementation with explicit loops. It lists the orders other than
+#     the original by stepping through every permutation in lexicographic
+#     order (next_permutation()), not by the generator's matrix build, and
+#     it uses the generator's random-number order: up to 8 segments, one
+#     sample.int(k! - 1, n_surrogates) draw from that list; above 8, one
+#     sample.int(k) per try until n_surrogates distinct non-identity orders
+#     are accepted. Asserted in the "matches the plain reference" test.
 #   segment-invariants (invariant): every column is a reordering of the
-#     segments of y with no segment in place, the tail stays, NA values move
+#     segments of y other than the original, the tail stays, NA values move
 #     with their segments, and the segment cut equals the eps loop of SUSY's
 #     susy() (tschacher2020). Asserted in the AC1 tests below.
+#   segment-uniformity (simulation-coverage): chi-square tests that single
+#     orders, pairs of orders, and the first-placed segment are equally
+#     frequent. Asserted in the AC3 tests below.
 #   segment-calibration (simulation-coverage): test-surrogate-calibration.R.
 
 # --- Plain reference -------------------------------------------------------
@@ -41,22 +46,22 @@ next_permutation <- function(p) {
   p
 }
 
-no_fixed_segment <- function(p) {
+is_identity <- function(p) {
   for (i in seq_along(p)) {
-    if (p[i] == i) {
+    if (p[i] != i) {
       return(FALSE)
     }
   }
   TRUE
 }
 
-# Every order of 1..k with no segment in its original place, one per row,
-# in lexicographic order.
+# Every order of 1..k except the original, one per row, in lexicographic
+# order.
 all_orders_plain <- function(k) {
   out <- list()
   p <- seq_len(k)
   while (!is.null(p)) {
-    if (no_fixed_segment(p)) {
+    if (!is_identity(p)) {
       out[[length(out) + 1]] <- p
     }
     p <- next_permutation(p)
@@ -82,7 +87,7 @@ segment_reference <- function(y, segment_size, n_surrogates) {
           seen <- TRUE
         }
       }
-      if (no_fixed_segment(p) && !seen) {
+      if (!is_identity(p) && !seen) {
         orders <- rbind(orders, p)
       }
     }
@@ -110,13 +115,19 @@ source_segments <- function(col, segment_size, k) {
   vapply(seq_len(k), function(i) {
     block <- col[((i - 1) * segment_size + 1):(i * segment_size)]
     q <- (block[1] - 1) / segment_size + 1
-    if (q == round(q) && q >= 1 && q <= k &&
-      identical(block, as.double(((q - 1) * segment_size + 1):(q * segment_size)))) {
+    whole <- as.double(((q - 1) * segment_size + 1):(q * segment_size))
+    if (q == round(q) && q >= 1 && q <= k && identical(block, whole)) {
       q
     } else {
       NA_real_
     }
   }, numeric(1))
+}
+
+# The segment order of every column of a surrogate matrix built from 1:n.
+column_orders <- function(surr, segment_size) {
+  k <- nrow(surr) %/% segment_size
+  t(apply(surr, 2, source_segments, segment_size = segment_size, k = k))
 }
 
 expect_segment_shuffle <- function(surr, n, segment_size) {
@@ -128,17 +139,18 @@ expect_segment_shuffle <- function(surr, n, segment_size) {
     q <- source_segments(surr[, j], segment_size, k)
     expect_false(anyNA(q))
     expect_identical(sort(q), as.double(seq_len(k)))
-    expect_true(all(q != seq_len(k)))
+    expect_false(all(q == seq_len(k)))
     if (k * segment_size < n) {
       tail_rows <- (k * segment_size + 1):n
       expect_identical(surr[tail_rows, j], as.double(tail_rows))
     }
   }
+  expect_identical(nrow(unique(t(surr))), ncol(surr))
 }
 
 # --- AC1: segment structure ------------------------------------------------
 
-test_that("segment surrogates reorder whole segments, none in place", {
+test_that("segment surrogates reorder whole segments, never the original", {
   # 60 = 6 * 10 (no tail); 64 = 6 * 10 + 4 (tail of 4); 97 = 12 * 8 + 1
   # (12 segments, the draw-and-reject branch).
   for (case in list(c(60, 10), c(64, 10), c(97, 8))) {
@@ -151,6 +163,15 @@ test_that("segment surrogates reorder whole segments, none in place", {
     expect_identical(ncol(surr), 9L)
     expect_segment_shuffle(surr, n, s)
   }
+})
+
+test_that("a segment can stay in place", {
+  # Uniform non-identity orders leave about one of k segments in place on
+  # average, so some of 50 columns of a 6-segment series keep a segment.
+  set.seed(16)
+  surr <- generate_surrogate_segment(as.double(1:60), 10, n_surrogates = 50)
+  orders <- column_orders(surr, 10)
+  expect_true(any(orders == matrix(1:6, 50, 6, byrow = TRUE)))
 })
 
 test_that("the segment cut matches the eps loop of SUSY's susy()", {
@@ -169,7 +190,7 @@ test_that("the segment cut matches the eps loop of SUSY's susy()", {
       which(vapply(boundaries, function(rows) identical(b, y[rows]), TRUE))
     }, integer(1))
     expect_setequal(sources, 1:4)
-    expect_true(all(sources != 1:4))
+    expect_false(all(sources == 1:4))
     expect_identical(surr[21:23, j], c(21, 22, 23))
   }
 })
@@ -186,29 +207,13 @@ test_that("NA values move with their segments", {
   expect_segment_shuffle(surr_id, n, 10)
   for (j in seq_len(ncol(surr_id))) {
     expect_identical(surr_na[, j], y_na[surr_id[, j]])
-    expect_identical(is.na(surr_na[, j]), is.na(y_na[surr_id[, j]]))
   }
   expect_identical(colSums(is.na(surr_na)), rep(5, 6))
 })
 
-test_that("segment surrogate columns are distinct orders", {
-  set.seed(12)
-  surr <- suppressMessages(
-    generate_surrogate_segment(as.double(1:40), 10, n_surrogates = 9)
-  )
-  # 4 segments have 9 orders with no segment in place: all 9 are returned.
-  expect_identical(nrow(unique(t(surr))), 9L)
-
-  set.seed(13)
-  surr <- suppressMessages(
-    generate_surrogate_segment(as.double(1:97), 8, n_surrogates = 50)
-  )
-  expect_identical(nrow(unique(t(surr))), 50L)
-})
-
 test_that("segment surrogates accept integer input and return doubles", {
   set.seed(14)
-  surr <- generate_surrogate_segment(1:30, 10, n_surrogates = 2)
+  surr <- generate_surrogate_segment(1:40, 10, n_surrogates = 2)
   expect_type(surr, "double")
 })
 
@@ -231,13 +236,63 @@ test_that("segment surrogates match the plain reference", {
   }
 })
 
-test_that("the plain reference lists the known number of orders", {
-  # Orders of k segments with none in place (derangements): 1, 2, 9, 44, 265.
-  counts <- vapply(2:6, function(k) nrow(all_orders_plain(k)), integer(1))
-  expect_identical(counts, c(1L, 2L, 9L, 44L, 265L))
+test_that("the plain reference lists k! - 1 orders", {
+  counts <- vapply(2:5, function(k) nrow(all_orders_plain(k)), integer(1))
+  expect_identical(counts, c(1L, 5L, 23L, 119L))
 })
 
-# --- AC4: messages and errors ----------------------------------------------
+# --- AC3: uniform orders -----------------------------------------------------
+
+order_key <- function(o) paste(o, collapse = "")
+
+test_that("with 4 segments, all 23 non-identity orders are returned", {
+  surr <- suppressMessages(
+    generate_surrogate_segment(as.double(1:40), 10, n_surrogates = 30)
+  )
+  got <- sort(apply(column_orders(surr, 10), 1, order_key))
+  want <- sort(apply(all_orders_plain(4), 1, order_key))
+  expect_identical(got, want)
+  expect_length(want, 23)
+})
+
+test_that("single orders and pairs of orders are equally frequent", {
+  y <- as.double(1:40)
+  levels_1 <- apply(all_orders_plain(4), 1, order_key)
+
+  set.seed(301)
+  one <- vapply(seq_len(2300), function(i) {
+    order_key(column_orders(generate_surrogate_segment(y, 10, 1), 10)[1, ])
+  }, character(1))
+  counts_1 <- table(factor(one, levels = levels_1))
+  expect_identical(sum(counts_1), 2300L)
+  expect_gte(stats::chisq.test(counts_1)$p.value, 0.001)
+
+  pair_levels <- utils::combn(sort(levels_1), 2, paste, collapse = "|")
+  set.seed(302)
+  two <- vapply(seq_len(2530), function(i) {
+    keys <- apply(column_orders(generate_surrogate_segment(y, 10, 2), 10), 1, order_key)
+    paste(sort(keys), collapse = "|")
+  }, character(1))
+  counts_2 <- table(factor(two, levels = pair_levels))
+  expect_length(counts_2, 253)
+  expect_identical(sum(counts_2), 2530L)
+  expect_gte(stats::chisq.test(counts_2)$p.value, 0.001)
+})
+
+test_that("with 9 segments, the first-placed segment is equally frequent", {
+  # Excluding the original order changes P(segment 1 first) from 1/9 to
+  # (8! - 1) / (9! - 1), a relative difference of 2.5e-5.
+  y <- as.double(1:18)
+  set.seed(303)
+  first <- vapply(seq_len(2000), function(i) {
+    column_orders(generate_surrogate_segment(y, 2, 1), 2)[1, 1]
+  }, numeric(1))
+  counts <- table(factor(first, levels = 1:9))
+  expect_identical(sum(counts), 2000L)
+  expect_gte(stats::chisq.test(counts)$p.value, 0.001)
+})
+
+# --- AC5: messages and errors ----------------------------------------------
 
 test_that("the tail message names the tail length", {
   expect_message(
@@ -251,16 +306,26 @@ test_that("the tail message names the tail length", {
   )
 })
 
-test_that("all orders are returned when n_surrogates reaches their number", {
+test_that("3 segments return all 5 orders and warn; 4 segments do not", {
   set.seed(15)
-  expect_message(
-    surr <- generate_surrogate_segment(as.double(1:30), 10, n_surrogates = 5),
-    "all 2 possible",
-    class = "bsync_segment_all_orders"
+  expect_warning(
+    expect_message(
+      surr <- generate_surrogate_segment(as.double(1:30), 10, n_surrogates = 19),
+      "all 5 possible",
+      class = "bsync_segment_all_orders"
+    ),
+    "no test .* can reach p <= .05",
+    class = "bsync_segment_few_orders"
   )
-  expect_identical(ncol(surr), 2L)
-  expect_identical(nrow(unique(t(surr))), 2L)
+  expect_identical(ncol(surr), 5L)
   expect_segment_shuffle(surr, 30, 10)
+
+  set.seed(15)
+  expect_no_warning(
+    surr <- generate_surrogate_segment(as.double(1:40), 10, n_surrogates = 19)
+  )
+  expect_identical(ncol(surr), 19L)
+  expect_segment_shuffle(surr, 40, 10)
 })
 
 test_that("generate_surrogate_segment() aborts on invalid input", {
@@ -293,10 +358,9 @@ test_that("generate_surrogate_segment() aborts on invalid input", {
     generate_surrogate_segment(as.double(1:3), 2),
     "must be at most `floor\\(length\\(y\\) / 2\\)` \\(1\\)"
   )
-  # 9 segments have 133496 orders with none in place; more than that would
-  # repeat an order.
+  # 9 segments have 9! - 1 = 362879 orders other than the original.
   expect_error(
-    generate_surrogate_segment(as.double(1:18), 2, n_surrogates = 133496),
-    "`n_surrogates` \\(133496\\) must be below the 133496 possible orders"
+    generate_surrogate_segment(as.double(1:18), 2, n_surrogates = 362879),
+    "`n_surrogates` \\(362879\\) must be below the 362879 possible orders"
   )
 })
