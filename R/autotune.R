@@ -218,6 +218,9 @@ autotune_wcc <- function(
   # Give the few-surrogates warning once here, and muffle the copy that
   # each per-dyad synchrony_multiverse() call would give.
   warn_few_surrogates(n_surrogates)
+  if ("segment" %in% surrogate_method) {
+    inform_segment_aligned(is_granger = FALSE)
+  }
 
   # Run multiverse on each dyad. IAAFT non-convergence is counted per dyad
   # and reported once after the loop.
@@ -238,6 +241,7 @@ autotune_wcc <- function(
         n_surrogates = n_surrogates
       ),
       bsync_few_surrogates = function(w) invokeRestart("muffleWarning"),
+      bsync_segment_aligned = function(m) invokeRestart("muffleMessage"),
       bsync_iaaft_unconverged = function(w) {
         unconverged <<- TRUE
         invokeRestart("muffleWarning")
