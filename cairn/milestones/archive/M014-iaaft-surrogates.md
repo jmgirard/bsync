@@ -1,0 +1,11 @@
+# M014: IAAFT surrogate generator
+
+**Status:** done (2026-10-07, PR #9 https://github.com/jmgirard/bsync/pull/9)
+
+**Goal:** Add an exported IAAFT surrogate generator that keeps the value distribution and the power spectrum of a series. Offer it as a `surrogate_method` in `synchrony_multiverse()` and `autotune_wcc()`.
+
+**Outcome:** `generate_surrogate_iaaft(y, n_surrogates = 100, max_iter = 1000, match = c("spectrum", "values"))` follows Schreiber & Schmitz (1996), source note `references/schreiber1996.md`. It starts each column from a shuffle, alternates the amplitude step and the rank step, and stops a column at the fixed point or at `max_iter`. `"spectrum"` returns the last spectrum-adjusted series (exact amplitudes, close values). `"values"` returns the rank-ordered series (exact values, close spectrum). The rank step ranks all columns in one stable `order()` call. Errors cover `NA`, non-finite values, length < 3, FFT overflow, bad arguments, and a reordered `match`. Non-convergence warns with class `bsync_iaaft_unconverged`. `synchrony_multiverse()` and `autotune_wcc()` take `"iaaft"`, abort up front on `NA` in `y` (autotune names the dyads), accept a one-column matrix, and restate non-convergence without `max_iter` (autotune once per run). Tests: `test-surrogate-iaaft.R` (plain reimplementation oracle, invariants), `test-surrogate-calibration.R` (size check), and `test-multiverse.R`. Docs: help page, vignette section 1.3, NEWS, README, DESIGN §2, §6, §13, §14 #8. The IAAFT half of the "Expanded surrogate generators" candidate row was absorbed. Segment shuffling is M015.
+
+**Decisions:** D-003 (the spectrum form is the default). The user chose it at an implement stop after the rank-ordered form rejected 21 of 200 true-null pairs in the WCC size check, against 9 for the spectrum form.
+
+**Review:** Plan criteria audit: 2 findings, both fixed. One substantive amendment (the `match` argument), re-audited twice. Claim audit: 38 claims, 2 corrected. Three-lens fan-out: 28 findings. 22 were fixed in 6f07dc2. 3 went to candidate rows: "Update CLAUDE.md for IAAFT", "[low] IAAFT on long series", and "[low] IAAFT rank-step tie test". 3 were rejected. No returns. Local check() at 6f07dc2 gave 0/0/0. CI was 9/9 green. No lesson was retired.
