@@ -54,7 +54,7 @@ Let users read the y -> x direction of a Granger `synchrony_multiverse()` result
 - [x] T2: Add `direction` to `glance.bsync_multiverse()` (`R/tidy.R:154`). Add the `direction` column for Granger only. Write the tests for AC2 and for the `glance()` part of AC5.
 - [x] T3: Add `direction` to `print.bsync_multiverse()` (`R/multiverse.R:568`) and `summary.bsync_multiverse()` (`R/multiverse.R:590`). Add a direction line for Granger. For `"yx"`, `summary()` reads `es_yx` for the range and the skipped count. Write the tests for AC3 and for their parts of AC5.
 - [x] T4: Add `direction` to `plot.bsync_multiverse()` and `multiverse_plot_data()` (`R/multiverse_plot.R:12`, `R/multiverse_plot.R:42`). Move the title text (`R/multiverse_plot.R:73`) into an internal helper. It reads the chosen robustness list and names the direction for Granger only, so the WCC title stays the same. Write the tests for AC4, AC6, and the plot part of AC5. Record the new vdiffr snapshot and look at it before the commit.
-- [ ] T5: Write roxygen for `direction` and `$robustness_yx`, with `@md` per the roxygen-markdown lesson. Fix the comment at `R/multiverse.R:13` and the test title at `tests/testthat/test-multiverse.R:293`. Fix `vignettes/choosing-parameters.Rmd:151-166` and add the y -> x `glance()` call. Add the NEWS.md entry. Run `devtools::document()`.
+- [x] T5: Write roxygen for `direction` and `$robustness_yx`, with `@md` per the roxygen-markdown lesson. Fix the comment at `R/multiverse.R:13` and the test title at `tests/testthat/test-multiverse.R:293`. Fix `vignettes/choosing-parameters.Rmd:151-166` and add the y -> x `glance()` call. Add the NEWS.md entry. Run `devtools::document()`.
 - [ ] T6: Run `devtools::test()`, `spelling::spell_check_package()`, and `devtools::check()`. Run `air format` only on files that were air-clean before the edit.
 
 ## Work log
@@ -69,6 +69,7 @@ Let users read the y -> x direction of a Granger `synchrony_multiverse()` result
 - 2026-10-06: T2 done. `glance()` takes `direction` and adds a `direction` column for Granger only, with `tibble::add_column()`. The block gets `@md`. Suite: 1931 pass, 0 fail.
 - 2026-10-06: T3 done. `print()` and `summary()` take `direction`, and print a "Direction" line for Granger only. `summary()` reads the chosen ES column for the range and the skipped/NA count. With the T3 code stashed, 10 of the new expectations failed. Suite: 1949 pass, 0 fail.
 - 2026-10-06: T4 done. `plot()` takes `direction` as its last named argument, after `top_frac`, so positional calls keep working. `multiverse_plot_data()` copies the chosen direction into `es`/`p`, and `multiverse_plot_title()` adds "(x -> y)" or "(y -> x)" for Granger only. The y -> x snapshot `multiverse-granger-yx.svg` was rendered to PNG and checked by eye: 0 of 8 significant, all ES negative. `git diff main` on the old snapshot is empty. Suite: 1969 pass, 0 fail.
+- 2026-10-06: T5 done. Roxygen documents `direction` on the four methods, which now carry `@md`, and documents `$robustness_yx` and all five y -> x grid columns in `synchrony_multiverse()`. That block stays without `@md`, as on main. The vignette and the test title are fixed, and the NEWS entry is added. `devtools::document()` rewrote 5 Rd files. `grep -rn "es_xy" vignettes/ tests/` returns no lines.
 
 ## Decisions
 

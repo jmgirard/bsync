@@ -290,7 +290,7 @@ test_that("AC3: Two methods generate two matrices, not 2 × n_cells", {
 # AC4: WDTW and Granger adapters produce correct grids ------------------------
 # =============================================================================
 
-test_that("AC4: Granger grid has no lag axis; has es_xy/p_xy/es_yx/p_yx columns", {
+test_that("AC4: Granger grid has no lag axis; has es/p (x -> y) and es_yx/p_yx columns", {
   s <- make_test_series()
   set.seed(9)
   res <- synchrony_multiverse(

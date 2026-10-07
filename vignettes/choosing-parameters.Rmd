@@ -149,8 +149,10 @@ head(tidy(mv))
 ### Running a multiverse for WDTW or Granger
 
 `synchrony_multiverse()` is not WCC-only. Pass `estimator = "wdtw"` or `estimator = "wgranger"`
-to sweep the same grid for those estimators. For Granger, the result carries two effect-size
-columns (`es_xy` and `es_yx`, one per causal direction) and no lag axis:
+to sweep the same grid for those estimators. For Granger, the grid has no lag axis and carries
+two effect-size columns, one per causal direction: `es` and `p` are x -> y, and `es_yx` and
+`p_yx` are y -> x. `print()`, `summary()`, `glance()`, and `plot()` report x -> y by default.
+Pass `direction = "yx"` to report y -> x:
 
 ```{r multiverse-granger, fig.width = 7, fig.height = 5}
 set.seed(2026)
@@ -165,6 +167,7 @@ mv_g <- synchrony_multiverse(
 )
 
 glance(mv_g)
+glance(mv_g, direction = "yx")
 ```
 
 ## 3. Multi-Dyad Parameter Selection: `autotune_wcc()`

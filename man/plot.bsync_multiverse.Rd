@@ -11,35 +11,41 @@
   active_color = "#2166AC",
   point_size = 1.5,
   top_frac = 0.55,
+  direction = c("xy", "yx"),
   ...
 )
 }
 \arguments{
-\item{x}{A `bsync_multiverse` object.}
+\item{x}{A \code{bsync_multiverse} object.}
 
-\item{sig_color}{Color for significant cells (p <= .05). Default: `"#2166AC"`.}
+\item{sig_color}{Color for significant cells (p <= .05). Default: \code{"#2166AC"}.}
 
-\item{insig_color}{Color for non-significant cells. Default: `"grey60"`.}
+\item{insig_color}{Color for non-significant cells. Default: \code{"grey60"}.}
 
-\item{active_color}{Fill for active choice tiles. Default: `"#2166AC"`.}
+\item{active_color}{Fill for active choice tiles. Default: \code{"#2166AC"}.}
 
-\item{point_size}{Size of ES points. Default: `1.5`.}
+\item{point_size}{Size of ES points. Default: \code{1.5}.}
 
 \item{top_frac}{Fraction of plot height allocated to the ES panel.
-Default: `0.55`.}
+Default: \code{0.55}.}
+
+\item{direction}{For a Granger result (\code{estimator = "wgranger"}), the
+direction to plot: \code{"xy"} (x -> y, the default) or \code{"yx"} (y -> x). The
+title names the direction. Other estimators have one direction only, so
+\code{"yx"} is an error for them.}
 
 \item{...}{Additional arguments (not used).}
 }
 \value{
-Returns `x` invisibly; draws to the active graphics device.
+Returns \code{x} invisibly; draws to the active graphics device.
 }
 \description{
-Draws a Simonsohn-style specification curve for a `bsync_multiverse` object.
+Draws a Simonsohn-style specification curve for a \code{bsync_multiverse} object.
 The top panel shows effect sizes sorted from smallest to largest, with
 significant cells (p <= .05) highlighted. The bottom panel is a choice
 dashboard showing which analytic choices each specification used.
 }
 \seealso{
-[synchrony_multiverse()], [tidy.bsync_multiverse()],
-  [glance.bsync_multiverse()]
+\code{\link[=synchrony_multiverse]{synchrony_multiverse()}}, \code{\link[=tidy.bsync_multiverse]{tidy.bsync_multiverse()}},
+\code{\link[=glance.bsync_multiverse]{glance.bsync_multiverse()}}
 }
