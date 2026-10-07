@@ -64,13 +64,17 @@ process that its calibration test uses.
   unchanged), or `max_iter`. The paper's own stop is a spectral accuracy
   target, and it describes the fixed point as where the iteration ends.
 - The start is a random shuffle, not an AAFT surrogate.
-- The generator returns the rank-ordered series, so each surrogate holds
-  exactly the values of `y`.
+- The generator returns the last spectrum-adjusted series by default
+  (`match = "spectrum"`): exact Fourier amplitudes, close values. The paper's
+  rank-ordered series is `match = "values"`: exact values, close spectrum. In
+  a WCC size simulation, the rank-ordered form rejected a true null too often
+  (milestone M014, Decisions). The paper notes that both properties cannot
+  hold exactly for a finite series (p. 2).
 
 ## Traces to
 
 - `R/surrogate_generation.R`, `generate_surrogate_iaaft()` — the iteration,
-  the stop, and the returned series.
+  the stop, and the two returned forms (`match`).
 - `tests/testthat/test-surrogate-iaaft.R` — the plain reference
   implementation, the discrepancy measure, and the AR(1) cube process of the
   calibration test.

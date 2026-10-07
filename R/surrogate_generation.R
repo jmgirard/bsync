@@ -139,32 +139,43 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #' Generate IAAFT Surrogates
 #'
 #' Builds surrogates with the iterative amplitude-adjusted Fourier transform
-#' (IAAFT) of Schreiber and Schmitz (1996). Each surrogate takes exactly the
-#' values of `y`, in a new order, and has a power spectrum close to the
-#' spectrum of `y`.
+#' (IAAFT) of Schreiber and Schmitz (1996). Each surrogate is a new series
+#' that matches both the power spectrum and the value distribution of `y`.
+#' One of the two matches exactly and the other closely, as `match` selects.
 #'
 #' @details
 #' **Which null this tests.** Phase randomization ([generate_surrogate_phase()])
 #' keeps the power spectrum but makes the values Gaussian, so a skewed or
 #' bounded signal gets surrogates with a different value distribution. IAAFT
-#' keeps both the spectrum and the exact values. The null is a Gaussian linear
-#' process seen through a fixed, monotone transform, for example a
+#' keeps the spectrum and the value distribution. The null is a Gaussian
+#' linear process seen through a fixed, monotone transform, for example a
 #' skewed movement-energy signal. Against this null, a significant result
 #' cannot come from the shape of the value distribution or from the
 #' autocorrelation of `y` alone.
 #'
 #' **Algorithm.** Each surrogate starts from a random shuffle of `y`. Each
 #' iteration takes the Fourier transform, replaces its amplitudes with those
-#' of `y` while it keeps the phases, and transforms back. It then rank-orders
-#' the result, so that the series takes exactly the values of `y`. A
-#' surrogate stops when the rank-ordering no longer changes it, which is
-#' where the iteration ends (Schreiber & Schmitz, 1996, p. 2). The returned
-#' series is the rank-ordered one: its values are exact and its spectrum is
-#' close to that of `y`.
+#' of `y` while it keeps the phases, and transforms back. This is the
+#' spectrum-adjusted series. The iteration then rank-orders it, so that the
+#' series takes exactly the values of `y`. A surrogate stops when the
+#' rank-ordering no longer changes it, which is where the iteration ends
+#' (Schreiber & Schmitz, 1996, p. 2). For a finite series, the spectrum and
+#' the values cannot both match exactly (p. 2).
 #'
-#' **`max_iter`.** Most series reach that fixed point in fewer than 1000
-#' iterations. The spectral error falls about as 1 / i over the first
-#' iterations (Fig. 2 of the paper, which runs to 1000), so the default
+#' **`match`.** `"spectrum"` (the default) returns the last spectrum-adjusted
+#' series. Its Fourier amplitudes equal those of `y` exactly, and its values
+#' are close to the values of `y`: closer than the values of a phase
+#' surrogate, in the package tests on a skewed autoregressive series.
+#' `"values"` returns the rank-ordered series, as in the paper. It holds
+#' exactly the values of `y`, and its spectrum is close to that of `y`. The
+#' rank step lowers the autocorrelation slightly, and a synchrony statistic
+#' that grows with autocorrelation, such as the mean absolute Fisher z of
+#' [wcc()], then reads high against these surrogates. So a test against
+#' `"values"` surrogates can reject a true null more often than its nominal
+#' level, and the spectrum form is the default.
+#'
+#' **`max_iter`.** The spectral error falls about as 1 / i over the first
+#' iterations, and the paper's Fig. 2 runs to 1000 iterations (p. 3). The default
 #' `1000` is a cap on run time, not a target. A surrogate that reaches
 #' `max_iter` without a fixed point is still returned, and the call warns
 #' with the number of such surrogates.
@@ -177,6 +188,9 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #'   Default is `100`.
 #' @param max_iter A single positive integer: the maximum number of
 #'   iterations per surrogate. Default is `1000`.
+#' @param match Which property matches exactly: `"spectrum"` (default), the
+#'   Fourier amplitudes of `y`, or `"values"`, the values of `y`. The other
+#'   property matches closely. See Details.
 #' @return A numeric matrix with `length(y)` rows and `n_surrogates`
 #'   columns, ready to pass as `y_surrogates` to [wcc_surrogate()] and the
 #'   other surrogate wrappers.
@@ -188,13 +202,23 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #'   between-dyad null; [wcc_surrogate()], [wdtw_surrogate()],
 #'   [wgranger_surrogate()], [wphase_surrogate()].
 #' @examples
-#' # Build 100 IAAFT surrogates (same values, near-identical spectrum)
+#' # Build 100 IAAFT surrogates: exact spectrum, close values
 #' surr <- generate_surrogate_iaaft(sim_dyad$x_B, n_surrogates = 100)
 #' dim(surr)
-#' all.equal(sort(surr[, 1]), sort(sim_dyad$x_B))
+#' all.equal(Mod(fft(surr[, 1])), Mod(fft(sim_dyad$x_B)))
+#'
+#' # The "values" form: exact values, close spectrum
+#' surr_v <- generate_surrogate_iaaft(sim_dyad$x_B, 10, match = "values")
+#' all.equal(sort(surr_v[, 1]), sort(sim_dyad$x_B))
 #' @md
 #' @export
-generate_surrogate_iaaft <- function(y, n_surrogates = 100, max_iter = 1000) {
+generate_surrogate_iaaft <- function(
+  y,
+  n_surrogates = 100,
+  max_iter = 1000,
+  match = c("spectrum", "values")
+) {
+  match <- rlang::arg_match(match)
   if (!is.numeric(y) || !is.null(dim(y))) {
     cli::cli_abort("{.arg y} must be a numeric vector.")
   }
@@ -228,7 +252,9 @@ generate_surrogate_iaaft <- function(y, n_surrogates = 100, max_iter = 1000) {
     surr_mat[, j] <- y[sample.int(n_y)]
   }
 
-  # Iterate the columns that have not yet reached a fixed point.
+  # Iterate the columns that have not yet reached a fixed point. `adj_mat`
+  # keeps each column's last spectrum-adjusted series (before the rank step).
+  adj_mat <- matrix(0, nrow = n_y, ncol = n_surrogates)
   active <- seq_len(n_surrogates)
   iter <- 0L
   while (length(active) > 0 && iter < max_iter) {
@@ -240,20 +266,29 @@ generate_surrogate_iaaft <- function(y, n_surrogates = 100, max_iter = 1000) {
     ranked <- apply(adjusted, 2, rank, ties.method = "first")
     updated <- matrix(y_sorted[ranked], nrow = n_y)
     changed <- colSums(updated != current) > 0
+    adj_mat[, active] <- adjusted
     surr_mat[, active] <- updated
     active <- active[changed]
   }
 
   if (length(active) > 0) {
+    hint <- if (match == "spectrum") {
+      "values closer to the values of {.arg y}"
+    } else {
+      "a spectrum closer to the spectrum of {.arg y}"
+    }
     cli::cli_warn(c(
       "{length(active)} of {n_surrogates} surrogates did not converge \\
       within {.arg max_iter} = {max_iter} iterations.",
-      "i" = "They are returned as they are. Raise {.arg max_iter} for a \\
-      closer spectrum."
+      "i" = paste0(
+        "They are returned as they are. Raise {.arg max_iter} for ",
+        hint,
+        "."
+      )
     ))
   }
 
-  surr_mat
+  if (match == "spectrum") adj_mat else surr_mat
 }
 
 # -------------------------------------------------------------------------
