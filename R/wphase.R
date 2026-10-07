@@ -62,6 +62,9 @@
 #' @return A list object of class `"wphase_res"` (a `bsync_surface`) with
 #'   `results_df` (columns `i`, `tau`, `plv`, `rel_phase`), `aggregate`
 #'   (named `mean_plv` or `peak`, after `statistic`), and `settings`.
+#' @seealso [wphase_surrogate()] for the matched surrogate test, [pick_optima()]
+#'   for per-window optima, and `vignette("wphase-workflow")` for a complete
+#'   workflow with band-pass filtering.
 #' @examples
 #' # Windowed phase synchrony on the bundled simulated dyad
 #' wphase_res <- wphase(

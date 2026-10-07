@@ -100,3 +100,8 @@ wphase_res
 # Average the best-lag PLV of each window instead
 wphase(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10, statistic = "peak")
 }
+\seealso{
+\code{\link[=wphase_surrogate]{wphase_surrogate()}} for the matched surrogate test, \code{\link[=pick_optima]{pick_optima()}}
+for per-window optima, and \code{vignette("wphase-workflow")} for a complete
+workflow with band-pass filtering.
+}

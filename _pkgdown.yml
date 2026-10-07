@@ -29,6 +29,7 @@ articles:
       - wcc-workflow
       - wdtw-workflow
       - wgranger-workflow
+      - wphase-workflow
 
   - title: "Going deeper"
     navbar: "Going deeper"
