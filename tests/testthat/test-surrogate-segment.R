@@ -112,16 +112,20 @@ segment_reference <- function(y, segment_size, n_surrogates) {
 # For one column of the generator's output on y = 1:n, return the source
 # segment of each position (NA if the block is not a whole segment of y).
 source_segments <- function(col, segment_size, k) {
-  vapply(seq_len(k), function(i) {
-    block <- col[((i - 1) * segment_size + 1):(i * segment_size)]
-    q <- (block[1] - 1) / segment_size + 1
-    whole <- as.double(((q - 1) * segment_size + 1):(q * segment_size))
-    if (q == round(q) && q >= 1 && q <= k && identical(block, whole)) {
-      q
-    } else {
-      NA_real_
-    }
-  }, numeric(1))
+  vapply(
+    seq_len(k),
+    function(i) {
+      block <- col[((i - 1) * segment_size + 1):(i * segment_size)]
+      q <- (block[1] - 1) / segment_size + 1
+      whole <- as.double(((q - 1) * segment_size + 1):(q * segment_size))
+      if (q == round(q) && q >= 1 && q <= k && identical(block, whole)) {
+        q
+      } else {
+        NA_real_
+      }
+    },
+    numeric(1)
+  )
 }
 
 # The segment order of every column of a surrogate matrix built from 1:n.
@@ -186,9 +190,13 @@ test_that("the segment cut matches the eps loop of SUSY's susy()", {
   surr <- suppressMessages(generate_surrogate_segment(y, 5, n_surrogates = 9))
   for (j in seq_len(ncol(surr))) {
     blocks <- lapply(boundaries, function(rows) surr[rows, j])
-    sources <- vapply(blocks, function(b) {
-      which(vapply(boundaries, function(rows) identical(b, y[rows]), TRUE))
-    }, integer(1))
+    sources <- vapply(
+      blocks,
+      function(b) {
+        which(vapply(boundaries, function(rows) identical(b, y[rows]), TRUE))
+      },
+      integer(1)
+    )
     expect_setequal(sources, 1:4)
     expect_false(all(sources == 1:4))
     expect_identical(surr[21:23, j], c(21, 22, 23))
@@ -260,19 +268,31 @@ test_that("single orders and pairs of orders are equally frequent", {
   levels_1 <- apply(all_orders_plain(4), 1, order_key)
 
   set.seed(301)
-  one <- vapply(seq_len(2300), function(i) {
-    order_key(column_orders(generate_surrogate_segment(y, 10, 1), 10)[1, ])
-  }, character(1))
+  one <- vapply(
+    seq_len(2300),
+    function(i) {
+      order_key(column_orders(generate_surrogate_segment(y, 10, 1), 10)[1, ])
+    },
+    character(1)
+  )
   counts_1 <- table(factor(one, levels = levels_1))
   expect_identical(sum(counts_1), 2300L)
   expect_gte(stats::chisq.test(counts_1)$p.value, 0.001)
 
   pair_levels <- utils::combn(sort(levels_1), 2, paste, collapse = "|")
   set.seed(302)
-  two <- vapply(seq_len(2530), function(i) {
-    keys <- apply(column_orders(generate_surrogate_segment(y, 10, 2), 10), 1, order_key)
-    paste(sort(keys), collapse = "|")
-  }, character(1))
+  two <- vapply(
+    seq_len(2530),
+    function(i) {
+      keys <- apply(
+        column_orders(generate_surrogate_segment(y, 10, 2), 10),
+        1,
+        order_key
+      )
+      paste(sort(keys), collapse = "|")
+    },
+    character(1)
+  )
   counts_2 <- table(factor(two, levels = pair_levels))
   expect_length(counts_2, 253)
   expect_identical(sum(counts_2), 2530L)
@@ -284,9 +304,13 @@ test_that("with 9 segments, the first-placed segment is equally frequent", {
   # (8! - 1) / (9! - 1), a relative difference of 2.5e-5.
   y <- as.double(1:18)
   set.seed(303)
-  first <- vapply(seq_len(2000), function(i) {
-    column_orders(generate_surrogate_segment(y, 2, 1), 2)[1, 1]
-  }, numeric(1))
+  first <- vapply(
+    seq_len(2000),
+    function(i) {
+      column_orders(generate_surrogate_segment(y, 2, 1), 2)[1, 1]
+    },
+    numeric(1)
+  )
   counts <- table(factor(first, levels = 1:9))
   expect_identical(sum(counts), 2000L)
   expect_gte(stats::chisq.test(counts)$p.value, 0.001)
@@ -310,7 +334,11 @@ test_that("3 segments return all 5 orders and warn; 4 segments do not", {
   set.seed(15)
   expect_warning(
     expect_message(
-      surr <- generate_surrogate_segment(as.double(1:30), 10, n_surrogates = 19),
+      surr <- generate_surrogate_segment(
+        as.double(1:30),
+        10,
+        n_surrogates = 19
+      ),
       "all 5 possible",
       class = "bsync_segment_all_orders"
     ),

@@ -32,17 +32,26 @@ test_that("a one-cell wcc segment multiverse matches wcc_surrogate()", {
   s <- w + 2 * lag
   set.seed(601)
   mv <- suppressMessages(synchrony_multiverse(
-    seg_pair$x, seg_pair$y,
-    estimator = "wcc", sample_rate = 1, window_sec = w, lag_sec = lag,
-    surrogate_method = "segment", n_surrogates = 19
+    seg_pair$x,
+    seg_pair$y,
+    estimator = "wcc",
+    sample_rate = 1,
+    window_sec = w,
+    lag_sec = lag,
+    surrogate_method = "segment",
+    n_surrogates = 19
   ))
   set.seed(601)
   surr <- suppressMessages(
     generate_surrogate_segment(seg_pair$y, segment_size = s, n_surrogates = 19)
   )
   ref <- wcc_surrogate(
-    seg_pair$x, seg_pair$y, surr,
-    window_size = w, lag_max = lag, window_increment = s
+    seg_pair$x,
+    seg_pair$y,
+    surr,
+    window_size = w,
+    lag_max = lag,
+    window_increment = s
   )
   expect_identical(nrow(mv$grid), 1L)
   expect_equal(mv$grid$p, ref$p_value)
@@ -56,17 +65,26 @@ test_that("a one-cell wdtw segment multiverse matches wdtw_surrogate()", {
   s <- w + 2 * lag
   set.seed(602)
   mv <- suppressMessages(synchrony_multiverse(
-    seg_pair$x, seg_pair$y,
-    estimator = "wdtw", sample_rate = 1, window_sec = w, lag_sec = lag,
-    surrogate_method = "segment", n_surrogates = 19
+    seg_pair$x,
+    seg_pair$y,
+    estimator = "wdtw",
+    sample_rate = 1,
+    window_sec = w,
+    lag_sec = lag,
+    surrogate_method = "segment",
+    n_surrogates = 19
   ))
   set.seed(602)
   surr <- suppressMessages(
     generate_surrogate_segment(seg_pair$y, segment_size = s, n_surrogates = 19)
   )
   ref <- wdtw_surrogate(
-    seg_pair$x, seg_pair$y, surr,
-    window_size = w, lag_max = lag, window_increment = s
+    seg_pair$x,
+    seg_pair$y,
+    surr,
+    window_size = w,
+    lag_max = lag,
+    window_increment = s
   )
   expect_equal(mv$grid$p, ref$p_value)
   expect_identical(mv$grid$window_increment, as.integer(s))
@@ -76,17 +94,26 @@ test_that("a one-cell wgranger segment multiverse matches wgranger_surrogate()",
   w <- 32
   set.seed(603)
   mv <- suppressMessages(synchrony_multiverse(
-    seg_pair$x, seg_pair$y,
-    estimator = "wgranger", sample_rate = 1, window_sec = w,
-    surrogate_method = "segment", n_surrogates = 19, ar_order = 2L
+    seg_pair$x,
+    seg_pair$y,
+    estimator = "wgranger",
+    sample_rate = 1,
+    window_sec = w,
+    surrogate_method = "segment",
+    n_surrogates = 19,
+    ar_order = 2L
   ))
   set.seed(603)
   surr <- suppressMessages(
     generate_surrogate_segment(seg_pair$y, segment_size = w, n_surrogates = 19)
   )
   ref <- wgranger_surrogate(
-    seg_pair$x, seg_pair$y, surr,
-    window_size = w, window_increment = w, ar_order = 2L
+    seg_pair$x,
+    seg_pair$y,
+    surr,
+    window_size = w,
+    window_increment = w,
+    ar_order = 2L
   )
   expect_equal(mv$grid$p, ref$p_value_xy)
   expect_equal(mv$grid$p_yx, ref$p_value_yx)
@@ -96,10 +123,16 @@ test_that("a one-cell wgranger segment multiverse matches wgranger_surrogate()",
 test_that("segment rows are not crossed with increment_pct", {
   set.seed(604)
   mv <- suppressMessages(synchrony_multiverse(
-    seg_pair$x, seg_pair$y,
-    estimator = "wcc", sample_rate = 1, window_sec = 16, lag_sec = 2,
-    increment_pct = c(0.1, 0.5), statistic = c("mean_abs_z", "peak"),
-    surrogate_method = c("phase", "segment"), n_surrogates = 19
+    seg_pair$x,
+    seg_pair$y,
+    estimator = "wcc",
+    sample_rate = 1,
+    window_sec = 16,
+    lag_sec = 2,
+    increment_pct = c(0.1, 0.5),
+    statistic = c("mean_abs_z", "peak"),
+    surrogate_method = c("phase", "segment"),
+    n_surrogates = 19
   ))
   for (stat in c("mean_abs_z", "peak")) {
     rows <- mv$grid[mv$grid$statistic == stat, ]
@@ -117,18 +150,28 @@ test_that("a call with segment cells gives the aligned-design message once", {
   set.seed(605)
   n_msg <- count_conditions(
     suppressWarnings(synchrony_multiverse(
-      seg_pair$x, seg_pair$y,
-      estimator = "wcc", sample_rate = 1, window_sec = c(16, 20),
-      lag_sec = 2, surrogate_method = "segment", n_surrogates = 19
+      seg_pair$x,
+      seg_pair$y,
+      estimator = "wcc",
+      sample_rate = 1,
+      window_sec = c(16, 20),
+      lag_sec = 2,
+      surrogate_method = "segment",
+      n_surrogates = 19
     )),
     "bsync_segment_aligned"
   )
   expect_identical(n_msg, 1L)
   expect_message(
     synchrony_multiverse(
-      seg_pair$x, seg_pair$y,
-      estimator = "wcc", sample_rate = 1, window_sec = c(16, 20),
-      lag_sec = 2, surrogate_method = "segment", n_surrogates = 19
+      seg_pair$x,
+      seg_pair$y,
+      estimator = "wcc",
+      sample_rate = 1,
+      window_sec = c(16, 20),
+      lag_sec = 2,
+      surrogate_method = "segment",
+      n_surrogates = 19
     ),
     "non-overlapping windows aligned to the segments",
     class = "bsync_segment_aligned"
@@ -144,9 +187,14 @@ test_that("segment cells with fewer than 4 segments are skipped", {
   warnings <- list()
   mv <- withCallingHandlers(
     suppressMessages(synchrony_multiverse(
-      x, y,
-      estimator = "wcc", sample_rate = 1, window_sec = c(24, 46),
-      lag_sec = 4, surrogate_method = "segment", n_surrogates = 19
+      x,
+      y,
+      estimator = "wcc",
+      sample_rate = 1,
+      window_sec = c(24, 46),
+      lag_sec = 4,
+      surrogate_method = "segment",
+      n_surrogates = 19
     )),
     warning = function(w) {
       warnings[[length(warnings) + 1]] <<- w
@@ -172,9 +220,13 @@ test_that("a skipped Granger segment cell names its window only", {
   y <- ar1(100)
   expect_warning(
     mv <- suppressMessages(synchrony_multiverse(
-      x, y,
-      estimator = "wgranger", sample_rate = 1, window_sec = 30,
-      surrogate_method = "segment", n_surrogates = 19
+      x,
+      y,
+      estimator = "wgranger",
+      sample_rate = 1,
+      window_sec = 30,
+      surrogate_method = "segment",
+      n_surrogates = 19
     )),
     "segment cell with `window_size` = 30 samples\\.",
     class = "bsync_segment_skipped"
@@ -189,11 +241,16 @@ test_that("autotune_wcc() runs segment cells with aligned increments", {
   res <- withCallingHandlers(
     autotune_wcc(
       dyads,
-      sample_rate = 1, window_sec = c(10, 16),
-      surrogate_method = "segment", n_surrogates = 19, sig_pct = 0
+      sample_rate = 1,
+      window_sec = c(10, 16),
+      surrogate_method = "segment",
+      n_surrogates = 19,
+      sig_pct = 0
     ),
     message = function(m) {
-      if (inherits(m, "bsync_segment_aligned")) n_msg <<- n_msg + 1L
+      if (inherits(m, "bsync_segment_aligned")) {
+        n_msg <<- n_msg + 1L
+      }
       invokeRestart("muffleMessage")
     }
   )

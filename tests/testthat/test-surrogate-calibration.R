@@ -76,8 +76,11 @@ segments_from_orders <- function(y, orders, segment_size) {
   k <- ncol(orders)
   tail_rows <- seq_len(length(y) - k * segment_size) + k * segment_size
   apply(orders, 1, function(o) {
-    y[c(rep((o - 1) * segment_size, each = segment_size) +
-      seq_len(segment_size), tail_rows)]
+    y[c(
+      rep((o - 1) * segment_size, each = segment_size) +
+        seq_len(segment_size),
+      tail_rows
+    )]
   })
 }
 
