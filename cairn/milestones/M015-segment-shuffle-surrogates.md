@@ -1,6 +1,6 @@
 # M015: Segment-shuffling surrogate generator
 
-- **Status:** blocked
+- **Status:** planned
 - **Priority:** normal
 - **Depends on:** M014
 - **Driving RR:** —
@@ -78,7 +78,14 @@ Add an exported segment-shuffling surrogate generator that reorders whole segmen
 - 2026-10-07: stop: the fix changes the Goal (no segment in place) and the multiverse segment size the question set chose (the window size). The user decides between a re-plan, an escalation, and the plan as written.
 - 2026-10-07: user chose escalation to a Fable review through /milestone-brief before any re-plan.
 - 2026-10-07: blocked on RB01 (`cairn/reviews/RB01-segment-surrogate-size.md`). The brief commit goes on the milestone branch, not main, because main still carries the M015 file at `planned`. The calibration script is inline in the brief, because the session scratchpad is not in the repo.
+- 2026-10-07: ingested RR01 (Fable). Both causes confirmed. Triage: recs 1-5 apply, through the re-plan. B2 (no significance below k = 4) and B3 (the above-8 abort) also go to the re-plan. Recs 6 and 7, B1, and B4/B5 became candidate rows. Recs 9-11 (rejections) accepted. D-004 records the decision. RB01 and RR01 moved to `cairn/reviews/archive/`.
+- 2026-10-07: goal found wrong: the Goal requires no segment in place, which RR01 shows makes the test invalid. Status back to `planned` for a re-cut by /milestone-plan. Branch m015-segment-shuffle-surrogates keeps T1 (the source note, still valid apart from its derangement line) and T2 (the generator and tests, to rework).
 
 ## Decisions
+
+- 2026-10-07 (RR01 Q1, Q5): Segment surrogates draw distinct orders uniformly from all non-identity orders of the k segments, so a surrogate can leave a segment in place. Orders with no segment in place are dropped. They are not a group with the identity, so the test rejects a true null too often at every k. If the segments of `y` are exchangeable, uniform non-identity orders give an exact add-one p-value for every number of surrogates up to k! - 1. A test can reach p <= .05 only with k >= 4.
+- 2026-10-07 (RR01 Q2, Q3): A segment test is exact only if every window and every lagged window lies inside one segment. For `wcc()`, `wdtw()`, and `wphase()` this needs `segment_size >= window_size + 2 * lag_max` and `window_increment = segment_size`. For `wgranger()` it needs `segment_size = window_size = window_increment`. `wphase()` stays approximate under alignment, because it takes the Hilbert transform of the whole series. RR01 Q3 states the null for users.
+- 2026-10-07 (RR01 Q4): In `synchrony_multiverse()` and `autotune_wcc()`, a `"segment"` cell uses segment size s = window + 2 * lag (s = window for Granger) and increment s, not the cell's `increment_pct`. One matrix is generated per distinct s, and the grid records the increment used. A cell with s above floor(n / 2) is skipped. One message per call says why. The smallest p-value uses the number of columns returned. Rejected: keeping the cell's increment (measured size about 0.065 at .05) and dropping the method from the multiverse (the user asked for it).
+- 2026-10-07 (RR01 Q6): The size test uses AR(1) pairs (phi 0.7), window 16, lag 2, segment and increment 20, and 19 surrogates. It runs 1000 pairs at k = 5 and at k = 12 and asserts a rate in [0.03, 0.07]. A control with no-segment-in-place orders at k = 5 must give a rate above 0.07. Unit tests cover k = 3 (all 5 orders) and k = 4. The k = 3 size run of the old AC3 is dropped, because its rate is 0 by construction.
 
 ## Review

@@ -43,9 +43,12 @@ cite the article. The SUSY mean absolute Z kernel is pinned separately in
 
 **bsync departures (stated, not from the source).**
 - bsync reorders whole segments of one series into a full-length surrogate,
-  with no segment in its original position, so every surrogate wrapper and
-  the multiverse can use it. SUSY compares segment pairs and does not build
-  a series. The plan gate of M015 chose this form.
+  so every surrogate wrapper and the multiverse can use it. SUSY compares
+  segment pairs and does not build a series. The plan gate of M015 chose
+  this form. The orders are drawn uniformly from all orders except the
+  original, so a surrogate can leave a segment in place. SUSY's pseudo pairs
+  (i != h) have no segment in place, but that rule applied to orders makes
+  the add-one p-value invalid (D-004, RR01; corrected M015).
 - `segment_size` is in samples, from 2 to floor(length(y) / 2). This is the
   SUSY half-length rule stated in rows. The lag rule
   (`segment >= 2 * maxlag`) is not checked, because the generator has no
