@@ -34,8 +34,9 @@ wphase_surrogate(
 \item{lag_increment}{A positive integer indicating the lag shift increment. Default is 1.}
 
 \item{statistic}{A character string naming the aggregate statistic, \code{"mean_plv"}
-(default) or \code{"peak"}; see \code{\link[=wphase]{wphase()}}. Pass the value you used in \code{\link[=wphase]{wphase()}} so that
-\code{observed_z} and the null distribution are on the same scale.}
+(default) or \code{"peak"}; see \code{\link[=wphase]{wphase()}}. The observed data and every surrogate are
+summarized with this statistic. Pass the value you used in \code{\link[=wphase]{wphase()}} so that the test
+is of the aggregate you reported (\code{observed_z} then equals \code{wphase()$aggregate}).}
 }
 \value{
 A list object of class "wphase_surr".

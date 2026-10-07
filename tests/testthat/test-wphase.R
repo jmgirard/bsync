@@ -326,8 +326,11 @@ peak_plv_loop <- function(x, y, ws, lag_max, wi = 1, li = 1) {
 # windows range from full locking to drifting phases.
 # Case (b): window_increment = 2, lag_increment = 3 with lag_max = 5 (lags
 # -5, -2, 1, 4), and a time vector in which window starts 6 and 8 (the first
-# two, at 1 + lag_max and one increment later) share a timestamp. n = 201 makes n - window_size - 2 * lag_max odd, so the window
-# count does not depend on how a partial last step is counted.
+# two, at 1 + lag_max and one increment later) share a timestamp.
+# n = 201 makes n - window_size - 2 * lag_max odd. With window_increment = 2,
+# build_surface_grid()'s floor((n - w_max - 2 * lag_max) / wi) then equals the
+# oracle's count of every window start that fits. When it is even, the grid
+# omits the last fitting start (planned fix: M017).
 stat_cases <- function() {
   t <- 0:79
   y_a <- c(

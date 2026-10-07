@@ -1,6 +1,6 @@
 # M016: wphase parity: selectable statistic and workflow article
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -78,6 +78,8 @@ Bring `wphase()` to the level of the other estimators: a selectable aggregate st
 - 2026-10-07: T3 done. One internal `wphase_agg_label()` gives the label to both print methods, and both use the `setNames()` card form of the wcc prints. `glance()` already copies `settings$statistic` (`R/tidy.R:94`), so it needed no change. The AC4 test also checks that "Mean PLV" is absent from the "peak" card.
 - 2026-10-07: T4 done. `vignettes/wphase-workflow.Rmd` simulates a 0.5 Hz rhythm with shared tempo wander (LESSONS M008), independent AR(0.98) drift, and a lead shifting from +0.5 s to -0.5 s, then band-passes 0.3-0.7 Hz. It renders in about 4 s with 1000 circular surrogates (`window_increment = 5`). Implementation choice: the article has no `leadership_asymmetry()` section, unlike the wdtw/wcc articles. A prototype showed the PLV optima correlate 0.50 with the simulated lead (relative phase at lag 0: 0.98), and the LAI pointed the wrong way in the third quarter. The article states both correlations from code and advises reading lead-lag from the relative phase. The wcc article had no See also section, so one was added for the link.
 - 2026-10-07: T5 done. NEWS entry under "Windowed phase synchrony"; DESIGN §9 row added. The spell check flagged the Greek letters in the article's lead formula, so that sentence now uses words and `2 * pi * 0.5` (no WORDLIST change). `document()` no diff, `check_pkgdown()` no problems, `devtools::check()` 0 errors / 0 warnings / 0 notes. `air format` not run: `R/wphase.R`, `R/surrogate_analysis.R`, and `test-wphase.R` were not air-clean on main (LESSONS M010).
+- 2026-10-07: claim audit: 61 claims read, 5 corrected — R/surrogate_analysis.R, vignettes/wphase-workflow.Rmd, tests/testthat/test-wphase.R (statistic param and Section 6 now say the test is of the reported aggregate; "7.5 cycles"; circular surrogates take `lag_max = 10` so no shift lies within the lag range, p now 0.001 for both statistics; case (b) comment states the grid arithmetic). The same reader re-read all 5 and found them correct. `devtools::check()` after the fixes: 0 errors / 0 warnings / 0 notes.
+- 2026-10-07: all tasks done; status set to review.
 
 ## Decisions
 

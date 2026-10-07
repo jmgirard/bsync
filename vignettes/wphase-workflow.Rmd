@@ -110,7 +110,7 @@ The two independent series reach a mean PLV of `r round(plv_indep_raw, 3)` witho
 
 ## 4. Calculating Windowed Phase Synchrony on the Filtered Pair
 
-Phase synchrony needs windows long enough to hold several cycles. We use 15-second windows (`window_size = 150`, about 7 cycles of the 0.5 Hz rhythm) and lags up to 1 second (`lag_max = 10`), which is half a cycle. A window moves 0.5 seconds at a time (`window_increment = 5`).
+Phase synchrony needs windows long enough to hold several cycles. We use 15-second windows (`window_size = 150`, 7.5 cycles of the 0.5 Hz rhythm) and lags up to 1 second (`lag_max = 10`), which is half a cycle. A window moves 0.5 seconds at a time (`window_increment = 5`).
 
 ```{r calculate-wphase}
 wphase_results <- wphase(
@@ -143,12 +143,12 @@ The estimated lead of Person A moves from `r round(lag0$lead_A_sec[1], 2)` secon
 
 Section 3 showed that unrelated narrowband signals still give a sizable PLV. A surrogate test asks whether the observed PLV is larger than the PLV of pairs whose timing relationship was destroyed.
 
-Circular-shift surrogates (`generate_surrogate_circular()`) suit phase synchrony well. Each surrogate shifts the whole series of Person B by a random amount and wraps the end around to the start. The rhythm of Person B stays intact, but its alignment with Person A is broken.
+Circular-shift surrogates (`generate_surrogate_circular()`) suit phase synchrony well. Each surrogate shifts the whole series of Person B by a random amount and wraps the end around to the start. The rhythm of Person B stays intact, but its alignment with Person A is broken. A shift smaller than the largest lag tested would leave the alignment within reach of a lagged window, so pass `lag_max` to keep every shift at least twice that far away.
 
 One caution: a circular shift of a perfectly periodic signal only adds a constant to its phase, and PLV ignores constant phase offsets. Against a strictly periodic shared rhythm, this null has no power. Real behavior has a wandering tempo, as simulated here, which gives the test its power.
 
 ```{r wphase-surrogate}
-y_surr <- generate_surrogate_circular(person_B_f, n_surrogates = 1000)
+y_surr <- generate_surrogate_circular(person_B_f, n_surrogates = 1000, lag_max = 10)
 
 surr_mean <- wphase_surrogate(
   x = person_A_f,
@@ -168,7 +168,7 @@ The empirical p-value is (b + 1) / (n + 1), where n is the number of surrogates 
 
 By default, `wphase()` summarizes the surface with the mean PLV over all windows and lags (`statistic = "mean_plv"`). The alternative, `statistic = "peak"`, takes the largest PLV across lags in each window and averages those per-window values. This is the best-lag convention that `wcc()` also offers as `statistic = "peak"`. It suits a dyad whose lead–lag shifts over time, because each window counts at the lag where the phases lock best.
 
-Pass the same `statistic` to `wphase_surrogate()`, so that every surrogate is summarized in the same way as the observed data. The same surrogate matrix can be reused:
+Pass the `statistic` that you report from `wphase()` to `wphase_surrogate()` as well, so that the test is of that statistic. `wphase_surrogate()` summarizes the observed data and every surrogate with it. The same surrogate matrix can be reused:
 
 ```{r peak-statistic}
 surr_peak <- wphase_surrogate(

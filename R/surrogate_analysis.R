@@ -468,8 +468,9 @@ wgranger_surrogate <- function(
 #' @param window_increment A positive integer indicating the window shift increment. Default is 1.
 #' @param lag_increment A positive integer indicating the lag shift increment. Default is 1.
 #' @param statistic A character string naming the aggregate statistic, `"mean_plv"`
-#'   (default) or `"peak"`; see [wphase()]. Pass the value you used in [wphase()] so that
-#'   `observed_z` and the null distribution are on the same scale.
+#'   (default) or `"peak"`; see [wphase()]. The observed data and every surrogate are
+#'   summarized with this statistic. Pass the value you used in [wphase()] so that the test
+#'   is of the aggregate you reported (`observed_z` then equals `wphase()$aggregate`).
 #' @return A list object of class "wphase_surr".
 #' @references Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never be
 #'   zero: calculating exact p-values when permutations are randomly drawn. *Statistical
