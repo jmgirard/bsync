@@ -131,6 +131,132 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 }
 
 # -------------------------------------------------------------------------
+# --- 3. IAAFT Method -----------------------------------------------------
+# -------------------------------------------------------------------------
+# M014. Source: Schreiber & Schmitz (1996), p. 2 (cairn/references/
+# schreiber1996.md).
+
+#' Generate IAAFT Surrogates
+#'
+#' Builds surrogates with the iterative amplitude-adjusted Fourier transform
+#' (IAAFT) of Schreiber and Schmitz (1996). Each surrogate takes exactly the
+#' values of `y`, in a new order, and has a power spectrum close to the
+#' spectrum of `y`.
+#'
+#' @details
+#' **Which null this tests.** Phase randomization ([generate_surrogate_phase()])
+#' keeps the power spectrum but makes the values Gaussian, so a skewed or
+#' bounded signal gets surrogates with a different value distribution. IAAFT
+#' keeps both the spectrum and the exact values. The null is a Gaussian linear
+#' process seen through a fixed, monotone transform, for example a
+#' skewed movement-energy signal. Against this null, a significant result
+#' cannot come from the shape of the value distribution or from the
+#' autocorrelation of `y` alone.
+#'
+#' **Algorithm.** Each surrogate starts from a random shuffle of `y`. Each
+#' iteration takes the Fourier transform, replaces its amplitudes with those
+#' of `y` while it keeps the phases, and transforms back. It then rank-orders
+#' the result, so that the series takes exactly the values of `y`. A
+#' surrogate stops when the rank-ordering no longer changes it, which is
+#' where the iteration ends (Schreiber & Schmitz, 1996, p. 2). The returned
+#' series is the rank-ordered one: its values are exact and its spectrum is
+#' close to that of `y`.
+#'
+#' **`max_iter`.** Most series reach that fixed point in fewer than 1000
+#' iterations. The spectral error falls about as 1 / i over the first
+#' iterations (Fig. 2 of the paper, which runs to 1000), so the default
+#' `1000` is a cap on run time, not a target. A surrogate that reaches
+#' `max_iter` without a fixed point is still returned, and the call warns
+#' with the number of such surrogates.
+#'
+#' **Missing values.** The Fourier transform cannot take `NA`, so `y` must
+#' be complete. Fill gaps first, for example with [impute_ts_gaps()].
+#'
+#' @param y A numeric vector with at least 3 finite values and no `NA`.
+#' @param n_surrogates A single positive integer: the number of surrogates.
+#'   Default is `100`.
+#' @param max_iter A single positive integer: the maximum number of
+#'   iterations per surrogate. Default is `1000`.
+#' @return A numeric matrix with `length(y)` rows and `n_surrogates`
+#'   columns, ready to pass as `y_surrogates` to [wcc_surrogate()] and the
+#'   other surrogate wrappers.
+#' @references Schreiber, T., & Schmitz, A. (1996). Improved surrogate data
+#'   for nonlinearity tests. *Physical Review Letters*, 77(4), 635-638.
+#'   \doi{10.1103/PhysRevLett.77.635}
+#' @seealso [generate_surrogate_phase()] and [generate_surrogate_circular()]
+#'   for the other within-dyad nulls; [generate_surrogate_pseudo()] for the
+#'   between-dyad null; [wcc_surrogate()], [wdtw_surrogate()],
+#'   [wgranger_surrogate()], [wphase_surrogate()].
+#' @examples
+#' # Build 100 IAAFT surrogates (same values, near-identical spectrum)
+#' surr <- generate_surrogate_iaaft(sim_dyad$x_B, n_surrogates = 100)
+#' dim(surr)
+#' all.equal(sort(surr[, 1]), sort(sim_dyad$x_B))
+#' @md
+#' @export
+generate_surrogate_iaaft <- function(y, n_surrogates = 100, max_iter = 1000) {
+  if (!is.numeric(y) || !is.null(dim(y))) {
+    cli::cli_abort("{.arg y} must be a numeric vector.")
+  }
+  if (anyNA(y)) {
+    cli::cli_abort(c(
+      "{.arg y} must not contain missing values.",
+      "i" = "Fill gaps first, for example with {.fn impute_ts_gaps}."
+    ))
+  }
+  if (!all(is.finite(y))) {
+    cli::cli_abort("{.arg y} must contain only finite values.")
+  }
+  if (length(y) < 3) {
+    cli::cli_abort("{.arg y} must have at least 3 values.")
+  }
+  if (!.is_count(n_surrogates)) {
+    cli::cli_abort("{.arg n_surrogates} must be a single positive integer.")
+  }
+  if (!.is_count(max_iter)) {
+    cli::cli_abort("{.arg max_iter} must be a single positive integer.")
+  }
+
+  y <- as.double(y)
+  n_y <- length(y)
+  y_sorted <- sort(y)
+  target_amp <- Mod(stats::fft(y))
+
+  # Start: one random shuffle per surrogate, column 1 first.
+  surr_mat <- matrix(0, nrow = n_y, ncol = n_surrogates)
+  for (j in seq_len(n_surrogates)) {
+    surr_mat[, j] <- y[sample.int(n_y)]
+  }
+
+  # Iterate the columns that have not yet reached a fixed point.
+  active <- seq_len(n_surrogates)
+  iter <- 0L
+  while (length(active) > 0 && iter < max_iter) {
+    iter <- iter + 1L
+    current <- surr_mat[, active, drop = FALSE]
+    spec <- stats::mvfft(current)
+    spec <- target_amp * exp(1i * Arg(spec))
+    adjusted <- Re(stats::mvfft(spec, inverse = TRUE)) / n_y
+    ranked <- apply(adjusted, 2, rank, ties.method = "first")
+    updated <- matrix(y_sorted[ranked], nrow = n_y)
+    changed <- colSums(updated != current) > 0
+    surr_mat[, active] <- updated
+    active <- active[changed]
+  }
+
+  if (length(active) > 0) {
+    cli::cli_warn(c(
+      "{length(active)} of {n_surrogates} surrogates did not converge \\
+      within {.arg max_iter} = {max_iter} iterations.",
+      "i" = "They are returned as they are. Raise {.arg max_iter} for a \\
+      closer spectrum."
+    ))
+  }
+
+  surr_mat
+}
+
+# -------------------------------------------------------------------------
 # --- 3. Pseudo-Dyad Method (between dyads) -------------------------------
 # -------------------------------------------------------------------------
 # M009. Convention: rMEA shuffle() (Kleinbub & Ramseyer, 2020) -- pairs
