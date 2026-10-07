@@ -37,7 +37,7 @@ Add an exported IAAFT surrogate generator that keeps the value distribution and 
 - [x] AC4: A seeded simulation test (`skip_on_cran()`) draws at least 400 independent pairs of length 512. Each partner is an AR(1) series x_n = 0.7 x_{n-1} + eta_n, observed as s_n = x_n^3 (schreiber1996, p. 2). The test runs `wcc_surrogate()` with `window_size = 32`, `lag_max = 4`, `window_increment = 16`, and at least 19 IAAFT surrogates per pair at the default `match`. The proportion of pairs with p <= .05 is at most 0.08.
 - [x] AC5: A test calls the generator with `max_iter = 1` on a series that does not converge in one iteration, once for each `match` value. Each call warns with a message that names the number of unconverged columns, and it returns the full matrix. Tests fire each abort branch and assert each message with a regexp. The branches are `NA` in `y`, a non-finite value, non-numeric `y`, and `length(y) < 3`, with a test that length 3 runs. The others are an invalid `n_surrogates`, an invalid `max_iter`, and an invalid `match`.
 - [x] AC6: A test runs a one-cell `synchrony_multiverse(estimator = "wcc", surrogate_method = "iaaft")`. Its `p` equals the `p` of `wcc_surrogate()` on `generate_surrogate_iaaft()` output drawn after the same `set.seed()`, with the cell's window, lag, and increment in samples. A test shows that a `c("phase", "iaaft")` grid has both values in its `surrogate_method` column. A test shows that `autotune_wcc(surrogate_method = "iaaft")` returns a result whose grid holds `"iaaft"`.
-- [ ] AC7: The roxygen of `generate_surrogate_iaaft()` states the null it tests and the default `match`. For each `match` value, it states which property is exact and which is close. It states the `max_iter` default and its reason, and the `NA` policy. It cites Schreiber & Schmitz (1996) with its DOI. It has a runnable `sim_dyad` example that shows the exact property of the default form. The `surrogate_method` docs of both functions name `"iaaft"`. The surrogate-testing vignette has an IAAFT section. NEWS.md has an entry. `pkgdown::check_pkgdown()` passes. `devtools::document()` leaves no uncommitted diff in `man/` or `NAMESPACE`. `devtools::test()` passes. `devtools::check()` gives 0 errors, 0 warnings, and no NOTE that `main` does not also give.
+- [x] AC7: The roxygen of `generate_surrogate_iaaft()` states the null it tests and the default `match`. For each `match` value, it states which property is exact and which is close. It states the `max_iter` default and its reason, and the `NA` policy. It cites Schreiber & Schmitz (1996) with its DOI. It has a runnable `sim_dyad` example that shows the exact property of the default form. The `surrogate_method` docs of both functions name `"iaaft"`. The surrogate-testing vignette has an IAAFT section. NEWS.md has an entry. `pkgdown::check_pkgdown()` passes. `devtools::document()` leaves no uncommitted diff in `man/` or `NAMESPACE`. `devtools::test()` passes. `devtools::check()` gives 0 errors, 0 warnings, and no NOTE that `main` does not also give.
 
 ## Coverage
 
@@ -117,32 +117,34 @@ Evidence run 2026-10-06 on `d12986b`, `devtools::test(filter = "surrogate-iaaft|
 
 Consistency gate on `d12986b`: `cairn_validate` all checks passed; `devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems; `spelling::spell_check_package()` 0 words; README.md built from README.Rmd in T6; NEWS.md has the entry; no new top-level files; the only added `M0nn` text outside `cairn/` is an R comment. No principle changed, so `cairn_impact` is skipped.
 
+- AC7 (evidence on `6f07dc2`, after the review fixes): the roxygen of `generate_surrogate_iaaft()` has "Which null this tests", the default `match` and each form's exact and close property ("`match`" paragraph and `@param match`), the `max_iter` default and reason, "Missing values", the Schreiber & Schmitz (1996) reference with `\doi{10.1103/PhysRevLett.77.635}`, and an example whose `all.equal(Mod(fft(...)))` prints `TRUE` (run in T3). The `surrogate_method` docs of `synchrony_multiverse()` and `autotune_wcc()` name `"iaaft"`. `vignettes/surrogate-testing.Rmd` has section 1.3 IAAFT. NEWS.md has "IAAFT surrogates". `pkgdown::check_pkgdown()`: no problems. `devtools::document()`: no diff. `devtools::test()`: 283 tests, 0 failed, 0 errors, 0 skipped. `devtools::check()`: 0 errors, 0 warnings, 0 notes (2m 10s), so no NOTE that `main` lacks.
+
 spawned: diff-bug, blame-history, prior-review
 
-- diff-bug #1: one `NA` in `y` aborts a whole multiverse or autotune run with `"iaaft"`, unnamed and undocumented — fix now (up-front abort naming the method in `synchrony_multiverse()`, naming the dyads in `autotune_wcc()`, docs, test).
-- diff-bug #2: long series routinely hit `max_iter`, and the hint to raise it cannot be followed from the multiverse — fix now (the multiverse restates the warning without `max_iter`, the help page states the measured long-series behavior) and follow-up (candidate row "[low] IAAFT on long series"). This falsifies the plan's fixed-point-stop condition for long series; work log.
-- diff-bug #3: `autotune_wcc()` repeats the non-convergence warning per dyad — fix now (classed `bsync_iaaft_unconverged`, muffled per dyad, one warning per run, test).
-- diff-bug #4: the autotune test hid all warnings — fix now (warnings kept and checked for the IAAFT class).
-- diff-bug #5: a one-column matrix `y` aborts with iaaft in the multiverse — fix now (`as.vector(y)`, test).
-- diff-bug #6: NEWS and vignette compared rates on different pair sets — fix now (21 of 200 vs 9 of the same 200).
-- diff-bug #7: the calibration test had no lower bound — fix now (`>= 0.01`).
+- diff-bug #1: one `NA` in `y` aborts a whole multiverse or autotune run with `"iaaft"`, unnamed and undocumented — fix now, fixed 6f07dc2 (up-front abort naming the method in `synchrony_multiverse()`, naming the dyads in `autotune_wcc()`, docs, test).
+- diff-bug #2: long series routinely hit `max_iter`, and the hint to raise it cannot be followed from the multiverse — fix now, fixed 6f07dc2 (the multiverse restates the warning without `max_iter`, the help page states the measured long-series behavior) and follow-up (candidate row "[low] IAAFT on long series"). This falsifies the plan's fixed-point-stop condition for long series; work log.
+- diff-bug #3: `autotune_wcc()` repeats the non-convergence warning per dyad — fix now, fixed 6f07dc2 (classed `bsync_iaaft_unconverged`, muffled per dyad, one warning per run, test).
+- diff-bug #4: the autotune test hid all warnings — fix now, fixed 6f07dc2 (warnings kept and checked for the IAAFT class).
+- diff-bug #5: a one-column matrix `y` aborts with iaaft in the multiverse — fix now, fixed 6f07dc2 (`as.vector(y)`, test).
+- diff-bug #6: NEWS and vignette compared rates on different pair sets — fix now, fixed 6f07dc2 (21 of 200 vs 9 of the same 200).
+- diff-bug #7: the calibration test had no lower bound — fix now, fixed 6f07dc2 (`>= 0.01`).
 - diff-bug #8: the rank step's tie rule is untested — follow-up (candidate row "[low] IAAFT rank-step tie test"); on `c(1, 1, 2, 2, 3, 3)` the generator matched the explicit-DFT reference on 13 of 30 seeds, so a tie test against the reference is not well posed.
-- diff-bug #9: very short series give shift or reversal surrogates — fix now (help page note).
-- diff-bug #10: an integer iteration counter overflows for huge `max_iter` — fix now (double counter).
-- diff-bug #11: values near 1e300 overflow the FFT silently — fix now (abort on non-finite amplitudes, test).
-- diff-bug #12: `match = c("values", "spectrum")` silently picked the values form (verified) — fix now (abort unless one value or the unchanged default, test).
-- diff-bug #13: doc wording (vignette stop omits the cap, "cannot both match" false for a cyclic shift, a test path in user docs) — fix now.
-- diff-bug #14: the warning was not pluralized — fix now (`{?s}`, test).
+- diff-bug #9: very short series give shift or reversal surrogates — fix now, fixed 6f07dc2 (help page note).
+- diff-bug #10: an integer iteration counter overflows for huge `max_iter` — fix now, fixed 6f07dc2 (double counter).
+- diff-bug #11: values near 1e300 overflow the FFT silently — fix now, fixed 6f07dc2 (abort on non-finite amplitudes, test).
+- diff-bug #12: `match = c("values", "spectrum")` silently picked the values form (verified) — fix now, fixed 6f07dc2 (abort unless one value or the unchanged default, test).
+- diff-bug #13: doc wording (vignette stop omits the cap, "cannot both match" false for a cyclic shift, a test path in user docs) — fix now, fixed 6f07dc2.
+- diff-bug #14: the warning was not pluralized — fix now, fixed 6f07dc2 (`{?s}`, test).
 - blame-history #1: CLAUDE.md still lists IAAFT as a candidate and omits it from the resolved defaults — follow-up (candidate row "Update CLAUDE.md for IAAFT"); CLAUDE.md is the owner's process file and is not edited on a reviewer's report.
-- blame-history #2: cross-references named only circular and phase surrogates — fix now (vignette 1.4 contrast, README, four vignette pointers).
-- blame-history #3: the default reversal was only in the milestone file — fix now (D-003).
-- blame-history #4: mixed backtick and `\code{}` markup in two non-markdown params — fix now (`\code{}` for all names).
-- blame-history #5: no test for NA input to the multiverse with iaaft — fix now (same fix as diff-bug #1).
-- blame-history #6: the autotune test's blanket `suppressWarnings()` — fix now (same as diff-bug #4).
+- blame-history #2: cross-references named only circular and phase surrogates — fix now, fixed 6f07dc2 (vignette 1.4 contrast, README, four vignette pointers).
+- blame-history #3: the default reversal was only in the milestone file — fix now, fixed 6f07dc2 (D-003).
+- blame-history #4: mixed backtick and `\code{}` markup in two non-markdown params — fix now, fixed 6f07dc2 (`\code{}` for all names).
+- blame-history #5: no test for NA input to the multiverse with iaaft — fix now, fixed 6f07dc2 (same fix as diff-bug #1).
+- blame-history #6: the autotune test's blanket `suppressWarnings()` — fix now, fixed 6f07dc2 (same as diff-bug #4).
 - blame-history #7: `circ_lag_max` is computed when circular is not requested — reject, style: a scalar computed from the grid, with no effect on any result, and pre-existing.
 - blame-history #8: DESIGN §6 old wording reads as both properties exact — reject, false: §6 and §14 #8 now state the `match` forms (corrected M014).
-- prior-review #1: `@seealso` links not reciprocal — fix now (circular, phase, both pseudo generators, multiverse, autotune link to IAAFT).
-- prior-review #2: mixed markup — fix now (same as blame-history #4).
-- prior-review #3: method lists omit IAAFT — fix now for the vignettes and README. `R/surrogate_analysis.R:455-458` stays: it compares the two named generators' effect on PLV and is accurate as written.
-- prior-review #4: two "3." section comments in `R/surrogate_generation.R` — fix now (pseudo-dyads is 4).
+- prior-review #1: `@seealso` links not reciprocal — fix now, fixed 6f07dc2 (circular, phase, both pseudo generators, multiverse, autotune link to IAAFT).
+- prior-review #2: mixed markup — fix now, fixed 6f07dc2 (same as blame-history #4).
+- prior-review #3: method lists omit IAAFT — fix now for the vignettes and README, fixed 6f07dc2. `R/surrogate_analysis.R:455-458` stays: it compares the two named generators' effect on PLV and is accurate as written.
+- prior-review #4: two "3." section comments in `R/surrogate_generation.R` — fix now, fixed 6f07dc2 (pseudo-dyads is 4).
 - prior-review #5: long lines in `test-multiverse.R` — reject, style: the file is not air-clean on main (M010 lesson).
