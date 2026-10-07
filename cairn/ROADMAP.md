@@ -1,13 +1,15 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M016)._
+_Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M018)._
 _Last hygiene check: 2026-10-07 (M015 merged and archived, M012 row pruned, RB01/RR01 archived, 3 lessons added, validate green)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M016 | wphase parity: selectable statistic and workflow article | planned | — | normal | milestones/M016-wphase-parity.md |
+| M017 | Count every window that fits when window_increment > 1 | planned | — | normal | milestones/M017-window-count-fix.md |
 | M015 | Segment-shuffling surrogate generator | done | M014 | normal | milestones/archive/M015-segment-shuffle-surrogates.md |
 | M014 | IAAFT surrogate generator | done | — | normal | milestones/archive/M014-iaaft-surrogates.md |
 | M013 | Granger multiverse summary and plot for both directions | done | — | normal | milestones/archive/M013-granger-multiverse-direction.md |
@@ -16,13 +18,9 @@ _Last hygiene check: 2026-10-07 (M015 merged and archived, M012 row pruned, RB01
 
 ## Candidates
 
-- Update CLAUDE.md for IAAFT and segment surrogates: the "Out of scope" bullet still calls both candidate rows, and the resolved-defaults line lists only phase and circular surrogate methods — added 2026-10-06 — M014 review (blame-history #1), M015 review (blame-history #7)
-- Window count in `build_surface_grid()`: when `window_increment > 1` does not divide n - w_max - 2 * lag_max, the grid has one window fewer than fits (`build_surface_grid(5, 3, 5, 1)` aborts, although one window fits). The multiverse `min_n` guard copies the formula. The default increment of 1 is not affected — added 2026-10-07 — M015 RR01 B1
 - Delivered surrogate count per multiverse cell: `print()` and `glance()` of a `bsync_multiverse` report the requested `n_surrogates`, but a segment cell with 4 to 8 segments uses at most k! - 1 (23, 119, 719, ...). Record the count each cell used, or print "up to" — added 2026-10-07 — M015 review (diff-bug #7, blame-history #2)
-- Duplicate multiverse cells from the lag cap: lags capped at floor(window / 2) can make crossed cells identical in samples (the default `lag_sec = window_sec / 2` crossed with every window does this), which inflates `n_valid` and `pct_significant`. Pre-existing for every surrogate method — added 2026-10-07 — M015 review (diff-bug #9)
+- Duplicate multiverse cells from the lag cap: lags capped at floor(window / 2) can make crossed cells identical in samples (the default `lag_sec = window_sec / 2` crossed with every window does this), which inflates `n_valid` and `pct_significant`. Pre-existing for every surrogate method. Chosen fix (plan question set 2026-10-07): drop repeated cells before testing and announce the count via cli — added 2026-10-07 — M015 review (diff-bug #9)
 - `autotune_wcc()` result does not record the winning cell's `surrogate_method` or `increment_pct`; with segment cells the increment depends on the method — added 2026-10-07 — M015 review (diff-bug #12)
-- wphase workflow vignette: parity with the wcc/wdtw/wgranger workflow articles, incl. narrowband/band-pass guidance for phase methods — added 2026-08-29 — M008 Out
-- Selectable wphase aggregate statistic (the M4 wcc pattern: `statistic =` argument, null matched to observed) — added 2026-08-29 — M008 Out
 - mne_connectivity PLV pipeline pin: M008's frozen pin uses MNE's analytic signal + the Lachaux formula, not mne_connectivity's own PLV pipeline (different spectral estimation; unmatchable at 1e-6); a tolerance-banded comparison against the toolbox's shipped PLV would close the convention gap the pin leaves. Promote when a definitional question about the PLV convention actually arises — added 2026-08-29 — M008 review F3
 - pick_optima local search with lag_increment > 1: pick_optima_cpp hard-errors unless each window carries exactly 2*lag_max+1 lags, so `search_method = "local"` fails for any estimator surface built with lag_increment > 1 (pre-existing, all estimators; surfaced by M008's whitelist extension). Promote when a user hits it or the next optima-touching milestone — added 2026-08-29 — M008 review F13
 - Enable roxygen markdown package-wide: DESCRIPTION sets no roxygen markdown option, so `[fn()]` links, `**bold**`, and backticks in existing roxygen render as raw text in `man/*.Rd`. M009's two new functions use a per-block `@md` instead. Turning it on regenerates every Rd file, so check the output. M011 added `@md` to the four `*_surrogate()` wrappers. M013 added `@md` to the four `bsync_multiverse` methods, but the `synchrony_multiverse()` block still renders its new `$robustness_yx` text raw — added 2026-10-05 — M009 T6, M013 review (diff-bug #6)
@@ -34,6 +32,7 @@ _Last hygiene check: 2026-10-07 (M015 merged and archived, M012 row pruned, RB01
 - CRAN submission of v0.1.0: package is submission-ready (`cran-comments.md` checklist, human-gated); release timing is user-declared, never agent-proposed — added 2026-08-29 — legacy CLAUDE.md Current focus
 - Unified `bsync_ts` preprocessing object: specify before building — added 2026-08-29 — legacy DESIGN §15 unscheduled
 - Expanded educational vignettes: choosing a method, interpreting a surface, reporting synchrony — added 2026-08-29 — legacy DESIGN §15 unscheduled
+- [low] `wcc()` "peak" with tied timestamps: `wcc()` groups windows by the time-mapped `results_df$i`, but `wcc_surrogate()` groups by grid position, and `validate_series()` accepts tied `time` values, so a tie can merge two windows on the observed side only. Group by grid position in both. Promote when a user passes `time` with ties or the next wcc-touching milestone — added 2026-10-07 — M016 plan criteria audit
 - [low] Segment rotations: cyclic rotations of the segments give k - 1 exact surrogates that move every segment, for users who want no segment in place. Promote on a user request — added 2026-10-07 — M015 RR01 rec 6
 - [low] wphase segment surrogates: `wphase()` takes the Hilbert transform of the whole series, so aligned segment surrogates are approximate (0.059 at .05 on AR(1) input). Measure on an oscillatory process, or permute the phase series by segments inside `wphase_surrogate()`. Promote when a user relies on segment tests for wphase — added 2026-10-07 — M015 RR01 rec 7
 - [low] Calibration tidy-up: record the size of phase randomization on a plain AR(1) pair (one 2000-pair row), and tighten the IAAFT bound from 0.08 at 400 pairs to 0.07 at 1000 pairs. Do it in the next milestone that edits the IAAFT test in `test-surrogate-calibration.R` — added 2026-10-07 — M015 RR01 B4, B5, M015 review (blame-history #6)

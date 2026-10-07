@@ -63,7 +63,8 @@ These encode hard-won reasoning. Changing them is a design decision, not a refac
 `1`/`1` · WCC `na.rm = TRUE` (pairwise; honored — `FALSE` ⇒ NA window) · WDTW `scale_method =
 "global"`, `distance_metric = "L2"` · Granger `ar_order = 1` · WCC aggregate statistic selectable,
 default `"mean_abs_z"` (M4) · surrogate method user-chosen (phase = spectrum, circular =
-autocorrelation) · `n_surrogates = 100` (≥ 1000 advised for reporting) · smoothing = Savitzky–Golay
+autocorrelation, iaaft = spectrum + exact values, segment = within-segment structure, pseudo-dyad =
+between-dyad) · `n_surrogates = 100` (≥ 1000 advised for reporting) · smoothing = Savitzky–Golay
 order 3 · downsample/aggregate = median · `impute maxgap = 5`, no extrapolation · PSD `threshold =
 0.95`. Don't change these silently.
 
@@ -148,9 +149,9 @@ snapshots; roxygen2 for every exported function (document the *why* of each defa
 - **First CRAN release** (`v0.1.0`) — explicitly its own milestone **M7**, after M6; not near-term.
 - **Group-level / multivariate modeling** — deferred to M11 (`mvSUSY` is the multivariate reference).
 - **tidy/glance/as_tibble methods** — built in **M5** (done).
-- **IAAFT / segment-shuffling surrogates** — resolved to add (cairn/DESIGN.md §6/§14); a
-  candidate row in `cairn/ROADMAP.md`. The pseudo-dyad (between-dyad rMEA) generators shipped
-  in M009 on the existing `dyad_list` input.
+- **IAAFT / segment-shuffling surrogates** — shipped (M014, M015; segment design in D-004). The
+  pseudo-dyad (between-dyad rMEA) generators shipped in M009 on the existing `dyad_list` input.
+  Pseudo-dyad cells in the multiverse remain a candidate row in `cairn/ROADMAP.md`.
 - **A unified `bsync_ts` preprocessing object** — logged in cairn/DESIGN.md §14; specify before building.
 - **OpenMP** — not adopted until the M2 decision; no `#pragma omp` ships before then.
 
