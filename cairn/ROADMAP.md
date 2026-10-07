@@ -2,16 +2,15 @@
 
 _The only authority on milestone status. Grouped by status, not ID._
 _Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M016)._
-_Last hygiene check: 2026-10-07 (M014 merged and archived, M011 row pruned, 3 lessons added, 3 candidate rows filed in review, validate green)_
+_Last hygiene check: 2026-10-07 (M015 merged and archived, M012 row pruned, RB01/RR01 archived, 3 lessons added, validate green)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M015 | Segment-shuffling surrogate generator | review | M014 | normal | milestones/M015-segment-shuffle-surrogates.md |
+| M015 | Segment-shuffling surrogate generator | done | M014 | normal | milestones/archive/M015-segment-shuffle-surrogates.md |
 | M014 | IAAFT surrogate generator | done | — | normal | milestones/archive/M014-iaaft-surrogates.md |
 | M013 | Granger multiverse summary and plot for both directions | done | — | normal | milestones/archive/M013-granger-multiverse-direction.md |
-| M012 | One significance rule (p <= .05) and surrogate print edges | done | — | normal | milestones/archive/M012-significance-rule.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent
      terminal (done or dropped) rows — older ones live in milestones/archive/ + git -->
 
