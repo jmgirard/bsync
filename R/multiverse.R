@@ -153,8 +153,12 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'   not apply to segment cells: the grid has one segment row per window,
 #'   lag, and statistic, with \code{increment_pct} \code{NA}. A segment cell
 #'   with fewer than 4 segments cannot reach p <= .05, so it is skipped with
-#'   a warning. A cell with 4 segments uses \code{min(n_surrogates, 23)}
-#'   surrogates, because 4 segments have 23 orders other than the original.
+#'   a warning. A cell with k segments uses \code{min(n_surrogates, k! - 1)}
+#'   surrogates, because k segments have k! - 1 orders other than the
+#'   original: a cell with 4 segments uses \code{min(n_surrogates, 23)}
+#'   surrogates, and 5 and 6 segments allow 119 and 719. The samples after
+#'   the last whole segment stay in place (see
+#'   \code{\link{generate_surrogate_segment}}).
 #' @param n_surrogates Single positive integer; number of surrogates per cell.
 #'   Default is `100`. Use >= 1000 for reporting. A cell is significant at
 #'   p <= .05. Below 19 the call warns, because the smallest possible
@@ -394,8 +398,9 @@ synchrony_multiverse <- function(
   names(surr_matrices) <- unique_methods
 
   # One segment matrix per distinct segment size of the cells that run. The
-  # tail is announced by the docs, and fewer than n_surrogates orders exist
-  # only at 4 segments (23 orders), which the docs also state.
+  # tail and the k! - 1 cap on the number of orders (23, 119, 719, 5039, and
+  # 40319 for 4 to 8 segments) are stated in the docs, so the generator's
+  # messages about them are muffled here.
   seg_sizes <- unique(seg_size_all[is_seg & !seg_skip])
   seg_matrices <- lapply(seg_sizes, function(s) {
     withCallingHandlers(

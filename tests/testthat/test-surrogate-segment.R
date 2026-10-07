@@ -301,7 +301,7 @@ test_that("single orders and pairs of orders are equally frequent", {
 
 test_that("with 9 segments, the first-placed segment is equally frequent", {
   # Excluding the original order changes P(segment 1 first) from 1/9 to
-  # (8! - 1) / (9! - 1), a relative difference of 2.5e-5.
+  # (8! - 1) / (9! - 1), a relative difference of 2.2e-5.
   y <- as.double(1:18)
   set.seed(303)
   first <- vapply(

@@ -41,14 +41,15 @@ lies inside one segment (see "Windows and segments").
 \strong{Segments and orders.} The series has k = \code{floor(length(y) / segment_size)} segments, cut from sample 1. Segment i covers samples
 (i - 1) * \code{segment_size} + 1 to i * \code{segment_size}. Each surrogate takes
 an order drawn uniformly from all k! - 1 orders other than the original,
-and no order is drawn twice. So a surrogate can leave a segment in place:
-about one of the k segments, on average. This rule makes the add-one
-p-value of the surrogate wrappers exact. Orders that move every segment
-do not form a group with the original order, and a test against them
-rejects a true null too often. With up to 8 segments and an
-\code{n_surrogates} of at least k! - 1, the call returns all k! - 1 orders and
-says so. With 3 segments or fewer, k! - 1 is below 19, so no test can
-reach p <= .05, and the call warns.
+and no order is drawn twice. So with 3 or more segments, a surrogate can
+leave a segment in place: on average (k! - k) / (k! - 1) of the k
+segments, which is close to one from 4 segments on. This rule makes the
+add-one p-value of the surrogate wrappers exact. From 4 segments on,
+orders that move every segment do not form a group with the original
+order, and a test against them rejects a true null too often. With up
+to 8 segments and an \code{n_surrogates} of at least k! - 1, the call returns
+all k! - 1 orders and says so. With 3 segments or fewer, k! - 1 is
+below 19, so no test can reach p <= .05, and the call warns.
 
 \strong{The tail.} The last \code{length(y) - k * segment_size} samples do not fill
 a segment. They stay in place at the end of every surrogate, and the call
@@ -63,12 +64,14 @@ segment under these settings:
 \item For \code{\link[=wgranger]{wgranger()}}: \code{segment_size = window_size = window_increment}.
 }
 
-The window grid then has k - 1 windows, or k windows when the tail is
-\code{segment_size - 1} samples. The remaining segment serves only as a source
-for the surrogates. \code{\link[=wphase]{wphase()}} takes the Hilbert transform of the whole
-series, so a segment test of phase synchrony is approximate even with
-aligned windows. \code{\link[=synchrony_multiverse]{synchrony_multiverse()}} and \code{\link[=autotune_wcc]{autotune_wcc()}} use these
-settings for \code{surrogate_method = "segment"}.
+The window grid then has k - 1 windows, or k windows when the tail is at
+least \code{window_size + 2 * lag_max - 1} samples (\code{window_size - 1} for
+\code{\link[=wgranger]{wgranger()}}). With \code{segment_size = window_size + 2 * lag_max}, that is a
+tail of \code{segment_size - 1} samples. With k - 1 windows, the last segment
+serves only as a source for the surrogates. \code{\link[=wphase]{wphase()}} takes the Hilbert
+transform of the whole series, so a segment test of phase synchrony is
+approximate even with aligned windows. \code{\link[=synchrony_multiverse]{synchrony_multiverse()}} and
+\code{\link[=autotune_wcc]{autotune_wcc()}} use these settings for \code{surrogate_method = "segment"}.
 
 \strong{SUSY.} The segment cut follows the \code{susy()} function of the SUSY
 package (Tschacher & Meier, 2020). SUSY correlates each segment of one

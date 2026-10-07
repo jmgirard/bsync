@@ -59,8 +59,12 @@ every lagged window lies inside one segment. \code{increment_pct} does
 not apply to segment cells: the grid has one segment row per window,
 lag, and statistic, with \code{increment_pct} \code{NA}. A segment cell
 with fewer than 4 segments cannot reach p <= .05, so it is skipped with
-a warning. A cell with 4 segments uses \code{min(n_surrogates, 23)}
-surrogates, because 4 segments have 23 orders other than the original.}
+a warning. A cell with k segments uses \code{min(n_surrogates, k! - 1)}
+surrogates, because k segments have k! - 1 orders other than the
+original: a cell with 4 segments uses \code{min(n_surrogates, 23)}
+surrogates, and 5 and 6 segments allow 119 and 719. The samples after
+the last whole segment stay in place (see
+\code{\link{generate_surrogate_segment}}).}
 
 \item{n_surrogates}{Single positive integer; number of surrogates per cell.
 Default is `100`. Use >= 1000 for reporting. A cell is significant at
