@@ -98,8 +98,8 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #' **Granger direction.** When `estimator = "wgranger"`, two sets of statistics
 #' are returned: primary (`observed`, `null_mean`, `null_sd`, `es`, `p`) refer to
 #' x -> y; additional columns `observed_yx`, `null_mean_yx`, `null_sd_yx`,
-#' `es_yx`, and `p_yx` give y -> x. `$robustness` summarises x -> y and
-#' `$robustness_yx` summarises y -> x. The `print()`, `summary()`, `glance()`,
+#' `es_yx`, and `p_yx` give y -> x. `$robustness` summarizes x -> y and
+#' `$robustness_yx` summarizes y -> x. The `print()`, `summary()`, `glance()`,
 #' and `plot()` methods report x -> y by default; pass `direction = "yx"` to
 #' report y -> x.
 #'
@@ -144,7 +144,7 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'       grid), `n_valid` (cells that produced a computable ES; the rest were
 #'       skipped as too short), `n_significant`, `pct_significant` (over
 #'       `n_valid`), `median_es`, `iqr_es`, `sign_consistent` (proportion of
-#'       significant cells with ES > 0). For Granger it summarises x -> y.}
+#'       significant cells with ES > 0). For Granger it summarizes x -> y.}
 #'     \item{`$robustness_yx`}{Granger only: the same fields as
 #'       `$robustness`, computed from `es_yx` and `p_yx` (y -> x).}
 #'   }

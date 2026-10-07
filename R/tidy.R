@@ -147,11 +147,11 @@ tidy.bsync_multiverse <- function(x, ...) {
 #'
 #' @param x A `bsync_multiverse` object from [synchrony_multiverse()].
 #' @param direction For a Granger result (`estimator = "wgranger"`), the
-#'   direction to summarise: `"xy"` (x -> y, the default) or `"yx"` (y -> x).
+#'   direction to summarize: `"xy"` (x -> y, the default) or `"yx"` (y -> x).
 #'   Other estimators have one direction only, so `"yx"` is an error for them.
 #' @param ... Additional arguments (not used).
 #' @return A one-row [tibble::tibble()]. For a Granger result, a `direction`
-#'   column after `estimator` names the direction summarised.
+#'   column after `estimator` names the direction summarized.
 #' @seealso [tidy.bsync_multiverse()], [as_tibble.bsync_multiverse()],
 #'   [synchrony_multiverse()]
 #' @md

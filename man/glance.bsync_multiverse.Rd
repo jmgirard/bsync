@@ -10,14 +10,14 @@
 \item{x}{A \code{bsync_multiverse} object from \code{\link[=synchrony_multiverse]{synchrony_multiverse()}}.}
 
 \item{direction}{For a Granger result (\code{estimator = "wgranger"}), the
-direction to summarise: \code{"xy"} (x -> y, the default) or \code{"yx"} (y -> x).
+direction to summarize: \code{"xy"} (x -> y, the default) or \code{"yx"} (y -> x).
 Other estimators have one direction only, so \code{"yx"} is an error for them.}
 
 \item{...}{Additional arguments (not used).}
 }
 \value{
 A one-row \code{\link[tibble:tibble]{tibble::tibble()}}. For a Granger result, a \code{direction}
-column after \code{estimator} names the direction summarised.
+column after \code{estimator} names the direction summarized.
 }
 \description{
 Returns a single-row tibble summarising robustness across the specification
