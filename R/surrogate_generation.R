@@ -182,9 +182,9 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #'
 #' **`max_iter`.** The spectral error falls about as 1 / i over the first
 #' iterations (p. 3), and the paper's Fig. 2 runs to 1000 iterations (p. 2).
-#' The default `1000` is a cap on run time, not a target. A surrogate that reaches
-#' `max_iter` without a fixed point is still returned, and the call warns
-#' with the number of such surrogates.
+#' The default `1000` is a cap on run time, not a target. A surrogate that
+#' reaches `max_iter` without a fixed point is still returned, and the call
+#' warns with the number of such surrogates.
 #'
 #' **Missing values.** The Fourier transform cannot take `NA`, so `y` must
 #' be complete. Fill gaps first, for example with [impute_ts_gaps()].

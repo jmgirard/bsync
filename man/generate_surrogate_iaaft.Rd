@@ -74,9 +74,9 @@ form rejected 21 of 200 pairs (10.5\%). The package test
 
 \strong{\code{max_iter}.} The spectral error falls about as 1 / i over the first
 iterations (p. 3), and the paper's Fig. 2 runs to 1000 iterations (p. 2).
-The default \code{1000} is a cap on run time, not a target. A surrogate that reaches
-\code{max_iter} without a fixed point is still returned, and the call warns
-with the number of such surrogates.
+The default \code{1000} is a cap on run time, not a target. A surrogate that
+reaches \code{max_iter} without a fixed point is still returned, and the call
+warns with the number of such surrogates.
 
 \strong{Missing values.} The Fourier transform cannot take \code{NA}, so \code{y} must
 be complete. Fill gaps first, for example with \code{\link[=impute_ts_gaps]{impute_ts_gaps()}}.
