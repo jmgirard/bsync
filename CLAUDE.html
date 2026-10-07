@@ -88,7 +88,7 @@
 </ol></div>
 <div class="section level2">
 <h2 id="resolved-defaults-see-cairndesignmd-9">Resolved defaults (see <code>cairn/DESIGN.md</code> §9)<a class="anchor" aria-label="anchor" href="#resolved-defaults-see-cairndesignmd-9"></a></h2>
-<p><code>window_size</code>/<code>lag_max</code> <strong>required</strong> · window length = exactly <code>window_size</code> samples · increments = <code>1</code>/<code>1</code> · WCC <code>na.rm = TRUE</code> (pairwise; honored — <code>FALSE</code> ⇒ NA window) · WDTW <code>scale_method = "global"</code>, <code>distance_metric = "L2"</code> · Granger <code>ar_order = 1</code> · WCC aggregate statistic selectable, default <code>"mean_abs_z"</code> (M4) · surrogate method user-chosen (phase = spectrum, circular = autocorrelation) · <code>n_surrogates = 100</code> (≥ 1000 advised for reporting) · smoothing = Savitzky–Golay order 3 · downsample/aggregate = median · <code>impute maxgap = 5</code>, no extrapolation · PSD <code>threshold = 0.95</code>. Don’t change these silently.</p>
+<p><code>window_size</code>/<code>lag_max</code> <strong>required</strong> · window length = exactly <code>window_size</code> samples · increments = <code>1</code>/<code>1</code> · WCC <code>na.rm = TRUE</code> (pairwise; honored — <code>FALSE</code> ⇒ NA window) · WDTW <code>scale_method = "global"</code>, <code>distance_metric = "L2"</code> · Granger <code>ar_order = 1</code> · WCC aggregate statistic selectable, default <code>"mean_abs_z"</code> (M4) · surrogate method user-chosen (phase = spectrum, circular = autocorrelation, iaaft = spectrum + exact values, segment = within-segment structure, pseudo-dyad = between-dyad) · <code>n_surrogates = 100</code> (≥ 1000 advised for reporting) · smoothing = Savitzky–Golay order 3 · downsample/aggregate = median · <code>impute maxgap = 5</code>, no extrapolation · PSD <code>threshold = 0.95</code>. Don’t change these silently.</p>
 </div>
 <div class="section level2">
 <h2 id="dependencies-see-cairndesignmd-10">Dependencies (see <code>cairn/DESIGN.md</code> §10)<a class="anchor" aria-label="anchor" href="#dependencies-see-cairndesignmd-10"></a></h2>
@@ -154,7 +154,7 @@
 <li>
 <strong>tidy/glance/as_tibble methods</strong> — built in <strong>M5</strong> (done).</li>
 <li>
-<strong>IAAFT / segment-shuffling surrogates</strong> — resolved to add (cairn/DESIGN.md §6/§14); a candidate row in <code>cairn/ROADMAP.md</code>. The pseudo-dyad (between-dyad rMEA) generators shipped in M009 on the existing <code>dyad_list</code> input.</li>
+<strong>IAAFT / segment-shuffling surrogates</strong> — shipped (M014, M015; segment design in D-004). The pseudo-dyad (between-dyad rMEA) generators shipped in M009 on the existing <code>dyad_list</code> input. Pseudo-dyad cells in the multiverse remain a candidate row in <code>cairn/ROADMAP.md</code>.</li>
 <li>
 <strong>A unified <code>bsync_ts</code> preprocessing object</strong> — logged in cairn/DESIGN.md §14; specify before building.</li>
 <li>
