@@ -68,6 +68,23 @@ validate_window_params <- function(window_size, window_increment = 1L,
 
 # Grid builder ----------------------------------------------------------------
 
+#' Minimum series length for one window
+#'
+#' The shortest series that holds one window: `window_size + 2 * lag_max`
+#' samples for lagged estimators, `window_size` for Granger. Shared by
+#' `build_surface_grid()` and the `synchrony_multiverse()` short-series guard.
+#'
+#' @inheritParams build_surface_grid
+#' @return Integer; the minimum number of samples.
+#' @noRd
+grid_min_length <- function(window_size, lag_max = NULL, lagged = TRUE) {
+  if (lagged) {
+    as.integer(window_size + 2L * lag_max)
+  } else {
+    as.integer(window_size)
+  }
+}
+
 #' Build a windowed-surface (i, tau) grid
 #'
 #' Sole source of the `n_r` math, the `w_max = window_size - 1` boundary
@@ -100,14 +117,17 @@ build_surface_grid <- function(n_x, window_size, window_increment = 1L,
   if (lagged) {
     tau_max <- lag_max
     tau_inc <- lag_increment
-    n_r <- floor((n_x - w_max - 2L * tau_max) / w_inc)
+    min_n <- grid_min_length(window_size, tau_max, lagged = TRUE)
 
-    if (n_r < 1L) {
+    if (n_x < min_n) {
       cli::cli_abort(c(
         "Series is too short for the requested {.arg window_size} and {.arg lag_max}.",
-        "i" = "Need at least {w_max + 1L + 2L * tau_max + 1L} samples; got {n_x}."
+        "i" = "Need at least {min_n} samples; got {n_x}."
       ))
     }
+
+    # Starts run from 1 + tau_max while start + w_max + tau_max <= n_x.
+    n_r <- floor((n_x - min_n) / w_inc) + 1L
 
     lags <- seq.int(-tau_max, tau_max, by = tau_inc)
     grid <- base::expand.grid(row = seq_len(n_r), col = seq_along(lags))
@@ -122,14 +142,17 @@ build_surface_grid <- function(n_x, window_size, window_increment = 1L,
       lags      = lags
     )
   } else {
-    n_r <- floor((n_x - w_max) / w_inc)
+    min_n <- grid_min_length(window_size, lagged = FALSE)
 
-    if (n_r < 1L) {
+    if (n_x < min_n) {
       cli::cli_abort(c(
         "Series is too short for the requested {.arg window_size}.",
-        "i" = "Need at least {w_max + 1L + 1L} samples; got {n_x}."
+        "i" = "Need at least {min_n} samples; got {n_x}."
       ))
     }
+
+    # Starts run from 1 while start + w_max <= n_x.
+    n_r <- floor((n_x - min_n) / w_inc) + 1L
 
     i_vals <- 1L + (seq_len(n_r) - 1L) * w_inc
 

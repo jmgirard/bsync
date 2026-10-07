@@ -1,13 +1,13 @@
 # M017: Count every window that fits when window_increment > 1
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** user-facing — changes the windows every estimator returns when `window_increment > 1`
-- **Branch/PR:** —
+- **Branch/PR:** m017-window-count-fix
 
 ## Goal
 
@@ -61,6 +61,8 @@ Make the window grid include every window position that fits in the series, so t
 - 2026-10-07: plan split the window fix into its own milestone instead of M016, which the gate answer named, because it shares no code with the wphase work and the goal needs "and". M016 and M017 are independent.
 - 2026-10-07: plan gate chose fixing the count over keeping it and documenting the dropped window, because the dropped window is data that fits the contract; falsified by a published method or sibling package (SUSY, rMEA) whose window count matches the current formula and that users compare against.
 - 2026-10-07: criteria audit (full mode, fresh Opus reader) returned 7 findings on M017, all fixed: lag-free loop uses lag_max = 0 and AC1 checks the corrected "too short" minimum; AC2 no longer claims the error text is unchanged at increment 1; AC4 names estimator, surrogate method, and a wgranger case; AC5 keeps the rejection-rate bounds fixed and names the frozen wphase `null_q99` (n = 600, increment 4, gains a window); AC3 adds a minimum-length call per estimator; T5 corrected (multiverse segment cells gain only the last full segment's window, no tail window). The audit found no conflict with D-004.
+- 2026-10-07: implement started on branch m017-window-count-fix.
+- 2026-10-07: checkpoint (half-done, user interrupted). T1 sweep tests failed on the old formula (602 lag-free mismatches, one-window abort). T2 fix and `grid_min_length()` helper landed, and test-surface.R passes. T4 guard switched to the helper, with no test yet. test-wphase.R: case 2 window count 21 to 22, `null_q99` 0.1316320 to 0.1316286 (rerun of data-raw/wphase_null_bound.R). The full suite run before these test edits had 4 failures (2 multiverse vdiffr snapshots, 1 multiverse-segment dashboard test, 1 wgranger structure test), not yet triaged. No task is ticked because the suite is not clean.
 
 ## Decisions
 
