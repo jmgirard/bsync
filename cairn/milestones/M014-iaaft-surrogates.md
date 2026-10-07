@@ -1,13 +1,13 @@
 # M014: IAAFT surrogate generator
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** user-facing — adds an exported generator and a new `surrogate_method` value
-- **Branch/PR:** —
+- **Branch/PR:** m014-iaaft-surrogates
 
 ## Goal
 
@@ -51,7 +51,7 @@ Add an exported IAAFT surrogate generator that keeps the value distribution and 
 
 ## Tasks
 
-- [ ] T1: Write `cairn/references/schreiber1996.md` from the source-note template. The source is the arXiv copy on the shelf (`sources/schreiber1996.pdf`, chao-dyn/9909041, PRL 77, 635). Extract the iteration and stopping rule (p. 2), the discrepancy measure and the AR(1) cube process (pp. 2-3), and the convergence remarks (p. 3). Add the INDEX.md line.
+- [x] T1: Write `cairn/references/schreiber1996.md` from the source-note template. The source is the arXiv copy on the shelf (`sources/schreiber1996.pdf`, chao-dyn/9909041, PRL 77, 635). Extract the iteration and stopping rule (p. 2), the discrepancy measure and the AR(1) cube process (pp. 2-3), and the convergence remarks (p. 3). Add the INDEX.md line.
 - [ ] T2: Write the AC1, AC2, AC3, and AC5 tests first. Put the plain reference in the test file with an oracle provenance header (DESIGN §13). Then implement `generate_surrogate_iaaft()` in R next to `generate_surrogate_phase()` (`R/surrogate_generation.R:84`). Use `stats::mvfft` over the columns that have not converged. Time it on `sim_dyad` (2400 samples, 100 surrogates) and record the time in the work log.
 - [ ] T3: Write the AC4 calibration test. Pick the series length, window, lag, and increment so that the test runs in under a minute. Record the observed rejection rate in the work log.
 - [ ] T4: Add `"iaaft"` to the `surrogate_method` choices and the generation branch in `synchrony_multiverse()` (`R/multiverse.R:192`, `R/multiverse.R:279`). Add it to the `autotune_wcc()` docs (`R/autotune.R:80`). Write the AC6 tests.
@@ -69,6 +69,7 @@ Add an exported IAAFT surrogate generator that keeps the value distribution and 
 - 2026-10-06: plan chose to abort on `NA` over imputing inside the generator, because the FFT cannot take `NA` and DESIGN forbids silent changes; falsified by none expected.
 - 2026-10-06: oracle plan: closed-form (plain reimplementation, AC2), invariant (AC1, AC3, AC6), and simulation-coverage (AC4). DESIGN §13 layer 3 validates generators by properties, so there is no frozen pin.
 - 2026-10-06: criteria audit (full mode, fresh Opus reader): 2 findings, both fixed. AC5 now names the length threshold (`length(y) < 3`). AC7 no longer binds the Review record. The audit also corrected the Scope reading of the paper: the paper advises reporting a failure and names a spectral target as its main stop, and the fixed point is where the iteration ends. AC1 to AC4 and AC6 passed.
+- 2026-10-06: T1 done: wrote `cairn/references/schreiber1996.md` and its INDEX line from the arXiv copy, pp. 1-4.
 
 ## Decisions
 
