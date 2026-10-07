@@ -77,8 +77,9 @@
 #' @param increment_pct Numeric; window increment as a fraction of window size
 #'   (e.g., `0.1` = 10\% step). Default is `0.1`.
 #' @param statistic Character; WCC aggregate statistic. Default `"mean_abs_z"`.
-#' @param surrogate_method Character; surrogate generator: `"phase"` (default)
-#'   or `"circular"`.
+#' @param surrogate_method Character; surrogate generator: `"phase"`
+#'   (default), `"circular"`, or \code{"iaaft"}. See
+#'   \code{\link{synchrony_multiverse}}.
 #' @param n_surrogates Single positive integer; surrogates per cell per dyad.
 #'   Default `100`. Increase to >= 1000 for reporting. Below 19 the call
 #'   warns once, because no cell can then reach p <= .05, so the

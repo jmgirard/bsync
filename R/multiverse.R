@@ -119,7 +119,10 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'   One or both of `"mean_abs_z"` (SUSY) and `"peak"` (rMEA/Boker). Ignored
 #'   for other estimators.
 #' @param surrogate_method Character vector; surrogate generator(s): `"phase"`
-#'   (preserves power spectrum) and/or `"circular"` (preserves autocorrelation).
+#'   (preserves power spectrum), `"circular"` (preserves autocorrelation),
+#'   and/or \code{"iaaft"} (preserves the power spectrum exactly and the
+#'   value distribution closely; \code{\link{generate_surrogate_iaaft}} with
+#'   its default \code{match = "spectrum"}).
 #' @param n_surrogates Single positive integer; number of surrogates per cell.
 #'   Default is `100`. Use >= 1000 for reporting. A cell is significant at
 #'   p <= .05. Below 19 the call warns, because the smallest possible
@@ -191,7 +194,7 @@ synchrony_multiverse <- function(
   )
   surrogate_method <- match.arg(
     surrogate_method,
-    choices = c("phase", "circular"), several.ok = TRUE
+    choices = c("phase", "circular", "iaaft"), several.ok = TRUE
   )
 
   # --- Input validation -------------------------------------------------
@@ -279,6 +282,8 @@ synchrony_multiverse <- function(
   surr_matrices <- lapply(unique_methods, function(method) {
     if (method == "phase") {
       generate_surrogate_phase(y, n_surrogates = n_surrogates)
+    } else if (method == "iaaft") {
+      generate_surrogate_iaaft(y, n_surrogates = n_surrogates)
     } else {
       generate_surrogate_circular(y,
         n_surrogates = n_surrogates,

@@ -46,7 +46,10 @@ One or both of `"mean_abs_z"` (SUSY) and `"peak"` (rMEA/Boker). Ignored
 for other estimators.}
 
 \item{surrogate_method}{Character vector; surrogate generator(s): `"phase"`
-(preserves power spectrum) and/or `"circular"` (preserves autocorrelation).}
+(preserves power spectrum), `"circular"` (preserves autocorrelation),
+and/or \code{"iaaft"} (preserves the power spectrum exactly and the
+value distribution closely; \code{\link{generate_surrogate_iaaft}} with
+its default \code{match = "spectrum"}).}
 
 \item{n_surrogates}{Single positive integer; number of surrogates per cell.
 Default is `100`. Use >= 1000 for reporting. A cell is significant at

@@ -439,3 +439,62 @@ test_that("Cells too short to compute appear as NA in grid", {
   expect_true(is.na(res$grid$es[res$grid$window_sec == 20]))
   expect_false(is.na(res$grid$es[res$grid$window_sec == 1]))
 })
+
+
+# =============================================================================
+# IAAFT surrogate method --------------------------------------------------------
+# =============================================================================
+
+test_that("an iaaft cell's p equals wcc_surrogate() on generate_surrogate_iaaft()", {
+  s <- make_test_series()
+  set.seed(21)
+  res <- synchrony_multiverse(
+    s$x, s$y,
+    estimator = "wcc", sample_rate = 10,
+    window_sec = 3, lag_sec = 0.5, increment_pct = 0.1,
+    surrogate_method = "iaaft", n_surrogates = 19L
+  )
+  expect_equal(nrow(res$grid), 1L)
+  expect_identical(res$grid$surrogate_method, "iaaft")
+  # 3 s, 0.5 s, and 10% of 30 samples at 10 Hz
+  expect_equal(res$grid$window_size, 30)
+  expect_equal(res$grid$lag_max, 5)
+  expect_equal(res$grid$window_increment, 3)
+
+  set.seed(21)
+  y_surr <- generate_surrogate_iaaft(s$y, n_surrogates = 19L)
+  direct <- wcc_surrogate(
+    s$x, s$y, y_surr,
+    window_size = 30, lag_max = 5, window_increment = 3
+  )
+  expect_equal(res$grid$p, direct$p_value)
+})
+
+test_that("a phase and iaaft grid holds both surrogate methods", {
+  s <- make_test_series()
+  set.seed(22)
+  res <- synchrony_multiverse(
+    s$x, s$y,
+    estimator = "wcc", sample_rate = 10,
+    window_sec = 3, lag_sec = 0.5,
+    surrogate_method = c("phase", "iaaft"), n_surrogates = 19L
+  )
+  expect_setequal(res$grid$surrogate_method, c("phase", "iaaft"))
+  expect_false(anyNA(res$grid$p))
+})
+
+test_that("autotune_wcc() runs with surrogate_method = 'iaaft'", {
+  skip_on_cran()
+  dyads <- list(make_test_series(seed = 1), make_test_series(seed = 2))
+  set.seed(23)
+  res <- suppressWarnings(autotune_wcc(
+    dyads,
+    sample_rate = 10, window_sec = c(2, 3), lag_sec = 0.5,
+    surrogate_method = "iaaft", n_surrogates = 19L
+  ))
+  methods <- unlist(lapply(res$dyad_multiverses, function(m) {
+    m$grid$surrogate_method
+  }))
+  expect_gt(length(methods), 0)
+  expect_true(all(methods == "iaaft"))
+})

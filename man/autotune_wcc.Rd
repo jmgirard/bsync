@@ -42,8 +42,9 @@ starting range.}
 
 \item{statistic}{Character; WCC aggregate statistic. Default `"mean_abs_z"`.}
 
-\item{surrogate_method}{Character; surrogate generator: `"phase"` (default)
-or `"circular"`.}
+\item{surrogate_method}{Character; surrogate generator: `"phase"`
+(default), `"circular"`, or \code{"iaaft"}. See
+\code{\link{synchrony_multiverse}}.}
 
 \item{n_surrogates}{Single positive integer; surrogates per cell per dyad.
 Default `100`. Increase to >= 1000 for reporting. Below 19 the call
