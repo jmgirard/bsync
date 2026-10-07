@@ -765,11 +765,21 @@ print.wphase_surr <- function(x, ...) {
 
   p_disp <- format_p_value(x$p_value)
 
-  cli::cli_dl(c(
-    "Permutations" = "{x$n_surrogates}",
-    "Observed Mean PLV" = "{round(x$observed_z, 4)}",
-    "Average Null Mean PLV" = "{round(mean(x$surrogate_z), 4)}",
-    "Empirical p-value" = "{p_disp}"
+  agg_label <- wphase_agg_label(x$settings$statistic)
+
+  cli::cli_dl(stats::setNames(
+    c(
+      "{x$n_surrogates}",
+      "{round(x$observed_z, 4)}",
+      "{round(mean(x$surrogate_z), 4)}",
+      "{p_disp}"
+    ),
+    c(
+      "Permutations",
+      paste0("Observed ", agg_label),
+      paste0("Average Null ", agg_label),
+      "Empirical p-value"
+    )
   ))
 
   print_significance_call(

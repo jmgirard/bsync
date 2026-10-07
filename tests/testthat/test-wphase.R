@@ -392,6 +392,31 @@ test_that("wphase_surrogate matches the null to the observed statistic", {
   }
 })
 
+test_that("the chosen statistic reaches settings, aggregate names, glance, and print labels", {
+  x <- sim_dyad$z_A[1:200]
+  y <- sim_dyad$z_B[1:200]
+  set.seed(5)
+  ys <- generate_surrogate_circular(y, n_surrogates = 3)
+  labels <- c(mean_plv = "Mean PLV", peak = "Mean Peak PLV")
+  for (st in names(labels)) {
+    res <- wphase(x, y, window_size = 32, lag_max = 4, statistic = st)
+    expect_identical(res$settings$statistic, st)
+    expect_identical(names(res$aggregate), st)
+    expect_identical(glance(res)$statistic, st)
+    expect_message(print(res), labels[[st]], fixed = TRUE)
+
+    surr <- wphase_surrogate(x, y,
+      y_surrogates = ys, window_size = 32, lag_max = 4, statistic = st
+    )
+    expect_message(print(surr), paste0("Observed ", labels[[st]]), fixed = TRUE)
+    expect_message(print(surr), paste0("Average Null ", labels[[st]]), fixed = TRUE)
+  }
+  # The default label must not appear when "peak" was chosen.
+  res_peak <- wphase(x, y, window_size = 32, lag_max = 4, statistic = "peak")
+  msgs <- testthat::capture_messages(print(res_peak))
+  expect_false(any(grepl("Mean PLV", msgs, fixed = TRUE)))
+})
+
 test_that("an unknown statistic stops wphase and wphase_surrogate", {
   x <- sim_dyad$z_A[1:120]
   y <- sim_dyad$z_B[1:120]

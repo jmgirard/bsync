@@ -150,12 +150,21 @@ print.wphase_res <- function(x, ...) {
 
   cli::cli_h1("Windowed Phase Synchrony Analysis")
 
-  cli::cli_dl(c(
-    "Total Windows" = "{n_windows}",
-    "Total Lags Tested" = "{n_lags}",
-    "Window Size" = "{s$window_size}",
-    "Max Lag" = "{s$lag_max}",
-    "Mean PLV" = "{round(x$aggregate[[1]], 4)}"
+  cli::cli_dl(stats::setNames(
+    c(
+      "{n_windows}",
+      "{n_lags}",
+      "{s$window_size}",
+      "{s$lag_max}",
+      "{round(x$aggregate[[1]], 4)}"
+    ),
+    c(
+      "Total Windows",
+      "Total Lags Tested",
+      "Window Size",
+      "Max Lag",
+      wphase_agg_label(s$statistic)
+    )
   ))
 
   invisible(x)
@@ -229,6 +238,13 @@ create_wphase_df <- function(x, y, time = NULL, settings) {
   # tied timestamps cannot merge two windows (wphase_surrogate() groups by the
   # same grid positions).
   list(results_df = results_df, window_id = grid$i_vals)
+}
+
+# Console label of the aggregate, shared by the wphase_res and wphase_surr
+# print methods.
+#' @noRd
+wphase_agg_label <- function(statistic) {
+  if (identical(statistic, "peak")) "Mean Peak PLV" else "Mean PLV"
 }
 
 # The one aggregate for the observed surface and every surrogate (Invariant
