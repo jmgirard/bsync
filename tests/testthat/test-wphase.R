@@ -325,8 +325,8 @@ peak_plv_loop <- function(x, y, ws, lag_max, wi = 1, li = 1) {
 # x in its first half and runs at another frequency in its second half, so
 # windows range from full locking to drifting phases.
 # Case (b): window_increment = 2, lag_increment = 3 with lag_max = 5 (lags
-# -5, -2, 1, 4), and a time vector in which window starts 7 and 9 share a
-# timestamp. n = 201 makes n - window_size - 2 * lag_max odd, so the window
+# -5, -2, 1, 4), and a time vector in which window starts 6 and 8 (the first
+# two, at 1 + lag_max and one increment later) share a timestamp. n = 201 makes n - window_size - 2 * lag_max odd, so the window
 # count does not depend on how a partial last step is counted.
 stat_cases <- function() {
   t <- 0:79
@@ -335,7 +335,7 @@ stat_cases <- function() {
     cos(2 * pi * 9 * t[41:80] / 80)
   )
   time_b <- as.numeric(seq_len(201))
-  time_b[9] <- time_b[7]
+  time_b[8] <- time_b[6]
   list(
     a = list(
       x = cos(2 * pi * 5 * t / 80), y = y_a, time = NULL,

@@ -12,7 +12,8 @@ wphase_surrogate(
   window_size,
   lag_max,
   window_increment = 1,
-  lag_increment = 1
+  lag_increment = 1,
+  statistic = c("mean_plv", "peak")
 )
 }
 \arguments{
@@ -31,6 +32,10 @@ wphase_surrogate(
 \item{window_increment}{A positive integer indicating the window shift increment. Default is 1.}
 
 \item{lag_increment}{A positive integer indicating the lag shift increment. Default is 1.}
+
+\item{statistic}{A character string naming the aggregate statistic, \code{"mean_plv"}
+(default) or \code{"peak"}; see \code{\link[=wphase]{wphase()}}. Pass the value you used in \code{\link[=wphase]{wphase()}} so that
+\code{observed_z} and the null distribution are on the same scale.}
 }
 \value{
 A list object of class "wphase_surr".
@@ -43,11 +48,12 @@ The p-value is the add-one form p = (b + 1) / (n + 1) (Phipson & Smyth, 2010), w
 is the number of surrogate columns and b is the number of surrogates whose aggregate
 statistic is \strong{at least as large as} the observed statistic. The \code{+ 1} counts the
 observed data as one more draw from the null, so the p-value is never 0. Its smallest
-value is 1 / (n + 1). The aggregate -- the mean phase-locking value over
-all window x lag combinations (\code{mean_plv}) -- is computed identically on the observed
-data and every surrogate via the same internal helper, so the null distribution and
-the observed value are directly comparable (Invariant 2: surrogate nulls match the
-observed statistic).
+value is 1 / (n + 1). The aggregate named by \code{statistic} -- the mean phase-locking
+value over all window x lag combinations (\code{"mean_plv"}), or the mean over windows of
+each window's largest PLV across lags (\code{"peak"}) -- is computed identically on the
+observed data and every surrogate via the same internal helper, so the null
+distribution and the observed value are directly comparable (Invariant 2: surrogate
+nulls match the observed statistic).
 
 Phase extraction (the analytic signal via \code{gsignal::hilbert()}) is applied to each
 surrogate column exactly as to the observed series. Circular-shift surrogates
