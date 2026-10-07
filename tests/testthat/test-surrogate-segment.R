@@ -206,6 +206,7 @@ test_that("the segment cut matches the eps loop of SUSY's susy()", {
 test_that("NA values move with their segments", {
   n <- 64
   y_id <- as.double(seq_len(n))
+  set.seed(10)
   y_na <- stats::rnorm(n)
   y_na[c(3, 4, 17, 40, 62)] <- NA
   set.seed(11)

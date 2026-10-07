@@ -305,5 +305,5 @@ Tschacher, W., & Meier, D. (2020). Physiological synchrony in psychotherapy sess
 ## See also
 
 - `vignette("wcc-workflow")` for the full WCC analytical pipeline
-- `vignette("surrogate-testing")` for details on circular-shift, phase-randomization, IAAFT, and pseudo-dyad surrogates
+- `vignette("surrogate-testing")` for details on circular-shift, phase-randomization, IAAFT, segment-shuffling, and pseudo-dyad surrogates
 - `vignette("determine-downsampling")` for PSD-based guidance on choosing a sample rate

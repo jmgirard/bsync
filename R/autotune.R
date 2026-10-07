@@ -183,6 +183,13 @@ autotune_wcc <- function(
     cli::cli_abort("{.arg iqr_penalty} must be a single non-negative number.")
   }
 
+  # Match the method names here, as synchrony_multiverse() does, so a partial
+  # name such as "seg" also gets the once-per-call messages below.
+  surrogate_method <- match.arg(
+    surrogate_method,
+    choices = c("phase", "circular", "iaaft", "segment"), several.ok = TRUE
+  )
+
   # Default lag_sec: SUSY ceiling (window / 2)
   lag_sec_use <- lag_sec %||% (window_sec / 2)
 
@@ -231,10 +238,12 @@ autotune_wcc <- function(
     inform_segment_aligned(is_granger = FALSE)
   }
 
-  # Run multiverse on each dyad. IAAFT non-convergence is counted per dyad
-  # and reported once after the loop.
+  # Run multiverse on each dyad. IAAFT non-convergence and skipped segment
+  # cells are recorded per dyad and reported once after the loop.
   n_unconverged_dyads <- 0L
-  mv_list <- lapply(tune_list, function(xy) {
+  seg_skip_dyads <- integer(0)
+  mv_list <- lapply(seq_along(tune_list), function(i) {
+    xy <- tune_list[[i]]
     unconverged <- FALSE
     res <- withCallingHandlers(
       synchrony_multiverse(
@@ -251,6 +260,10 @@ autotune_wcc <- function(
       ),
       bsync_few_surrogates = function(w) invokeRestart("muffleWarning"),
       bsync_segment_aligned = function(m) invokeRestart("muffleMessage"),
+      bsync_segment_skipped = function(w) {
+        seg_skip_dyads <<- union(seg_skip_dyads, tune_idx[i])
+        invokeRestart("muffleWarning")
+      },
       bsync_iaaft_unconverged = function(w) {
         unconverged <<- TRUE
         invokeRestart("muffleWarning")
@@ -259,6 +272,19 @@ autotune_wcc <- function(
     if (unconverged) n_unconverged_dyads <<- n_unconverged_dyads + 1L
     res
   })
+  names(mv_list) <- names(tune_list)
+  if (length(seg_skip_dyads) > 0) {
+    n_skip <- length(seg_skip_dyads)
+    cli::cli_warn(
+      c(
+        "Skipped segment cells in {cli::qty(n_skip)}dyad{?s} \\
+        {seg_skip_dyads} of {.arg dyad_list}.",
+        "i" = "Their segments of {.code window_size + 2 * lag_max} samples \\
+        give fewer than 4 segments, so those cells cannot reach p <= .05."
+      ),
+      class = "bsync_segment_skipped"
+    )
+  }
   if (n_unconverged_dyads > 0) {
     cli::cli_warn(
       c(
