@@ -1,0 +1,75 @@
+# M014: IAAFT surrogate generator
+
+- **Status:** planned
+- **Priority:** normal
+- **Depends on:** —
+- **Driving RR:** —
+- **Principles touched:** —
+- **Resolves:** —
+- **Surface tier:** user-facing — adds an exported generator and a new `surrogate_method` value
+- **Branch/PR:** —
+
+## Goal
+
+Add an exported IAAFT surrogate generator that keeps the value distribution and the power spectrum of a series. Offer it as a `surrogate_method` in `synchrony_multiverse()` and `autotune_wcc()`.
+
+## Scope
+
+**In:**
+- `generate_surrogate_iaaft(y, n_surrogates = 100, max_iter = 1000)` in `R/surrogate_generation.R`, after schreiber1996 (p. 2). Each column starts from a random shuffle of `y` without replacement. Each iteration replaces the Fourier amplitudes with those of `y` and keeps the phases. It then transforms back and rank-orders the result, so that the result takes exactly the values of `y`. When the rank-ordering no longer changes a column, that column stops (p. 2). At `max_iter`, every column stops. The returned columns are the rank-ordered series.
+- A warning that names how many columns reached `max_iter` without converging. The paper advises reporting a failure when the iteration does not reach its target (p. 2). The matrix is still returned.
+- An error for `NA` or non-finite values in `y`, with a message that points to `impute_ts_gaps()`. An error when `length(y) < 3`. Errors for invalid `y`, `n_surrogates`, or `max_iter`.
+- `"iaaft"` as a `surrogate_method` value in `synchrony_multiverse()` and `autotune_wcc()`. Like `"phase"`, it is generated once per call and reused across cells.
+- Roxygen with the null this tests, the `max_iter` rationale, and the citation. A `_pkgdown.yml` row, an IAAFT section in the surrogate-testing vignette, NEWS, `inst/WORDLIST`.
+- Source note `cairn/references/schreiber1996.md` and DESIGN §2, §6, §13, §14 #8 updates.
+
+**Out:**
+- Segment-shuffling surrogates → M015.
+- The AAFT algorithm and a windowed or smoothed target spectrum (schreiber1996, p. 3 remarks): not asked for, no row.
+- A C++ core for the iteration. The work log names the measurement that justifies one.
+- Pseudo-dyad surrogates in the multiverse: their existing candidate row.
+
+## Acceptance criteria
+
+- [ ] AC1: Tests on seeded inputs show that `generate_surrogate_iaaft()` returns a numeric matrix with `length(y)` rows and `n_surrogates` columns. They show that `sort(surr[, j])` is identical to `sort(y)` for every column `j`. The inputs include an even length, an odd length, and a series with tied values.
+- [ ] AC2: A test file holds a plain reimplementation of the schreiber1996 (p. 2) iteration. It uses explicit loops and the DFT as the explicit sum in the paper's S_k formula. It uses the same stopping rule and the same sequence of `sample()` draws. The test uses at least two seeded series of length 32 or less, one even and one odd. For each, every column of `generate_surrogate_iaaft()` equals the reference output (`expect_equal`).
+- [ ] AC3: A test uses a seeded series where no column reaches `max_iter`. It shows that one more iteration of the reference step leaves every output column unchanged. It also computes the spectral discrepancy of schreiber1996 (p. 3), unsmoothed. For each column, this discrepancy is smaller than that of a random shuffle of `y` drawn in the test.
+- [ ] AC4: A seeded simulation test (`skip_on_cran()`) draws at least 200 independent pairs. Each partner is an AR(1) series x_n = 0.7 x_{n-1} + eta_n, observed as s_n = x_n^3 (schreiber1996, p. 2). The test runs `wcc_surrogate()` with at least 19 IAAFT surrogates per pair. The proportion of pairs with p <= .05 is at most 0.09.
+- [ ] AC5: A test calls the generator with `max_iter = 1` on a series that does not converge in one iteration. The call warns with a message that names the number of unconverged columns, and it returns the full matrix. Tests fire each abort branch and assert each message with a regexp. The branches are `NA` in `y`, a non-finite value, non-numeric `y`, and `length(y) < 3`, with a test that length 3 runs. The other two are an invalid `n_surrogates` and an invalid `max_iter`.
+- [ ] AC6: A test runs a one-cell `synchrony_multiverse(estimator = "wcc", surrogate_method = "iaaft")`. Its `p` equals the `p` of `wcc_surrogate()` on `generate_surrogate_iaaft()` output drawn after the same `set.seed()`, with the cell's window, lag, and increment in samples. A test shows that a `c("phase", "iaaft")` grid has both values in its `surrogate_method` column. A test shows that `autotune_wcc(surrogate_method = "iaaft")` returns a result whose grid holds `"iaaft"`.
+- [ ] AC7: The roxygen of `generate_surrogate_iaaft()` states the null it tests, the `max_iter` default and its reason, and the `NA` policy. It cites Schreiber & Schmitz (1996) with its DOI and has a runnable `sim_dyad` example. The `surrogate_method` docs of both functions name `"iaaft"`. The surrogate-testing vignette has an IAAFT section. NEWS.md has an entry. `pkgdown::check_pkgdown()` passes. `devtools::document()` leaves no uncommitted diff in `man/` or `NAMESPACE`. `devtools::test()` passes. `devtools::check()` gives 0 errors, 0 warnings, and no NOTE that `main` does not also give.
+
+## Coverage
+
+- AC1 → T2
+- AC2 → T2
+- AC3 → T2
+- AC4 → T3
+- AC5 → T2
+- AC6 → T4
+- AC7 → T1, T5, T6
+
+## Tasks
+
+- [ ] T1: Write `cairn/references/schreiber1996.md` from the source-note template. The source is the arXiv copy on the shelf (`sources/schreiber1996.pdf`, chao-dyn/9909041, PRL 77, 635). Extract the iteration and stopping rule (p. 2), the discrepancy measure and the AR(1) cube process (pp. 2-3), and the convergence remarks (p. 3). Add the INDEX.md line.
+- [ ] T2: Write the AC1, AC2, AC3, and AC5 tests first. Put the plain reference in the test file with an oracle provenance header (DESIGN §13). Then implement `generate_surrogate_iaaft()` in R next to `generate_surrogate_phase()` (`R/surrogate_generation.R:84`). Use `stats::mvfft` over the columns that have not converged. Time it on `sim_dyad` (2400 samples, 100 surrogates) and record the time in the work log.
+- [ ] T3: Write the AC4 calibration test. Pick the series length, window, lag, and increment so that the test runs in under a minute. Record the observed rejection rate in the work log.
+- [ ] T4: Add `"iaaft"` to the `surrogate_method` choices and the generation branch in `synchrony_multiverse()` (`R/multiverse.R:192`, `R/multiverse.R:279`). Add it to the `autotune_wcc()` docs (`R/autotune.R:80`). Write the AC6 tests.
+- [ ] T5: Write roxygen with `@md`, `@references`, and `@seealso` links both ways with the other generators. Add the `_pkgdown.yml` row, the vignette section, the NEWS entry, and the WORDLIST words. Update the method count in section 1 of the vignette. Update DESIGN §2, §6, §13 (oracle records), and §14 #8. Run `devtools::document()`.
+- [ ] T6: Run `devtools::test()`, `spelling::spell_check_package()`, `pkgdown::check_pkgdown()`, and `devtools::check()`. Run `air format` only on files that were air-clean before the edit.
+
+## Work log
+
+- 2026-10-06: created by /milestone-plan. It takes the IAAFT half of the "Expanded surrogate generators" candidate row. M015 takes the segment-shuffling half.
+- 2026-10-06: question set: can the agent fetch the primary sources itself — yes. The arXiv copy of schreiber1996 is on the shelf. Nothing was installed.
+- 2026-10-06: question set: offer the new generators in `synchrony_multiverse()` and `autotune_wcc()` — yes, both.
+- 2026-10-06: plan chose R over a C++ core, because `stats::mvfft` transforms all columns at once and the rank step is a native sort; falsified by a timing where IAAFT generation takes longer than the cell analysis of a typical multiverse run.
+- 2026-10-06: plan chose the fixed-point stop over a spectral tolerance, because the paper says the iteration ends at a fixed point (p. 2) and it needs no new argument; falsified by typical series that do not converge within 1000 iterations.
+- 2026-10-06: plan chose to return the rank-ordered series over the last spectrum-matched series, after the paper (p. 2); falsified by a user need for an exact spectrum, which `generate_surrogate_phase()` already gives.
+- 2026-10-06: plan chose to abort on `NA` over imputing inside the generator, because the FFT cannot take `NA` and DESIGN forbids silent changes; falsified by none expected.
+- 2026-10-06: oracle plan: closed-form (plain reimplementation, AC2), invariant (AC1, AC3, AC6), and simulation-coverage (AC4). DESIGN §13 layer 3 validates generators by properties, so there is no frozen pin.
+- 2026-10-06: criteria audit (full mode, fresh Opus reader): 2 findings, both fixed. AC5 now names the length threshold (`length(y) < 3`). AC7 no longer binds the Review record. The audit also corrected the Scope reading of the paper: the paper advises reporting a failure and names a spectral target as its main stop, and the fixed point is where the iteration ends. AC1 to AC4 and AC6 passed.
+
+## Decisions
+
+## Review
