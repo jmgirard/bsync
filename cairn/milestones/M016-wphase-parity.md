@@ -80,6 +80,7 @@ Bring `wphase()` to the level of the other estimators: a selectable aggregate st
 - 2026-10-07: T5 done. NEWS entry under "Windowed phase synchrony"; DESIGN §9 row added. The spell check flagged the Greek letters in the article's lead formula, so that sentence now uses words and `2 * pi * 0.5` (no WORDLIST change). `document()` no diff, `check_pkgdown()` no problems, `devtools::check()` 0 errors / 0 warnings / 0 notes. `air format` not run: `R/wphase.R`, `R/surrogate_analysis.R`, and `test-wphase.R` were not air-clean on main (LESSONS M010).
 - 2026-10-07: claim audit: 61 claims read, 5 corrected — R/surrogate_analysis.R, vignettes/wphase-workflow.Rmd, tests/testthat/test-wphase.R (statistic param and Section 6 now say the test is of the reported aggregate; "7.5 cycles"; circular surrogates take `lag_max = 10` so no shift lies within the lag range, p now 0.001 for both statistics; case (b) comment states the grid arithmetic). The same reader re-read all 5 and found them correct. `devtools::check()` after the fixes: 0 errors / 0 warnings / 0 notes.
 - 2026-10-07: all tasks done; status set to review.
+- 2026-10-07: step-7 approval: m016-wphase-parity approved for merge
 
 ## Decisions
 
