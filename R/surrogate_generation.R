@@ -263,7 +263,12 @@ generate_surrogate_iaaft <- function(
     spec <- stats::mvfft(current)
     spec <- target_amp * exp(1i * Arg(spec))
     adjusted <- Re(stats::mvfft(spec, inverse = TRUE)) / n_y
-    ranked <- apply(adjusted, 2, rank, ties.method = "first")
+    # Rank within each column in one stable order() call; stability breaks
+    # ties by position, as rank(ties.method = "first") does.
+    n_active <- length(active)
+    ord <- order(rep(seq_len(n_active), each = n_y), adjusted)
+    ranked <- integer(n_y * n_active)
+    ranked[ord] <- rep.int(seq_len(n_y), n_active)
     updated <- matrix(y_sorted[ranked], nrow = n_y)
     changed <- colSums(updated != current) > 0
     adj_mat[, active] <- adjusted
