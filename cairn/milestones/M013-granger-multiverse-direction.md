@@ -1,6 +1,6 @@
 # M013: Granger multiverse summary and plot for both directions
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -55,7 +55,7 @@ Let users read the y -> x direction of a Granger `synchrony_multiverse()` result
 - [x] T3: Add `direction` to `print.bsync_multiverse()` (`R/multiverse.R:568`) and `summary.bsync_multiverse()` (`R/multiverse.R:590`). Add a direction line for Granger. For `"yx"`, `summary()` reads `es_yx` for the range and the skipped count. Write the tests for AC3 and for their parts of AC5.
 - [x] T4: Add `direction` to `plot.bsync_multiverse()` and `multiverse_plot_data()` (`R/multiverse_plot.R:12`, `R/multiverse_plot.R:42`). Move the title text (`R/multiverse_plot.R:73`) into an internal helper. It reads the chosen robustness list and names the direction for Granger only, so the WCC title stays the same. Write the tests for AC4, AC6, and the plot part of AC5. Record the new vdiffr snapshot and look at it before the commit.
 - [x] T5: Write roxygen for `direction` and `$robustness_yx`, with `@md` per the roxygen-markdown lesson. Fix the comment at `R/multiverse.R:13` and the test title at `tests/testthat/test-multiverse.R:293`. Fix `vignettes/choosing-parameters.Rmd:151-166` and add the y -> x `glance()` call. Add the NEWS.md entry. Run `devtools::document()`.
-- [ ] T6: Run `devtools::test()`, `spelling::spell_check_package()`, and `devtools::check()`. Run `air format` only on files that were air-clean before the edit.
+- [x] T6: Run `devtools::test()`, `spelling::spell_check_package()`, and `devtools::check()`. Run `air format` only on files that were air-clean before the edit.
 
 ## Work log
 
@@ -72,6 +72,7 @@ Let users read the y -> x direction of a Granger `synchrony_multiverse()` result
 - 2026-10-06: T5 done. Roxygen documents `direction` on the four methods, which now carry `@md`, and documents `$robustness_yx` and all five y -> x grid columns in `synchrony_multiverse()`. That block stays without `@md`, as on main. The vignette and the test title are fixed, and the NEWS entry is added. `devtools::document()` rewrote 5 Rd files. `grep -rn "es_xy" vignettes/ tests/` returns no lines.
 - 2026-10-06: T6 spell check flagged "summarise" 3 times in the new roxygen. Changed to American spelling, and the spell check is clean.
 - 2026-10-06: claim audit: 60 claims read, 4 corrected — vignettes/choosing-parameters.Rmd, tests/testthat/test-multiverse.R, NEWS.md, R/multiverse.R.
+- 2026-10-06: T6 done. `devtools::check()` at 78434ef gave 0 errors, 0 warnings, 0 notes. After the claim-audit commit, `devtools::test()` gives 1969 pass, 0 fail, and `devtools::document()` gives no diff. Status set to review.
 
 ## Decisions
 

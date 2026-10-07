@@ -8,7 +8,7 @@ _Last hygiene check: 2026-10-06 (M012 merged and archived, M009 row pruned, 1 le
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M013 | Granger multiverse summary and plot for both directions | in-progress | — | normal | milestones/M013-granger-multiverse-direction.md |
+| M013 | Granger multiverse summary and plot for both directions | review | — | normal | milestones/M013-granger-multiverse-direction.md |
 | M012 | One significance rule (p <= .05) and surrogate print edges | done | — | normal | milestones/archive/M012-significance-rule.md |
 | M011 | Add-one surrogate p-values | done | — | normal | milestones/archive/M011-add-one-p-value.md |
 | M010 | Strict dyad input and named pseudo-dyad sources | done | — | normal | milestones/archive/M010-strict-dyad-input.md |
