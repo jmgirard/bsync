@@ -92,20 +92,22 @@ Consistency gate: `cairn_validate.py` passes all checks. No DESIGN principle cha
 
 spawned: diff-bug, blame-history, prior-review
 
-- diff-bug #1: a Granger object without `$robustness_yx` (saved before this change, or built by hand) gives a `glance(direction = "yx")` with the 7 summary columns silently missing — fix now: `multiverse_direction()` recomputes the summary from `es_yx`/`p_yx` when it is missing.
-- diff-bug #2: the same object gives unclear cli or math errors from `print()` and `plot()` — fix now, same fix as #1.
-- diff-bug #3: a Granger object without `es_yx`/`p_yx` columns gives tibble warnings and a vctrs error, not a clear message — fix now: `multiverse_direction()` stops with a message when the columns are missing.
-- diff-bug #4: `plot(res, "yx")` binds `"yx"` to `sig_color` — fix now: the `@param direction` text for `plot()` says to pass it by name. The argument stays last so positional color arguments keep working.
-- diff-bug #5: with `es_yx` all NA, `summary(direction = "yx")` prints "ES range: [Inf, -Inf]" with a base R warning — fix now: the range line says "none" when no ES is computable.
+- diff-bug #1: a Granger object without `$robustness_yx` (saved before this change, or built by hand) gives a `glance(direction = "yx")` with the 7 summary columns silently missing — fix now: `multiverse_direction()` recomputes the summary from `es_yx`/`p_yx` when it is missing, fixed e16657d.
+- diff-bug #2: the same object gives unclear cli or math errors from `print()` and `plot()` — fix now, same fix as #1, fixed e16657d.
+- diff-bug #3: a Granger object without `es_yx`/`p_yx` columns gives tibble warnings and a vctrs error, not a clear message — fix now: `multiverse_direction()` stops with a message when the columns are missing, fixed e16657d.
+- diff-bug #4: `plot(res, "yx")` binds `"yx"` to `sig_color` — fix now: the `@param direction` text for `plot()` says to pass it by name. The argument stays last so positional color arguments keep working, fixed e16657d.
+- diff-bug #5: with `es_yx` all NA, `summary(direction = "yx")` prints "ES range: [Inf, -Inf]" with a base R warning — fix now: the range line says "none" when no ES is computable, fixed e16657d (NEWS line in 7c10bb9).
 - diff-bug #6: the `synchrony_multiverse()` roxygen block has no `@md`, so the new backtick text renders raw — follow-up: absorbed into the candidate row "Enable roxygen markdown package-wide". The block was without `@md` on main, and turning it on renders the whole block differently.
-- diff-bug #7: the `$robustness` docs say cells not counted in `n_valid` "were skipped as too short", which is not the only reason for y -> x — fix now: the docs say cells with a computable ES in that direction.
-- diff-bug #8: no y -> x cell in the fixture is significant, so `sign_consistent` for y -> x is only checked as NA — fix now: a test on a hand-built grid with significant `p_yx` cells checks all 7 fields, through the #1 recompute path.
+- diff-bug #7: the `$robustness` docs say cells not counted in `n_valid` "were skipped as too short", which is not the only reason for y -> x — fix now: the docs say cells with a computable ES in that direction, fixed e16657d.
+- diff-bug #8: no y -> x cell in the fixture is significant, so `sign_consistent` for y -> x is only checked as NA — fix now: a test on a hand-built grid with significant `p_yx` cells checks all 7 fields, through the #1 recompute path, fixed e16657d.
 - diff-bug #9: the plot title is tested through the helper, and only the snapshot shows that `plot()` passes it — reject, planned change: AC4 and T4 chose a tested title helper, and `multiverse_direction()` output is tested beside it.
-- diff-bug #10: an object with no `settings$estimator` gets "estimator is ," in the refusal — fix now: the message falls back to "unknown".
+- diff-bug #10: an object with no `settings$estimator` gets "estimator is ," in the refusal — fix now: the message falls back to "unknown", fixed e16657d.
 - diff-bug #11: default Granger `glance()` and `print()` output gains a column and a line — reject, false: NEWS.md already says that Granger `print()` and `summary()` show a "Direction" line and that `glance()` has a `direction` column.
 - blame-history #1: `$robustness_yx` reuses `multiverse_robustness()`, and the y -> x p-value source was not traced — noted: `R/surrogate_analysis.R:421` computes `p_val_yx` in the add-one form, so the summary follows the p-value rules on record.
 - blame-history #2: says the candidate row "Test the all-NA error in `plot.bsync_multiverse()`" is still open — reject, false: the plan commit 57f510a removed it, and `grep -c "all-NA error" cairn/ROADMAP.md` gives 0.
 - blame-history #3, #4, #6, #7, #8, #9, #10: no conflict found — noted.
 - blame-history #5: Granger `glance()` gains a column, which could break strict column checks — reject, planned change: the plan scope adds the column, and NEWS states it.
 - prior-review #1: three added lines in `R/multiverse.R` and `R/tidy.R` exceed 80 columns — reject, style: a formatter catches this, and both files were not air-clean on main (checked in T1), so the M010 lesson says not to run air on them.
-- prior-review #2: `summary(direction = "yx")` has no `expect_invisible()` — fix now: add it.
+- prior-review #2: `summary(direction = "yx")` has no `expect_invisible()` — fix now: add it, fixed e16657d.
+
+After the fixes: with the R changes of e16657d stashed, the new tests fail (4 failures, 4 errors, and the tibble and min warnings). With them, `devtools::test()` gives 1984 pass, 0 fail, `devtools::document()` gives no diff, and the spell check is clean.
