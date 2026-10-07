@@ -118,8 +118,13 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #' @param statistic Character vector; aggregate statistic for `"wcc"` only.
 #'   One or both of `"mean_abs_z"` (SUSY) and `"peak"` (rMEA/Boker). Ignored
 #'   for other estimators.
-#' @param surrogate_method Character vector; surrogate generator(s): `"phase"`
-#'   (preserves power spectrum) and/or `"circular"` (preserves autocorrelation).
+#' @param surrogate_method Character vector; surrogate generator(s):
+#'   \code{"phase"} (preserves power spectrum), \code{"circular"} (preserves
+#'   autocorrelation), and/or \code{"iaaft"} (preserves the power spectrum
+#'   exactly and the value distribution closely;
+#'   \code{\link{generate_surrogate_iaaft}} with its default
+#'   \code{match = "spectrum"}). \code{"iaaft"} needs \code{y} without
+#'   missing values.
 #' @param n_surrogates Single positive integer; number of surrogates per cell.
 #'   Default is `100`. Use >= 1000 for reporting. A cell is significant at
 #'   p <= .05. Below 19 the call warns, because the smallest possible
@@ -149,7 +154,8 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'       `$robustness`, computed from `es_yx` and `p_yx` (y -> x).}
 #'   }
 #' @seealso [autotune_wcc()], [suggest_wcc_params()], [plot.bsync_multiverse()],
-#'   [tidy.bsync_multiverse()], [glance.bsync_multiverse()]
+#'   [tidy.bsync_multiverse()], [glance.bsync_multiverse()];
+#'   \code{\link{generate_surrogate_iaaft}} for the \code{"iaaft"} method
 #' @examples
 #' \donttest{
 #' # Sweep a seconds-specified window/lag grid and test each cell vs. a null.
@@ -191,7 +197,7 @@ synchrony_multiverse <- function(
   )
   surrogate_method <- match.arg(
     surrogate_method,
-    choices = c("phase", "circular"), several.ok = TRUE
+    choices = c("phase", "circular", "iaaft"), several.ok = TRUE
   )
 
   # --- Input validation -------------------------------------------------
@@ -221,6 +227,14 @@ synchrony_multiverse <- function(
     if (!is.numeric(lag_sec) || any(lag_sec <= 0)) {
       cli::cli_abort("{.arg lag_sec} must be a positive numeric vector.")
     }
+  }
+  if ("iaaft" %in% surrogate_method && anyNA(y)) {
+    cli::cli_abort(c(
+      "{.code surrogate_method = \"iaaft\"} needs {.arg y} without missing \\
+      values.",
+      "i" = "Fill gaps first, for example with {.fn impute_ts_gaps}, or use \\
+      another surrogate method."
+    ))
   }
   # After every argument check, so a call that aborts gives no warning first.
   warn_few_surrogates(n_surrogates)
@@ -279,6 +293,29 @@ synchrony_multiverse <- function(
   surr_matrices <- lapply(unique_methods, function(method) {
     if (method == "phase") {
       generate_surrogate_phase(y, n_surrogates = n_surrogates)
+    } else if (method == "iaaft") {
+      # max_iter is not an argument here, so restate the warning without the
+      # advice to raise it.
+      withCallingHandlers(
+        generate_surrogate_iaaft(as.vector(y), n_surrogates = n_surrogates),
+        bsync_iaaft_unconverged = function(w) {
+          n_unconverged <- w$n_unconverged
+          cli::cli_warn(
+            c(
+              "{n_unconverged} of {n_surrogates} IAAFT surrogate{?s} did \\
+              not converge within {w$max_iter} iterations.",
+              "i" = "They still match the spectrum of {.arg y} exactly. \\
+              Their values are a little less close to the values of \\
+              {.arg y}."
+            ),
+            class = "bsync_iaaft_unconverged",
+            n_unconverged = n_unconverged,
+            n_surrogates = n_surrogates,
+            max_iter = w$max_iter
+          )
+          invokeRestart("muffleWarning")
+        }
+      )
     } else {
       generate_surrogate_circular(y,
         n_surrogates = n_surrogates,

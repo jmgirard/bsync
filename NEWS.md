@@ -1,5 +1,23 @@
 # bsync (development version)
 
+## IAAFT surrogates
+
+* New `generate_surrogate_iaaft()` builds surrogates with the iterative
+  amplitude-adjusted Fourier transform (IAAFT) of Schreiber & Schmitz (1996).
+  Each surrogate matches both the power spectrum and the value distribution
+  of the series. With `match = "spectrum"` (the default), the Fourier
+  amplitudes match exactly and the values match closely. With
+  `match = "values"`, the values match exactly and the spectrum matches
+  closely. The spectrum form is the default because, in a WCC size check,
+  the values form rejected a true null in 21 of 200 pairs (10.5%) at a
+  nominal 5%, and the spectrum form in 9 of the same 200 pairs (4.5%).
+  `max_iter` (default 1000) caps the iterations, and the call warns when a
+  surrogate reaches it. A series with `NA` is an error.
+* `synchrony_multiverse()` and `autotune_wcc()` accept
+  `surrogate_method = "iaaft"`. It needs `y` without missing values, and
+  the call stops with an error that says so. `autotune_wcc()` reports IAAFT
+  non-convergence once for the whole run.
+
 ## Both Granger directions in multiverse summaries and plots
 
 * `synchrony_multiverse(estimator = "wgranger")` now also returns

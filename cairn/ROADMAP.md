@@ -8,7 +8,7 @@ _Last hygiene check: 2026-10-07 (M013 merged and archived, M010 row pruned, 1 le
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M014 | IAAFT surrogate generator | planned | — | normal | milestones/M014-iaaft-surrogates.md |
+| M014 | IAAFT surrogate generator | review | — | normal | milestones/M014-iaaft-surrogates.md |
 | M015 | Segment-shuffling surrogate generator | planned | M014 | normal | milestones/M015-segment-shuffle-surrogates.md |
 | M013 | Granger multiverse summary and plot for both directions | done | — | normal | milestones/archive/M013-granger-multiverse-direction.md |
 | M012 | One significance rule (p <= .05) and surrogate print edges | done | — | normal | milestones/archive/M012-significance-rule.md |
@@ -18,6 +18,7 @@ _Last hygiene check: 2026-10-07 (M013 merged and archived, M010 row pruned, 1 le
 
 ## Candidates
 
+- Update CLAUDE.md for IAAFT: the "Out of scope" IAAFT bullet still calls it a candidate row, and the resolved-defaults line lists only phase and circular surrogate methods — added 2026-10-06 — M014 review (blame-history #1)
 - wphase workflow vignette: parity with the wcc/wdtw/wgranger workflow articles, incl. narrowband/band-pass guidance for phase methods — added 2026-08-29 — M008 Out
 - Selectable wphase aggregate statistic (the M4 wcc pattern: `statistic =` argument, null matched to observed) — added 2026-08-29 — M008 Out
 - mne_connectivity PLV pipeline pin: M008's frozen pin uses MNE's analytic signal + the Lachaux formula, not mne_connectivity's own PLV pipeline (different spectral estimation; unmatchable at 1e-6); a tolerance-banded comparison against the toolbox's shipped PLV would close the convention gap the pin leaves. Promote when a definitional question about the PLV convention actually arises — added 2026-08-29 — M008 review F3
@@ -31,3 +32,5 @@ _Last hygiene check: 2026-10-07 (M013 merged and archived, M010 row pruned, 1 le
 - CRAN submission of v0.1.0: package is submission-ready (`cran-comments.md` checklist, human-gated); release timing is user-declared, never agent-proposed — added 2026-08-29 — legacy CLAUDE.md Current focus
 - Unified `bsync_ts` preprocessing object: specify before building — added 2026-08-29 — legacy DESIGN §15 unscheduled
 - Expanded educational vignettes: choosing a method, interpreting a surface, reporting synchrony — added 2026-08-29 — legacy DESIGN §15 unscheduled
+- [low] IAAFT on long series: at 10000 samples most surrogates reach `max_iter = 1000` before the fixed point, and `synchrony_multiverse()` / `autotune_wcc()` do not expose `max_iter`. Options: pass `max_iter` through, or stop at a spectral-accuracy target (the paper's own stop). Promote when users hit routine non-convergence warnings or slow IAAFT runs on long recordings — added 2026-10-06 — M014 review (diff-bug #2)
+- [low] IAAFT rank-step tie test: the tie rule of the rank step has no test, and a test against the explicit-DFT reference is not well posed on tied input (FFT and DFT round near-ties differently). Test it through an extracted rank helper. Promote with the next change to the rank step — added 2026-10-06 — M014 review (diff-bug #8)

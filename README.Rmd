@@ -149,7 +149,7 @@ surrogate_results
 | [WDTW workflow](https://jmgirard.github.io/bsync/articles/wdtw-workflow.html) | WDTW pipeline: time-warped alignment, optima extraction |
 | [WGC workflow](https://jmgirard.github.io/bsync/articles/wgranger-workflow.html) | Windowed Granger Causality: directional F-statistic and p-value plots |
 | [Choosing parameters](https://jmgirard.github.io/bsync/articles/choosing-parameters.html) | `suggest_wcc_params()`, `synchrony_multiverse()`, `autotune_wcc()` |
-| [Surrogate testing](https://jmgirard.github.io/bsync/articles/surrogate-testing.html) | Circular-shift vs. phase-randomization vs. pseudo-dyads; best practices |
+| [Surrogate testing](https://jmgirard.github.io/bsync/articles/surrogate-testing.html) | Circular-shift vs. phase-randomization vs. IAAFT vs. pseudo-dyads; best practices |
 | [Downsampling](https://jmgirard.github.io/bsync/articles/determine-downsampling.html) | PSD-based guidance for choosing a biologically appropriate sample rate |
 
 ## Citation
@@ -192,6 +192,10 @@ The phase-locking value computed by the windowed phase-synchrony estimator is ba
 The use of circular-shifted surrogate data to establish a statistical baseline for true interpersonal synchrony was popularized in behavioral research by:
 
 *	Ramseyer, F., & Tschacher, W. (2011). Nonverbal synchrony in psychotherapy: Coordinated body movement reflects relationship quality and outcome. *Journal of Consulting and Clinical Psychology, 79*(3), 284-295.
+
+The IAAFT generator (`generate_surrogate_iaaft()`) implements the iterative amplitude-adjusted Fourier transform of:
+
+*	Schreiber, T., & Schmitz, A. (1996). Improved surrogate data for nonlinearity tests. *Physical Review Letters, 77*(4), 635-638. https://doi.org/10.1103/PhysRevLett.77.635
 
 The pseudo-dyad generators (`generate_surrogate_pseudo()`, `generate_pseudo_dyads()`) follow the between-dyad shuffling convention of the rMEA package:
 

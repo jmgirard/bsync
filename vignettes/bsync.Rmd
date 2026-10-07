@@ -299,5 +299,5 @@ Rules of thumb:
 | `vignette("wdtw-workflow")` | WDTW step-by-step with surrogate testing and optima extraction |
 | `vignette("wgranger-workflow")` | WGC step-by-step with F-statistic and p-value plots |
 | `vignette("choosing-parameters")` | Data-driven parameter selection: `suggest_wcc_params()`, `synchrony_multiverse()`, `autotune_wcc()`, and `select_specification()` |
-| `vignette("surrogate-testing")` | When to use circular-shift vs. phase-randomization surrogates; best practices |
+| `vignette("surrogate-testing")` | When to use circular-shift, phase-randomization, IAAFT, or pseudo-dyad surrogates; best practices |
 | `vignette("determine-downsampling")` | How to choose a biologically appropriate sample rate from PSD diagnostics |

@@ -36,3 +36,17 @@ dyads, not 21. The few-surrogates warning starts below 19 surrogates, not
 below 20. Per-window parametric Granger p-values in `wgranger()` are not
 add-one p-values and keep `< .05`. The user chose `<=` at the M012 plan
 gate.
+
+### D-003: IAAFT surrogates keep the spectrum exact by default (match = "spectrum")
+
+2026-10-06, M014 implement stop. `generate_surrogate_iaaft()` returns the
+last spectrum-adjusted series by default, so its Fourier amplitudes equal
+those of `y` and its values are close. The rank-ordered series of
+Schreiber & Schmitz (1996), with exact values and a close spectrum, is
+`match = "values"`. Rationale: the rank step lowers the autocorrelation, so
+a synchrony statistic that grows with autocorrelation reads high against
+rank-ordered surrogates, and a WCC test against them rejected a true null
+too often in the M014 size simulation. The spectrum form kept the nominal
+size. The measured rates are in the M014 milestone record. The
+`"iaaft"` method of `synchrony_multiverse()` and `autotune_wcc()` uses
+this default. The user chose it at the M014 implement stop.

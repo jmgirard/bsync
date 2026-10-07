@@ -50,7 +50,7 @@ method generalized and accelerated**, plus more:
 - **Multiple estimators behind one surface contract** (§4) — WCC *and* windowed DTW *and* windowed
   Granger — not WCC alone, with a shared optima/surrogate/plot layer.
 - **Matched-null surrogate testing** for every estimator, with circular-shift,
-  phase-randomization, and pseudo-dyad generators (segment-shuffling and IAAFT planned, §6) rather
+  phase-randomization, IAAFT, and pseudo-dyad generators (segment-shuffling planned, §6) rather
   than a single shuffle scheme.
 - **Peak/valley optima + leadership asymmetry** as a shared, estimator-agnostic layer.
 - **An educational preprocessing + tuning layer** — PSD downsampling guidance, zero-phase smoothing,
@@ -173,6 +173,13 @@ with a real series from another dyad (corrected M009):
   data; can respect `lag_max` to guarantee decoupling).
 - `generate_surrogate_phase()` — Fourier phase randomization (preserve power spectrum; good for
   continuous/physiological data; Hermitian-symmetric reconstruction; even-length requirement).
+- `generate_surrogate_iaaft()` — IAAFT (M014; Schreiber & Schmitz 1996,
+  `cairn/references/schreiber1996.md`): iterate between the data's Fourier amplitudes and its
+  exact values until the rank-ordering stops changing. Each `match` form keeps one property
+  exactly and the other closely: `"spectrum"` (default) exact amplitudes, close values;
+  `"values"` exact values, close spectrum. The default is the spectrum form because the
+  rank-ordered form lowers autocorrelation and made a WCC test liberal (M014 Decisions). `NA`
+  aborts.
 - `generate_surrogate_pseudo()` / `generate_pseudo_dyads()` — pseudo-dyads (M009): partners drawn
   from *other* dyads in a `dyad_list`, cropped start-aligned. A different null from the two above:
   it keeps task-locked co-movement and removes interaction-specific coupling. Convention and
@@ -197,10 +204,8 @@ p. 6; corrected M011). Changing the observed statistic changes the null in
 lockstep. (This is why the selectable WCC statistic — §9, M4 — threads through both `wcc()` and
 `wcc_surrogate()`.)
 
-**Planned generators (resolved — to build, not to decide).**
-- **IAAFT** (iterative amplitude-adjusted Fourier transform; Schreiber & Schmitz 1996) — matches
-  both the amplitude distribution *and* the power spectrum, a stricter null than plain phase
-  randomization. Committed to the roadmap (§15).
+**Planned generators (resolved — to build, not to decide).** IAAFT shipped in M014 (listed
+above; corrected M014).
 - **Segment shuffling** — the SUSY/rMEA scheme (recombine non-contemporaneous segments). A natural
   third generator that also makes bsync's nulls directly comparable to those packages. Candidate to
   add alongside IAAFT.
@@ -296,7 +301,9 @@ reproducible; result objects stay light; supplied `time` maps windows to real ti
 - **Oracle records:** provenance headers in the asserting test files
   (`tests/testthat/test-external-oracle.R`, per-estimator test files) plus the
   committed generators under `data-raw/` (`wphase_null_bound.R`,
-  `wphase_mne_pin.py`); each names its source, versions, and asserting test.
+  `wphase_mne_pin.py`); each names its source, versions, and asserting test. Surrogate
+  generator oracles (M014): `test-surrogate-iaaft.R` (closed-form reference, invariants) and
+  `test-surrogate-calibration.R` (layer-3 size checks).
 - **Layered validation (four modes, distinct failure types).** Unit tests catch *implementation*
   bugs but cannot catch a *definitional* one: a pure-R oracle written from the same mental model as
   the C++ core agrees with it and is wrong in the same way. The four layers close different gaps:
@@ -345,9 +352,9 @@ reproducible; result objects stay light; supplied `time` maps windows to real ti
    + mean\|Z\| path is the SUSY method generalized and C++-accelerated.
 7. **tidy / glance / as_tibble** → **will be added** (§7), built in M5 from the shared framework
    (`generics` → Imports at that point).
-8. **IAAFT surrogates** → **will be added** (§6; a ROADMAP candidate row, corrected M009 —
-   the pre-cairn "M12" slot no longer exists); segment-shuffling surrogates a candidate
-   alongside. Pseudo-dyad generators shipped in M009.
+8. **IAAFT surrogates** → **added** in M014 (§6; corrected M014), with a `match` argument whose
+   default keeps the spectrum exact. Segment-shuffling surrogates are planned as M015.
+   Pseudo-dyad generators shipped in M009.
 
 9. **OpenMP** → **removed** (M2). The prefix-sum algorithm eliminates the inner w_max loop that
    motivated OpenMP; the serial implementation already achieves 5–25× speedup over the baseline.

@@ -20,6 +20,9 @@
 #' # Build 100 circular-shift surrogates of one partner's signal
 #' surr <- generate_surrogate_circular(sim_dyad$x_B, n_surrogates = 100)
 #' dim(surr)
+#' @seealso \code{\link{generate_surrogate_phase}} and
+#'   \code{\link{generate_surrogate_iaaft}} for the other within-dyad nulls;
+#'   \code{\link{generate_surrogate_pseudo}} for the between-dyad null.
 #' @export
 generate_surrogate_circular <- function(y, n_surrogates = 100, lag_max = NULL) {
   n_y <- length(y)
@@ -80,6 +83,10 @@ generate_surrogate_circular <- function(y, n_surrogates = 100, lag_max = NULL) {
 #' # Build 100 phase-randomized surrogates (preserves the power spectrum)
 #' surr <- generate_surrogate_phase(sim_dyad$x_B, n_surrogates = 100)
 #' dim(surr)
+#' @seealso \code{\link{generate_surrogate_iaaft}}, which also keeps the
+#'   value distribution, and \code{\link{generate_surrogate_circular}} for
+#'   the other within-dyad nulls; \code{\link{generate_surrogate_pseudo}}
+#'   for the between-dyad null.
 #' @export
 generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
   n_y <- length(y)
@@ -131,7 +138,207 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 }
 
 # -------------------------------------------------------------------------
-# --- 3. Pseudo-Dyad Method (between dyads) -------------------------------
+# --- 3. IAAFT Method -----------------------------------------------------
+# -------------------------------------------------------------------------
+# M014. Source: Schreiber & Schmitz (1996), p. 2 (cairn/references/
+# schreiber1996.md).
+
+#' Generate IAAFT Surrogates
+#'
+#' Builds surrogates with the iterative amplitude-adjusted Fourier transform
+#' (IAAFT) of Schreiber and Schmitz (1996). Each surrogate is a new series
+#' that matches both the power spectrum and the value distribution of `y`.
+#' One of the two matches exactly and the other closely, as `match` selects.
+#'
+#' @details
+#' **Which null this tests.** Phase randomization ([generate_surrogate_phase()])
+#' keeps the power spectrum but makes the values Gaussian, so a skewed or
+#' bounded signal gets surrogates with a different value distribution. IAAFT
+#' keeps the spectrum and the value distribution. The null is a Gaussian
+#' linear process seen through a fixed, monotone transform, for example a
+#' skewed movement-energy signal. Against this null, a significant result
+#' cannot come from the shape of the value distribution or from the
+#' autocorrelation of `y` alone.
+#'
+#' **Algorithm.** Each surrogate starts from a random shuffle of `y`. Each
+#' iteration takes the Fourier transform, replaces its amplitudes with those
+#' of `y` while it keeps the phases, and transforms back. This is the
+#' spectrum-adjusted series. The iteration then rank-orders it, so that the
+#' series takes exactly the values of `y`. A surrogate stops when the
+#' rank-ordering no longer changes it, which is where the iteration ends
+#' (Schreiber & Schmitz, 1996, p. 2). Apart from a cyclic shift of `y`, a
+#' finite series in general cannot match the spectrum and the values both
+#' exactly (p. 2). A very short series has few orderings, and its surrogates
+#' can be cyclic shifts or reversals of `y`, which break little of its
+#' structure.
+#'
+#' **`match`.** `"spectrum"` (the default) returns the last spectrum-adjusted
+#' series. Its Fourier amplitudes equal those of `y` exactly, and its values
+#' are close to the values of `y`: closer than the values of a phase
+#' surrogate, in the package tests on a skewed autoregressive series.
+#' `"values"` returns the rank-ordered series, as in the paper. It holds
+#' exactly the values of `y`, and its spectrum is close to that of `y`. The
+#' rank step lowers the autocorrelation slightly, and a synchrony statistic
+#' that grows with autocorrelation, such as the mean absolute Fisher z of
+#' [wcc()], then reads high against these surrogates. So a test against
+#' `"values"` surrogates can reject a true null more often than its nominal
+#' level, and the spectrum form is the default. In a size check run on
+#' 2026-10-06 (independent pairs of AR(1) series x_n = 0.7 x_(n-1) + e_n
+#' observed as x_n^3, length 512, 19 surrogates per pair, [wcc_surrogate()]
+#' with `window_size = 32`, `lag_max = 4`, `window_increment = 16`), the
+#' spectrum form rejected 17 of 400 pairs (4.25%) at p <= .05. On the first
+#' 200 of those pairs, the values form rejected 21 (10.5%) and the spectrum
+#' form 9 (4.5%). The package's own tests repeat this check.
+#'
+#' **`max_iter`.** The spectral error falls about as 1 / i over the first
+#' iterations (p. 3), and the paper's Fig. 2 runs to 1000 iterations (p. 2).
+#' The default `1000` is a cap on run time, not a target. A surrogate that
+#' reaches `max_iter` without a fixed point is still returned, and the call
+#' warns with the number of such surrogates. Long series need more
+#' iterations: on one AR(1)-cube series of 10000 samples (run 2026-10-06),
+#' 4 of 5 surrogates had not reached the fixed point at 1000 iterations.
+#' With the default `match`, such surrogates still match the spectrum
+#' exactly.
+#'
+#' **Missing values.** The Fourier transform cannot take `NA`, so `y` must
+#' be complete. Fill gaps first, for example with [impute_ts_gaps()].
+#'
+#' @param y A numeric vector with at least 3 finite values and no `NA`.
+#' @param n_surrogates A single positive integer: the number of surrogates.
+#'   Default is `100`.
+#' @param max_iter A single positive integer: the maximum number of
+#'   iterations per surrogate. Default is `1000`.
+#' @param match Which property matches exactly: `"spectrum"` (default), the
+#'   Fourier amplitudes of `y`, or `"values"`, the values of `y`. The other
+#'   property matches closely. See Details.
+#' @return A numeric matrix with `length(y)` rows and `n_surrogates`
+#'   columns, ready to pass as `y_surrogates` to [wcc_surrogate()] and the
+#'   other surrogate wrappers.
+#' @references Schreiber, T., & Schmitz, A. (1996). Improved surrogate data
+#'   for nonlinearity tests. *Physical Review Letters*, 77(4), 635-638.
+#'   \doi{10.1103/PhysRevLett.77.635}
+#' @seealso [generate_surrogate_phase()] and [generate_surrogate_circular()]
+#'   for the other within-dyad nulls; [generate_surrogate_pseudo()] for the
+#'   between-dyad null; [wcc_surrogate()], [wdtw_surrogate()],
+#'   [wgranger_surrogate()], [wphase_surrogate()].
+#' @examples
+#' # Build 100 IAAFT surrogates: exact spectrum, close values
+#' surr <- generate_surrogate_iaaft(sim_dyad$x_B, n_surrogates = 100)
+#' dim(surr)
+#' all.equal(Mod(fft(surr[, 1])), Mod(fft(sim_dyad$x_B)))
+#'
+#' # The "values" form: exact values, close spectrum
+#' surr_v <- generate_surrogate_iaaft(sim_dyad$x_B, 10, match = "values")
+#' all.equal(sort(surr_v[, 1]), sort(sim_dyad$x_B))
+#' @md
+#' @export
+generate_surrogate_iaaft <- function(
+  y,
+  n_surrogates = 100,
+  max_iter = 1000,
+  match = c("spectrum", "values")
+) {
+  # arg_match() takes the first element of any reordering of the choices, so
+  # require one value unless the default vector is passed unchanged.
+  if (length(match) > 1 && !identical(match, c("spectrum", "values"))) {
+    cli::cli_abort(
+      "{.arg match} must be a single value: {.val spectrum} or {.val values}."
+    )
+  }
+  match <- rlang::arg_match(match)
+  if (!is.numeric(y) || !is.null(dim(y))) {
+    cli::cli_abort("{.arg y} must be a numeric vector.")
+  }
+  if (anyNA(y)) {
+    cli::cli_abort(c(
+      "{.arg y} must not contain missing values.",
+      "i" = "Fill gaps first, for example with {.fn impute_ts_gaps}."
+    ))
+  }
+  if (!all(is.finite(y))) {
+    cli::cli_abort("{.arg y} must contain only finite values.")
+  }
+  if (length(y) < 3) {
+    cli::cli_abort("{.arg y} must have at least 3 values.")
+  }
+  if (!.is_count(n_surrogates)) {
+    cli::cli_abort("{.arg n_surrogates} must be a single positive integer.")
+  }
+  if (!.is_count(max_iter)) {
+    cli::cli_abort("{.arg max_iter} must be a single positive integer.")
+  }
+
+  y <- as.double(y)
+  n_y <- length(y)
+  y_sorted <- sort(y)
+  target_amp <- Mod(stats::fft(y))
+  if (!all(is.finite(target_amp))) {
+    cli::cli_abort(c(
+      "The Fourier transform of {.arg y} overflows.",
+      "i" = "Rescale {.arg y}, for example to standard units, first."
+    ))
+  }
+
+  # Start: one random shuffle per surrogate, column 1 first.
+  surr_mat <- matrix(0, nrow = n_y, ncol = n_surrogates)
+  for (j in seq_len(n_surrogates)) {
+    surr_mat[, j] <- y[sample.int(n_y)]
+  }
+
+  # Iterate the columns that have not yet reached a fixed point. `adj_mat`
+  # keeps each column's last spectrum-adjusted series (before the rank step).
+  adj_mat <- matrix(0, nrow = n_y, ncol = n_surrogates)
+  active <- seq_len(n_surrogates)
+  # A double counter, so a max_iter above the integer range cannot overflow.
+  iter <- 0
+  while (length(active) > 0 && iter < max_iter) {
+    iter <- iter + 1
+    current <- surr_mat[, active, drop = FALSE]
+    spec <- stats::mvfft(current)
+    spec <- target_amp * exp(1i * Arg(spec))
+    adjusted <- Re(stats::mvfft(spec, inverse = TRUE)) / n_y
+    # Rank within each column in one stable order() call; stability breaks
+    # ties by position, as rank(ties.method = "first") does.
+    n_active <- length(active)
+    ord <- order(rep(seq_len(n_active), each = n_y), adjusted)
+    ranked <- integer(n_y * n_active)
+    ranked[ord] <- rep.int(seq_len(n_y), n_active)
+    updated <- matrix(y_sorted[ranked], nrow = n_y)
+    changed <- colSums(updated != current) > 0
+    adj_mat[, active] <- adjusted
+    surr_mat[, active] <- updated
+    active <- active[changed]
+  }
+
+  if (length(active) > 0) {
+    hint <- if (match == "spectrum") {
+      "values closer to the values of {.arg y}"
+    } else {
+      "a spectrum closer to the spectrum of {.arg y}"
+    }
+    n_unconverged <- length(active)
+    cli::cli_warn(
+      c(
+        "{n_unconverged} of {n_surrogates} surrogate{?s} did not converge \\
+        within {.arg max_iter} = {max_iter} iterations.",
+        "i" = paste0(
+          "They are returned as they are. Raise {.arg max_iter} for ",
+          hint,
+          "."
+        )
+      ),
+      class = "bsync_iaaft_unconverged",
+      n_unconverged = n_unconverged,
+      n_surrogates = n_surrogates,
+      max_iter = max_iter
+    )
+  }
+
+  if (match == "spectrum") adj_mat else surr_mat
+}
+
+# -------------------------------------------------------------------------
+# --- 4. Pseudo-Dyad Method (between dyads) -------------------------------
 # -------------------------------------------------------------------------
 # M009. Convention: rMEA shuffle() (Kleinbub & Ramseyer, 2020) -- pairs
 # series from different dyads and crops each pair to the shorter series,
@@ -215,8 +422,9 @@ generate_surrogate_phase <- function(y, n_surrogates = 100, trim_odd = FALSE) {
 #'   to assess nonverbal synchronization in motion energy analysis
 #'   time-series. *Psychotherapy Research*. \doi{10.1080/10503307.2020.1844334}
 #' @seealso [generate_pseudo_dyads()] for the sample-wide set of
-#'   pseudo-dyads; [generate_surrogate_circular()] and
-#'   [generate_surrogate_phase()] for within-dyad nulls; [wcc_surrogate()],
+#'   pseudo-dyads; [generate_surrogate_circular()],
+#'   [generate_surrogate_phase()], and [generate_surrogate_iaaft()] for
+#'   within-dyad nulls; [wcc_surrogate()],
 #'   [wdtw_surrogate()], [wgranger_surrogate()], [wphase_surrogate()].
 #' @examples
 #' # Three "dyads" built from sim_dyad's axes (a stand-in for a real sample)
@@ -385,8 +593,9 @@ generate_surrogate_pseudo <- function(
 #'   time-series. *Psychotherapy Research*. \doi{10.1080/10503307.2020.1844334}
 #' @seealso [generate_surrogate_pseudo()] for a per-dyad surrogate matrix,
 #'   which [wcc_surrogate()], [wdtw_surrogate()], [wgranger_surrogate()], and
-#'   [wphase_surrogate()] accept; [generate_surrogate_circular()] and
-#'   [generate_surrogate_phase()] for within-dyad nulls; [wcc()], [wdtw()],
+#'   [wphase_surrogate()] accept; [generate_surrogate_circular()],
+#'   [generate_surrogate_phase()], and [generate_surrogate_iaaft()] for
+#'   within-dyad nulls; [wcc()], [wdtw()],
 #'   [wgranger()], and [wphase()] to compute the statistic on each
 #'   pseudo-dyad.
 #' @examples
