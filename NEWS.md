@@ -10,7 +10,8 @@
   (y -> x). Before, these methods reported x -> y only. For a Granger result,
   `print()` and `summary()` show a "Direction" line, `glance()` has a
   `direction` column, and the plot title names the direction. `"yx"` on a WCC
-  or WDTW result is an error. WCC and WDTW output does not change.
+  or WDTW result is an error. WCC and WDTW results, printed summaries,
+  `glance()` columns, and plots do not change.
 
 ## Add-one surrogate p-values and the p <= .05 rule (changes reported results)
 

@@ -70,6 +70,8 @@ Let users read the y -> x direction of a Granger `synchrony_multiverse()` result
 - 2026-10-06: T3 done. `print()` and `summary()` take `direction`, and print a "Direction" line for Granger only. `summary()` reads the chosen ES column for the range and the skipped/NA count. With the T3 code stashed, 10 of the new expectations failed. Suite: 1949 pass, 0 fail.
 - 2026-10-06: T4 done. `plot()` takes `direction` as its last named argument, after `top_frac`, so positional calls keep working. `multiverse_plot_data()` copies the chosen direction into `es`/`p`, and `multiverse_plot_title()` adds "(x -> y)" or "(y -> x)" for Granger only. The y -> x snapshot `multiverse-granger-yx.svg` was rendered to PNG and checked by eye: 0 of 8 significant, all ES negative. `git diff main` on the old snapshot is empty. Suite: 1969 pass, 0 fail.
 - 2026-10-06: T5 done. Roxygen documents `direction` on the four methods, which now carry `@md`, and documents `$robustness_yx` and all five y -> x grid columns in `synchrony_multiverse()`. That block stays without `@md`, as on main. The vignette and the test title are fixed, and the NEWS entry is added. `devtools::document()` rewrote 5 Rd files. `grep -rn "es_xy" vignettes/ tests/` returns no lines.
+- 2026-10-06: T6 spell check flagged "summarise" 3 times in the new roxygen. Changed to American spelling, and the spell check is clean.
+- 2026-10-06: claim audit: 60 claims read, 4 corrected — vignettes/choosing-parameters.Rmd, tests/testthat/test-multiverse.R, NEWS.md, R/multiverse.R.
 
 ## Decisions
 

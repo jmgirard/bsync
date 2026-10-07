@@ -9,10 +9,10 @@
 #  - Surrogate reuse: one y_surrogates matrix per unique surrogate_method,
 #    reused across every cell sharing it (efficiency seam from M5)
 #  - ES polarity: WCC/Granger = upper-tail (higher better), WDTW = lower-tail
-#  - Granger has two directional statistics (f_xy / f_yx). The columns es/p
-#    hold x -> y, and es_yx/p_yx (plus observed_yx, null_mean_yx,
-#    null_sd_yx) are added for y -> x when estimator = "wgranger", along with
-#    a $robustness_yx summary
+#  - Granger has two directional statistics (f_xy / f_yx). The columns
+#    observed/null_mean/null_sd/es/p hold x -> y, and the matching _yx
+#    columns are added for y -> x when estimator = "wgranger", along with a
+#    $robustness_yx summary
 #  - bsync_multiverse result is light (Invariant 7): tidy grid + settings +
 #    robustness summary; no raw surrogate draws, no raw input stored
 

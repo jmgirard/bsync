@@ -290,7 +290,7 @@ test_that("AC3: Two methods generate two matrices, not 2 × n_cells", {
 # AC4: WDTW and Granger adapters produce correct grids ------------------------
 # =============================================================================
 
-test_that("AC4: Granger grid has no lag axis; has es/p (x -> y) and es_yx/p_yx columns", {
+test_that("AC4: Granger grid has no lag axis; has es/p and es_yx/p_yx columns", {
   s <- make_test_series()
   set.seed(9)
   res <- synchrony_multiverse(
@@ -300,7 +300,7 @@ test_that("AC4: Granger grid has no lag axis; has es/p (x -> y) and es_yx/p_yx c
   )
   expect_true(all(is.na(res$grid$lag_sec)))
   expect_true(all(is.na(res$grid$lag_max)))
-  expect_true(all(c("es_yx", "p_yx") %in% names(res$grid)))
+  expect_true(all(c("es", "p", "es_yx", "p_yx") %in% names(res$grid)))
   expect_equal(nrow(res$grid), 2L) # 2 window_sec values
 })
 
