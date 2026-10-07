@@ -32,6 +32,7 @@
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
     <li><a class="dropdown-item" href="../articles/wgranger-workflow.html">Windowed Granger Causality</a></li>
+    <li><a class="dropdown-item" href="../articles/wphase-workflow.html">Windowed Phase Synchrony</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Going deeper</h6></li>
     <li><a class="dropdown-item" href="../articles/choosing-parameters.html">Choosing Analysis Parameters</a></li>
@@ -55,6 +56,12 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="bsync-development-version">bsync (development version)<a class="anchor" aria-label="anchor" href="#bsync-development-version"></a></h2>
+<div class="section level3">
+<h3 id="windowed-phase-synchrony-development-version">Windowed phase synchrony<a class="anchor" aria-label="anchor" href="#windowed-phase-synchrony-development-version"></a></h3>
+<ul><li>
+<code><a href="../reference/wphase.html">wphase()</a></code> and <code><a href="../reference/wphase_surrogate.html">wphase_surrogate()</a></code> take a new <code>statistic</code> argument. <code>"mean_plv"</code> (the default) is the mean PLV over all windows and lags, as before. <code>"peak"</code> takes the largest PLV across lags in each window and averages those per-window values, as <code>wcc(statistic = "peak")</code> does. The surrogate test summarizes every surrogate with the same statistic, and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code>, and <code>names(aggregate)</code> show which one was used.</li>
+<li>New article, <code><a href="../articles/wphase-workflow.html">vignette("wphase-workflow")</a></code>: band-pass filtering before phase extraction, <code><a href="../reference/wphase.html">wphase()</a></code>, a circular-shift surrogate test, the <code>"peak"</code> statistic, optima, and plots. In its simulated example, the relative phase tracks the lead–lag better than the lag of the highest PLV.</li>
+</ul></div>
 <div class="section level3">
 <h3 id="segment-shuffling-surrogates-development-version">Segment-shuffling surrogates<a class="anchor" aria-label="anchor" href="#segment-shuffling-surrogates-development-version"></a></h3>
 <ul><li>New <code><a href="../reference/generate_surrogate_segment.html">generate_surrogate_segment()</a></code> cuts a series into segments of <code>segment_size</code> samples, from sample 1 as in the SUSY package (Tschacher &amp; Meier, 2020), and builds each surrogate by putting the segments in a new order. Orders are drawn uniformly from all orders other than the original, without repeats, so a surrogate can leave a segment in place. This keeps the add-one p-value exact. The samples after the last whole segment stay in place, and the call says how many there are. Missing values move with their segments. With 3 segments or fewer, the call warns that no test can reach p &lt;= .05.</li>

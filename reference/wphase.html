@@ -40,6 +40,7 @@ phase."></head><body>
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
     <li><a class="dropdown-item" href="../articles/wgranger-workflow.html">Windowed Granger Causality</a></li>
+    <li><a class="dropdown-item" href="../articles/wphase-workflow.html">Windowed Phase Synchrony</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Going deeper</h6></li>
     <li><a class="dropdown-item" href="../articles/choosing-parameters.html">Choosing Analysis Parameters</a></li>
@@ -79,7 +80,8 @@ phase.</p>
 <span>  <span class="va">window_size</span>,</span>
 <span>  <span class="va">lag_max</span>,</span>
 <span>  window_increment <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  lag_increment <span class="op">=</span> <span class="fl">1</span></span>
+<span>  lag_increment <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  statistic <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean_plv"</span>, <span class="st">"peak"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -88,18 +90,18 @@ phase.</p>
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>A numeric vector containing a time series (same length as `y`).</p></dd>
+<dd><p>A numeric vector containing a time series (same length as <code>y</code>).</p></dd>
 
 
 <dt id="arg-y">y<a class="anchor" aria-label="anchor" href="#arg-y"></a></dt>
-<dd><p>A numeric vector containing a time series (same length as `x`).</p></dd>
+<dd><p>A numeric vector containing a time series (same length as <code>x</code>).</p></dd>
 
 
 <dt id="arg-time">time<a class="anchor" aria-label="anchor" href="#arg-time"></a></dt>
 <dd><p>An optional numeric vector of timestamps for the data, same
-length as `x` and `y`; if provided, window indices in the results are
+length as <code>x</code> and <code>y</code>; if provided, window indices in the results are
 mapped to these timestamps (and it must not contain missing values).
-Default is `NULL`.</p></dd>
+Default is <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-window-size">window_size<a class="anchor" aria-label="anchor" href="#arg-window-size"></a></dt>
@@ -109,50 +111,68 @@ samples.</p></dd>
 
 <dt id="arg-lag-max">lag_max<a class="anchor" aria-label="anchor" href="#arg-lag-max"></a></dt>
 <dd><p>A positive integer indicating the maximum lag (in samples)
-to try between the `x` and `y` windows.</p></dd>
+to try between the <code>x</code> and <code>y</code> windows.</p></dd>
 
 
 <dt id="arg-window-increment">window_increment<a class="anchor" aria-label="anchor" href="#arg-window-increment"></a></dt>
 <dd><p>A positive integer indicating the number of samples
-between successive windows. (default = `1`)</p></dd>
+between successive windows. (default = <code>1</code>)</p></dd>
 
 
 <dt id="arg-lag-increment">lag_increment<a class="anchor" aria-label="anchor" href="#arg-lag-increment"></a></dt>
 <dd><p>A positive integer indicating the number of samples
-between successive lags. (default = `1`)</p></dd>
+between successive lags. (default = <code>1</code>)</p></dd>
+
+
+<dt id="arg-statistic">statistic<a class="anchor" aria-label="anchor" href="#arg-statistic"></a></dt>
+<dd><p>A character string naming how to aggregate the PLV
+surface into a single number. <code>"mean_plv"</code> (default) takes the mean PLV
+over <strong>all</strong> windows and lags, so it summarizes the whole surface.
+<code>"peak"</code> takes the largest PLV across lags <strong>within each window</strong>, then
+averages those per-window values. This is the best-lag definition that
+<code><a href="wcc.html">wcc()</a></code> uses for its own <code>"peak"</code> statistic, applied to PLV.
+It suits a dyad whose lead–lag shifts across windows, where the mean
+over all lags dilutes the lag at which phases lock. Pass the same value
+to <code><a href="wphase_surrogate.html">wphase_surrogate()</a></code> so that the null distribution matches.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list object of class `"wphase_res"` (a `bsync_surface`) with
-  `results_df` (columns `i`, `tau`, `plv`, `rel_phase`), `aggregate`
-  (`mean_plv`), and `settings`.</p>
+    <p>A list object of class <code>"wphase_res"</code> (a <code>bsync_surface</code>) with
+<code>results_df</code> (columns <code>i</code>, <code>tau</code>, <code>plv</code>, <code>rel_phase</code>), <code>aggregate</code>
+(named <code>mean_plv</code> or <code>peak</code>, after <code>statistic</code>), and <code>settings</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The PLV is the modulus of the mean unit phasor of the phase differences —
 the phase-locking value of Lachaux, Rodriguez, Martinerie, and Varela
-(1999). Lachaux et al. average across trials at a fixed latency; `wphase()`
+(1999). Lachaux et al. average across trials at a fixed latency; <code>wphase()</code>
 is a single-trial continuous-data adaptation that averages across the time
 samples within each sliding window (at each lag offset). PLV is 1 when the
 phase difference is constant across the window and near 0 when it is
-uniformly scattered. `rel_phase` is the circular mean of the phase
-differences (radians); positive values mean `x`'s phase is ahead of `y`'s.</p>
-<p>**Narrowband caveat (stated loudly, per the source method):** instantaneous
+uniformly scattered. <code>rel_phase</code> is the circular mean of the phase
+differences (radians); positive values mean <code>x</code>'s phase is ahead of <code>y</code>'s.</p>
+<p><strong>Narrowband caveat (stated loudly, per the source method):</strong> instantaneous
 phase is well-defined for narrowband signals. Lachaux et al. band-pass
-filter before phase extraction; `wphase()` leaves filtering to you (e.g.
-[smooth_signal()] or an external band-pass) rather than silently changing
-the basis. Beware that this failure mode is **anti-conservative**:
-broadband or low-frequency-dominated input *inflates* PLV toward 1 (two
+filter before phase extraction; <code>wphase()</code> leaves filtering to you (e.g.
+<code><a href="smooth_signal.html">smooth_signal()</a></code> or an external band-pass) rather than silently changing
+the basis. Beware that this failure mode is <strong>anti-conservative</strong>:
+broadband or low-frequency-dominated input <em>inflates</em> PLV toward 1 (two
 independent AR(0.98) series measure a mean PLV near 0.6 at
-`window_size = 96`, against roughly 0.12 for white noise), because slowly
+<code>window_size = 96</code>, against roughly 0.12 for white noise), because slowly
 drifting phases stay aligned across a short window. High PLV on
 unfiltered signals is not evidence of synchrony; band-pass first and use
-[wphase_surrogate()] for significance.</p>
-<p>**NA policy:** the analytic signal is FFT-based, so a single `NA` corrupts
-every phase estimate; unlike [wcc()], there is no coherent per-window
-`na.rm`. `wphase()` therefore aborts on `NA`-containing input — impute with
-[impute_ts_gaps()] or trim with [trim_edges()] (`pad_na = FALSE`) first.</p>
+<code><a href="wphase_surrogate.html">wphase_surrogate()</a></code> for significance.</p>
+<p><strong>NA policy:</strong> the analytic signal is FFT-based, so a single <code>NA</code> corrupts
+every phase estimate; unlike <code><a href="wcc.html">wcc()</a></code>, there is no coherent per-window
+<code>na.rm</code>. <code>wphase()</code> therefore aborts on <code>NA</code>-containing input — impute with
+<code><a href="impute_ts_gaps.html">impute_ts_gaps()</a></code> or trim with <code><a href="trim_edges.html">trim_edges()</a></code> (<code>pad_na = FALSE</code>) first.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><code><a href="wphase_surrogate.html">wphase_surrogate()</a></code> for the matched surrogate test, <code><a href="pick_optima.html">pick_optima()</a></code>
+for per-window optima, and <code><a href="../articles/wphase-workflow.html">vignette("wphase-workflow")</a></code> for a complete
+workflow with band-pass filtering.</p></div>
     </div>
 
     <div class="section level2">
@@ -172,6 +192,16 @@ every phase estimate; unlike [wcc()], there is no coherent per-window
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Window Size: 96</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Max Lag: 10</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Mean PLV: 0.1196</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Average the best-lag PLV of each window instead</span></span></span>
+<span class="r-in"><span><span class="fu">wphase</span><span class="op">(</span><span class="va">sim_dyad</span><span class="op">$</span><span class="va">x_A</span>, <span class="va">sim_dyad</span><span class="op">$</span><span class="va">x_B</span>, window_size <span class="op">=</span> <span class="fl">96</span>, lag_max <span class="op">=</span> <span class="fl">10</span>, statistic <span class="op">=</span> <span class="st">"peak"</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Windowed Phase Synchrony Analysis</span> <span style="color: #00BBBB;">───────────────────────────────────────────</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Total Windows: 2285</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Total Lags Tested: 21</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Window Size: 96</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Max Lag: 10</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Mean Peak PLV: 0.246</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

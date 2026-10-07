@@ -292,3 +292,5 @@ data.
 - [`vignette("wcc-workflow")`](https://jmgirard.github.io/bsync/articles/wcc-workflow.md)
   for the Windowed Cross-Correlation workflow, which shares the same
   surrogate pipeline and tidy interface
+- [`vignette("wphase-workflow")`](https://jmgirard.github.io/bsync/articles/wphase-workflow.md)
+  for windowed phase synchrony, for rhythmic behavior

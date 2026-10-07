@@ -348,3 +348,5 @@ leadership from Person A to Person B perfectly clear.
 - [`vignette("wcc-workflow")`](https://jmgirard.github.io/bsync/articles/wcc-workflow.md)
   for the Windowed Cross-Correlation workflow, which shares the same
   optima and leadership pipeline
+- [`vignette("wphase-workflow")`](https://jmgirard.github.io/bsync/articles/wphase-workflow.md)
+  for windowed phase synchrony, for rhythmic behavior

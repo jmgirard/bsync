@@ -568,3 +568,9 @@ dplyr::bind_rows(
 #> 2     NA            53          90               30      45             1
 #> # ℹ 2 more variables: statistic <chr>, peak <dbl>
 ```
+
+## See also
+
+- [`vignette("wphase-workflow")`](https://jmgirard.github.io/bsync/articles/wphase-workflow.md)
+  for windowed phase synchrony, which offers the same `"peak"` statistic
+  for rhythmic data

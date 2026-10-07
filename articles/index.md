@@ -13,6 +13,8 @@
   Warping](https://jmgirard.github.io/bsync/articles/wdtw-workflow.md):
 - [Windowed Granger
   Causality](https://jmgirard.github.io/bsync/articles/wgranger-workflow.md):
+- [Windowed Phase
+  Synchrony](https://jmgirard.github.io/bsync/articles/wphase-workflow.md):
 
 ### Going deeper
 

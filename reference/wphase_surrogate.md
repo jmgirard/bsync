@@ -13,7 +13,8 @@ wphase_surrogate(
   window_size,
   lag_max,
   window_increment = 1,
-  lag_increment = 1
+  lag_increment = 1,
+  statistic = c("mean_plv", "peak")
 )
 ```
 
@@ -53,6 +54,17 @@ wphase_surrogate(
 
   A positive integer indicating the lag shift increment. Default is 1.
 
+- statistic:
+
+  A character string naming the aggregate statistic, `"mean_plv"`
+  (default) or `"peak"`; see
+  [`wphase()`](https://jmgirard.github.io/bsync/reference/wphase.md).
+  The observed data and every surrogate are summarized with this
+  statistic. Pass the value you used in
+  [`wphase()`](https://jmgirard.github.io/bsync/reference/wphase.md) so
+  that the test is of the aggregate you reported (`observed_z` then
+  equals `wphase()$aggregate`).
+
 ## Value
 
 A list object of class "wphase_surr".
@@ -64,11 +76,13 @@ The p-value is the add-one form p = (b + 1) / (n + 1) (Phipson & Smyth,
 surrogates whose aggregate statistic is **at least as large as** the
 observed statistic. The `+ 1` counts the observed data as one more draw
 from the null, so the p-value is never 0. Its smallest value is 1 / (n +
-1). The aggregate – the mean phase-locking value over all window x lag
-combinations (`mean_plv`) – is computed identically on the observed data
-and every surrogate via the same internal helper, so the null
-distribution and the observed value are directly comparable (Invariant
-2: surrogate nulls match the observed statistic).
+1). The aggregate named by `statistic` – the mean phase-locking value
+over all window x lag combinations (`"mean_plv"`), or the mean over
+windows of each window's largest PLV across lags (`"peak"`) – is
+computed identically on the observed data and every surrogate via the
+same internal helper, so the null distribution and the observed value
+are directly comparable (Invariant 2: surrogate nulls match the observed
+statistic).
 
 Phase extraction (the analytic signal via
 [`gsignal::hilbert()`](https://rdrr.io/pkg/gsignal/man/hilbert.html)) is

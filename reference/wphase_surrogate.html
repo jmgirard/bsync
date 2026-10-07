@@ -32,6 +32,7 @@
     <li><a class="dropdown-item" href="../articles/wcc-workflow.html">Windowed Cross-Correlation</a></li>
     <li><a class="dropdown-item" href="../articles/wdtw-workflow.html">Windowed Dynamic Time Warping</a></li>
     <li><a class="dropdown-item" href="../articles/wgranger-workflow.html">Windowed Granger Causality</a></li>
+    <li><a class="dropdown-item" href="../articles/wphase-workflow.html">Windowed Phase Synchrony</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Going deeper</h6></li>
     <li><a class="dropdown-item" href="../articles/choosing-parameters.html">Choosing Analysis Parameters</a></li>
@@ -68,7 +69,8 @@
 <span>  <span class="va">window_size</span>,</span>
 <span>  <span class="va">lag_max</span>,</span>
 <span>  window_increment <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  lag_increment <span class="op">=</span> <span class="fl">1</span></span>
+<span>  lag_increment <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  statistic <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean_plv"</span>, <span class="st">"peak"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -107,6 +109,13 @@
 <dt id="arg-lag-increment">lag_increment<a class="anchor" aria-label="anchor" href="#arg-lag-increment"></a></dt>
 <dd><p>A positive integer indicating the lag shift increment. Default is 1.</p></dd>
 
+
+<dt id="arg-statistic">statistic<a class="anchor" aria-label="anchor" href="#arg-statistic"></a></dt>
+<dd><p>A character string naming the aggregate statistic, <code>"mean_plv"</code>
+(default) or <code>"peak"</code>; see <code><a href="wphase.html">wphase()</a></code>. The observed data and every surrogate are
+summarized with this statistic. Pass the value you used in <code><a href="wphase.html">wphase()</a></code> so that the test
+is of the aggregate you reported (<code>observed_z</code> then equals <code>wphase()$aggregate</code>).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -118,11 +127,12 @@
 is the number of surrogate columns and b is the number of surrogates whose aggregate
 statistic is <strong>at least as large as</strong> the observed statistic. The <code>+ 1</code> counts the
 observed data as one more draw from the null, so the p-value is never 0. Its smallest
-value is 1 / (n + 1). The aggregate – the mean phase-locking value over
-all window x lag combinations (<code>mean_plv</code>) – is computed identically on the observed
-data and every surrogate via the same internal helper, so the null distribution and
-the observed value are directly comparable (Invariant 2: surrogate nulls match the
-observed statistic).</p>
+value is 1 / (n + 1). The aggregate named by <code>statistic</code> – the mean phase-locking
+value over all window x lag combinations (<code>"mean_plv"</code>), or the mean over windows of
+each window's largest PLV across lags (<code>"peak"</code>) – is computed identically on the
+observed data and every surrogate via the same internal helper, so the null
+distribution and the observed value are directly comparable (Invariant 2: surrogate
+nulls match the observed statistic).</p>
 <p>Phase extraction (the analytic signal via <code><a href="https://rdrr.io/pkg/gsignal/man/hilbert.html" class="external-link">gsignal::hilbert()</a></code>) is applied to each
 surrogate column exactly as to the observed series. Circular-shift surrogates
 (<code><a href="generate_surrogate_circular.html">generate_surrogate_circular()</a></code>) preserve each series' own phase continuity while

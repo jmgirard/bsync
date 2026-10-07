@@ -484,6 +484,9 @@ psychotherapy sessions. *Psychotherapy Research*, *30*(5), 558–573.
 
 - [`vignette("wcc-workflow")`](https://jmgirard.github.io/bsync/articles/wcc-workflow.md)
   for the full WCC analytical pipeline
+- [`vignette("wphase-workflow")`](https://jmgirard.github.io/bsync/articles/wphase-workflow.md)
+  for windowed phase synchrony, where the window must span several
+  cycles of the rhythm
 - [`vignette("surrogate-testing")`](https://jmgirard.github.io/bsync/articles/surrogate-testing.md)
   for details on circular-shift, phase-randomization, IAAFT,
   segment-shuffling, and pseudo-dyad surrogates

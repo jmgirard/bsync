@@ -2,6 +2,26 @@
 
 ## bsync (development version)
 
+### Windowed phase synchrony
+
+- [`wphase()`](https://jmgirard.github.io/bsync/reference/wphase.md) and
+  [`wphase_surrogate()`](https://jmgirard.github.io/bsync/reference/wphase_surrogate.md)
+  take a new `statistic` argument. `"mean_plv"` (the default) is the
+  mean PLV over all windows and lags, as before. `"peak"` takes the
+  largest PLV across lags in each window and averages those per-window
+  values, as `wcc(statistic = "peak")` does. The surrogate test
+  summarizes every surrogate with the same statistic, and
+  [`print()`](https://rdrr.io/r/base/print.html),
+  [`glance()`](https://generics.r-lib.org/reference/glance.html), and
+  `names(aggregate)` show which one was used.
+- New article,
+  [`vignette("wphase-workflow")`](https://jmgirard.github.io/bsync/articles/wphase-workflow.md):
+  band-pass filtering before phase extraction,
+  [`wphase()`](https://jmgirard.github.io/bsync/reference/wphase.md), a
+  circular-shift surrogate test, the `"peak"` statistic, optima, and
+  plots. In its simulated example, the relative phase tracks the
+  lead–lag better than the lag of the highest PLV.
+
 ### Segment-shuffling surrogates
 
 - New
