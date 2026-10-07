@@ -178,3 +178,4 @@ By applying Windowed Granger Causality, we have successfully extracted a rigorou
   IAAFT, and pseudo-dyad surrogate methods and best practices for permutation count
 - `vignette("wcc-workflow")` for the Windowed Cross-Correlation workflow, which shares the same
   surrogate pipeline and tidy interface
+- `vignette("wphase-workflow")` for windowed phase synchrony, for rhythmic behavior

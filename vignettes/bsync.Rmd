@@ -298,6 +298,7 @@ Rules of thumb:
 | `vignette("wcc-workflow")` | Full WCC pipeline with optima, LAI, tidy interface, and the two aggregate statistics (`mean_abs_z` vs. `peak`) |
 | `vignette("wdtw-workflow")` | WDTW step-by-step with surrogate testing and optima extraction |
 | `vignette("wgranger-workflow")` | WGC step-by-step with F-statistic and p-value plots |
+| `vignette("wphase-workflow")` | Windowed phase synchrony step-by-step with band-pass filtering and a surrogate test |
 | `vignette("choosing-parameters")` | Data-driven parameter selection: `suggest_wcc_params()`, `synchrony_multiverse()`, `autotune_wcc()`, and `select_specification()` |
 | `vignette("surrogate-testing")` | When to use circular-shift, phase-randomization, IAAFT, segment-shuffling, or pseudo-dyad surrogates; best practices |
 | `vignette("determine-downsampling")` | How to choose a biologically appropriate sample rate from PSD diagnostics |

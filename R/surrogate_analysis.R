@@ -445,11 +445,12 @@ wgranger_surrogate <- function(
 #' is the number of surrogate columns and b is the number of surrogates whose aggregate
 #' statistic is **at least as large as** the observed statistic. The `+ 1` counts the
 #' observed data as one more draw from the null, so the p-value is never 0. Its smallest
-#' value is 1 / (n + 1). The aggregate -- the mean phase-locking value over
-#' all window x lag combinations (`mean_plv`) -- is computed identically on the observed
-#' data and every surrogate via the same internal helper, so the null distribution and
-#' the observed value are directly comparable (Invariant 2: surrogate nulls match the
-#' observed statistic).
+#' value is 1 / (n + 1). The aggregate named by `statistic` -- the mean phase-locking
+#' value over all window x lag combinations (`"mean_plv"`), or the mean over windows of
+#' each window's largest PLV across lags (`"peak"`) -- is computed identically on the
+#' observed data and every surrogate via the same internal helper, so the null
+#' distribution and the observed value are directly comparable (Invariant 2: surrogate
+#' nulls match the observed statistic).
 #'
 #' Phase extraction (the analytic signal via `gsignal::hilbert()`) is applied to each
 #' surrogate column exactly as to the observed series. Circular-shift surrogates
@@ -466,6 +467,10 @@ wgranger_surrogate <- function(
 #' @param lag_max A positive integer indicating the maximum lag to try.
 #' @param window_increment A positive integer indicating the window shift increment. Default is 1.
 #' @param lag_increment A positive integer indicating the lag shift increment. Default is 1.
+#' @param statistic A character string naming the aggregate statistic, `"mean_plv"`
+#'   (default) or `"peak"`; see [wphase()]. The observed data and every surrogate are
+#'   summarized with this statistic. Pass the value you used in [wphase()] so that the test
+#'   is of the aggregate you reported (`observed_z` then equals `wphase()$aggregate`).
 #' @return A list object of class "wphase_surr".
 #' @references Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never be
 #'   zero: calculating exact p-values when permutations are randomly drawn. *Statistical
@@ -494,8 +499,10 @@ wphase_surrogate <- function(
   window_size,
   lag_max,
   window_increment = 1,
-  lag_increment = 1
+  lag_increment = 1,
+  statistic = c("mean_plv", "peak")
 ) {
+  statistic <- match.arg(statistic)
   if (!is.matrix(y_surrogates)) {
     cli::cli_abort("{.arg y_surrogates} must be a matrix.")
   }
@@ -524,7 +531,8 @@ wphase_surrogate <- function(
     window_size = window_size,
     lag_max = lag_max,
     window_increment = window_increment,
-    lag_increment = lag_increment
+    lag_increment = lag_increment,
+    statistic = statistic
   )
   obs_plv <- obs_wphase$aggregate[[1]]
 
@@ -548,7 +556,9 @@ wphase_surrogate <- function(
       i_vals = g$i_vals, tau_vals = g$tau_vals,
       w_max = g$w_max
     )
-    wphase_aggregate(core$plv)
+    wphase_aggregate(
+      plv = core$plv, window_id = g$i_vals, statistic = statistic
+    )
   }
 
   # 3. Surrogate loop via shared engine
@@ -756,11 +766,21 @@ print.wphase_surr <- function(x, ...) {
 
   p_disp <- format_p_value(x$p_value)
 
-  cli::cli_dl(c(
-    "Permutations" = "{x$n_surrogates}",
-    "Observed Mean PLV" = "{round(x$observed_z, 4)}",
-    "Average Null Mean PLV" = "{round(mean(x$surrogate_z), 4)}",
-    "Empirical p-value" = "{p_disp}"
+  agg_label <- wphase_agg_label(x$settings$statistic)
+
+  cli::cli_dl(stats::setNames(
+    c(
+      "{x$n_surrogates}",
+      "{round(x$observed_z, 4)}",
+      "{round(mean(x$surrogate_z), 4)}",
+      "{p_disp}"
+    ),
+    c(
+      "Permutations",
+      paste0("Observed ", agg_label),
+      paste0("Average Null ", agg_label),
+      "Empirical p-value"
+    )
   ))
 
   print_significance_call(

@@ -218,3 +218,4 @@ By grouping the windows into local epochs, the LAI function smooths over momenta
   IAAFT, and pseudo-dyad surrogate methods and best practices for permutation count
 - `vignette("wcc-workflow")` for the Windowed Cross-Correlation workflow, which shares the same
   optima and leadership pipeline
+- `vignette("wphase-workflow")` for windowed phase synchrony, for rhythmic behavior

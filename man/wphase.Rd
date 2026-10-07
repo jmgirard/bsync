@@ -11,35 +11,46 @@ wphase(
   window_size,
   lag_max,
   window_increment = 1,
-  lag_increment = 1
+  lag_increment = 1,
+  statistic = c("mean_plv", "peak")
 )
 }
 \arguments{
-\item{x}{A numeric vector containing a time series (same length as `y`).}
+\item{x}{A numeric vector containing a time series (same length as \code{y}).}
 
-\item{y}{A numeric vector containing a time series (same length as `x`).}
+\item{y}{A numeric vector containing a time series (same length as \code{x}).}
 
 \item{time}{An optional numeric vector of timestamps for the data, same
-length as `x` and `y`; if provided, window indices in the results are
+length as \code{x} and \code{y}; if provided, window indices in the results are
 mapped to these timestamps (and it must not contain missing values).
-Default is `NULL`.}
+Default is \code{NULL}.}
 
 \item{window_size}{A positive integer indicating the size of each window in
 samples.}
 
 \item{lag_max}{A positive integer indicating the maximum lag (in samples)
-to try between the `x` and `y` windows.}
+to try between the \code{x} and \code{y} windows.}
 
 \item{window_increment}{A positive integer indicating the number of samples
-between successive windows. (default = `1`)}
+between successive windows. (default = \code{1})}
 
 \item{lag_increment}{A positive integer indicating the number of samples
-between successive lags. (default = `1`)}
+between successive lags. (default = \code{1})}
+
+\item{statistic}{A character string naming how to aggregate the PLV
+surface into a single number. \code{"mean_plv"} (default) takes the mean PLV
+over \strong{all} windows and lags, so it summarizes the whole surface.
+\code{"peak"} takes the largest PLV across lags \strong{within each window}, then
+averages those per-window values. This is the best-lag definition that
+\code{\link[=wcc]{wcc()}} uses for its own \code{"peak"} statistic, applied to PLV.
+It suits a dyad whose lead–lag shifts across windows, where the mean
+over all lags dilutes the lag at which phases lock. Pass the same value
+to \code{\link[=wphase_surrogate]{wphase_surrogate()}} so that the null distribution matches.}
 }
 \value{
-A list object of class `"wphase_res"` (a `bsync_surface`) with
-  `results_df` (columns `i`, `tau`, `plv`, `rel_phase`), `aggregate`
-  (`mean_plv`), and `settings`.
+A list object of class \code{"wphase_res"} (a \code{bsync_surface}) with
+\code{results_df} (columns \code{i}, \code{tau}, \code{plv}, \code{rel_phase}), \code{aggregate}
+(named \code{mean_plv} or \code{peak}, after \code{statistic}), and \code{settings}.
 }
 \description{
 Conduct a windowed phase-synchrony analysis. Instantaneous phase is
@@ -51,29 +62,29 @@ phase.
 \details{
 The PLV is the modulus of the mean unit phasor of the phase differences —
 the phase-locking value of Lachaux, Rodriguez, Martinerie, and Varela
-(1999). Lachaux et al. average across trials at a fixed latency; `wphase()`
+(1999). Lachaux et al. average across trials at a fixed latency; \code{wphase()}
 is a single-trial continuous-data adaptation that averages across the time
 samples within each sliding window (at each lag offset). PLV is 1 when the
 phase difference is constant across the window and near 0 when it is
-uniformly scattered. `rel_phase` is the circular mean of the phase
-differences (radians); positive values mean `x`'s phase is ahead of `y`'s.
+uniformly scattered. \code{rel_phase} is the circular mean of the phase
+differences (radians); positive values mean \code{x}'s phase is ahead of \code{y}'s.
 
-**Narrowband caveat (stated loudly, per the source method):** instantaneous
+\strong{Narrowband caveat (stated loudly, per the source method):} instantaneous
 phase is well-defined for narrowband signals. Lachaux et al. band-pass
-filter before phase extraction; `wphase()` leaves filtering to you (e.g.
-[smooth_signal()] or an external band-pass) rather than silently changing
-the basis. Beware that this failure mode is **anti-conservative**:
-broadband or low-frequency-dominated input *inflates* PLV toward 1 (two
+filter before phase extraction; \code{wphase()} leaves filtering to you (e.g.
+\code{\link[=smooth_signal]{smooth_signal()}} or an external band-pass) rather than silently changing
+the basis. Beware that this failure mode is \strong{anti-conservative}:
+broadband or low-frequency-dominated input \emph{inflates} PLV toward 1 (two
 independent AR(0.98) series measure a mean PLV near 0.6 at
-`window_size = 96`, against roughly 0.12 for white noise), because slowly
+\code{window_size = 96}, against roughly 0.12 for white noise), because slowly
 drifting phases stay aligned across a short window. High PLV on
 unfiltered signals is not evidence of synchrony; band-pass first and use
-[wphase_surrogate()] for significance.
+\code{\link[=wphase_surrogate]{wphase_surrogate()}} for significance.
 
-**NA policy:** the analytic signal is FFT-based, so a single `NA` corrupts
-every phase estimate; unlike [wcc()], there is no coherent per-window
-`na.rm`. `wphase()` therefore aborts on `NA`-containing input — impute with
-[impute_ts_gaps()] or trim with [trim_edges()] (`pad_na = FALSE`) first.
+\strong{NA policy:} the analytic signal is FFT-based, so a single \code{NA} corrupts
+every phase estimate; unlike \code{\link[=wcc]{wcc()}}, there is no coherent per-window
+\code{na.rm}. \code{wphase()} therefore aborts on \code{NA}-containing input — impute with
+\code{\link[=impute_ts_gaps]{impute_ts_gaps()}} or trim with \code{\link[=trim_edges]{trim_edges()}} (\code{pad_na = FALSE}) first.
 }
 \examples{
 # Windowed phase synchrony on the bundled simulated dyad
@@ -84,4 +95,12 @@ wphase_res <- wphase(
   lag_max = 10
 )
 wphase_res
+
+# Average the best-lag PLV of each window instead
+wphase(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10, statistic = "peak")
+}
+\seealso{
+\code{\link[=wphase_surrogate]{wphase_surrogate()}} for the matched surrogate test, \code{\link[=pick_optima]{pick_optima()}}
+for per-window optima, and \code{vignette("wphase-workflow")} for a complete
+workflow with band-pass filtering.
 }

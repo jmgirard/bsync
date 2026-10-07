@@ -148,6 +148,7 @@ surrogate_results
 | [WCC workflow](https://jmgirard.github.io/bsync/articles/wcc-workflow.html) | WCC pipeline: optima, LAI, tidy interface, aggregate statistics |
 | [WDTW workflow](https://jmgirard.github.io/bsync/articles/wdtw-workflow.html) | WDTW pipeline: time-warped alignment, optima extraction |
 | [WGC workflow](https://jmgirard.github.io/bsync/articles/wgranger-workflow.html) | Windowed Granger Causality: directional F-statistic and p-value plots |
+| [Phase synchrony workflow](https://jmgirard.github.io/bsync/articles/wphase-workflow.html) | Windowed phase synchrony: band-pass filtering, phase-locking values, and a surrogate test |
 | [Choosing parameters](https://jmgirard.github.io/bsync/articles/choosing-parameters.html) | `suggest_wcc_params()`, `synchrony_multiverse()`, `autotune_wcc()` |
 | [Surrogate testing](https://jmgirard.github.io/bsync/articles/surrogate-testing.html) | Circular-shift vs. phase-randomization vs. IAAFT vs. segment-shuffling vs. pseudo-dyads; best practices |
 | [Downsampling](https://jmgirard.github.io/bsync/articles/determine-downsampling.html) | PSD-based guidance for choosing a biologically appropriate sample rate |

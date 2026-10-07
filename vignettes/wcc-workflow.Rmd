@@ -338,3 +338,8 @@ dplyr::bind_rows(
   glance(wcc_peak2)
 )
 ```
+
+## See also
+
+- `vignette("wphase-workflow")` for windowed phase synchrony, which offers the same `"peak"`
+  statistic for rhythmic data

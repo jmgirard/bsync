@@ -49,9 +49,21 @@
 #'   between successive windows. (default = `1`)
 #' @param lag_increment A positive integer indicating the number of samples
 #'   between successive lags. (default = `1`)
+#' @param statistic A character string naming how to aggregate the PLV
+#'   surface into a single number. `"mean_plv"` (default) takes the mean PLV
+#'   over **all** windows and lags, so it summarizes the whole surface.
+#'   `"peak"` takes the largest PLV across lags **within each window**, then
+#'   averages those per-window values. This is the best-lag definition that
+#'   [wcc()] uses for its own `"peak"` statistic, applied to PLV.
+#'   It suits a dyad whose lead–lag shifts across windows, where the mean
+#'   over all lags dilutes the lag at which phases lock. Pass the same value
+#'   to [wphase_surrogate()] so that the null distribution matches.
 #' @return A list object of class `"wphase_res"` (a `bsync_surface`) with
 #'   `results_df` (columns `i`, `tau`, `plv`, `rel_phase`), `aggregate`
-#'   (`mean_plv`), and `settings`.
+#'   (named `mean_plv` or `peak`, after `statistic`), and `settings`.
+#' @seealso [wphase_surrogate()] for the matched surrogate test, [pick_optima()]
+#'   for per-window optima, and `vignette("wphase-workflow")` for a complete
+#'   workflow with band-pass filtering.
 #' @examples
 #' # Windowed phase synchrony on the bundled simulated dyad
 #' wphase_res <- wphase(
@@ -61,6 +73,10 @@
 #'   lag_max = 10
 #' )
 #' wphase_res
+#'
+#' # Average the best-lag PLV of each window instead
+#' wphase(sim_dyad$x_A, sim_dyad$x_B, window_size = 96, lag_max = 10, statistic = "peak")
+#' @md
 #' @export
 wphase <- function(
   x,
@@ -69,8 +85,10 @@ wphase <- function(
   window_size,
   lag_max,
   window_increment = 1,
-  lag_increment = 1
+  lag_increment = 1,
+  statistic = c("mean_plv", "peak")
 ) {
+  statistic <- match.arg(statistic)
   validate_series(x, y, time)
   validate_window_params(
     window_size, window_increment,
@@ -92,22 +110,27 @@ wphase <- function(
     window_increment = window_increment,
     lag_max = lag_max,
     lag_increment = lag_increment,
-    statistic = "mean_plv",
+    statistic = statistic,
     has_time = !is.null(time)
   )
 
-  results_df <- create_wphase_df(
+  surface <- create_wphase_df(
     x = x,
     y = y,
     time = time,
     settings = settings
   )
+  results_df <- surface$results_df
 
-  agg_val <- wphase_aggregate(results_df$plv)
+  agg_val <- wphase_aggregate(
+    plv = results_df$plv,
+    window_id = surface$window_id,
+    statistic = statistic
+  )
 
   out <- list(
     results_df = results_df,
-    aggregate  = stats::setNames(agg_val, "mean_plv"),
+    aggregate  = stats::setNames(agg_val, statistic),
     settings   = settings
   )
 
@@ -129,12 +152,21 @@ print.wphase_res <- function(x, ...) {
 
   cli::cli_h1("Windowed Phase Synchrony Analysis")
 
-  cli::cli_dl(c(
-    "Total Windows" = "{n_windows}",
-    "Total Lags Tested" = "{n_lags}",
-    "Window Size" = "{s$window_size}",
-    "Max Lag" = "{s$lag_max}",
-    "Mean PLV" = "{round(x$aggregate[[1]], 4)}"
+  cli::cli_dl(stats::setNames(
+    c(
+      "{n_windows}",
+      "{n_lags}",
+      "{s$window_size}",
+      "{s$lag_max}",
+      "{round(x$aggregate[[1]], 4)}"
+    ),
+    c(
+      "Total Windows",
+      "Total Lags Tested",
+      "Window Size",
+      "Max Lag",
+      wphase_agg_label(s$statistic)
+    )
   ))
 
   invisible(x)
@@ -204,10 +236,31 @@ create_wphase_df <- function(x, y, time = NULL, settings) {
     results_df$i <- time[results_df$i]
   }
 
-  results_df
+  # window_id holds the grid positions from before the time mapping, so that
+  # tied timestamps cannot merge two windows (wphase_surrogate() groups by the
+  # same grid positions).
+  list(results_df = results_df, window_id = grid$i_vals)
 }
 
+# Console label of the aggregate, shared by the wphase_res and wphase_surr
+# print methods.
 #' @noRd
-wphase_aggregate <- function(plv) {
-  base::mean(plv, na.rm = TRUE)
+wphase_agg_label <- function(statistic) {
+  if (identical(statistic, "peak")) "Mean Peak PLV" else "Mean PLV"
+}
+
+# The one aggregate for the observed surface and every surrogate (Invariant
+# 2). "mean_plv": mean PLV over all windows and lags. "peak": per-window
+# maximum PLV across lags, averaged over windows -- the wcc "peak" definition
+# (wcc_aggregate()) applied to PLV. window_id: grid window positions.
+#' @noRd
+wphase_aggregate <- function(plv, window_id, statistic = "mean_plv") {
+  if (statistic == "mean_plv") {
+    base::mean(plv, na.rm = TRUE)
+  } else {
+    peaks <- tapply(plv, window_id, function(v) {
+      if (all(is.na(v))) NA_real_ else max(v, na.rm = TRUE)
+    })
+    base::mean(peaks, na.rm = TRUE)
+  }
 }
