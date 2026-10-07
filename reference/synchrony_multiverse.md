@@ -106,7 +106,8 @@ A \`bsync_multiverse\` object with:
   \[tibble::tibble()\] with one row per parameter cell: specification
   columns, \`window_size\`/\`lag_max\`/\`window_increment\` (samples),
   \`n_windows\`, \`observed\`, \`null_mean\`, \`null_sd\`, \`es\`, \`p\`
-  (plus \`es_yx\`/\`p_yx\` for Granger).
+  (x -\> y for Granger, plus \`observed_yx\`, \`null_mean_yx\`,
+  \`null_sd_yx\`, \`es_yx\`, and \`p_yx\` for y -\> x).
 
 - \`\$settings\`:
 
@@ -115,10 +116,16 @@ A \`bsync_multiverse\` object with:
 - \`\$robustness\`:
 
   Named list: \`n_cells\` (total specifications in the grid),
-  \`n_valid\` (cells that produced a computable ES; the rest were
-  skipped as too short), \`n_significant\`, \`pct_significant\` (over
-  \`n_valid\`), \`median_es\`, \`iqr_es\`, \`sign_consistent\`
-  (proportion of significant cells with ES \> 0).
+  \`n_valid\` (cells with a computable ES in that direction; the rest
+  were skipped as too short or gave an NA ES), \`n_significant\`,
+  \`pct_significant\` (over \`n_valid\`), \`median_es\`, \`iqr_es\`,
+  \`sign_consistent\` (proportion of significant cells with ES \> 0).
+  For Granger it summarizes x -\> y.
+
+- \`\$robustness_yx\`:
+
+  Granger only: the same fields as \`\$robustness\`, computed from
+  \`es_yx\` and \`p_yx\` (y -\> x).
 
 ## Details
 
@@ -142,7 +149,11 @@ evidence for synchrony.
 \*\*Granger direction.\*\* When \`estimator = "wgranger"\`, two sets of
 statistics are returned: primary (\`observed\`, \`null_mean\`,
 \`null_sd\`, \`es\`, \`p\`) refer to x -\> y; additional columns
-\`es_yx\` and \`p_yx\` give y -\> x.
+\`observed_yx\`, \`null_mean_yx\`, \`null_sd_yx\`, \`es_yx\`, and
+\`p_yx\` give y -\> x. \`\$robustness\` summarizes x -\> y and
+\`\$robustness_yx\` summarizes y -\> x. The \`print()\`, \`summary()\`,
+\`glance()\`, and \`plot()\` methods report x -\> y by default; pass
+\`direction = "yx"\` to report y -\> x.
 
 ## See also
 

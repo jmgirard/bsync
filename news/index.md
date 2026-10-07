@@ -2,6 +2,33 @@
 
 ## bsync (development version)
 
+### Both Granger directions in multiverse summaries and plots
+
+- `synchrony_multiverse(estimator = "wgranger")` now also returns
+  `$robustness_yx`, the robustness summary of the y -\> x direction. It
+  has the same fields as `$robustness`, which stays x -\> y.
+- [`print()`](https://rdrr.io/r/base/print.html),
+  [`summary()`](https://rdrr.io/r/base/summary.html),
+  [`glance()`](https://generics.r-lib.org/reference/glance.html), and
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) for
+  `bsync_multiverse` objects take a `direction` argument: `"xy"` (x -\>
+  y, the default) or `"yx"` (y -\> x). Before, these methods reported x
+  -\> y only. For a Granger result,
+  [`print()`](https://rdrr.io/r/base/print.html) and
+  [`summary()`](https://rdrr.io/r/base/summary.html) show a “Direction”
+  line, [`glance()`](https://generics.r-lib.org/reference/glance.html)
+  has a `direction` column, and the plot title names the direction.
+  `"yx"` on a WCC or WDTW result is an error. WCC and WDTW results,
+  printed summaries,
+  [`glance()`](https://generics.r-lib.org/reference/glance.html)
+  columns, and plots do not change.
+- A Granger result made before this change has no `$robustness_yx`. With
+  `direction = "yx"`, the methods compute it from the grid’s `es_yx` and
+  `p_yx` columns.
+- [`summary()`](https://rdrr.io/r/base/summary.html) of a
+  `bsync_multiverse` object prints “ES range: none” when no cell has a
+  computable ES, in place of `[Inf, -Inf]` and a warning.
+
 ### Add-one surrogate p-values and the p \<= .05 rule (changes reported results)
 
 - [`wcc_surrogate()`](https://jmgirard.github.io/bsync/reference/wcc_surrogate.md),

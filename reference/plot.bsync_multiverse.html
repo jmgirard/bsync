@@ -5,10 +5,10 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Plot a synchrony multiverse specification curve — plot.bsync_multiverse"><meta name="description" content="Draws a Simonsohn-style specification curve for a `bsync_multiverse` object.
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Plot a synchrony multiverse specification curve — plot.bsync_multiverse"><meta name="description" content="Draws a Simonsohn-style specification curve for a bsync_multiverse object.
 The top panel shows effect sizes sorted from smallest to largest, with
 significant cells (p &amp;lt;= .05) highlighted. The bottom panel is a choice
-dashboard showing which analytic choices each specification used."><meta property="og:description" content="Draws a Simonsohn-style specification curve for a `bsync_multiverse` object.
+dashboard showing which analytic choices each specification used."><meta property="og:description" content="Draws a Simonsohn-style specification curve for a bsync_multiverse object.
 The top panel shows effect sizes sorted from smallest to largest, with
 significant cells (p &amp;lt;= .05) highlighted. The bottom panel is a choice
 dashboard showing which analytic choices each specification used."></head><body>
@@ -61,7 +61,7 @@ dashboard showing which analytic choices each specification used."></head><body>
     </div>
 
     <div class="ref-description section level2">
-    <p>Draws a Simonsohn-style specification curve for a `bsync_multiverse` object.
+    <p>Draws a Simonsohn-style specification curve for a <code>bsync_multiverse</code> object.
 The top panel shows effect sizes sorted from smallest to largest, with
 significant cells (p &lt;= .05) highlighted. The bottom panel is a choice
 dashboard showing which analytic choices each specification used.</p>
@@ -77,6 +77,7 @@ dashboard showing which analytic choices each specification used.</p>
 <span>  active_color <span class="op">=</span> <span class="st">"#2166AC"</span>,</span>
 <span>  point_size <span class="op">=</span> <span class="fl">1.5</span>,</span>
 <span>  top_frac <span class="op">=</span> <span class="fl">0.55</span>,</span>
+<span>  direction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"xy"</span>, <span class="st">"yx"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -86,28 +87,36 @@ dashboard showing which analytic choices each specification used.</p>
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>A `bsync_multiverse` object.</p></dd>
+<dd><p>A <code>bsync_multiverse</code> object.</p></dd>
 
 
 <dt id="arg-sig-color">sig_color<a class="anchor" aria-label="anchor" href="#arg-sig-color"></a></dt>
-<dd><p>Color for significant cells (p &lt;= .05). Default: `"#2166AC"`.</p></dd>
+<dd><p>Color for significant cells (p &lt;= .05). Default: <code>"#2166AC"</code>.</p></dd>
 
 
 <dt id="arg-insig-color">insig_color<a class="anchor" aria-label="anchor" href="#arg-insig-color"></a></dt>
-<dd><p>Color for non-significant cells. Default: `"grey60"`.</p></dd>
+<dd><p>Color for non-significant cells. Default: <code>"grey60"</code>.</p></dd>
 
 
 <dt id="arg-active-color">active_color<a class="anchor" aria-label="anchor" href="#arg-active-color"></a></dt>
-<dd><p>Fill for active choice tiles. Default: `"#2166AC"`.</p></dd>
+<dd><p>Fill for active choice tiles. Default: <code>"#2166AC"</code>.</p></dd>
 
 
 <dt id="arg-point-size">point_size<a class="anchor" aria-label="anchor" href="#arg-point-size"></a></dt>
-<dd><p>Size of ES points. Default: `1.5`.</p></dd>
+<dd><p>Size of ES points. Default: <code>1.5</code>.</p></dd>
 
 
 <dt id="arg-top-frac">top_frac<a class="anchor" aria-label="anchor" href="#arg-top-frac"></a></dt>
 <dd><p>Fraction of plot height allocated to the ES panel.
-Default: `0.55`.</p></dd>
+Default: <code>0.55</code>.</p></dd>
+
+
+<dt id="arg-direction">direction<a class="anchor" aria-label="anchor" href="#arg-direction"></a></dt>
+<dd><p>For a Granger result (<code>estimator = "wgranger"</code>), the
+direction to plot: <code>"xy"</code> (x -&gt; y, the default) or <code>"yx"</code> (y -&gt; x). The
+title names the direction. Other estimators have one direction only, so
+<code>"yx"</code> is an error for them. Pass it by name (<code>direction = "yx"</code>): it
+comes after the color and size arguments.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -116,12 +125,12 @@ Default: `0.55`.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns `x` invisibly; draws to the active graphics device.</p>
+    <p>Returns <code>x</code> invisibly; draws to the active graphics device.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>[synchrony_multiverse()], [tidy.bsync_multiverse()],
-  [glance.bsync_multiverse()]</p></div>
+    <div class="dont-index"><p><code><a href="synchrony_multiverse.html">synchrony_multiverse()</a></code>, <code><a href="tidy.bsync_multiverse.html">tidy.bsync_multiverse()</a></code>,
+<code><a href="glance.bsync_multiverse.html">glance.bsync_multiverse()</a></code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

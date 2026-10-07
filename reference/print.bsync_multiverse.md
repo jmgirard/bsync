@@ -6,14 +6,20 @@ Print method for bsync_multiverse objects
 
 ``` r
 # S3 method for class 'bsync_multiverse'
-print(x, ...)
+print(x, direction = c("xy", "yx"), ...)
 ```
 
 ## Arguments
 
 - x:
 
-  A \`bsync_multiverse\` object.
+  A `bsync_multiverse` object.
+
+- direction:
+
+  For a Granger result (`estimator = "wgranger"`), the direction to
+  report: `"xy"` (x -\> y, the default) or `"yx"` (y -\> x). Other
+  estimators have one direction only, so `"yx"` is an error for them.
 
 - ...:
 
@@ -21,4 +27,4 @@ print(x, ...)
 
 ## Value
 
-Returns \`x\` invisibly.
+Returns `x` invisibly.

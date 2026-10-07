@@ -232,9 +232,14 @@ head(tidy(mv))
 
 [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
 is not WCC-only. Pass `estimator = "wdtw"` or `estimator = "wgranger"`
-to sweep the same grid for those estimators. For Granger, the result
-carries two effect-size columns (`es_xy` and `es_yx`, one per causal
-direction) and no lag axis:
+to sweep the same grid for those estimators. For Granger, the grid has
+no lag axis and carries one effect size and one p-value per causal
+direction: `es` and `p` are x -\> y, and `es_yx` and `p_yx` are y -\> x.
+[`print()`](https://rdrr.io/r/base/print.html),
+[`summary()`](https://rdrr.io/r/base/summary.html),
+[`glance()`](https://generics.r-lib.org/reference/glance.html), and
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) report x -\> y
+by default. Pass `direction = "yx"` to report y -\> x:
 
 ``` r
 
@@ -250,11 +255,17 @@ mv_g <- synchrony_multiverse(
 )
 
 glance(mv_g)
-#> # A tibble: 1 × 9
-#>   estimator n_cells n_valid n_significant pct_significant median_es iqr_es
-#>   <chr>       <int>   <int>         <int>           <dbl>     <dbl>  <dbl>
-#> 1 wgranger        3       3             0               0     0.458  0.220
-#> # ℹ 2 more variables: sign_consistent <dbl>, n_surrogates <int>
+#> # A tibble: 1 × 10
+#>   estimator direction n_cells n_valid n_significant pct_significant median_es
+#>   <chr>     <chr>       <int>   <int>         <int>           <dbl>     <dbl>
+#> 1 wgranger  xy              3       3             0               0     0.458
+#> # ℹ 3 more variables: iqr_es <dbl>, sign_consistent <dbl>, n_surrogates <int>
+glance(mv_g, direction = "yx")
+#> # A tibble: 1 × 10
+#>   estimator direction n_cells n_valid n_significant pct_significant median_es
+#>   <chr>     <chr>       <int>   <int>         <int>           <dbl>     <dbl>
+#> 1 wgranger  yx              3       3             0               0     0.417
+#> # ℹ 3 more variables: iqr_es <dbl>, sign_consistent <dbl>, n_surrogates <int>
 ```
 
 ## 3. Multi-Dyad Parameter Selection: `autotune_wcc()`

@@ -6,14 +6,20 @@ Summary method for bsync_multiverse objects
 
 ``` r
 # S3 method for class 'bsync_multiverse'
-summary(object, ...)
+summary(object, direction = c("xy", "yx"), ...)
 ```
 
 ## Arguments
 
 - object:
 
-  A \`bsync_multiverse\` object.
+  A `bsync_multiverse` object.
+
+- direction:
+
+  For a Granger result (`estimator = "wgranger"`), the direction to
+  report: `"xy"` (x -\> y, the default) or `"yx"` (y -\> x). Other
+  estimators have one direction only, so `"yx"` is an error for them.
 
 - ...:
 
@@ -21,4 +27,4 @@ summary(object, ...)
 
 ## Value
 
-Returns \`object\` invisibly.
+Returns `object` invisibly.

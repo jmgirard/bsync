@@ -67,7 +67,7 @@ sign-consistency.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'bsync_multiverse'</span></span>
-<span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">x</span>, direction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"xy"</span>, <span class="st">"yx"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -75,7 +75,13 @@ sign-consistency.</p>
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>A `bsync_multiverse` object from [synchrony_multiverse()].</p></dd>
+<dd><p>A <code>bsync_multiverse</code> object from <code><a href="synchrony_multiverse.html">synchrony_multiverse()</a></code>.</p></dd>
+
+
+<dt id="arg-direction">direction<a class="anchor" aria-label="anchor" href="#arg-direction"></a></dt>
+<dd><p>For a Granger result (<code>estimator = "wgranger"</code>), the
+direction to summarize: <code>"xy"</code> (x -&gt; y, the default) or <code>"yx"</code> (y -&gt; x).
+Other estimators have one direction only, so <code>"yx"</code> is an error for them.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -84,12 +90,13 @@ sign-consistency.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A one-row [tibble::tibble()].</p>
+    <p>A one-row <code><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble()</a></code>. For a Granger result, a <code>direction</code>
+column after <code>estimator</code> names the direction summarized.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>[tidy.bsync_multiverse()], [as_tibble.bsync_multiverse()],
-  [synchrony_multiverse()]</p></div>
+    <div class="dont-index"><p><code><a href="tidy.bsync_multiverse.html">tidy.bsync_multiverse()</a></code>, <code><a href="as_tibble.bsync_multiverse.html">as_tibble.bsync_multiverse()</a></code>,
+<code><a href="synchrony_multiverse.html">synchrony_multiverse()</a></code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

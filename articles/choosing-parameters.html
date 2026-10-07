@@ -304,9 +304,13 @@ significant regardless of the specific hyperparameters.</p>
 </h3>
 <p><code><a href="../reference/synchrony_multiverse.html">synchrony_multiverse()</a></code> is not WCC-only. Pass
 <code>estimator = "wdtw"</code> or <code>estimator = "wgranger"</code>
-to sweep the same grid for those estimators. For Granger, the result
-carries two effect-size columns (<code>es_xy</code> and
-<code>es_yx</code>, one per causal direction) and no lag axis:</p>
+to sweep the same grid for those estimators. For Granger, the grid has
+no lag axis and carries one effect size and one p-value per causal
+direction: <code>es</code> and <code>p</code> are x -&gt; y, and
+<code>es_yx</code> and <code>p_yx</code> are y -&gt; x.
+<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code>, and
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> report x -&gt; y by default. Pass
+<code>direction = "yx"</code> to report y -&gt; x:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
 <span><span class="va">mv_g</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synchrony_multiverse.html">synchrony_multiverse</a></span><span class="op">(</span></span>
@@ -320,11 +324,17 @@ carries two effect-size columns (<code>es_xy</code> and
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mv_g</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 9</span></span></span>
-<span><span class="co">#&gt;   estimator n_cells n_valid n_significant pct_significant median_es iqr_es</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wgranger        3       3             0               0     0.458  0.220</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: sign_consistent &lt;dbl&gt;, n_surrogates &lt;int&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 10</span></span></span>
+<span><span class="co">#&gt;   estimator direction n_cells n_valid n_significant pct_significant median_es</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wgranger  xy              3       3             0               0     0.458</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: iqr_es &lt;dbl&gt;, sign_consistent &lt;dbl&gt;, n_surrogates &lt;int&gt;</span></span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mv_g</span>, direction <span class="op">=</span> <span class="st">"yx"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 10</span></span></span>
+<span><span class="co">#&gt;   estimator direction n_cells n_valid n_significant pct_significant median_es</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wgranger  yx              3       3             0               0     0.417</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: iqr_es &lt;dbl&gt;, sign_consistent &lt;dbl&gt;, n_surrogates &lt;int&gt;</span></span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
