@@ -26,7 +26,8 @@ surr <- generate_surrogate_circular(sim_dyad$x_B, n_surrogates = 100)
 dim(surr)
 }
 \seealso{
-\code{\link{generate_surrogate_phase}} and
-  \code{\link{generate_surrogate_iaaft}} for the other within-dyad nulls;
+\code{\link{generate_surrogate_phase}},
+  \code{\link{generate_surrogate_iaaft}}, and
+  \code{\link{generate_surrogate_segment}} for the other within-dyad nulls;
   \code{\link{generate_surrogate_pseudo}} for the between-dyad null.
 }

@@ -8,7 +8,8 @@
 #   - Accepts a prebuilt grid (from build_surface_grid()) and a prebuilt
 #     y_surrogates matrix so both can be hoisted out of an outer parameter-cell
 #     loop in M6 (surrogates depend only on surrogate_method, not on
-#     window_size/lag_max/increment).
+#     window_size/lag_max/increment, except segment surrogates, whose
+#     segment size comes from window_size and lag_max; M015).
 #   - aggregate-only path: compute_fn(x, y_col, grid) returns a numeric scalar
 #     or named numeric — never a full results_df. The heavy per-cell data.frame
 #     assembly (create_*_df) is not called on the surrogate path (Invariant 7).

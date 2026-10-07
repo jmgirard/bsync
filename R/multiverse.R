@@ -7,7 +7,8 @@
 #  - Grid axes in seconds, converted per-cell to samples (window_size >= 1,
 #    lag_max capped at floor(window_size/2))
 #  - Surrogate reuse: one y_surrogates matrix per unique surrogate_method,
-#    reused across every cell sharing it (efficiency seam from M5)
+#    reused across every cell sharing it (efficiency seam from M5); for
+#    "segment", one matrix per distinct segment size (M015, D-004)
 #  - ES polarity: WCC/Granger = upper-tail (higher better), WDTW = lower-tail
 #  - Granger has two directional statistics (f_xy / f_yx). The columns
 #    observed/null_mean/null_sd/es/p hold x -> y, and the matching _yx
@@ -36,6 +37,26 @@ warn_few_surrogates <- function(n_surrogates) {
       "i" = "Use {.code n_surrogates >= 19}, and >= 1000 for reporting."
     ),
     class = "bsync_few_surrogates"
+  )
+}
+
+# Segment cells (D-004) use non-overlapping windows aligned to the segments.
+# The class lets autotune_wcc() give this message once instead of once per
+# dyad.
+inform_segment_aligned <- function(is_granger) {
+  cli::cli_inform(
+    c(
+      "Segment cells use non-overlapping windows aligned to the segments.",
+      "i" = if (is_granger) {
+        "Each segment is one window, and {.arg increment_pct} does not \\
+        apply to segment cells."
+      } else {
+        "Each segment is {.code window_size + 2 * lag_max} samples, so that \\
+        every lagged window lies inside one segment, and \\
+        {.arg increment_pct} does not apply to segment cells."
+      }
+    ),
+    class = "bsync_segment_aligned"
   )
 }
 
@@ -81,14 +102,17 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #' @details
 #' **Grid construction.** Each vector argument (`window_sec`, `lag_sec`,
 #' `increment_pct`, `statistic`, `surrogate_method`) is crossed into a full
-#' parameter grid. Seconds are converted to samples per cell; `lag_max` is
+#' parameter grid, except that \code{"segment"} cells are not crossed with
+#' `increment_pct` (see `surrogate_method`). Seconds are converted to samples
+#' per cell; `lag_max` is
 #' hard-capped at `floor(window_size / 2)` to preserve statistical reliability.
-#' Cells where the series is too short are silently skipped and appear as `NA`
-#' rows in the output grid.
+#' Cells where the series is too short are skipped with a message and appear
+#' as `NA` rows in the output grid.
 #'
 #' **Surrogate reuse.** One surrogate matrix is generated per unique
 #' `surrogate_method` and reused across every cell sharing that method; surrogate
-#' cost does not multiply by grid size.
+#' cost does not multiply by grid size. For \code{"segment"}, one matrix is
+#' generated per distinct segment size.
 #'
 #' **Effect size polarity.** For WCC and Granger, higher values indicate stronger
 #' synchrony (upper-tail test): `ES = (obs - null_mean) / null_sd`. For WDTW,
@@ -124,7 +148,21 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'   exactly and the value distribution closely;
 #'   \code{\link{generate_surrogate_iaaft}} with its default
 #'   \code{match = "spectrum"}). \code{"iaaft"} needs \code{y} without
-#'   missing values.
+#'   missing values. \code{"segment"} (\code{\link{generate_surrogate_segment}})
+#'   reorders segments of \code{y}. A segment cell uses segments of
+#'   \code{window_size + 2 * lag_max} samples (\code{window_size} for
+#'   \code{"wgranger"}) and steps its windows one segment at a time, so that
+#'   every lagged window lies inside one segment. \code{increment_pct} does
+#'   not apply to segment cells: the grid has one segment row per window,
+#'   lag, and statistic, with \code{increment_pct} \code{NA}. A segment cell
+#'   with fewer than 4 segments cannot reach p <= .05, so it is skipped with
+#'   a warning, as is a cell whose segment is a single sample. A cell with
+#'   k segments uses \code{min(n_surrogates, k! - 1)}
+#'   surrogates, because k segments have k! - 1 orders other than the
+#'   original: a cell with 4 segments uses \code{min(n_surrogates, 23)}
+#'   surrogates, and 5 and 6 segments allow 119 and 719. The samples after
+#'   the last whole segment stay in place (see
+#'   \code{\link{generate_surrogate_segment}}).
 #' @param n_surrogates Single positive integer; number of surrogates per cell.
 #'   Default is `100`. Use >= 1000 for reporting. A cell is significant at
 #'   p <= .05. Below 19 the call warns, because the smallest possible
@@ -155,7 +193,8 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'   }
 #' @seealso [autotune_wcc()], [suggest_wcc_params()], [plot.bsync_multiverse()],
 #'   [tidy.bsync_multiverse()], [glance.bsync_multiverse()];
-#'   \code{\link{generate_surrogate_iaaft}} for the \code{"iaaft"} method
+#'   \code{\link{generate_surrogate_iaaft}} for the \code{"iaaft"} method;
+#'   \code{\link{generate_surrogate_segment}} for the \code{"segment"} method
 #' @examples
 #' \donttest{
 #' # Sweep a seconds-specified window/lag grid and test each cell vs. a null.
@@ -197,7 +236,7 @@ synchrony_multiverse <- function(
   )
   surrogate_method <- match.arg(
     surrogate_method,
-    choices = c("phase", "circular", "iaaft"), several.ok = TRUE
+    choices = c("phase", "circular", "iaaft", "segment"), several.ok = TRUE
   )
 
   # --- Input validation -------------------------------------------------
@@ -272,20 +311,56 @@ synchrony_multiverse <- function(
     )
   }
 
+  # Segment cells step one segment at a time, so increment_pct does not
+  # apply to them: keep the segment rows of the first increment_pct value
+  # only, one per window, lag, and statistic.
+  is_seg <- grid_params$surrogate_method == "segment"
+  grid_params <- grid_params[
+    !is_seg | grid_params$increment_pct == increment_pct[1], ,
+    drop = FALSE
+  ]
+  grid_params$increment_pct[grid_params$surrogate_method == "segment"] <-
+    NA_real_
+  rownames(grid_params) <- NULL
+  is_seg <- grid_params$surrogate_method == "segment"
+  n_cells <- nrow(grid_params)
+
+  # --- Convert seconds -> samples per cell ------------------------------
+  w_samp_all <- pmax(1L, round(grid_params$window_sec * sample_rate))
+  l_samp_all <- if (is_granger) {
+    rep(NA_integer_, n_cells)
+  } else {
+    as.integer(pmin(
+      pmax(1L, round(grid_params$lag_sec * sample_rate)),
+      floor(w_samp_all / 2L)
+    ))
+  }
+  # Segment cells (D-004): every lagged window lies inside one segment when
+  # the segment is window + 2 * lag samples (the window for Granger, whose
+  # grid has no lags) and the windows step one segment at a time.
+  seg_size_all <- if (is_granger) w_samp_all else w_samp_all + 2L * l_samp_all
+  inc_samp_all <- ifelse(
+    is_seg,
+    seg_size_all,
+    pmax(1L, round(w_samp_all * grid_params$increment_pct))
+  )
+  # Below 4 segments, at most 5 orders exist, so no cell can reach p <= .05.
+  # A segment needs at least 2 samples (a 1-sample window gives 1).
+  seg_skip <- is_seg & (seg_size_all < 2L | (n %/% seg_size_all) < 4L)
+
+  if (any(is_seg & !seg_skip)) {
+    inform_segment_aligned(is_granger)
+  }
+
   # --- Pre-generate one surrogate matrix per surrogate_method -----------
   # For circular, we use the largest lag_max in the grid as the minimum shift
   # (more conservative; valid for all cells). For Granger with no lag_sec,
   # use n/4 as a safe default.
-  unique_methods <- unique(grid_params$surrogate_method)
+  unique_methods <- setdiff(unique(grid_params$surrogate_method), "segment")
 
   if (!is_granger) {
     # Largest lag_max across the grid (in samples, pre-capped at window/2)
-    max_lag_samp <- max(vapply(seq_len(nrow(grid_params)), function(ci) {
-      w_samp <- max(1L, round(grid_params$window_sec[ci] * sample_rate))
-      l_raw <- max(1L, round(grid_params$lag_sec[ci] * sample_rate))
-      min(l_raw, floor(w_samp / 2L))
-    }, numeric(1)))
-    circ_lag_max <- max_lag_samp
+    circ_lag_max <- as.numeric(max(l_samp_all))
   } else {
     circ_lag_max <- max(1L, round(n / 4L))
   }
@@ -325,9 +400,25 @@ synchrony_multiverse <- function(
   })
   names(surr_matrices) <- unique_methods
 
-  # --- Evaluate each cell -----------------------------------------------
-  n_cells <- nrow(grid_params)
+  # One segment matrix per distinct segment size of the cells that run. The
+  # tail and the k! - 1 cap on the number of orders (23, 119, 719, 5039, and
+  # 40319 for 4 to 8 segments) are stated in the docs, so the generator's
+  # messages about them are muffled here.
+  seg_sizes <- unique(seg_size_all[is_seg & !seg_skip])
+  seg_matrices <- lapply(seg_sizes, function(s) {
+    withCallingHandlers(
+      generate_surrogate_segment(
+        as.vector(y),
+        segment_size = s,
+        n_surrogates = n_surrogates
+      ),
+      bsync_segment_tail = function(m) invokeRestart("muffleMessage"),
+      bsync_segment_all_orders = function(m) invokeRestart("muffleMessage")
+    )
+  })
+  names(seg_matrices) <- as.character(seg_sizes)
 
+  # --- Evaluate each cell -----------------------------------------------
   window_size_samp <- integer(n_cells)
   lag_max_samp <- integer(n_cells)
   window_inc_samp <- integer(n_cells)
@@ -348,25 +439,37 @@ synchrony_multiverse <- function(
   }
 
   for (ci in seq_len(n_cells)) {
-    w_sec <- grid_params$window_sec[ci]
-    l_sec <- grid_params$lag_sec[ci]
-    inc_pct <- grid_params$increment_pct[ci]
     s_method <- grid_params$surrogate_method[ci]
     stat <- grid_params$statistic[ci]
-
-    # Convert seconds -> samples
-    w_samp <- max(1L, round(w_sec * sample_rate))
-    l_samp <- if (is_granger) {
-      NA_integer_
-    } else {
-      l_raw <- max(1L, round(l_sec * sample_rate))
-      as.integer(min(l_raw, floor(w_samp / 2L)))
-    }
-    inc_samp <- max(1L, round(w_samp * inc_pct))
+    # Doubles, as on main before the vectorized conversion (grid types kept)
+    w_samp <- w_samp_all[ci]
+    l_samp <- l_samp_all[ci]
+    inc_samp <- inc_samp_all[ci]
 
     window_size_samp[ci] <- w_samp
-    lag_max_samp[ci] <- if (is_granger) NA_integer_ else l_samp
+    lag_max_samp[ci] <- l_samp
     window_inc_samp[ci] <- inc_samp
+
+    if (seg_skip[ci]) {
+      cli::cli_warn(
+        c(
+          if (is_granger) {
+            "Skipped a segment cell with {.arg window_size} = {w_samp} \\
+            samples."
+          } else {
+            "Skipped a segment cell with {.arg window_size} = {w_samp} and \\
+            {.arg lag_max} = {l_samp} samples."
+          },
+          "i" = if (seg_size_all[ci] < 2L) {
+            "Its segment size of {seg_size_all[ci]} sample is below 2."
+          } else {
+            "Its segments of {seg_size_all[ci]} samples give fewer than 4 \\
+            segments, so the cell cannot reach p <= .05."
+          }
+        ),
+        class = "bsync_segment_skipped"
+      )
+    }
 
     # Guard against short series (build_surface_grid would abort)
     min_n <- if (is_granger) {
@@ -374,7 +477,7 @@ synchrony_multiverse <- function(
     } else {
       (w_samp - 1L) + 2L * l_samp + inc_samp
     }
-    if (n < min_n) {
+    if (seg_skip[ci] || n < min_n) {
       skipped_vec[ci] <- TRUE
       observed_vec[ci] <- NA_real_
       null_mean_vec[ci] <- NA_real_
@@ -392,7 +495,11 @@ synchrony_multiverse <- function(
       next
     }
 
-    y_surr <- surr_matrices[[s_method]]
+    y_surr <- if (s_method == "segment") {
+      seg_matrices[[as.character(seg_size_all[ci])]]
+    } else {
+      surr_matrices[[s_method]]
+    }
 
     cell <- tryCatch(
       {
@@ -433,8 +540,9 @@ synchrony_multiverse <- function(
     }
   }
 
-  # Warn about skipped cells
-  n_skipped <- sum(skipped_vec)
+  # Warn about skipped cells (segment cells with too few segments have their
+  # own warning above)
+  n_skipped <- sum(skipped_vec & !seg_skip)
   if (n_skipped > 0) {
     cli::cli_alert_warning(
       "{n_skipped} cell{?s} skipped: series too short for the requested parameters."

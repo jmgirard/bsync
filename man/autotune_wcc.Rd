@@ -43,9 +43,17 @@ starting range.}
 \item{statistic}{Character; WCC aggregate statistic. Default `"mean_abs_z"`.}
 
 \item{surrogate_method}{Character; surrogate generator: \code{"phase"}
-(default), \code{"circular"}, or \code{"iaaft"}. \code{"iaaft"} needs
-every \code{y} without missing values. See
-\code{\link{synchrony_multiverse}}.}
+(default), \code{"circular"}, \code{"iaaft"}, or \code{"segment"}.
+\code{"iaaft"} needs every \code{y} without missing values. A
+\code{"segment"} cell uses segments of \code{window_size + 2 * lag_max}
+samples and steps its windows one segment at a time, so
+\code{increment_pct} does not apply to it. A segment cell with fewer
+than 4 segments is skipped with a warning. A cell with k segments uses
+\code{min(n_surrogates, k! - 1)} surrogates, so a cell with 4 segments
+uses \code{min(n_surrogates, 23)}. The default \code{lag_sec} is crossed
+with every window, so a segment is not always twice the window. See
+\code{\link{synchrony_multiverse}} and
+\code{\link{generate_surrogate_segment}}.}
 
 \item{n_surrogates}{Single positive integer; surrogates per cell per dyad.
 Default `100`. Increase to >= 1000 for reporting. Below 19 the call
@@ -150,5 +158,6 @@ tuned
 \seealso{
 [synchrony_multiverse()], [suggest_wcc_params()],
   [select_specification()]; \code{\link{generate_surrogate_iaaft}} for
-  the \code{"iaaft"} method
+  the \code{"iaaft"} method; \code{\link{generate_surrogate_segment}} for
+  the \code{"segment"} method
 }

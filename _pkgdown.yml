@@ -60,6 +60,7 @@ reference:
       - generate_surrogate_circular
       - generate_surrogate_phase
       - generate_surrogate_iaaft
+      - generate_surrogate_segment
       - generate_surrogate_pseudo
       - generate_pseudo_dyads
       - wcc_surrogate

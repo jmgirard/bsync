@@ -141,7 +141,9 @@ plot.bsync_multiverse <- function(
       dash_rows[[paste(d, v, sep = "_")]] <- data.frame(
         spec_rank = gd$spec_rank,
         y_val = y_pos,
-        active = as.character(gd[[d]]) == as.character(v),
+        # A segment cell has no increment_pct (NA), so no Increment tile is
+        # active for it.
+        active = !is.na(gd[[d]]) & as.character(gd[[d]]) == as.character(v),
         row_label = paste0(dim_labels[d], ": ", v),
         stringsAsFactors = FALSE
       )

@@ -51,7 +51,21 @@ autocorrelation), and/or \code{"iaaft"} (preserves the power spectrum
 exactly and the value distribution closely;
 \code{\link{generate_surrogate_iaaft}} with its default
 \code{match = "spectrum"}). \code{"iaaft"} needs \code{y} without
-missing values.}
+missing values. \code{"segment"} (\code{\link{generate_surrogate_segment}})
+reorders segments of \code{y}. A segment cell uses segments of
+\code{window_size + 2 * lag_max} samples (\code{window_size} for
+\code{"wgranger"}) and steps its windows one segment at a time, so that
+every lagged window lies inside one segment. \code{increment_pct} does
+not apply to segment cells: the grid has one segment row per window,
+lag, and statistic, with \code{increment_pct} \code{NA}. A segment cell
+with fewer than 4 segments cannot reach p <= .05, so it is skipped with
+a warning, as is a cell whose segment is a single sample. A cell with
+k segments uses \code{min(n_surrogates, k! - 1)}
+surrogates, because k segments have k! - 1 orders other than the
+original: a cell with 4 segments uses \code{min(n_surrogates, 23)}
+surrogates, and 5 and 6 segments allow 119 and 719. The samples after
+the last whole segment stay in place (see
+\code{\link{generate_surrogate_segment}}).}
 
 \item{n_surrogates}{Single positive integer; number of surrogates per cell.
 Default is `100`. Use >= 1000 for reporting. A cell is significant at
@@ -97,14 +111,17 @@ autocorrelation inflates.
 \details{
 **Grid construction.** Each vector argument (`window_sec`, `lag_sec`,
 `increment_pct`, `statistic`, `surrogate_method`) is crossed into a full
-parameter grid. Seconds are converted to samples per cell; `lag_max` is
+parameter grid, except that \code{"segment"} cells are not crossed with
+`increment_pct` (see `surrogate_method`). Seconds are converted to samples
+per cell; `lag_max` is
 hard-capped at `floor(window_size / 2)` to preserve statistical reliability.
-Cells where the series is too short are silently skipped and appear as `NA`
-rows in the output grid.
+Cells where the series is too short are skipped with a message and appear
+as `NA` rows in the output grid.
 
 **Surrogate reuse.** One surrogate matrix is generated per unique
 `surrogate_method` and reused across every cell sharing that method; surrogate
-cost does not multiply by grid size.
+cost does not multiply by grid size. For \code{"segment"}, one matrix is
+generated per distinct segment size.
 
 **Effect size polarity.** For WCC and Granger, higher values indicate stronger
 synchrony (upper-tail test): `ES = (obs - null_mean) / null_sd`. For WDTW,
@@ -139,5 +156,6 @@ glance(mv)
 \seealso{
 [autotune_wcc()], [suggest_wcc_params()], [plot.bsync_multiverse()],
   [tidy.bsync_multiverse()], [glance.bsync_multiverse()];
-  \code{\link{generate_surrogate_iaaft}} for the \code{"iaaft"} method
+  \code{\link{generate_surrogate_iaaft}} for the \code{"iaaft"} method;
+  \code{\link{generate_surrogate_segment}} for the \code{"segment"} method
 }

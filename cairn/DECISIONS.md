@@ -50,3 +50,21 @@ too often in the M014 size simulation. The spectrum form kept the nominal
 size. The measured rates are in the M014 milestone record. The
 `"iaaft"` method of `synchrony_multiverse()` and `autotune_wcc()` uses
 this default. The user chose it at the M014 implement stop.
+
+### D-004: Segment surrogates use uniform non-identity orders and aligned windows
+
+2026-10-07, M015 RR01 ingest. `generate_surrogate_segment()` draws
+distinct segment orders uniformly from all orders except the original, so
+a surrogate can leave a segment in place. A segment test is run only with
+windows where every lagged window lies inside one segment: segment size at
+least window + 2 * lag_max with the increment equal to the segment size,
+or segment = window = increment for `wgranger()`. The multiverse forces
+this design for `"segment"` cells. Rationale: the add-one p-value is exact
+only when the surrogate orders and the identity form a group and the
+segments of `y` are exchangeable (phipson2010, p. 6). Orders with no
+segment in place are not such a group, and windows that cross segment
+boundaries keep continuity in the observed series that the surrogates
+lose. Both made the test reject a true null too often. The measured rates
+are in RR01 (`cairn/reviews/archive/RR01-segment-surrogate-size.md`). This
+replaces the M015 plan choice of orders with no segment in place and of
+segment size equal to the window size.
