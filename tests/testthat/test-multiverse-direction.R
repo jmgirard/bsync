@@ -244,3 +244,113 @@ test_that("print() and summary() refuse direction = 'yx' for WCC", {
   expect_bad_direction(print(granger_fixture(), direction = "zz"))
   expect_bad_direction(summary(granger_fixture(), direction = "zz"))
 })
+
+
+# plot() -----------------------------------------------------------------------
+
+test_that("plot data rank cells by es_yx and mark significance from p_yx", {
+  res <- granger_fixture()
+  g <- res$grid
+
+  gd <- multiverse_plot_data(res, "yx")
+  expect_equal(gd$window_sec, g$window_sec[order(g$es_yx)])
+  expect_equal(gd$increment_pct, g$increment_pct[order(g$es_yx)])
+  expect_equal(gd$es, sort(g$es_yx))
+  expect_equal(
+    gd$significant,
+    !is.na(g$p_yx[order(g$es_yx)]) & g$p_yx[order(g$es_yx)] <= 0.05
+  )
+
+  gd_xy <- multiverse_plot_data(res)
+  expect_equal(gd_xy$es, sort(g$es))
+  expect_equal(
+    gd_xy$significant,
+    !is.na(g$p[order(g$es)]) & g$p[order(g$es)] <= 0.05
+  )
+})
+
+test_that("the plot title names the Granger direction only", {
+  res <- granger_fixture()
+  rb <- res$robustness
+  rb_yx <- res$robustness_yx
+  expect_identical(
+    multiverse_plot_title(rb, "x -> y"),
+    paste0(
+      "Synchrony Multiverse (x -> y)  --  ",
+      rb$n_significant,
+      " / ",
+      rb$n_valid,
+      " cells significant  |  Median ES = ",
+      round(rb$median_es, 2)
+    )
+  )
+  expect_identical(
+    multiverse_plot_title(rb_yx, "y -> x"),
+    paste0(
+      "Synchrony Multiverse (y -> x)  --  ",
+      rb_yx$n_significant,
+      " / ",
+      rb_yx$n_valid,
+      " cells significant  |  Median ES = ",
+      round(rb_yx$median_es, 2)
+    )
+  )
+
+  # The plot passes the chosen direction's robustness and label.
+  expect_identical(multiverse_direction(res, "yx")$robustness, rb_yx)
+  expect_identical(multiverse_direction(res, "yx")$label, "y -> x")
+  expect_identical(multiverse_direction(res)$label, "x -> y")
+
+  # A WCC result keeps the title it had before the direction argument.
+  wcc <- small_multiverse("wcc")
+  wcc_dir <- multiverse_direction(wcc)
+  expect_null(wcc_dir$label)
+  expect_identical(
+    multiverse_plot_title(wcc_dir$robustness, wcc_dir$label),
+    paste0(
+      "Synchrony Multiverse  --  ",
+      wcc$robustness$n_significant,
+      " / ",
+      wcc$robustness$n_valid,
+      " cells significant  |  Median ES = ",
+      round(wcc$robustness$median_es, 2)
+    )
+  )
+})
+
+test_that("plot() draws the y -> x specification curve (vdiffr snapshot)", {
+  res <- granger_fixture()
+  vdiffr::expect_doppelganger(
+    "multiverse-granger-yx",
+    function() plot(res, direction = "yx")
+  )
+})
+
+test_that("plot() refuses direction = 'yx' for WCC and unknown directions", {
+  expect_yx_refused(plot(small_multiverse("wcc"), direction = "yx"), "wcc")
+  expect_bad_direction(plot(granger_fixture(), direction = "zz"))
+})
+
+test_that("plot() stops when the chosen direction has no valid cells", {
+  res <- granger_fixture()
+
+  # es is fine, es_yx is all NA: only y -> x has nothing to plot.
+  no_yx <- res
+  no_yx$grid$es_yx <- NA_real_
+  expect_error(
+    plot(no_yx, direction = "yx"),
+    "No valid cells to plot \\(all ES values are NA\\)",
+    class = "rlang_error"
+  )
+  expect_s3_class(multiverse_plot_data(no_yx), "tbl_df")
+
+  # es_yx is fine, es is all NA: only x -> y has nothing to plot.
+  no_xy <- res
+  no_xy$grid$es <- NA_real_
+  expect_error(
+    plot(no_xy, direction = "xy"),
+    "No valid cells to plot \\(all ES values are NA\\)",
+    class = "rlang_error"
+  )
+  expect_s3_class(multiverse_plot_data(no_xy, "yx"), "tbl_df")
+})

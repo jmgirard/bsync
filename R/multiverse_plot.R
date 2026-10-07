@@ -9,15 +9,35 @@
 
 # Valid cells of the grid, sorted by ES, with their rank and significance.
 # Significance uses is_significant(), so an NA p-value is not significant.
-multiverse_plot_data <- function(x) {
-  gd <- x$grid[!is.na(x$grid$es), ]
+# For direction = "yx" the `es` and `p` columns of the returned data hold the
+# grid's `es_yx` and `p_yx`, so the plot code reads one pair of columns.
+multiverse_plot_data <- function(x, direction = c("xy", "yx"),
+                                 call = rlang::caller_env()) {
+  dir <- multiverse_direction(x, direction, call = call)
+  gd <- x$grid
+  gd$es <- dir$es
+  gd$p <- dir$p
+  gd <- gd[!is.na(gd$es), ]
   if (nrow(gd) == 0) {
-    cli::cli_abort("No valid cells to plot (all ES values are NA).")
+    cli::cli_abort("No valid cells to plot (all ES values are NA).", call = call)
   }
   gd <- gd[order(gd$es), ]
   gd$spec_rank <- seq_len(nrow(gd))
   gd$significant <- is_significant(gd$p)
   gd
+}
+
+# Title of the ES panel. `label` names the Granger direction and is NULL for
+# one-direction estimators, whose title has no direction.
+multiverse_plot_title <- function(rb, label = NULL) {
+  paste0(
+    "Synchrony Multiverse",
+    if (!is.null(label)) paste0(" (", label, ")"),
+    "  --  ",
+    rb$n_significant, " / ", rb$n_valid,
+    " cells significant  |  Median ES = ",
+    round(rb$median_es, 2)
+  )
 }
 
 #' Plot a synchrony multiverse specification curve
@@ -34,10 +54,15 @@ multiverse_plot_data <- function(x) {
 #' @param point_size Size of ES points. Default: `1.5`.
 #' @param top_frac Fraction of plot height allocated to the ES panel.
 #'   Default: `0.55`.
+#' @param direction For a Granger result (`estimator = "wgranger"`), the
+#'   direction to plot: `"xy"` (x -> y, the default) or `"yx"` (y -> x). The
+#'   title names the direction. Other estimators have one direction only, so
+#'   `"yx"` is an error for them.
 #' @param ... Additional arguments (not used).
 #' @return Returns `x` invisibly; draws to the active graphics device.
 #' @seealso [synchrony_multiverse()], [tidy.bsync_multiverse()],
 #'   [glance.bsync_multiverse()]
+#' @md
 #' @export
 plot.bsync_multiverse <- function(
   x,
@@ -46,9 +71,11 @@ plot.bsync_multiverse <- function(
   active_color = "#2166AC",
   point_size = 1.5,
   top_frac = 0.55,
+  direction = c("xy", "yx"),
   ...
 ) {
-  gd <- multiverse_plot_data(x)
+  dir <- multiverse_direction(x, direction)
+  gd <- multiverse_plot_data(x, dir$direction)
 
   # ------------------------------------------------------------------
   # Top panel: ES by spec rank
@@ -70,12 +97,7 @@ plot.bsync_multiverse <- function(
     ggplot2::labs(
       x = NULL,
       y = "Effect Size (ES)",
-      title = paste0(
-        "Synchrony Multiverse  --  ",
-        x$robustness$n_significant, " / ", x$robustness$n_valid,
-        " cells significant  |  Median ES = ",
-        round(x$robustness$median_es, 2)
-      )
+      title = multiverse_plot_title(dir$robustness, dir$label)
     ) +
     ggplot2::theme_bw(base_size = 10) +
     ggplot2::theme(
