@@ -194,6 +194,57 @@ test_that("build_surface_grid() returns one window when exactly one fits", {
   expect_equal(grid$tau_vals, -1:1)
 })
 
+# Each estimator, its metric column, and whether it is lagged.
+window_fit_estimators <- list(
+  wcc = list(fn = wcc, metric = "wcc", lagged = TRUE),
+  wdtw = list(fn = wdtw, metric = "dtw_dist", lagged = TRUE),
+  wgranger = list(fn = wgranger, metric = "f_xy", lagged = FALSE),
+  wphase = list(fn = wphase, metric = "plv", lagged = TRUE)
+)
+
+call_estimator <- function(est, x, y, window_size, window_increment) {
+  if (est$lagged) {
+    est$fn(x, y,
+      window_size = window_size, lag_max = 2,
+      window_increment = window_increment
+    )
+  } else {
+    est$fn(x, y, window_size = window_size, window_increment = window_increment)
+  }
+}
+
+for (nm in names(window_fit_estimators)) {
+  test_that(paste0(nm, "() returns the last window that fits"), {
+    est <- window_fit_estimators[[nm]]
+    set.seed(41)
+    t_idx <- seq_len(50)
+    x <- sin(t_idx / 3) + rnorm(50, sd = 0.3)
+    y <- sin((t_idx - 1) / 3) + rnorm(50, sd = 0.3)
+    # n = 50, window_size = 10, window_increment = 4. Lagged (lag_max = 2):
+    # starts 3, 7, ..., 39; the window at 39 spans 37..50 with its lags. The
+    # pre-fix count floor((50 - 9 - 4) / 4) = 9 stopped at start 35. Lag-free:
+    # starts 1, 5, ..., 41 (41..50); the pre-fix count floor(41 / 4) = 10
+    # stopped at start 37.
+    last_start <- if (est$lagged) 39L else 41L
+    res <- call_estimator(est, x, y, window_size = 10, window_increment = 4)
+    expect_equal(max(res$results_df$i), last_start)
+    last_rows <- res$results_df[res$results_df$i == last_start, ]
+    expect_gt(nrow(last_rows), 0L)
+    expect_false(anyNA(last_rows[[est$metric]]))
+  })
+
+  test_that(paste0(nm, "() returns one window at the minimum length"), {
+    est <- window_fit_estimators[[nm]]
+    # Minimum length: window_size + 2 * lag_max = 14 (lagged), 10 (lag-free).
+    n <- if (est$lagged) 14L else 10L
+    set.seed(42)
+    x <- sin(seq_len(n) / 3) + rnorm(n, sd = 0.3)
+    y <- sin((seq_len(n) - 1) / 3) + rnorm(n, sd = 0.3)
+    res <- call_estimator(est, x, y, window_size = 10, window_increment = 3)
+    expect_equal(unique(res$results_df$i), if (est$lagged) 3L else 1L)
+  })
+}
+
 
 # AC2: shared validator -------------------------------------------------------
 

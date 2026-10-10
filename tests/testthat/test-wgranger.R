@@ -89,7 +89,7 @@ test_that("wgranger returns expected structure and classes", {
   ))
 
   # Check that row count aligns with windowing math
-  expected_rows <- floor((n_len - 20) / 5)
+  expected_rows <- floor((n_len - 20) / 5) + 1
   expect_equal(nrow(res$results_df), expected_rows)
 })
 
