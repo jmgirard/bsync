@@ -70,6 +70,9 @@ Make the window grid include every window position that fits in the series, so t
 - 2026-10-10: claim audit: 24 claims read, 0 corrected — NEWS.md, R/surface.R, R/multiverse.R, tests/testthat/test-surface.R, test-multiverse.R, test-wgranger.R, test-wphase.R
 - 2026-10-10: T6 done. `devtools::check()` gives 0 errors, 0 warnings, 0 notes. All tasks done, status set to review.
 - 2026-10-10: amendment routed: AC5 — three vdiffr snapshots changed (multiverse-granger-yx, multiverse-phase-segment, multiverse-spec-curve), which the "only" list of AC5 does not allow; the snapshots plot ES values that move when a cell gains a window, so the criterion is wrong, not the work.
+- 2026-10-10: re-audit: AC5 (full) — 3 findings on the first draft: "no other text label differs" fails because axis tick labels moved position (fixed: string content only); "stated in the work log" binds a record (moved to tasks); the increment qualifier admits nearly every multiverse snapshot (fixed: `grid$window_increment` above 1).
+- 2026-10-10: re-audit: AC5 (full) — 6 findings on the second draft: "pass" can be met by a skip (require NOT_CRAN=true, 0 skipped); granger-yx has one increment-1 cell (say "at least one cell"); the test-wgranger line is an expression, not a literal; non-text tile marks are unconstrained (require the same per-column tile patterns as main); pinning significant counts and tick strings is stricter than the plan; T5 must record `null_q99` and snapshot ES values. Second re-audit line on AC5, so the final wording goes to the user.
+- 2026-10-10: correction to the T1-T3 line of 2026-10-10: in the three snapshots, the y-axis tick labels also moved position (strings unchanged), and in multiverse-phase-segment two dashboard columns swapped tile patterns. It is not only data marks and the title ES.
 
 ## Decisions
 
