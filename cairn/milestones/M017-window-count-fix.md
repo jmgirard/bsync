@@ -95,18 +95,19 @@ Pass 2, 2026-10-10, branch at 121ea20 after the AC5 amendment return. No code ch
 - AC5 evidence (amended wording): with NOT_CRAN=true, test-surrogate-calibration.R (2 tests) and test-multiverse-segment.R (13 tests) pass with 0 failed and 0 skipped; the calibration file and data-raw/ do not differ from main. The removed .R lines in `git diff main...HEAD -- tests/` are the test-wgranger.R `expected_rows` expression, the test-wphase.R `null_q99` literal, three test-wphase.R comments, and the case-2 `n_r = 21` line; nothing else. A scratchpad script compared each of the three snapshots on main and HEAD: the changed `<text>` elements are y-axis tick labels (positions only) and the title, each title differs only in its Median ES (-0.8 to -0.85, -1.99 to -2, 1.41 to 1.44), and the per-column tile patterns are equal multisets (69, 61, 122 rects). A planted fill swap in one rect made the tile check fail in all three. Each snapshot run has a cell with increment above 1 (spec curve: windows 20-40 samples at 0.1; granger: 10-40 samples at 0.1 and 0.25; phase-segment: 16 and 24 samples at 0.1 and 0.5).
 - Consistency gate: `cairn_validate.py` all checks passed. No DESIGN principle changed, so `cairn_impact` is skipped. `devtools::document()` gives no diff. `pkgdown::check_pkgdown()` finds no problems. README.Rmd and README.md are not changed. NEWS.md has the "Window grid" entry with no milestone numbers. The branch adds no top-level files. `devtools::check()` is clean (AC7).
 - spawned: diff-bug, blame-history, prior-review
-- diff-bug #1: `generate_surrogate_segment()` docs (R/surrogate_generation.R:395-399, man page) still state k - 1 windows for aligned segments — fix now
-- diff-bug #2: the tail window that a segment longer than window + 2 * lag can add is not documented — fix now (segment docs and NEWS)
+- diff-bug #1: `generate_surrogate_segment()` docs (R/surrogate_generation.R:395-399, man page) still state k - 1 windows for aligned segments — fix now, fixed 3b64e28
+- diff-bug #2: the tail window that a segment longer than window + 2 * lag can add is not documented — fix now (segment docs and NEWS), fixed 3b64e28
 - diff-bug #3: `synchrony_multiverse()` with circular surrogates aborts at the minimum length when lag_max >= n / 4 — follow-up, pre-existing on main ("Circular surrogates at the minimum length" row)
-- diff-bug #4: NEWS bullet 2 named only the exact minimum length, but every length up to minimum + increment - 2 aborted — fix now
+- diff-bug #4: NEWS bullet 2 named only the exact minimum length, but every length up to minimum + increment - 2 aborted — fix now, fixed 3b64e28
 - diff-bug #5: `n_r` and multiverse `n_windows` are doubles — follow-up, pre-existing on main ("Window counts are doubles" row)
-- diff-bug #6: `grid_min_length()` default `lag_max = NULL` with `lagged = TRUE` returns `integer(0)` — fix now (default 0L)
+- diff-bug #6: `grid_min_length()` default `lag_max = NULL` with `lagged = TRUE` returns `integer(0)` — fix now (default 0L), fixed 3b64e28
 - diff-bug #7: `suggest_wcc_params()` docs claim two non-overlapping windows fit in half the series, false with lag_max > 0 — follow-up, pre-existing on main ("`suggest_wcc_params()` window bound text" row)
 - diff-bug #8: in `loop_starts()` the `i - lag_max >= 1` check cannot fail and the loop shares the start rule — reject, planned change (AC1 prescribes this loop; the planted old formula failed it)
-- blame-history #1: stale k - 1 segment window text (same as diff-bug #1) — fix now
+- blame-history #1: stale k - 1 segment window text (same as diff-bug #1) — fix now, fixed 3b64e28
 - blame-history #2: no other stale count statement in R/, vignettes, README, or man — reject, false as a defect (reports none)
-- blame-history #3: `grid_min_length()` default trap (same as diff-bug #6) — fix now
+- blame-history #3: `grid_min_length()` default trap (same as diff-bug #6) — fix now, fixed 3b64e28
 - blame-history #4: test-wgranger `expected_rows` mirrors the production formula — reject, planned change (AC5 allows the expression; the sweep is the independent oracle)
-- prior-review #1: stale segment window text contradicts the RR01/M015 record now that the count changed (same as diff-bug #1) — fix now
+- prior-review #1: stale segment window text contradicts the RR01/M015 record now that the count changed (same as diff-bug #1) — fix now, fixed 3b64e28
 - prior-review #2: possible overlap with the tied-timestamps candidate row — reject, false as a defect (reviewer found nothing reintroduced)
 - Fix-now verification: a scratchpad run confirmed aligned segments give k windows (n 143, segment 24: 5) and a long tail adds one window (n 145, segment 30, window 20, lag 2: 5 windows, start 123) whose WCC equals the observed value in all 23 surrogates. Two new tests in test-surface.R pin both. Full suite after the fixes: 330 tests, 0 failed, 0 skipped. Spelling clean; `devtools::document()` regenerated man/generate_surrogate_segment.Rd only.
+- AC7 recheck after the fixes: `devtools::check()` at 3b64e28 gives 0 errors, 0 warnings, 0 notes (3m 23s).
