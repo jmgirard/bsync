@@ -8,7 +8,7 @@ _Last hygiene check: 2026-10-07 (M016 merged and archived, M013 row pruned, 3 le
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M017 | Count every window that fits when window_increment > 1 | in-progress | — | normal | milestones/M017-window-count-fix.md |
+| M017 | Count every window that fits when window_increment > 1 | review | — | normal | milestones/M017-window-count-fix.md |
 | M016 | wphase parity: selectable statistic and workflow article | done | — | normal | milestones/archive/M016-wphase-parity.md |
 | M015 | Segment-shuffling surrogate generator | done | M014 | normal | milestones/archive/M015-segment-shuffle-surrogates.md |
 | M014 | IAAFT surrogate generator | done | — | normal | milestones/archive/M014-iaaft-surrogates.md |
