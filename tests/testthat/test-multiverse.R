@@ -601,3 +601,38 @@ test_that("iaaft accepts a one-column matrix y in the multiverse", {
   )
   expect_false(is.na(res$grid$p))
 })
+
+test_that("a series with room for one window computes its cell (lagged)", {
+  # window 10, lag 2: the minimum length is 10 + 2 * 2 = 14 samples, and
+  # increment_pct = 0.5 gives an increment of 5 samples.
+  set.seed(27)
+  x <- rnorm(14)
+  y <- rnorm(14)
+  res <- suppressMessages(synchrony_multiverse(
+    x, y,
+    estimator = "wcc", sample_rate = 1,
+    window_sec = 10, lag_sec = 2, increment_pct = 0.5,
+    surrogate_method = "circular", n_surrogates = 5L
+  ))
+  expect_equal(res$grid$window_increment, 5)
+  expect_equal(res$grid$n_windows, 1L)
+  expect_false(is.na(res$grid$observed))
+  expect_false(is.na(res$grid$p))
+})
+
+test_that("a series with room for one window computes its cell (wgranger)", {
+  # window 10: the minimum length is 10 samples; increment 5 samples.
+  set.seed(28)
+  x <- rnorm(10)
+  y <- rnorm(10)
+  res <- suppressMessages(synchrony_multiverse(
+    x, y,
+    estimator = "wgranger", sample_rate = 1,
+    window_sec = 10, increment_pct = 0.5,
+    surrogate_method = "circular", n_surrogates = 3L
+  ))
+  expect_equal(res$grid$window_increment, 5)
+  expect_equal(res$grid$n_windows, 1L)
+  expect_false(is.na(res$grid$observed))
+  expect_false(is.na(res$grid$p))
+})

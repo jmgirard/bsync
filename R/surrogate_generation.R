@@ -392,11 +392,11 @@ generate_surrogate_iaaft <- function(
 #'   2 * lag_max` and `window_increment = segment_size`.
 #' * For [wgranger()]: `segment_size = window_size = window_increment`.
 #'
-#' The window grid then has k - 1 windows, or k windows when the tail is at
-#' least `window_size + 2 * lag_max - 1` samples (`window_size - 1` for
-#' [wgranger()]). With `segment_size = window_size + 2 * lag_max`, that is a
-#' tail of `segment_size - 1` samples. With k - 1 windows, the last segment
-#' serves only as a source for the surrogates. [wphase()] takes the Hilbert
+#' The window grid then has k windows, one in each segment. If
+#' `segment_size > window_size + 2 * lag_max` and the tail holds at least
+#' `window_size + 2 * lag_max` samples, the grid also has one window in the
+#' tail. The tail stays in place, so that window gives the same value for the
+#' observed series and for every surrogate. [wphase()] takes the Hilbert
 #' transform of the whole series, so a segment test of phase synchrony is
 #' approximate even with aligned windows. [synchrony_multiverse()] and
 #' [autotune_wcc()] use these settings for `surrogate_method = "segment"`.

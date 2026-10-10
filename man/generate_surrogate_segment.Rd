@@ -64,11 +64,11 @@ segment under these settings:
 \item For \code{\link[=wgranger]{wgranger()}}: \code{segment_size = window_size = window_increment}.
 }
 
-The window grid then has k - 1 windows, or k windows when the tail is at
-least \code{window_size + 2 * lag_max - 1} samples (\code{window_size - 1} for
-\code{\link[=wgranger]{wgranger()}}). With \code{segment_size = window_size + 2 * lag_max}, that is a
-tail of \code{segment_size - 1} samples. With k - 1 windows, the last segment
-serves only as a source for the surrogates. \code{\link[=wphase]{wphase()}} takes the Hilbert
+The window grid then has k windows, one in each segment. If
+\code{segment_size > window_size + 2 * lag_max} and the tail holds at least
+\code{window_size + 2 * lag_max} samples, the grid also has one window in the
+tail. The tail stays in place, so that window gives the same value for the
+observed series and for every surrogate. \code{\link[=wphase]{wphase()}} takes the Hilbert
 transform of the whole series, so a segment test of phase synchrony is
 approximate even with aligned windows. \code{\link[=synchrony_multiverse]{synchrony_multiverse()}} and
 \code{\link[=autotune_wcc]{autotune_wcc()}} use these settings for \code{surrogate_method = "segment"}.

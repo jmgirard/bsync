@@ -129,6 +129,13 @@ structure(list(
 A window of `window_size` contains **exactly `window_size` samples**. The R wrapper passes
 `w_max = window_size - 1` to the C++ core (whose inclusive `0..w_max` loop then spans exactly
 `window_size` points). This is the single source of truth for realized window length (Invariant 4).
+The grid (`build_surface_grid()`) holds every window that fits. Window starts run from
+`1 + lag_max` in steps of `window_increment`, and the last lagged window ends at or before sample
+`n`. The count is `floor((n - window_size - 2 * lag_max) / window_increment) + 1` windows, with
+`lag_max = 0` for `wgranger()`. The minimum series length is `window_size + 2 * lag_max`, from
+`grid_min_length()`. The `synchrony_multiverse()` short-series guard reads the same helper. Before
+M017 the count was `floor((n - window_size + 1 - 2 * lag_max) / window_increment)`. That count
+gives the same windows at increment 1 and can drop the last window at larger increments.
 *(Pre-M1, the cores used `window_size` as `w_max`, silently yielding `window_size + 1` samples —
 fixed in M1.)*
 

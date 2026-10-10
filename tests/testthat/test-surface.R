@@ -87,6 +87,210 @@ test_that("AC1: build_surface_grid aborts for too-short series", {
 })
 
 
+# Window count: every window that fits ----------------------------------------
+
+# Window starts found by an explicit loop: start i is kept when its lagged
+# window lies inside 1..n_x, stepping by the increment from 1 + lag_max.
+loop_starts <- function(n_x, window_size, window_increment, lag_max) {
+  starts <- integer(0)
+  i <- 1L + lag_max
+  while (i + window_size - 1L + lag_max <= n_x) {
+    if (i - lag_max >= 1L) starts <- c(starts, i)
+    i <- i + window_increment
+  }
+  starts
+}
+
+# Returns a character vector naming each mismatch between the grid and the
+# loop (empty when they agree).
+sweep_grid <- function(lagged) {
+  bad <- character(0)
+  lag_range <- if (lagged) 1:3 else 0L
+  for (n_x in 1:40) for (ws in 2:8) for (inc in 1:4) for (lag in lag_range) {
+    expected <- loop_starts(n_x, ws, inc, lag)
+    min_n <- ws + 2L * lag
+    label <- sprintf("n_x=%d ws=%d inc=%d lag=%d", n_x, ws, inc, lag)
+    res <- tryCatch(
+      build_surface_grid(
+        n_x = n_x, window_size = ws, window_increment = inc,
+        lag_max = if (lagged) lag else NULL, lagged = lagged
+      ),
+      error = function(e) e
+    )
+    if (inherits(res, "error")) {
+      msg <- conditionMessage(res)
+      if (length(expected) > 0L) {
+        bad <- c(bad, paste(label, "aborted but", length(expected), "fit"))
+      } else if (!grepl("too short", msg, fixed = TRUE) ||
+        !grepl(sprintf("at least %d samples", min_n), msg, fixed = TRUE)) {
+        bad <- c(bad, paste(label, "wrong message:", msg))
+      }
+      next
+    }
+    if (length(expected) == 0L) {
+      bad <- c(bad, paste(label, "returned windows but none fit"))
+      next
+    }
+    starts <- unique(res$i_vals)
+    if (!identical(as.integer(starts), expected) ||
+      res$n_r != length(expected)) {
+      bad <- c(bad, paste(label, "starts differ"))
+    }
+    if (lagged && !identical(
+      as.integer(res$tau_vals), rep(-lag:lag, each = length(expected))
+    )) {
+      bad <- c(bad, paste(label, "tau_vals differ"))
+    }
+  }
+  bad
+}
+
+test_that("build_surface_grid() returns every window start that fits (lagged)", {
+  expect_identical(sweep_grid(lagged = TRUE), character(0))
+})
+
+test_that("build_surface_grid() returns every window start that fits (lag-free)", {
+  expect_identical(sweep_grid(lagged = FALSE), character(0))
+})
+
+test_that("build_surface_grid() keeps the pre-fix grid when window_increment = 1", {
+  # Pre-fix formula: n_r = floor((n_x - w_max - 2 * lag_max) / increment),
+  # starts at 1 + lag_max. With increment 1 it must give the same grid.
+  bad <- character(0)
+  for (lagged in c(TRUE, FALSE)) {
+    lag_range <- if (lagged) 1:3 else 0L
+    for (n_x in 1:40) for (ws in 2:8) for (lag in lag_range) {
+      old_n_r <- floor((n_x - (ws - 1L) - 2L * lag) / 1L)
+      res <- tryCatch(
+        build_surface_grid(
+          n_x = n_x, window_size = ws, window_increment = 1L,
+          lag_max = if (lagged) lag else NULL, lagged = lagged
+        ),
+        error = function(e) NULL
+      )
+      label <- sprintf("n_x=%d ws=%d lag=%d lagged=%s", n_x, ws, lag, lagged)
+      if (old_n_r < 1L) {
+        if (!is.null(res)) bad <- c(bad, paste(label, "no longer aborts"))
+        next
+      }
+      if (is.null(res) || res$n_r != old_n_r ||
+        !identical(
+          as.integer(unique(res$i_vals)),
+          as.integer(1L + lag + (seq_len(old_n_r) - 1L))
+        )) {
+        bad <- c(bad, paste(label, "differs from pre-fix grid"))
+      }
+    }
+  }
+  expect_identical(bad, character(0))
+})
+
+test_that("build_surface_grid() returns one window when exactly one fits", {
+  grid <- build_surface_grid(
+    n_x = 5, window_size = 3, window_increment = 5, lag_max = 1
+  )
+  expect_equal(grid$n_r, 1L)
+  expect_equal(unique(grid$i_vals), 2L)
+  expect_equal(grid$tau_vals, -1:1)
+})
+
+# Each estimator, its metric column, and whether it is lagged.
+window_fit_estimators <- list(
+  wcc = list(fn = wcc, metric = "wcc", lagged = TRUE),
+  wdtw = list(fn = wdtw, metric = "dtw_dist", lagged = TRUE),
+  wgranger = list(fn = wgranger, metric = "f_xy", lagged = FALSE),
+  wphase = list(fn = wphase, metric = "plv", lagged = TRUE)
+)
+
+call_estimator <- function(est, x, y, window_size, window_increment) {
+  if (est$lagged) {
+    est$fn(x, y,
+      window_size = window_size, lag_max = 2,
+      window_increment = window_increment
+    )
+  } else {
+    est$fn(x, y, window_size = window_size, window_increment = window_increment)
+  }
+}
+
+for (nm in names(window_fit_estimators)) {
+  test_that(paste0(nm, "() returns the last window that fits"), {
+    est <- window_fit_estimators[[nm]]
+    set.seed(41)
+    t_idx <- seq_len(50)
+    x <- sin(t_idx / 3) + rnorm(50, sd = 0.3)
+    y <- sin((t_idx - 1) / 3) + rnorm(50, sd = 0.3)
+    # n = 50, window_size = 10, window_increment = 4. Lagged (lag_max = 2):
+    # starts 3, 7, ..., 39; the window at 39 spans 37..50 with its lags. The
+    # pre-fix count floor((50 - 9 - 4) / 4) = 9 stopped at start 35. Lag-free:
+    # starts 1, 5, ..., 41 (41..50); the pre-fix count floor(41 / 4) = 10
+    # stopped at start 37.
+    last_start <- if (est$lagged) 39L else 41L
+    res <- call_estimator(est, x, y, window_size = 10, window_increment = 4)
+    expect_equal(max(res$results_df$i), last_start)
+    last_rows <- res$results_df[res$results_df$i == last_start, ]
+    expect_gt(nrow(last_rows), 0L)
+    expect_false(anyNA(last_rows[[est$metric]]))
+  })
+
+  test_that(paste0(nm, "() returns one window at the minimum length"), {
+    est <- window_fit_estimators[[nm]]
+    # Minimum length: window_size + 2 * lag_max = 14 (lagged), 10 (lag-free).
+    n <- if (est$lagged) 14L else 10L
+    set.seed(42)
+    x <- sin(seq_len(n) / 3) + rnorm(n, sd = 0.3)
+    y <- sin((seq_len(n) - 1) / 3) + rnorm(n, sd = 0.3)
+    res <- call_estimator(est, x, y, window_size = 10, window_increment = 3)
+    expect_equal(unique(res$results_df$i), if (est$lagged) 3L else 1L)
+  })
+}
+
+test_that("aligned segment windows give one window per segment", {
+  # window 20, lag 2: segment 24 (= window + 2 * lag) on n = 143 gives k = 5
+  # segments and a tail of 23. Starts are 3, 27, ..., 99, one per segment.
+  grid <- build_surface_grid(
+    n_x = 143, window_size = 20, window_increment = 24, lag_max = 2
+  )
+  expect_equal(unique(grid$i_vals), 3L + 24L * 0:4)
+  # Segment 30 on n = 145 gives k = 4 segments and a tail of 25 >= 24
+  # samples: one window per segment plus one in the tail (start 123).
+  grid <- build_surface_grid(
+    n_x = 145, window_size = 20, window_increment = 30, lag_max = 2
+  )
+  expect_equal(unique(grid$i_vals), 3L + 30L * 0:4)
+  # Same segment with a tail of 23 < 24 samples: no tail window.
+  grid <- build_surface_grid(
+    n_x = 143, window_size = 20, window_increment = 30, lag_max = 2
+  )
+  expect_equal(unique(grid$i_vals), 3L + 30L * 0:3)
+})
+
+test_that("the tail window of a segment design matches in every surrogate", {
+  set.seed(5)
+  x <- rnorm(145)
+  y <- rnorm(145)
+  ys <- suppressMessages(generate_surrogate_segment(
+    y,
+    segment_size = 30, n_surrogates = 23
+  ))
+  fit <- function(yy) {
+    r <- wcc(x, yy, window_size = 20, lag_max = 2, window_increment = 30)
+    r$results_df$wcc[r$results_df$i == 123L]
+  }
+  obs <- fit(y)
+  expect_length(obs, 5L)
+  for (j in seq_len(ncol(ys))) expect_equal(fit(ys[, j]), obs)
+  # Control: the window in the last full segment (start 93) differs in some
+  # surrogate, so the match above comes from the tail staying in place.
+  r_obs <- wcc(x, y, window_size = 20, lag_max = 2, window_increment = 30)
+  r_s1 <- wcc(x, ys[, 1], window_size = 20, lag_max = 2, window_increment = 30)
+  expect_false(isTRUE(all.equal(
+    r_obs$results_df$wcc[r_obs$results_df$i == 93L],
+    r_s1$results_df$wcc[r_s1$results_df$i == 93L]
+  )))
+})
+
+
 # AC2: shared validator -------------------------------------------------------
 
 test_that("AC2: validate_series catches type and length errors", {
