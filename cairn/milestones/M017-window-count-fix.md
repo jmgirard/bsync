@@ -1,6 +1,6 @@
 # M017: Count every window that fits when window_increment > 1
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -52,7 +52,7 @@ Make the window grid include every window position that fits in the series, so t
 - [x] T3: Write the AC3 tests, one per estimator. Update window counts pinned in existing tests (search `tests/testthat` for `n_r` and hard-coded window counts) and record each changed value in the work log.
 - [x] T4: Replace the `min_n` formula in `synchrony_multiverse()` (`R/multiverse.R:474`) with the helper. Write the AC4 multiverse test.
 - [x] T5: Run `test-surrogate-calibration.R`, `test-multiverse-segment.R`, and the vdiffr snapshots (`devtools::test()`, LESSONS M013). In multiverse segment cells (segment = window + 2 * lag, increment = segment), the fix adds only the window of the last full segment, which lies inside that segment (D-004). In a manual segment test with a segment longer than window + 2 * lag, it can also add a window in the tail, which stays in place in every surrogate. Do not move the rejection-rate bounds. Rerun `data-raw/wphase_null_bound.R` (window_increment 4 there gains a window) and update `null_q99`.
-- [ ] T6: Search R/, vignettes, README, and `cairn/DESIGN.md` for statements of the window count or the minimum length, and update them. Write the NEWS.md entry. Run `devtools::document()`, `devtools::test()`, and `devtools::check()`.
+- [x] T6: Search R/, vignettes, README, and `cairn/DESIGN.md` for statements of the window count or the minimum length, and update them. Write the NEWS.md entry. Run `devtools::document()`, `devtools::test()`, and `devtools::check()`.
 
 ## Work log
 
@@ -68,6 +68,7 @@ Make the window grid include every window position that fits in the series, so t
 - 2026-10-10: T5 done. With NOT_CRAN=true, test-surrogate-calibration.R (2 tests) and test-multiverse-segment.R (13 tests) pass with 0 skipped, and neither file nor data-raw/ differs from main. The rejection-rate bounds did not move. `null_q99` rerun result is in the 2026-10-07 checkpoint line (0.1316320 to 0.1316286).
 - 2026-10-10: T6 docs: no roxygen, vignette, or README text states the window count or minimum length. NEWS.md gains a "Window grid" section, and DESIGN.md §4.2 states the count and the minimum. `devtools::document()` gives no diff, and spelling is clean. Edited R and test files were not air-clean on main, so they are not reformatted (LESSONS M010).
 - 2026-10-10: claim audit: 24 claims read, 0 corrected — NEWS.md, R/surface.R, R/multiverse.R, tests/testthat/test-surface.R, test-multiverse.R, test-wgranger.R, test-wphase.R
+- 2026-10-10: T6 done. `devtools::check()` gives 0 errors, 0 warnings, 0 notes. All tasks done, status set to review.
 
 ## Decisions
 
