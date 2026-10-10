@@ -7,10 +7,18 @@
   that fits in the series. With `window_increment > 1`, a run can gain one
   window at the end, so its results can change. With `window_increment = 1`,
   the windows are the same as before.
-* A series with room for exactly one window (`window_size + 2 * lag_max`
-  samples, or `window_size` for `wgranger()`) now returns that window. Before,
-  it stopped with a "too short" error when `window_increment > 1`, and
-  `synchrony_multiverse()` skipped the cell.
+* A series with room for exactly one window now returns that window. Such a
+  series has from `window_size + 2 * lag_max` samples (`window_size` for
+  `wgranger()`) to `window_increment - 1` samples more. Before, when
+  `window_increment > 1`, all of these lengths except the longest stopped with
+  a "too short" error, and `synchrony_multiverse()` skipped the cell.
+* For segment surrogates with aligned windows, the grid now has one window in
+  each of the k segments. Before, it left out the last segment unless the
+  tail held at least `window_size + 2 * lag_max - 1` samples.
+  If `segment_size > window_size + 2 * lag_max` and the tail holds at least
+  `window_size + 2 * lag_max` samples, the grid also has one window in the
+  tail, which gives the same value for the observed series and every
+  surrogate.
 * The "too short" error now states the true minimum length,
   `window_size + 2 * lag_max` samples (`window_size` for `wgranger()`), at
   every increment. Before, it stated one sample more.

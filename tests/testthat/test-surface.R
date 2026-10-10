@@ -245,6 +245,51 @@ for (nm in names(window_fit_estimators)) {
   })
 }
 
+test_that("aligned segment windows give one window per segment", {
+  # window 20, lag 2: segment 24 (= window + 2 * lag) on n = 143 gives k = 5
+  # segments and a tail of 23. Starts are 3, 27, ..., 99, one per segment.
+  grid <- build_surface_grid(
+    n_x = 143, window_size = 20, window_increment = 24, lag_max = 2
+  )
+  expect_equal(unique(grid$i_vals), 3L + 24L * 0:4)
+  # Segment 30 on n = 145 gives k = 4 segments and a tail of 25 >= 24
+  # samples: one window per segment plus one in the tail (start 123).
+  grid <- build_surface_grid(
+    n_x = 145, window_size = 20, window_increment = 30, lag_max = 2
+  )
+  expect_equal(unique(grid$i_vals), 3L + 30L * 0:4)
+  # Same segment with a tail of 23 < 24 samples: no tail window.
+  grid <- build_surface_grid(
+    n_x = 143, window_size = 20, window_increment = 30, lag_max = 2
+  )
+  expect_equal(unique(grid$i_vals), 3L + 30L * 0:3)
+})
+
+test_that("the tail window of a segment design matches in every surrogate", {
+  set.seed(5)
+  x <- rnorm(145)
+  y <- rnorm(145)
+  ys <- suppressMessages(generate_surrogate_segment(
+    y,
+    segment_size = 30, n_surrogates = 23
+  ))
+  fit <- function(yy) {
+    r <- wcc(x, yy, window_size = 20, lag_max = 2, window_increment = 30)
+    r$results_df$wcc[r$results_df$i == 123L]
+  }
+  obs <- fit(y)
+  expect_length(obs, 5L)
+  for (j in seq_len(ncol(ys))) expect_equal(fit(ys[, j]), obs)
+  # Control: the window in the last full segment (start 93) differs in some
+  # surrogate, so the match above comes from the tail staying in place.
+  r_obs <- wcc(x, y, window_size = 20, lag_max = 2, window_increment = 30)
+  r_s1 <- wcc(x, ys[, 1], window_size = 20, lag_max = 2, window_increment = 30)
+  expect_false(isTRUE(all.equal(
+    r_obs$results_df$wcc[r_obs$results_df$i == 93L],
+    r_s1$results_df$wcc[r_s1$results_df$i == 93L]
+  )))
+})
+
 
 # AC2: shared validator -------------------------------------------------------
 

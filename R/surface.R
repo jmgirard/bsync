@@ -77,7 +77,7 @@ validate_window_params <- function(window_size, window_increment = 1L,
 #' @inheritParams build_surface_grid
 #' @return Integer; the minimum number of samples.
 #' @noRd
-grid_min_length <- function(window_size, lag_max = NULL, lagged = TRUE) {
+grid_min_length <- function(window_size, lag_max = 0L, lagged = TRUE) {
   if (lagged) {
     as.integer(window_size + 2L * lag_max)
   } else {
