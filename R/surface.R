@@ -127,7 +127,7 @@ build_surface_grid <- function(n_x, window_size, window_increment = 1L,
     }
 
     # Starts run from 1 + tau_max while start + w_max + tau_max <= n_x.
-    n_r <- floor((n_x - min_n) / w_inc) + 1L
+    n_r <- as.integer(floor((n_x - min_n) / w_inc)) + 1L
 
     lags <- seq.int(-tau_max, tau_max, by = tau_inc)
     grid <- base::expand.grid(row = seq_len(n_r), col = seq_along(lags))
@@ -152,7 +152,7 @@ build_surface_grid <- function(n_x, window_size, window_increment = 1L,
     }
 
     # Starts run from 1 while start + w_max <= n_x.
-    n_r <- floor((n_x - min_n) / w_inc) + 1L
+    n_r <- as.integer(floor((n_x - min_n) / w_inc)) + 1L
 
     i_vals <- 1L + (seq_len(n_r) - 1L) * w_inc
 

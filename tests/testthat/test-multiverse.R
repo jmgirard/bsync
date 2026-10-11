@@ -636,3 +636,21 @@ test_that("a series with room for one window computes its cell (wgranger)", {
   expect_false(is.na(res$grid$observed))
   expect_false(is.na(res$grid$p))
 })
+
+test_that("grid sample counts are integer for every estimator", {
+  set.seed(29)
+  x <- rnorm(200)
+  y <- rnorm(200)
+  for (est in c("wcc", "wdtw", "wgranger")) {
+    res <- suppressWarnings(suppressMessages(synchrony_multiverse(
+      x, y,
+      estimator = est, sample_rate = 10,
+      window_sec = 2,
+      lag_sec = if (est == "wgranger") NULL else 0.5,
+      n_surrogates = 3L
+    )))
+    for (col in c("window_size", "window_increment", "n_windows")) {
+      expect_type(res$grid[[col]], "integer")
+    }
+  }
+})

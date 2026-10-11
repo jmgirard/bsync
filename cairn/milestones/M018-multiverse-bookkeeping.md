@@ -1,13 +1,13 @@
 # M018: Multiverse bookkeeping: repeated cells, surrogate counts, circular skips
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** user-facing — changes the grid, print, glance, and robustness counts of `synchrony_multiverse()` and the result of `autotune_wcc()`
-- **Branch/PR:** —
+- **Branch/PR:** m018-multiverse-bookkeeping
 
 ## Goal
 
@@ -51,8 +51,8 @@ Make `synchrony_multiverse()` and `autotune_wcc()` report each specification onc
 
 ## Tasks
 
-- [ ] T1: Integer counts. `build_surface_grid()` returns `n_r` as integer (`R/surface.R:130`, `:155`). `synchrony_multiverse()` keeps `w_samp_all` and `inc_samp_all` integer (`R/multiverse.R:329-346`, and the "Doubles" comment at `:444`). Add type tests for each estimator, and invert the `"double"` assertion at `tests/testthat/test-multiverse-segment.R:284-285`.
-- [ ] T2: On main at ab7c509, run the AC2 grids with a fixed seed. Pin their values in a new regression test, with a comment that names the commit and the call. The test fails until T3 drops the repeated cell. At review, re-derive the pins from ab7c509 in a separate worktree.
+- [x] T1: Integer counts. `build_surface_grid()` returns `n_r` as integer (`R/surface.R:130`, `:155`). `synchrony_multiverse()` keeps `w_samp_all` and `inc_samp_all` integer (`R/multiverse.R:329-346`, and the "Doubles" comment at `:444`). Add type tests for each estimator, and invert the `"double"` assertion at `tests/testthat/test-multiverse-segment.R:284-285`.
+- [x] T2: On main at ab7c509, run the AC2 grids with a fixed seed. Pin their values in a new regression test, with a comment that names the commit and the call. The test fails until T3 drops the repeated cell. At review, re-derive the pins from ab7c509 in a separate worktree.
 - [ ] T3: Drop repeated cells in `synchrony_multiverse()` after the seconds-to-samples step (`R/multiverse.R:328-349`). Subset every per-cell vector together, before the segment skip warnings and surrogate generation. Use message class `bsync_duplicate_cells`. In `autotune_wcc()`, muffle the message for each dyad and give it once (`R/autotune.R:248-271`). Update the "Grid construction" roxygen.
 - [ ] T4: Fill the `n_surrogates` column from `ncol()` of the surrogate matrix of each cell. Update `print.bsync_multiverse()` (`R/multiverse.R:792-798`) and `glance.bsync_multiverse()` (`R/tidy.R:157-174`), with the fallback for a grid without the column. Update the roxygen `@return`.
 - [ ] T5: Circular fallback for wcc and wdtw (`R/multiverse.R:361-366`, `:395-398`). If n <= 4 * `max(l_samp_all)`, mark circular cells that fit their window and have n <= 4 * their lag as skipped with `bsync_circular_skipped`. Generate with the largest remaining circular lag, or make no matrix if none remain. Aggregate the warning in `autotune_wcc()` as for segment skips. Update the roxygen.
@@ -71,6 +71,8 @@ Make `synchrony_multiverse()` and `autotune_wcc()` report each specification onc
 - 2026-10-11: plan moved the wgranger circular shift bound to a new `[high]` candidate row. On main, `round(n / 4)` stopped the call at n = 200, 203, and 204 and left few shifts at 201 and 202 (window 2 s at 10 Hz, 19 surrogates). A new bound changes Granger circular results, so it needs its own design choice.
 - 2026-10-11: inbox sweep found no open issues or outside PRs on jmgirard/bsync.
 - 2026-10-11: criteria audit (full mode, fresh Opus reader) returned 10 findings, all fixed. AC5 now skips only cells that fit their window but have no valid shift, and says "does not stop because of the circular shift bound". AC2 is narrowed to the pinned grids (adds segment, wgranger uses phase), with the pin re-derivation moved to T2. AC3 defines a computed cell and sets 0L wherever `n_windows` is 0. AC1 adds `n_cells_gated`, NA keys, and window, wgranger, and segment repeat cases. AC4 adds the print fallback. AC6 adds a segment-only test. AC7 lists the NEWS entries. T1 names the test to invert. The "Limited unique shifts" warning and the `select_specification()` grid check went to Out.
+- 2026-10-11: T1 done. `n_r`, `window_size`, and `window_increment` are integer. Five type-only assertions in `test-multiverse-segment.R` moved from double to integer. Suite: only the T2 pin test fails.
+- 2026-10-11: T2 done. `test-multiverse-pins.R` pins 9 wcc cells (phase, circular, segment) and 2 wgranger cells from the unchanged code at ab7c509 (seeds 20261011, 20261012). The wcc pin fails until T3, because the grid still has 12 rows.
 
 ## Decisions
 

@@ -326,7 +326,7 @@ synchrony_multiverse <- function(
   n_cells <- nrow(grid_params)
 
   # --- Convert seconds -> samples per cell ------------------------------
-  w_samp_all <- pmax(1L, round(grid_params$window_sec * sample_rate))
+  w_samp_all <- as.integer(pmax(1L, round(grid_params$window_sec * sample_rate)))
   l_samp_all <- if (is_granger) {
     rep(NA_integer_, n_cells)
   } else {
@@ -339,11 +339,11 @@ synchrony_multiverse <- function(
   # the segment is window + 2 * lag samples (the window for Granger, whose
   # grid has no lags) and the windows step one segment at a time.
   seg_size_all <- if (is_granger) w_samp_all else w_samp_all + 2L * l_samp_all
-  inc_samp_all <- ifelse(
+  inc_samp_all <- as.integer(ifelse(
     is_seg,
     seg_size_all,
     pmax(1L, round(w_samp_all * grid_params$increment_pct))
-  )
+  ))
   # Below 4 segments, at most 5 orders exist, so no cell can reach p <= .05.
   # A segment needs at least 2 samples (a 1-sample window gives 1).
   seg_skip <- is_seg & (seg_size_all < 2L | (n %/% seg_size_all) < 4L)
@@ -441,7 +441,6 @@ synchrony_multiverse <- function(
   for (ci in seq_len(n_cells)) {
     s_method <- grid_params$surrogate_method[ci]
     stat <- grid_params$statistic[ci]
-    # Doubles, as on main before the vectorized conversion (grid types kept)
     w_samp <- w_samp_all[ci]
     l_samp <- l_samp_all[ci]
     inc_samp <- inc_samp_all[ci]
