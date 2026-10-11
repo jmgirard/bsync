@@ -524,7 +524,11 @@ test_that("autotune_wcc records the statistic, method, and increment of the winn
   expect_identical(res$window_increment, best$window_increment)
   msgs <- paste(testthat::capture_messages(print(res)), collapse = "")
   expect_match(msgs, paste0("Statistic: ", best$statistic), fixed = TRUE)
-  expect_match(msgs, paste0("Surrogates: ", best$surrogate_method), fixed = TRUE)
+  expect_match(
+    msgs,
+    paste0("Surrogate method: ", best$surrogate_method),
+    fixed = TRUE
+  )
 })
 
 test_that("autotune_wcc gives NA increment_pct for a segment winner", {

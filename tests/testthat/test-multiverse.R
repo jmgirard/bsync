@@ -697,6 +697,7 @@ test_that("a lag-cap repeat is dropped and announced once", {
   expect_equal(g$window_sec, c(1, 2, 2))
   expect_equal(g$lag_sec, c(0.5, 0.5, 1))
   expect_identical(out$res$settings$n_cells, 3L)
+  expect_identical(out$res$settings$n_dropped, 1L)
   expect_identical(out$res$robustness$n_cells, 3L)
   keys <- g[, c("window_size", "lag_max", "window_increment", "surrogate_method", "statistic")]
   expect_false(anyDuplicated(keys) > 0)
@@ -784,6 +785,38 @@ test_that("a grid without repeats gives no repeated-cell message", {
   )
   expect_length(out$cnds, 0L)
   expect_identical(nrow(out$res$grid), 4L)
+  expect_identical(out$res$settings$n_dropped, 0L)
+})
+
+test_that("circular-skip warnings name the increment of each cell", {
+  set.seed(46)
+  x <- rnorm(40)
+  y <- rnorm(40)
+  # Window 20 and lag 10: the window fits (20 + 2 * 10 = 40), but circular
+  # shifts need n > 40. The two increments give two skipped cells.
+  out <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 1,
+      window_sec = 20, lag_sec = 10, increment_pct = c(0.5, 1),
+      surrogate_method = "circular", n_surrogates = 9L
+    ),
+    "bsync_circular_skipped"
+  )
+  msgs <- vapply(out$cnds, conditionMessage, character(1))
+  expect_length(msgs, 2L)
+  expect_match(msgs[1], "`window_increment` = 10 samples")
+  expect_match(msgs[2], "`window_increment` = 20 samples")
+})
+
+test_that("the surrogate count prints without scientific notation", {
+  x <- list(
+    settings = list(n_surrogates = 1e5),
+    grid = tibble::tibble(n_surrogates = c(100000L, 23L))
+  )
+  expect_identical(multiverse_surrogate_text(x), "up to 100000 (fewest 23)")
+  x$grid$n_surrogates <- 100000L
+  expect_identical(multiverse_surrogate_text(x), "100000")
 })
 
 # Window 20 and lag 2 give 24-sample segments, so a 100-sample series has 4
@@ -881,7 +914,7 @@ test_that("a circular cell with no valid shift is skipped, not an abort", {
     "bsync_circular_skipped"
   )
   expect_length(out$cnds, 1L)
-  expect_match(conditionMessage(out$cnds[[1]]), "lag_max` = 5 samples")
+  expect_match(conditionMessage(out$cnds[[1]]), "lag_max` = 5,")
   g <- out$res$grid
   expect_identical(g$lag_max, 5L)
   expect_identical(g$n_windows, 0L)

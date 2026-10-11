@@ -112,10 +112,11 @@
 #'     \item{`lag_increment`}{`1L` (standard lag increment).}
 #'     \item{`window_sec`}{Selected window size in seconds.}
 #'     \item{`lag_sec`}{Selected max lag in seconds.}
-#'     \item{`increment_pct`}{Selected window increment as a fraction of the
-#'       window; \code{NA} for a segment cell, whose increment is one segment.}
-#'     \item{`statistic`}{Aggregate WCC statistic of the selected cell.}
-#'     \item{`surrogate_method`}{Surrogate method of the selected cell.}
+#'     \item{\code{increment_pct}}{Selected window increment as a fraction of
+#'       the window; \code{NA} for a segment cell, whose increment is one
+#'       segment.}
+#'     \item{\code{statistic}}{Aggregate WCC statistic of the selected cell.}
+#'     \item{\code{surrogate_method}}{Surrogate method of the selected cell.}
 #'     \item{`sig_rate`}{Proportion of dyads where selected cell was significant.}
 #'     \item{`median_es`}{Median ES across dyads for the selected cell.}
 #'     \item{`iqr_es`}{IQR of ES across dyads for the selected cell.}
@@ -235,8 +236,7 @@ autotune_wcc <- function(
     }
   }
 
-  cli::cli_inform("Running synchrony_multiverse() on {n_use} dyad(s) \\
-    ({length(window_sec)} window x {length(lag_sec_use)} lag cells each)...")
+  cli::cli_inform("Running synchrony_multiverse() on {n_use} dyad{?s}...")
 
   # Give the few-surrogates warning once here, and muffle the copy that
   # each per-dyad synchrony_multiverse() call would give.
@@ -379,7 +379,7 @@ print.bsync_autotune <- function(x, ...) {
     "Increment"   = "{x$window_increment} samples",
     if (!is.null(x$statistic)) c("Statistic" = "{x$statistic}"),
     if (!is.null(x$surrogate_method)) {
-      c("Surrogates" = "{x$surrogate_method}")
+      c("Surrogate method" = "{x$surrogate_method}")
     },
     "Sig. rate"  = "{round(x$sig_rate * 100, 1)}% of dyads",
     "Median ES"   = "{round(x$median_es, 3)} (IQR = {round(x$iqr_es, 3)})"

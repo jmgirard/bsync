@@ -8,8 +8,8 @@
   `floor(window_size / 2)`, the rounding of seconds to samples, and repeated
   values in the arguments make such repeats. For example, the default
   `lag_sec = window_sec / 2` of `autotune_wcc()` crossed with several windows
-  gives them. The first cell in grid order is kept, and a message states how
-  many cells were dropped.
+  gives them. The first cell in grid order is kept, a message states how
+  many cells were dropped, and `settings$n_dropped` records the count.
   Before, a repeated cell was tested and counted again. So `n_cells`,
   `n_valid`, `pct_significant`, the other robustness summaries, and the
   `n_cells_gated` of `autotune_wcc()` counted some specifications more than

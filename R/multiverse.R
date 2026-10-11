@@ -121,16 +121,19 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #' **Grid construction.** Each vector argument (`window_sec`, `lag_sec`,
 #' `increment_pct`, `statistic`, `surrogate_method`) is crossed into a full
 #' parameter grid, except that \code{"segment"} cells are not crossed with
-#' `increment_pct` (see `surrogate_method`). Seconds are converted to samples
+#' `increment_pct` (see `surrogate_method`), and repeated cells are then
+#' dropped (below). Seconds are converted to samples
 #' per cell; `lag_max` is
 #' hard-capped at `floor(window_size / 2)` to preserve statistical reliability.
-#' The cap and the rounding of seconds to samples can give two cells the same
-#' `window_size`, `lag_max`, and `window_increment` in samples, with the same
-#' `surrogate_method` and `statistic`. Such repeated cells are dropped, with a
-#' message, and the first cell in grid order is kept. Each specification is
-#' then tested once, and `settings$n_cells` and the robustness summary count
-#' it once. For example, `lag_sec = window_sec / 2` crossed with several
-#' windows gives repeats.
+#' The cap, the rounding of seconds to samples, and repeated values in the
+#' arguments can give two cells the same \code{window_size},
+#' \code{lag_max}, and \code{window_increment} in samples, with the same
+#' \code{surrogate_method} and \code{statistic}. Such repeated cells are
+#' dropped, with a message, and the first cell in grid order is kept. Each
+#' specification is then tested once, and \code{settings$n_cells} and the
+#' robustness summary count it once. \code{settings$n_dropped} is the number
+#' of cells dropped. For example, \code{lag_sec = window_sec / 2} crossed with
+#' several windows gives repeats.
 #' Cells where the series is too short are skipped with a message and appear
 #' as `NA` rows in the output grid.
 #'
@@ -178,8 +181,9 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'   \code{window_size + 2 * lag_max} samples (\code{window_size} for
 #'   \code{"wgranger"}) and steps its windows one segment at a time, so that
 #'   every lagged window lies inside one segment. \code{increment_pct} does
-#'   not apply to segment cells: the grid has one segment row per window,
-#'   lag, and statistic, with \code{increment_pct} \code{NA}. A segment cell
+#'   not apply to segment cells: the grid has at most one segment row per
+#'   window, lag, and statistic (repeated cells are dropped), with
+#'   \code{increment_pct} \code{NA}. A segment cell
 #'   with fewer than 4 segments cannot reach p <= .05, so it is skipped with
 #'   a warning, as is a cell whose segment is a single sample. A cell with
 #'   k segments uses \code{min(n_surrogates, k! - 1)}
@@ -220,7 +224,9 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'       for a cell that was not computed (\code{n_windows} 0). Circular
 #'       surrogates are counted with repeated shifts, so with few valid
 #'       shifts a cell can hold fewer distinct surrogates.}
-#'     \item{`$settings`}{Named list of call-level inputs.}
+#'     \item{`$settings`}{Named list of call-level inputs, plus
+#'       \code{n_cells} (cells kept) and \code{n_dropped} (repeated cells
+#'       dropped before testing).}
 #'     \item{`$robustness`}{Named list: `n_cells` (total specifications in the
 #'       grid), `n_valid` (cells with a computable ES in that direction; the
 #'       rest were skipped as too short or gave an NA ES), `n_significant`, `pct_significant` (over
@@ -415,8 +421,9 @@ synchrony_multiverse <- function(
 
   # --- Pre-generate one surrogate matrix per surrogate_method -----------
   # For circular, we use the largest lag_max in the grid as the minimum shift
-  # (more conservative; valid for all cells). For Granger with no lag_sec,
-  # use n/4 as a safe default.
+  # (more conservative; valid for all cells), or, when the series is too short
+  # for it, the largest lag of the circular cells that can shift (below). For
+  # Granger with no lag_sec, use n/4 as a safe default.
   unique_methods <- setdiff(unique(grid_params$surrogate_method), "segment")
 
   circ_skip <- rep(FALSE, n_cells)
@@ -553,8 +560,9 @@ synchrony_multiverse <- function(
     if (circ_skip[ci]) {
       cli::cli_warn(
         c(
-          "Skipped a circular cell with {.arg window_size} = {w_samp} and \\
-          {.arg lag_max} = {l_samp} samples.",
+          "Skipped a circular cell with {.arg window_size} = {w_samp}, \\
+          {.arg lag_max} = {l_samp}, and {.arg window_increment} = \\
+          {inc_samp} samples.",
           "i" = "Circular shifts need more than {.code 4 * lag_max} = \\
           {4L * l_samp} samples, and the series has {n}."
         ),
@@ -673,7 +681,8 @@ synchrony_multiverse <- function(
     estimator    = estimator,
     sample_rate  = sample_rate,
     n_surrogates = n_surrogates,
-    n_cells      = n_cells
+    n_cells      = n_cells,
+    n_dropped    = n_dropped # repeated cells dropped before testing
   )
 
   out <- list(grid = grid_tbl, settings = settings, robustness = robustness)
@@ -886,9 +895,12 @@ multiverse_surrogate_text <- function(x) {
   requested <- x$settings$n_surrogates
   fewest <- multiverse_surrogates_min(x)
   if (is.na(fewest) || fewest >= requested) {
-    return(format(requested))
+    return(format(requested, scientific = FALSE))
   }
-  paste0("up to ", requested, " (fewest ", fewest, ")")
+  paste0(
+    "up to ", format(requested, scientific = FALSE),
+    " (fewest ", fewest, ")"
+  )
 }
 
 #' Print method for bsync_multiverse objects
