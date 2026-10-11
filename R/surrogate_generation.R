@@ -48,14 +48,32 @@ generate_surrogate_circular <- function(y, n_surrogates = 100, lag_max = NULL) {
     shifts <- sample(valid_shifts, n_surrogates, replace = FALSE)
   }
 
-  # Pre-allocate and fill matrix
-  surr_mat <- matrix(0, nrow = n_y, ncol = n_surrogates)
-  for (j in seq_len(n_surrogates)) {
+  circular_shift_matrix(y, shifts)
+}
+
+# Circular-shift surrogates of `y`, one column per shift in `shifts`. Column j
+# moves `y` back by shifts[j] samples, wrapping the start to the end. Each
+# shift must lie in 1 to length(y) - 1.
+circular_shift_matrix <- function(y, shifts) {
+  n_y <- length(y)
+  surr_mat <- matrix(0, nrow = n_y, ncol = length(shifts))
+  for (j in seq_along(shifts)) {
     s <- shifts[j]
     surr_mat[, j] <- c(y[(s + 1):n_y], y[1:s])
   }
+  surr_mat
+}
 
-  return(surr_mat)
+# Distinct circular shifts for one multiverse cell: min(n_surrogates, k) of
+# the k shifts from min_shift to n - min_shift, drawn without replacement.
+# When k >= n_surrogates, this draws the same random numbers as
+# generate_surrogate_circular() with lag_max = min_shift / 2.
+draw_circular_shifts <- function(n, n_surrogates, min_shift) {
+  valid_shifts <- min_shift:(n - min_shift)
+  valid_shifts[sample.int(
+    length(valid_shifts),
+    min(n_surrogates, length(valid_shifts))
+  )]
 }
 
 # -------------------------------------------------------------------------

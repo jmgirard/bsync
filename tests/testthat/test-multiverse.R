@@ -258,20 +258,21 @@ test_that("AC3: Two methods generate two matrices, not 2 × n_cells", {
   phase_calls <- 0L
   circ_calls <- 0L
   real_phase <- bsync:::generate_surrogate_phase
-  real_circ <- bsync:::generate_surrogate_circular
+  real_circ <- bsync:::circular_shift_matrix
   local_mocked_bindings(
     generate_surrogate_phase = function(y, n_surrogates, trim_odd = FALSE) {
       phase_calls <<- phase_calls + 1L
       real_phase(y, n_surrogates = n_surrogates, trim_odd = trim_odd)
     },
-    generate_surrogate_circular = function(y, n_surrogates, lag_max = NULL) {
+    circular_shift_matrix = function(y, shifts) {
       circ_calls <<- circ_calls + 1L
-      real_circ(y, n_surrogates = n_surrogates, lag_max = lag_max)
+      real_circ(y, shifts)
     },
     .package = "bsync"
   )
   set.seed(8)
-  # 2 window sizes × 2 surrogate methods = 4 cells
+  # 2 window sizes × 2 surrogate methods = 4 cells. Both circular cells have
+  # lag 5 samples, so they share one circular matrix.
   synchrony_multiverse(
     s$x, s$y,
     estimator = "wcc",
@@ -612,7 +613,7 @@ test_that("a series with room for one window computes its cell (lagged)", {
     x, y,
     estimator = "wcc", sample_rate = 1,
     window_sec = 10, lag_sec = 2, increment_pct = 0.5,
-    surrogate_method = "circular", n_surrogates = 5L
+    surrogate_method = "phase", n_surrogates = 5L
   ))
   expect_equal(res$grid$window_increment, 5)
   expect_equal(res$grid$n_windows, 1L)
@@ -629,7 +630,7 @@ test_that("a series with room for one window computes its cell (wgranger)", {
     x, y,
     estimator = "wgranger", sample_rate = 1,
     window_sec = 10, increment_pct = 0.5,
-    surrogate_method = "circular", n_surrogates = 3L
+    surrogate_method = "phase", n_surrogates = 3L
   ))
   expect_equal(res$grid$window_increment, 5)
   expect_equal(res$grid$n_windows, 1L)
@@ -793,7 +794,8 @@ test_that("circular-skip warnings name the increment of each cell", {
   x <- rnorm(40)
   y <- rnorm(40)
   # Window 20 and lag 10: the window fits (20 + 2 * 10 = 40), but circular
-  # shifts need n > 40. The two increments give two skipped cells.
+  # shifts of 20 to 20 samples give 1 shift, fewer than 19. The two
+  # increments give two skipped cells.
   out <- collect_class(
     synchrony_multiverse(
       x, y,
@@ -898,9 +900,10 @@ test_that("a result without the n_surrogates column prints the requested count",
   expect_identical(glance(m)$n_surrogates, 50L)
 })
 
-test_that("a circular cell with no valid shift is skipped, not an abort", {
+test_that("a circular cell with too few shifts is skipped, not an abort", {
   # n = 20, window 10, lag 5: the window fits (10 + 2 * 5 = 20), but
-  # circular shifts need n > 4 * 5 = 20. On main the call stopped.
+  # circular shifts of 10 to 10 samples give 1 shift, fewer than 19. Before
+  # M018 the call stopped.
   set.seed(40)
   x <- rnorm(20)
   y <- rnorm(20)
@@ -925,15 +928,16 @@ test_that("a circular cell with no valid shift is skipped, not an abort", {
 
 test_that("circular cells with a valid shift still compute on a short series", {
   set.seed(41)
-  x <- rnorm(20)
-  y <- rnorm(20)
-  # Cells: (10, 2) and (12, 2) compute; (10, 5) fits its window but has no
-  # valid shift; (12, 5) needs 22 samples, so it is only too short.
+  x <- rnorm(30)
+  y <- rnorm(30)
+  # Cells: (10, 2) and (22, 2) compute with shifts 4 to 26 (23 shifts);
+  # (10, 5) fits its window but has shifts 10 to 20 (11 shifts), fewer than
+  # 19; (22, 5) needs 32 samples, so it is only too short.
   out <- collect_class(
     synchrony_multiverse(
       x, y,
       estimator = "wcc", sample_rate = 1,
-      window_sec = c(10, 12), lag_sec = c(2, 5),
+      window_sec = c(10, 22), lag_sec = c(2, 5),
       surrogate_method = c("circular", "phase"), n_surrogates = 9L
     ),
     "bsync_circular_skipped"
@@ -941,7 +945,7 @@ test_that("circular cells with a valid shift still compute on a short series", {
   expect_length(out$cnds, 1L)
   g <- out$res$grid
   circ <- g[g$surrogate_method == "circular", ]
-  expect_identical(circ$window_size, c(10L, 12L, 10L, 12L))
+  expect_identical(circ$window_size, c(10L, 22L, 10L, 22L))
   expect_identical(circ$lag_max, c(2L, 2L, 5L, 5L))
   expect_identical(!is.na(circ$es), c(TRUE, TRUE, FALSE, FALSE))
   expect_identical(circ$n_surrogates, c(9L, 9L, 0L, 0L))

@@ -16,17 +16,41 @@
   once. The values of the cells that remain do not change.
 * The multiverse grid has a new integer column, `n_surrogates`, with the
   number of surrogate series that each cell used. A segment cell with k
-  segments uses at most k! - 1, which can be fewer than requested. A cell
-  that was not computed has 0. `print()` shows "Surrogates per cell" as
+  segments uses at most k! - 1, and a circular cell with k valid shifts uses
+  at most k, which can be fewer than requested. A cell that was not computed
+  has 0. `print()` shows "Surrogates per cell" as
   "up to <requested> (fewest <m>)" when a computed cell used fewer surrogates
   than requested, and `glance()` has a new `n_surrogates_min` column.
   `glance()`'s `n_surrogates` is still the requested count.
-* For `"wcc"` and `"wdtw"`, a series too short for circular shifts at the
-  largest lag of the grid (`length(y) <= 4 * lag_max`) no longer stops
-  `synchrony_multiverse()`. Each circular cell that fits its window but has
-  no valid shift at its own lag is skipped with a warning, and the other
-  circular cells that fit their window are computed. `autotune_wcc()` gives
-  this warning once and names the dyads.
+* Each circular cell of `synchrony_multiverse()` now has its own range of
+  shifts. For `"wcc"` and `"wdtw"`, a cell shifts `y` by `2 * lag_max` to
+  `n - 2 * lag_max` samples for its own `lag_max`, and by at least 1 sample
+  (a 1-sample window has `lag_max` 0). Before, every circular
+  cell used the range of the largest `lag_max` in the grid (or of the
+  largest one with a valid shift), so a cell with a short lag sometimes got
+  very few shifts. For `"wgranger"`, a cell shifts `y`
+  by `window_size` to `n - window_size` samples. Before, it used a minimum
+  shift of `2 * round(n / 4)`, which stopped with an error or left 2 or 3
+  shifts on any series.
+* A circular cell now uses `min(n_surrogates, k)` surrogates with distinct
+  shifts, where k is its number of valid shifts. Before, it sampled the
+  shifts with replacement when k was below `n_surrogates`.
+* A circular cell that fits its window but has fewer than 19 valid shifts is
+  skipped with a warning, because it cannot reach p <= .05. This holds also
+  when `n_surrogates` is below 19. Before, such a cell was computed unless it
+  had no valid shift. A series too short for circular shifts no longer stops
+  the call. `autotune_wcc()` gives this warning once and names the dyads.
+* So the results of circular cells change for `"wgranger"` grids, for
+  `"wcc"` and `"wdtw"` grids with more than one `lag_max`, and for cells
+  with fewer valid shifts than `n_surrogates`. In such a call, cells of other
+  surrogate methods drawn after the circular cells can also change, because
+  the random draws shift. A call in which every circular cell is skipped
+  (too short for its window, or fewer than 19 valid shifts) draws no
+  circular surrogates, so its later draws can also differ from before. In
+  `autotune_wcc()`, this can change the results of later dyads. A `"wcc"`
+  or `"wdtw"` call whose circular cells all share one `lag_max` of at least
+  1, each with at least `max(n_surrogates, 19)` valid shifts, gives the same
+  results as before.
 * The `autotune_wcc()` result has new `increment_pct`, `statistic`, and
   `surrogate_method` fields for the selected cell, and `print()` shows the
   statistic and the surrogate method. `increment_pct` is `NA` for a segment
