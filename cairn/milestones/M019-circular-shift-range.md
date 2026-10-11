@@ -1,6 +1,6 @@
 # M019: Circular surrogates in the multiverse: a shift range per cell
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -63,6 +63,8 @@ Give each circular cell of `synchrony_multiverse()` its own range of valid circu
 - 2026-10-11: T5 done. Rewrote the circular text of the `surrogate_method` roxygen of `synchrony_multiverse()` and `autotune_wcc()`, and the autotune skip message. Replaced the M018 NEWS bullet on circular skips with four bullets (shift range, distinct shifts, skip below 19, which results change). The AC6 sweep read every hit with context in `R/*.R` and `vignettes/*.Rmd`. One stale code comment (`R/multiverse.R` near line 647) was fixed. No vignette states an old rule. `document()` rewrote two Rd files, spelling found no errors, air ran on the three air-clean files, and `check()` gave 0 errors, 0 warnings, 0 notes.
 - 2026-10-11: claim audit: 41 claims read, 4 corrected — NEWS.md, R/multiverse.R (fixed in d37c5ed; the same reader re-read all 4 as correct). Reader note left as is: when every circular cell of a dyad is too short for its window, main still drew a circular matrix and the branch does not, so a later dyad of `autotune_wcc()` can draw different numbers.
 - 2026-10-11: after the corrections, `document()` rewrote one Rd, the full suite gave 3266 expectations with 0 failed, and spelling found no errors. Status set to review.
+- 2026-10-11: review return 1: diff-bug #1. A window that rounds to 1 sample caps its lag to 0, so its circular cell gets minimum shift 0 and draws shift 0 or n. `circular_shift_matrix()` then stops the whole `synchrony_multiverse()` call ("number of items to replace is not a multiple of replacement length"; n = 100, `window_sec = c(1, 10)`, `lag_sec = 2`, wcc and wdtw). Main returned results for the same call. The k formula also counts n + 1 shifts for m = 0. Fix the minimum shift for lag 0, and add a regression test that fails before the fix.
+- 2026-10-11: review fix-now items committed before the return: `n_surrogates` docs and comment (f8bd33a); `glance()` docs, the M018 NEWS bullet, the zero-shift skip message, and the NEWS note on shifted draws (review-fix commit). Status set to in-progress.
 
 ## Decisions
 
@@ -76,3 +78,32 @@ Review on 2026-10-11, branch m019-circular-shift-range at b6001ec, main e3d98b9 
 - AC4: tests 4 to 7 (28 expectations, 0 failed). For wcc (window 4, lag 1), n = 21 gives k = 18: skipped with one warning, `n_shifts` 18, message "18 distinct shifts", `NA` es and p, `n_surrogates` 0. n = 22 gives k = 19 and computes with 19. For wgranger (window 10), n = 37 is skipped with k = 18, and n = 38 computes. With 9 surrogates requested, k = 18 is still skipped, and k = 27 computes with 9. A cell too short for its window gives the too-short message and no circular warning, for wcc and for wgranger. A direct run of wgranger with n = 37 printed a warning that names the cell ("Skipped a circular cell with `window_size` = 10 and `window_increment` = 1 samples") and states "18 distinct shifts".
 - AC5: `test-multiverse-pins.R` test 3 (5 expectations, 0 failed, tolerance 0) passes on the branch and, rerun now, on c13ffca. So every cell of the pinned single-lag call equals main. `test-surrogate.R` tests 8 to 10 pass. A direct run of the three generator cases (seeds 101 to 103) on the branch and on c13ffca gave `identical()` TRUE for the matrices and the warnings together. The third case gives the replacement warning on both.
 - AC6: `man/synchrony_multiverse.Rd` (`surrogate_method`) states m = 2 * lag_max or window_size, the range m to n - m, k = n - 2 * m + 1, `min(n_surrogates, k)` distinct shifts, and the skip below 19, also below 19 requested surrogates. `man/autotune_wcc.Rd` states the wcc form and the same skip. Both skip messages state the 19-shift rule. The rerun sweep read the context of every hit and found 3 hits on the old-rule words, none stating an old rule. Two state the new rule (`R/autotune.R:91`, `R/multiverse.R:203`), and one is the standalone generator advice in `vignettes/wphase-workflow.Rmd:146`. NEWS.md lists the changed results (wgranger, multi-lag wcc and wdtw, k below `n_surrogates`, and later-drawn cells of other methods) and the new skip.
+
+Consistency gate (pass 1): `cairn_validate` all checks passed. `document()` made no diff. README not touched. `pkgdown::check_pkgdown()` found no problems. NEWS has the entry. No new top-level files. `check()` gave 0 errors, 0 warnings, 0 notes.
+
+spawned: diff-bug, blame-history, prior-review
+
+- diff-bug #1: a 1-sample window caps its lag to 0, so its circular cell gets minimum shift 0, draws shift 0 or n, and `circular_shift_matrix()` stops the whole call (n = 100, `window_sec = c(1, 10)`, `lag_sec = 2`, wcc and wdtw). Main returned results — floor return (load-bearing crash), review return 1.
+- diff-bug #2: the `n_surrogates` grid-column docs still say circular surrogates repeat shifts — fix now, fixed f8bd33a (same as prior-review #1).
+- diff-bug #3: the `glance()` docs and the M018 NEWS bullet name only segment cells as using fewer surrogates — fix now, fixed in the review-fix commit.
+- diff-bug #4: the aggregated `bsync_circular_skipped` warning of `autotune_wcc()` has none of the fields that the `synchrony_multiverse()` warning carries — follow-up, new candidate row "Circular-skip condition fields".
+- diff-bug #5: with k = 0 the skip message stated inverted bounds ("at least 30 and at most 10") — fix now, the message now says no valid shift exists. Fixed in the review-fix commit.
+- diff-bug #6: the wgranger skip warning sets `lag_max` to `NA` with no docs — follow-up, same row as #4.
+- diff-bug #7: a call where no circular cell is computed no longer draws circular surrogates, so later draws shift, and NEWS did not say so — fix now, NEWS sentence added in the review-fix commit.
+- diff-bug #8: the re-derived two-lag pins guard only later drift — reject, planned change (T4 re-derives them, and AC2 tests the ranges).
+- diff-bug #9: no test covers a lag-0 or 1-sample circular cell — goes with review return 1 (its regression test).
+- diff-bug #10: no test asserts two matrix builds for two lags, or independent draws across estimators — reject, false: the AC2 test recovers each cell's shifts and fails if two lags share a matrix.
+- diff-bug #11: the draw equivalence rests on `sample()` calling `sample.int()` — reject, false as a defect: the comment states it, and the AC5 pins fail if it stops holding.
+- blame-history #1: cells with 1 to 18 shifts that M018 computed are now skipped — reject, planned change (D-005, AC4, chosen at the plan gate).
+- blame-history #2: the skip applies below 19 requested surrogates, unlike phase — reject, planned change (AC4 states it, chosen at the plan gate).
+- blame-history #3: two-lag pins re-baselined and some p-values moved — reject, planned change (T4).
+- blame-history #4: circular cells with different lags no longer share draws — reject, planned change (one matrix per lag, chosen at the plan gate).
+- blame-history #5: a circular cell with 19 <= k < `n_surrogates` uses fewer surrogates without a warning — reject, planned change (AC3). The count shows in the `n_surrogates` column and `print()`, as for segment cells.
+- blame-history #6: the one-window tests no longer run circular surrogates — reject, planned change (T4 moved them; the window count is still tested).
+- blame-history #7: the M018 n = 20 short-series case moved to n = 30 — reject, false as a loss: the n = 20 case is still tested near `test-multiverse.R:903`.
+- blame-history #8: the two-matrices test mocks the internal helper — reject, planned change (T4), and AC2 covers per-lag matrices.
+- blame-history #9: the autotune message and test moved to the new rule with no coverage loss — reject, no defect reported.
+- prior-review #1: the `n_surrogates` grid-column docs contradict NEWS (M017 lesson on counts in prose) — fix now, fixed f8bd33a.
+- prior-review #2: the comment above `multiverse_surrogate_text()` names only segment cells — fix now, fixed f8bd33a.
+- prior-review #3: `m` and `n - m` in the warning print raw — reject, false: both are integer, so no scientific notation.
+- prior-review #4 to #7: checks of cli plural forms, braces, `\code{}`, the print label, and the crossing docs found no problem — reject, no defect reported.

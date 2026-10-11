@@ -155,7 +155,8 @@ tidy.bsync_multiverse <- function(x, ...) {
 #'   is the requested number of surrogates per cell. `n_surrogates_min` is the
 #'   fewest surrogates that a computed cell used (the `n_surrogates` grid
 #'   column), which is below the requested number when a segment cell has few
-#'   segments. It is `NA` when no cell was computed or the grid has no
+#'   segments or a circular cell has few valid shifts. It is `NA` when no cell
+#'   was computed or the grid has no
 #'   `n_surrogates` column.
 #' @seealso [tidy.bsync_multiverse()], [as_tibble.bsync_multiverse()],
 #'   [synchrony_multiverse()]

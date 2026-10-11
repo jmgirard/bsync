@@ -564,9 +564,15 @@ synchrony_multiverse <- function(
             {.arg lag_max} = {l_samp}, and {.arg window_increment} = \\
             {inc_samp} samples."
           },
-          "i" = "Its shifts must be at least {m} and at most {n - m} \\
-          samples on a series of {n}, which gives {k} distinct shift{?s}. A \\
-          circular cell needs at least 19 to reach p <= .05."
+          "i" = if (k > 0L) {
+            "Its shifts must be at least {m} and at most {n - m} samples on \\
+            a series of {n}, which gives {k} distinct shift{?s}. A circular \\
+            cell needs at least 19 to reach p <= .05."
+          } else {
+            "Its shifts must be at least {m} samples from both ends of a \\
+            series of {n}, so it has no valid shift. A circular cell needs \\
+            at least 19 to reach p <= .05."
+          }
         ),
         class = "bsync_circular_skipped",
         window_size = w_samp,

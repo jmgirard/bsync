@@ -16,8 +16,9 @@
   once. The values of the cells that remain do not change.
 * The multiverse grid has a new integer column, `n_surrogates`, with the
   number of surrogate series that each cell used. A segment cell with k
-  segments uses at most k! - 1, which can be fewer than requested. A cell
-  that was not computed has 0. `print()` shows "Surrogates per cell" as
+  segments uses at most k! - 1, and a circular cell with k valid shifts uses
+  at most k, which can be fewer than requested. A cell that was not computed
+  has 0. `print()` shows "Surrogates per cell" as
   "up to <requested> (fewest <m>)" when a computed cell used fewer surrogates
   than requested, and `glance()` has a new `n_surrogates_min` column.
   `glance()`'s `n_surrogates` is still the requested count.
@@ -42,7 +43,10 @@
   `"wcc"` and `"wdtw"` grids with more than one `lag_max`, and for cells
   with fewer valid shifts than `n_surrogates`. In such a call, cells of other
   surrogate methods drawn after the circular cells can also change, because
-  the random draws shift. A `"wcc"` or `"wdtw"` call whose circular cells
+  the random draws shift. The draws also shift when no circular cell of a
+  call is computed, because such a call no longer draws circular
+  surrogates. In `autotune_wcc()`, this can change the results of later
+  dyads. A `"wcc"` or `"wdtw"` call whose circular cells
   all share one `lag_max`, each with at least `max(n_surrogates, 19)` valid
   shifts, gives the same results as before.
 * The `autotune_wcc()` result has new `increment_pct`, `statistic`, and
