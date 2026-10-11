@@ -97,18 +97,19 @@ Review pass 1, 2026-10-11, on b29d06c (branch contains origin/main 818d416). Ful
 - Consistency gate: `cairn_validate.py` all checks passed. `devtools::document()` gave no diff in `man/` or `NAMESPACE`. README.Rmd and README.md are unchanged on the branch and show no multiverse output. `pkgdown::check_pkgdown()` found no problems. No new top-level files. NEWS.md has the entry. No principle changed, so `cairn_impact` was skipped. `check()` gave 0/0/0 (as for AC7).
 - spawned: diff-bug, blame-history, prior-review
 - diff-bug #1: just above n = 4 * the largest lag, all circular cells share a matrix with very few distinct shifts, so effect sizes jump (n = 401, windows 10 and 200, lags 5 and 100: es 23 and 181), and `n_surrogates` counts the repeated shifts — follow-up, new candidate row "Shared circular matrix with few shifts" (the shared matrix and the n = 401 result are as on main; the diff did not introduce them)
-- diff-bug #2: circular-skip warnings for cells that differ only in increment are word-for-word identical — fix now (the warning names `window_increment`)
-- diff-bug #3: the autotune start-up message "N window x M lag cells each" ignores dropped cells, methods, and increments, and now sits next to the dropped-count message — fix now (the count clause is removed)
+- diff-bug #2: circular-skip warnings for cells that differ only in increment are word-for-word identical — fix now, fixed e0126f6 (the warning names `window_increment`)
+- diff-bug #3: the autotune start-up message "N window x M lag cells each" ignores dropped cells, methods, and increments, and now sits next to the dropped-count message — fix now, fixed e0126f6 (the count clause is removed)
 - diff-bug #4: the kept row's `window_sec`/`lag_sec` can come from a requested value that the cap changed — reject, planned change (AC1 keeps the first cell in grid order; the lag cap alone did this on main)
-- diff-bug #5: the dropped count is not stored on the result — fix now (`settings$n_dropped`)
+- diff-bug #5: the dropped count is not stored on the result — fix now, fixed e0126f6 (`settings$n_dropped`)
 - diff-bug #6: glance `n_surrogates` keeps the type the user passed while `n_surrogates_min` is integer — reject, style
-- diff-bug #7: the autotune print label "Surrogates" reads as a count — fix now (label "Surrogate method")
+- diff-bug #7: the autotune print label "Surrogates" reads as a count — fix now, fixed e0126f6 (label "Surrogate method")
 - diff-bug #8: `=` alignment lost in two `R/autotune.R` lines — reject, style (formatter item)
-- diff-bug #9: `multiverse_surrogate_text()` prints a large request such as 1e+05 in scientific notation — fix now (`format(..., scientific = FALSE)`)
+- diff-bug #9: `multiverse_surrogate_text()` prints a large request such as 1e+05 in scientific notation — fix now, fixed e0126f6 (`format(..., scientific = FALSE)`)
 - blame-history #1: the M015 test "repeated user inputs keep their segment rows" was reversed — reject, planned change (the drop was the fix chosen at the 2026-10-07 question set, recorded in the ROADMAP row "Duplicate multiverse cells from the lag cap")
 - blame-history #2: M015 kept sample-count columns as doubles on purpose — reject, planned change (AC3; NEWS states it)
-- blame-history #3: the comment above the circular matrix still says "the largest lag_max in the grid", which the fallback changes — fix now. The RNG-order side effect when "circular" leaves `unique_methods` arises only in calls that stopped on main — reject, false as a defect (no kept result changes)
+- blame-history #3: the comment above the circular matrix still says "the largest lag_max in the grid", which the fallback changes — fix now, fixed e0126f6. The RNG-order side effect when "circular" leaves `unique_methods` arises only in calls that stopped on main — reject, false as a defect (no kept result changes)
 - blame-history #4: the M013 glance column test no longer guards an unchanged set — reject, planned change (AC4 adds `n_surrogates_min`)
 - blame-history #5: `=` alignment in `R/autotune.R` — reject, style
-- prior-review #1: the docs still say the vector arguments are "crossed into a full parameter grid" and that the grid has "one segment row per window, lag, and statistic", which repeats now break (the M017 stale-prose lesson) — fix now
-- prior-review #2: new text in the `synchrony_multiverse()` and `autotune_wcc()` roxygen uses backticks without `@md`, so it renders raw (the M009 lesson) — fix now (the added text uses `\code{}`)
+- prior-review #1: the docs still say the vector arguments are "crossed into a full parameter grid" and that the grid has "one segment row per window, lag, and statistic", which repeats now break (the M017 stale-prose lesson) — fix now, fixed e0126f6
+- fix-now verification: after e0126f6, `devtools::test(filter = "multiverse|autotune")` gave 363 passed and 0 failed. The full suite before the final one-line test fix gave 2671 passed and 1 failed, and that failure was the old warning-text match. The full suite at e0126f6 then gave 2672 passed, 0 failed, and 0 skipped. `spell_check_package()` found no errors, and `document()` regenerated both Rd files. The new tests check `settings$n_dropped` (1 and 0), the increment in the circular-skip warnings (10 and 20), and `multiverse_surrogate_text()` with 1e5 ("100000").
+- prior-review #2: new text in the `synchrony_multiverse()` and `autotune_wcc()` roxygen uses backticks without `@md`, so it renders raw (the M009 lesson) — fix now, fixed e0126f6 (the added text uses `\code{}`)
