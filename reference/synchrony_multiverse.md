@@ -81,15 +81,23 @@ synchrony_multiverse(
   `window_size + 2 * lag_max` samples (`window_size` for `"wgranger"`)
   and steps its windows one segment at a time, so that every lagged
   window lies inside one segment. `increment_pct` does not apply to
-  segment cells: the grid has one segment row per window, lag, and
-  statistic, with `increment_pct` `NA`. A segment cell with fewer than 4
-  segments cannot reach p \<= .05, so it is skipped with a warning, as
-  is a cell whose segment is a single sample. A cell with k segments
-  uses `min(n_surrogates, k! - 1)` surrogates, because k segments have
-  k! - 1 orders other than the original: a cell with 4 segments uses
-  `min(n_surrogates, 23)` surrogates, and 5 and 6 segments allow 119
-  and 719. The samples after the last whole segment stay in place (see
+  segment cells: the grid has at most one segment row per window, lag,
+  and statistic (repeated cells are dropped), with `increment_pct` `NA`.
+  A segment cell with fewer than 4 segments cannot reach p \<= .05, so
+  it is skipped with a warning, as is a cell whose segment is a single
+  sample. A cell with k segments uses `min(n_surrogates, k! - 1)`
+  surrogates, because k segments have k! - 1 orders other than the
+  original: a cell with 4 segments uses `min(n_surrogates, 23)`
+  surrogates, and 5 and 6 segments allow 119 and 719. The samples after
+  the last whole segment stay in place (see
   [`generate_surrogate_segment`](https://jmgirard.github.io/bsync/reference/generate_surrogate_segment.md)).
+  For `"wcc"` and `"wdtw"`, all circular cells share one surrogate
+  matrix, made with `lag_max` equal to the largest `lag_max` in the
+  grid. If the series is too short for that
+  (`length(y) <= 4 * lag_max`), each circular cell that fits its window
+  but has `length(y) <= 4 * lag_max` for its own `lag_max` is skipped
+  with a warning, and the matrix is made with the largest `lag_max` of
+  the circular cells that remain.
 
 - n_surrogates:
 
@@ -126,11 +134,18 @@ A \`bsync_multiverse\` object with:
   columns, \`window_size\`/\`lag_max\`/\`window_increment\` (samples),
   \`n_windows\`, \`observed\`, \`null_mean\`, \`null_sd\`, \`es\`, \`p\`
   (x -\> y for Granger, plus \`observed_yx\`, \`null_mean_yx\`,
-  \`null_sd_yx\`, \`es_yx\`, and \`p_yx\` for y -\> x).
+  \`null_sd_yx\`, \`es_yx\`, and \`p_yx\` for y -\> x). The integer
+  column `n_surrogates` is the number of surrogate series that the test
+  of the cell used. It is the requested `n_surrogates`, except for a
+  segment cell with k segments, which uses at most k! - 1, and it is 0
+  for a cell that was not computed (`n_windows` 0). Circular surrogates
+  are counted with repeated shifts, so with few valid shifts a cell can
+  hold fewer distinct surrogates.
 
 - \`\$settings\`:
 
-  Named list of call-level inputs.
+  Named list of call-level inputs, plus `n_cells` (cells kept) and
+  `n_dropped` (repeated cells dropped before testing).
 
 - \`\$robustness\`:
 
@@ -151,11 +166,19 @@ A \`bsync_multiverse\` object with:
 \*\*Grid construction.\*\* Each vector argument (\`window_sec\`,
 \`lag_sec\`, \`increment_pct\`, \`statistic\`, \`surrogate_method\`) is
 crossed into a full parameter grid, except that `"segment"` cells are
-not crossed with \`increment_pct\` (see \`surrogate_method\`). Seconds
-are converted to samples per cell; \`lag_max\` is hard-capped at
-\`floor(window_size / 2)\` to preserve statistical reliability. Cells
-where the series is too short are skipped with a message and appear as
-\`NA\` rows in the output grid.
+not crossed with \`increment_pct\` (see \`surrogate_method\`), and
+repeated cells are then dropped (below). Seconds are converted to
+samples per cell; \`lag_max\` is hard-capped at \`floor(window_size /
+2)\` to preserve statistical reliability. The cap, the rounding of
+seconds to samples, and repeated values in the arguments can give two
+cells the same `window_size`, `lag_max`, and `window_increment` in
+samples, with the same `surrogate_method` and `statistic`. Such repeated
+cells are dropped, with a message, and the first cell in grid order is
+kept. Each specification is then tested once, and `settings$n_cells` and
+the robustness summary count it once. `settings$n_dropped` is the number
+of cells dropped. For example, `lag_sec = window_sec / 2` crossed with
+several windows gives repeats. Cells where the series is too short are
+skipped with a message and appear as \`NA\` rows in the output grid.
 
 \*\*Surrogate reuse.\*\* One surrogate matrix is generated per unique
 \`surrogate_method\` and reused across every cell sharing that method;
@@ -211,10 +234,11 @@ mv
 #> Median ES: 1.138 [IQR: 0.468]
 #> Sign-consistent (sig. cells): NA%
 glance(mv)
-#> # A tibble: 1 × 9
+#> # A tibble: 1 × 10
 #>   estimator n_cells n_valid n_significant pct_significant median_es iqr_es
 #>   <chr>       <int>   <int>         <int>           <dbl>     <dbl>  <dbl>
 #> 1 wcc             3       3             0               0      1.14  0.468
-#> # ℹ 2 more variables: sign_consistent <dbl>, n_surrogates <dbl>
+#> # ℹ 3 more variables: sign_consistent <dbl>, n_surrogates <dbl>,
+#> #   n_surrogates_min <int>
 # }
 ```

@@ -60,13 +60,13 @@ select_specification(mv_list)
 #> Warning: No specification passed the detectability gate (0.5 significance rate). Falling
 #> back to highest median ES.
 #> $best_row
-#> # A tibble: 1 × 15
+#> # A tibble: 1 × 16
 #>   estimator window_sec lag_sec increment_pct surrogate_method statistic 
 #>   <chr>          <dbl>   <dbl>         <dbl> <chr>            <chr>     
 #> 1 wcc                2       1           0.1 phase            mean_abs_z
-#> # ℹ 9 more variables: window_size <dbl>, lag_max <int>, window_increment <dbl>,
-#> #   n_windows <dbl>, observed <dbl>, null_mean <dbl>, null_sd <dbl>, es <dbl>,
-#> #   p <dbl>
+#> # ℹ 10 more variables: window_size <int>, lag_max <int>,
+#> #   window_increment <int>, n_windows <int>, n_surrogates <int>,
+#> #   observed <dbl>, null_mean <dbl>, null_sd <dbl>, es <dbl>, p <dbl>
 #> 
 #> $sig_rate
 #> [1] 0

@@ -33,7 +33,11 @@ glance(x, direction = c("xy", "yx"), ...)
 A one-row
 [`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html).
 For a Granger result, a `direction` column after `estimator` names the
-direction summarized.
+direction summarized. `n_surrogates` is the requested number of
+surrogates per cell. `n_surrogates_min` is the fewest surrogates that a
+computed cell used (the `n_surrogates` grid column), which is below the
+requested number when a segment cell has few segments. It is `NA` when
+no cell was computed or the grid has no `n_surrogates` column.
 
 ## See also
 

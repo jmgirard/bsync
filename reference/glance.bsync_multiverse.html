@@ -92,7 +92,12 @@ Other estimators have one direction only, so <code>"yx"</code> is an error for t
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A one-row <code><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble()</a></code>. For a Granger result, a <code>direction</code>
-column after <code>estimator</code> names the direction summarized.</p>
+column after <code>estimator</code> names the direction summarized. <code>n_surrogates</code>
+is the requested number of surrogates per cell. <code>n_surrogates_min</code> is the
+fewest surrogates that a computed cell used (the <code>n_surrogates</code> grid
+column), which is below the requested number when a segment cell has few
+segments. It is <code>NA</code> when no cell was computed or the grid has no
+<code>n_surrogates</code> column.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

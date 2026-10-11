@@ -2,6 +2,56 @@
 
 ## bsync (development version)
 
+### Multiverse results
+
+- [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
+  now drops a cell that repeats an earlier cell in samples: the same
+  `window_size`, `lag_max`, and `window_increment`, with the same
+  `surrogate_method` and `statistic`. The cap of `lag_max` at
+  `floor(window_size / 2)`, the rounding of seconds to samples, and
+  repeated values in the arguments make such repeats. For example, the
+  default `lag_sec = window_sec / 2` of
+  [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  crossed with several windows gives them. The first cell in grid order
+  is kept, a message states how many cells were dropped, and
+  `settings$n_dropped` records the count. Before, a repeated cell was
+  tested and counted again. So `n_cells`, `n_valid`, `pct_significant`,
+  the other robustness summaries, and the `n_cells_gated` of
+  [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  counted some specifications more than once. The values of the cells
+  that remain do not change.
+- The multiverse grid has a new integer column, `n_surrogates`, with the
+  number of surrogate series that each cell used. A segment cell with k
+  segments uses at most k! - 1, which can be fewer than requested. A
+  cell that was not computed has 0.
+  [`print()`](https://rdrr.io/r/base/print.html) shows “Surrogates per
+  cell” as “up to (fewest )” when a computed cell used fewer surrogates
+  than requested, and
+  [`glance()`](https://generics.r-lib.org/reference/glance.html) has a
+  new `n_surrogates_min` column.
+  [`glance()`](https://generics.r-lib.org/reference/glance.html)’s
+  `n_surrogates` is still the requested count.
+- For `"wcc"` and `"wdtw"`, a series too short for circular shifts at
+  the largest lag of the grid (`length(y) <= 4 * lag_max`) no longer
+  stops
+  [`synchrony_multiverse()`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md).
+  Each circular cell that fits its window but has no valid shift at its
+  own lag is skipped with a warning, and the other circular cells that
+  fit their window are computed.
+  [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  gives this warning once and names the dyads.
+- The
+  [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  result has new `increment_pct`, `statistic`, and `surrogate_method`
+  fields for the selected cell, and
+  [`print()`](https://rdrr.io/r/base/print.html) shows the statistic and
+  the surrogate method. `increment_pct` is `NA` for a segment cell.
+- The `window_size`, `window_increment`, and `n_windows` columns of the
+  multiverse grid are now integer, as `lag_max` was, so the
+  `window_size` and `window_increment` of
+  [`autotune_wcc()`](https://jmgirard.github.io/bsync/reference/autotune_wcc.md)
+  are integer too.
+
 ### Window grid
 
 - The window grid of

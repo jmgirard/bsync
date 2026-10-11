@@ -174,25 +174,36 @@ mv <- synchrony_multiverse(
   lag_sec      = c(0.25, 0.5, 1),
   n_surrogates = 100L
 )
+#> Dropped 3 cells that repeat an earlier cell in samples.
+#> ℹ The cap of `lag_max` at `floor(window_size / 2)`, the rounding of seconds to
+#>   samples, and repeated values in the arguments can give two cells the same
+#>   samples. The first cell in grid order is kept.
 
 mv
 #> 
 #> ── Synchrony Multiverse Analysis (wcc) ─────────────────────────────────────────
-#> Specifications: 12 (12 computable)
+#> Specifications: 9 (9 computable)
 #> Surrogates per cell: 100
-#> Significant (p <= .05): 6 of 12 (50%)
-#> Median ES: 1.905 [IQR: 1.412]
+#> Significant (p <= .05): 5 of 9 (55.6%)
+#> Median ES: 1.955 [IQR: 0.541]
 #> Sign-consistent (sig. cells): 100%
 ```
+
+The grid crosses 4 windows with 3 lags, but it has 9 cells, not 12.
+`lag_max` is capped at half the window, so at a 0.5 s window all three
+lags become 0.25 s, and at a 1 s window the 0.5 s and 1 s lags are both
+0.5 s. Cells that repeat an earlier cell in samples are dropped, with a
+message, so each specification is tested and counted once.
 
 ``` r
 
 glance(mv)
-#> # A tibble: 1 × 9
+#> # A tibble: 1 × 10
 #>   estimator n_cells n_valid n_significant pct_significant median_es iqr_es
 #>   <chr>       <int>   <int>         <int>           <dbl>     <dbl>  <dbl>
-#> 1 wcc            12      12             6             0.5      1.91   1.41
-#> # ℹ 2 more variables: sign_consistent <dbl>, n_surrogates <int>
+#> 1 wcc             9       9             5           0.556      1.95  0.541
+#> # ℹ 3 more variables: sign_consistent <dbl>, n_surrogates <int>,
+#> #   n_surrogates_min <int>
 ```
 
 ``` r
@@ -214,18 +225,18 @@ The full specification grid is available as a tibble via
 ``` r
 
 head(tidy(mv))
-#> # A tibble: 6 × 15
+#> # A tibble: 6 × 16
 #>   estimator window_sec lag_sec increment_pct surrogate_method statistic 
 #>   <chr>          <dbl>   <dbl>         <dbl> <chr>            <chr>     
 #> 1 wcc              0.5    0.25           0.1 phase            mean_abs_z
 #> 2 wcc              1      0.25           0.1 phase            mean_abs_z
 #> 3 wcc              2      0.25           0.1 phase            mean_abs_z
 #> 4 wcc              4      0.25           0.1 phase            mean_abs_z
-#> 5 wcc              0.5    0.5            0.1 phase            mean_abs_z
-#> 6 wcc              1      0.5            0.1 phase            mean_abs_z
-#> # ℹ 9 more variables: window_size <dbl>, lag_max <int>, window_increment <dbl>,
-#> #   n_windows <dbl>, observed <dbl>, null_mean <dbl>, null_sd <dbl>, es <dbl>,
-#> #   p <dbl>
+#> 5 wcc              1      0.5            0.1 phase            mean_abs_z
+#> 6 wcc              2      0.5            0.1 phase            mean_abs_z
+#> # ℹ 10 more variables: window_size <int>, lag_max <int>,
+#> #   window_increment <int>, n_windows <int>, n_surrogates <int>,
+#> #   observed <dbl>, null_mean <dbl>, null_sd <dbl>, es <dbl>, p <dbl>
 ```
 
 ### Running a multiverse for WDTW or Granger
@@ -255,17 +266,19 @@ mv_g <- synchrony_multiverse(
 )
 
 glance(mv_g)
-#> # A tibble: 1 × 10
+#> # A tibble: 1 × 11
 #>   estimator direction n_cells n_valid n_significant pct_significant median_es
 #>   <chr>     <chr>       <int>   <int>         <int>           <dbl>     <dbl>
 #> 1 wgranger  xy              3       3             0               0     0.465
-#> # ℹ 3 more variables: iqr_es <dbl>, sign_consistent <dbl>, n_surrogates <int>
+#> # ℹ 4 more variables: iqr_es <dbl>, sign_consistent <dbl>, n_surrogates <int>,
+#> #   n_surrogates_min <int>
 glance(mv_g, direction = "yx")
-#> # A tibble: 1 × 10
+#> # A tibble: 1 × 11
 #>   estimator direction n_cells n_valid n_significant pct_significant median_es
 #>   <chr>     <chr>       <int>   <int>         <int>           <dbl>     <dbl>
 #> 1 wgranger  yx              3       3             0               0     0.417
-#> # ℹ 3 more variables: iqr_es <dbl>, sign_consistent <dbl>, n_surrogates <int>
+#> # ℹ 4 more variables: iqr_es <dbl>, sign_consistent <dbl>, n_surrogates <int>,
+#> #   n_surrogates_min <int>
 ```
 
 ## 3. Multi-Dyad Parameter Selection: `autotune_wcc()`
@@ -293,18 +306,23 @@ best <- autotune_wcc(
   lag_sec      = c(0.5, 1),
   n_surrogates = 100L
 )
-#> Running synchrony_multiverse() on 3 dyad(s) (3 window x 2 lag cells
-#> each)...
+#> Running synchrony_multiverse() on 3 dyads...
+#> Dropped 1 cell that repeats an earlier cell in samples.
+#> ℹ The cap of `lag_max` at `floor(window_size / 2)`, the rounding of seconds to
+#>   samples, and repeated values in the arguments can give two cells the same
+#>   samples. The first cell in grid order is kept.
 
 best
 #> 
 #> ── Auto-Tune Result ──
 #> 
-#> Window size: 160 samples (2 s)
-#> Max lag: 80 samples (1 s)
-#> Increment: 16 samples
+#> Window size: 80 samples (1 s)
+#> Max lag: 40 samples (0.5 s)
+#> Increment: 8 samples
+#> Statistic: mean_abs_z
+#> Surrogate method: phase
 #> Sig. rate: 100% of dyads
-#> Median ES: 2.325 (IQR = 0.101)
+#> Median ES: 2.731 (IQR = 0.248)
 #> ℹ Tuned over 3 dyads; 4 cells passed the detectability gate. Per-dyad multiverses in $dyad_multiverses.
 #> ! These parameters were selected to maximize effect size. Re-testing synchrony with them on the same dyads is circular; confirm on held-out dyads or report the multiverse robustness. See `?autotune_wcc()`.
 ```
@@ -325,8 +343,8 @@ results_tuned <- wcc(
 glance(results_tuned)
 #> # A tibble: 1 × 7
 #>   mean_abs_z n_windows window_size window_increment lag_max lag_increment
-#>        <dbl>     <int>       <dbl>            <dbl>   <int>         <int>
-#> 1       1.12       131         160               16      80             1
+#>        <dbl>     <int>       <int>            <int>   <int>         <int>
+#> 1       1.34       281          80                8      40             1
 #> # ℹ 1 more variable: statistic <chr>
 ```
 
@@ -375,6 +393,18 @@ mv_list <- lapply(dyad_list, function(d) {
     n_surrogates = 100L
   )
 })
+#> Dropped 1 cell that repeats an earlier cell in samples.
+#> ℹ The cap of `lag_max` at `floor(window_size / 2)`, the rounding of seconds to
+#>   samples, and repeated values in the arguments can give two cells the same
+#>   samples. The first cell in grid order is kept.
+#> Dropped 1 cell that repeats an earlier cell in samples.
+#> ℹ The cap of `lag_max` at `floor(window_size / 2)`, the rounding of seconds to
+#>   samples, and repeated values in the arguments can give two cells the same
+#>   samples. The first cell in grid order is kept.
+#> Dropped 1 cell that repeats an earlier cell in samples.
+#> ℹ The cap of `lag_max` at `floor(window_size / 2)`, the rounding of seconds to
+#>   samples, and repeated values in the arguments can give two cells the same
+#>   samples. The first cell in grid order is kept.
 
 # Apply the selection rule directly
 best_adv <- select_specification(
@@ -385,25 +415,25 @@ best_adv <- select_specification(
 
 best_adv
 #> $best_row
-#> # A tibble: 1 × 15
+#> # A tibble: 1 × 16
 #>   estimator window_sec lag_sec increment_pct surrogate_method statistic 
 #>   <chr>          <dbl>   <dbl>         <dbl> <chr>            <chr>     
-#> 1 wcc                2       1           0.1 phase            mean_abs_z
-#> # ℹ 9 more variables: window_size <dbl>, lag_max <int>, window_increment <dbl>,
-#> #   n_windows <dbl>, observed <dbl>, null_mean <dbl>, null_sd <dbl>, es <dbl>,
-#> #   p <dbl>
+#> 1 wcc                1     0.5           0.1 phase            mean_abs_z
+#> # ℹ 10 more variables: window_size <int>, lag_max <int>,
+#> #   window_increment <int>, n_windows <int>, n_surrogates <int>,
+#> #   observed <dbl>, null_mean <dbl>, null_sd <dbl>, es <dbl>, p <dbl>
 #> 
 #> $sig_rate
 #> [1] 1
 #> 
 #> $median_es
-#> [1] 2.324929
+#> [1] 2.731198
 #> 
 #> $iqr_es
-#> [1] 0.1011534
+#> [1] 0.2484781
 #> 
 #> $score
-#> [1] 2.274353
+#> [1] 2.606959
 #> 
 #> $n_gated
 #> [1] 4
@@ -454,8 +484,11 @@ best2 <- autotune_wcc(
   lag_sec      = grid_lags,
   n_surrogates = 100L
 )
-#> Running synchrony_multiverse() on 3 dyad(s) (3 window x 3 lag cells
-#> each)...
+#> Running synchrony_multiverse() on 3 dyads...
+#> Dropped 3 cells that repeat an earlier cell in samples.
+#> ℹ The cap of `lag_max` at `floor(window_size / 2)`, the rounding of seconds to
+#>   samples, and repeated values in the arguments can give two cells the same
+#>   samples. The first cell in grid order is kept.
 
 best2
 #> 
@@ -464,8 +497,10 @@ best2
 #> Window size: 512 samples (6.4 s)
 #> Max lag: 256 samples (3.2 s)
 #> Increment: 51 samples
+#> Statistic: mean_abs_z
+#> Surrogate method: phase
 #> Sig. rate: 100% of dyads
-#> Median ES: 1.601 (IQR = 0.105)
+#> Median ES: 1.545 (IQR = 0.043)
 #> ℹ Tuned over 3 dyads; 1 cell passed the detectability gate. Per-dyad multiverses in $dyad_multiverses.
 #> ! These parameters were selected to maximize effect size. Re-testing synchrony with them on the same dyads is circular; confirm on held-out dyads or report the multiverse robustness. See `?autotune_wcc()`.
 ```

@@ -134,7 +134,10 @@ samples and steps its windows one segment at a time, so
 than 4 segments is skipped with a warning. A cell with k segments uses
 <code>min(n_surrogates, k! - 1)</code> surrogates, so a cell with 4 segments
 uses <code>min(n_surrogates, 23)</code>. The default <code>lag_sec</code> is crossed
-with every window, so a segment is not always twice the window. See
+with every window, so a segment is not always twice the window. A
+<code>"circular"</code> cell that fits its window but has no valid circular
+shift (series length equal to <code>4 * lag_max</code>) is skipped, with one
+warning per call. A shorter series is skipped as too short. See
 <code><a href="synchrony_multiverse.html">synchrony_multiverse</a></code> and
 <code><a href="generate_surrogate_segment.html">generate_surrogate_segment</a></code>.</p></dd>
 
@@ -182,6 +185,17 @@ cell must be significant (p &lt;= .05). Default `0.5`.</p></dd>
 
     <dt>`lag_sec`</dt>
 <dd><p>Selected max lag in seconds.</p></dd>
+
+    <dt><code>increment_pct</code></dt>
+<dd><p>Selected window increment as a fraction of
+      the window; <code>NA</code> for a segment cell, whose increment is one
+      segment.</p></dd>
+
+    <dt><code>statistic</code></dt>
+<dd><p>Aggregate WCC statistic of the selected cell.</p></dd>
+
+    <dt><code>surrogate_method</code></dt>
+<dd><p>Surrogate method of the selected cell.</p></dd>
 
     <dt>`sig_rate`</dt>
 <dd><p>Proportion of dyads where selected cell was significant.</p></dd>
@@ -269,7 +283,7 @@ estimate.</p>
 <span class="r-in"><span>  lag_sec <span class="op">=</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span>  n_surrogates <span class="op">=</span> <span class="fl">30</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Running synchrony_multiverse() on 3 dyad(s) (3 window x 1 lag cells each)...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Running synchrony_multiverse() on 3 dyads...</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>No specification passed the detectability gate (<span style="color: #0000BB;">0.5</span> significance rate). Falling</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> back to highest median ES.</span>
 <span class="r-in"><span><span class="va">tuned</span></span></span>
@@ -279,6 +293,8 @@ estimate.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Window size: 320 samples (4 s)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Max lag: 80 samples (1 s)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Increment: 32 samples</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Statistic: mean_abs_z</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Surrogate method: phase</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Sig. rate: 0% of dyads</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Median ES: 1.566 (IQR = 0.221)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Tuned over 3 dyads; 3 cells passed the detectability gate. Per-dyad multiverses in <span style="color: #00BB00;">$dyad_multiverses</span>.</span>

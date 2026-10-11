@@ -261,22 +261,33 @@ autocorrelation inflates).</p>
 <span>  lag_sec      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  n_surrogates <span class="op">=</span> <span class="fl">100L</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; Dropped 3 cells that repeat an earlier cell in samples.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The cap of `lag_max` at `floor(window_size / 2)`, the rounding of seconds to</span></span>
+<span><span class="co">#&gt;   samples, and repeated values in the arguments can give two cells the same</span></span>
+<span><span class="co">#&gt;   samples. The first cell in grid order is kept.</span></span>
 <span></span>
 <span><span class="va">mv</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Synchrony Multiverse Analysis (wcc)</span> <span style="color: #00BBBB;">─────────────────────────────────────────</span></span></span>
-<span><span class="co">#&gt; Specifications: 12 (12 computable)</span></span>
+<span><span class="co">#&gt; Specifications: 9 (9 computable)</span></span>
 <span><span class="co">#&gt; Surrogates per cell: 100</span></span>
-<span><span class="co">#&gt; Significant (p &lt;= .05): 6 of 12 (50%)</span></span>
-<span><span class="co">#&gt; Median ES: 1.905 [IQR: 1.412]</span></span>
+<span><span class="co">#&gt; Significant (p &lt;= .05): 5 of 9 (55.6%)</span></span>
+<span><span class="co">#&gt; Median ES: 1.955 [IQR: 0.541]</span></span>
 <span><span class="co">#&gt; Sign-consistent (sig. cells): 100%</span></span></code></pre></div>
+<p>The grid crosses 4 windows with 3 lags, but it has 9 cells, not 12.
+<code>lag_max</code> is capped at half the window, so at a 0.5 s window
+all three lags become 0.25 s, and at a 1 s window the 0.5 s and 1 s lags
+are both 0.5 s. Cells that repeat an earlier cell in samples are
+dropped, with a message, so each specification is tested and counted
+once.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mv</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 9</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 10</span></span></span>
 <span><span class="co">#&gt;   estimator n_cells n_valid n_significant pct_significant median_es iqr_es</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wcc            12      12             6             0.5      1.91   1.41</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: sign_consistent &lt;dbl&gt;, n_surrogates &lt;int&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wcc             9       9             5           0.556      1.95  0.541</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: sign_consistent &lt;dbl&gt;, n_surrogates &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   n_surrogates_min &lt;int&gt;</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mv</span><span class="op">)</span></span></code></pre></div>
 <p><img src="choosing-parameters_files/figure-html/multiverse-plot-1.png" class="r-plt" alt="" width="672"></p>
@@ -288,18 +299,18 @@ significant regardless of the specific hyperparameters.</p>
 <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> or <code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble()</a></code>:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">mv</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 15</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 16</span></span></span>
 <span><span class="co">#&gt;   estimator window_sec lag_sec increment_pct surrogate_method statistic </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wcc              0.5    0.25           0.1 phase            mean_abs_z</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> wcc              1      0.25           0.1 phase            mean_abs_z</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> wcc              2      0.25           0.1 phase            mean_abs_z</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> wcc              4      0.25           0.1 phase            mean_abs_z</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> wcc              0.5    0.5            0.1 phase            mean_abs_z</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> wcc              1      0.5            0.1 phase            mean_abs_z</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 9 more variables: window_size &lt;dbl&gt;, lag_max &lt;int&gt;, window_increment &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   n_windows &lt;dbl&gt;, observed &lt;dbl&gt;, null_mean &lt;dbl&gt;, null_sd &lt;dbl&gt;, es &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   p &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> wcc              1      0.5            0.1 phase            mean_abs_z</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> wcc              2      0.5            0.1 phase            mean_abs_z</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 10 more variables: window_size &lt;int&gt;, lag_max &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   window_increment &lt;int&gt;, n_windows &lt;int&gt;, n_surrogates &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   observed &lt;dbl&gt;, null_mean &lt;dbl&gt;, null_sd &lt;dbl&gt;, es &lt;dbl&gt;, p &lt;dbl&gt;</span></span></span></code></pre></div>
 <div class="section level3">
 <h3 id="running-a-multiverse-for-wdtw-or-granger">Running a multiverse for WDTW or Granger<a class="anchor" aria-label="anchor" href="#running-a-multiverse-for-wdtw-or-granger"></a>
 </h3>
@@ -325,17 +336,19 @@ direction: <code>es</code> and <code>p</code> are x -&gt; y, and
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mv_g</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 10</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 11</span></span></span>
 <span><span class="co">#&gt;   estimator direction n_cells n_valid n_significant pct_significant median_es</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wgranger  xy              3       3             0               0     0.465</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: iqr_es &lt;dbl&gt;, sign_consistent &lt;dbl&gt;, n_surrogates &lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: iqr_es &lt;dbl&gt;, sign_consistent &lt;dbl&gt;, n_surrogates &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   n_surrogates_min &lt;int&gt;</span></span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mv_g</span>, direction <span class="op">=</span> <span class="st">"yx"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 10</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 11</span></span></span>
 <span><span class="co">#&gt;   estimator direction n_cells n_valid n_significant pct_significant median_es</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wgranger  yx              3       3             0               0     0.417</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: iqr_es &lt;dbl&gt;, sign_consistent &lt;dbl&gt;, n_surrogates &lt;int&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: iqr_es &lt;dbl&gt;, sign_consistent &lt;dbl&gt;, n_surrogates &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   n_surrogates_min &lt;int&gt;</span></span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -361,18 +374,23 @@ dyads with different signal characteristics).</p>
 <span>  lag_sec      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  n_surrogates <span class="op">=</span> <span class="fl">100L</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Running synchrony_multiverse() on 3 dyad(s) (3 window x 2 lag cells</span></span>
-<span><span class="co">#&gt; each)...</span></span>
+<span><span class="co">#&gt; Running synchrony_multiverse() on 3 dyads...</span></span>
+<span><span class="co">#&gt; Dropped 1 cell that repeats an earlier cell in samples.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The cap of `lag_max` at `floor(window_size / 2)`, the rounding of seconds to</span></span>
+<span><span class="co">#&gt;   samples, and repeated values in the arguments can give two cells the same</span></span>
+<span><span class="co">#&gt;   samples. The first cell in grid order is kept.</span></span>
 <span></span>
 <span><span class="va">best</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Auto-Tune Result</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Window size: 160 samples (2 s)</span></span>
-<span><span class="co">#&gt; Max lag: 80 samples (1 s)</span></span>
-<span><span class="co">#&gt; Increment: 16 samples</span></span>
+<span><span class="co">#&gt; Window size: 80 samples (1 s)</span></span>
+<span><span class="co">#&gt; Max lag: 40 samples (0.5 s)</span></span>
+<span><span class="co">#&gt; Increment: 8 samples</span></span>
+<span><span class="co">#&gt; Statistic: mean_abs_z</span></span>
+<span><span class="co">#&gt; Surrogate method: phase</span></span>
 <span><span class="co">#&gt; Sig. rate: 100% of dyads</span></span>
-<span><span class="co">#&gt; Median ES: 2.325 (IQR = 0.101)</span></span>
+<span><span class="co">#&gt; Median ES: 2.731 (IQR = 0.248)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Tuned over 3 dyads; 4 cells passed the detectability gate. Per-dyad multiverses in <span style="color: #00BB00;">$dyad_multiverses</span>.</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> These parameters were <span style="font-style: italic;">selected</span> to maximize effect size. Re-testing synchrony with them on the same dyads is circular; confirm on held-out dyads or report the multiverse robustness. See `?autotune_wcc()`.</span></span></code></pre></div>
 <p>Plug the result directly into <code><a href="../reference/wcc.html">wcc()</a></code>:</p>
@@ -388,8 +406,8 @@ dyads with different signal characteristics).</p>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">results_tuned</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 7</span></span></span>
 <span><span class="co">#&gt;   mean_abs_z n_windows window_size window_increment lag_max lag_increment</span></span>
-<span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       1.12       131         160               16      80             1</span></span>
+<span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       1.34       281          80                8      40             1</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: statistic &lt;chr&gt;</span></span></span></code></pre></div>
 <div class="section level3">
 <h3 id="how-the-selection-rule-works">How the selection rule works<a class="anchor" aria-label="anchor" href="#how-the-selection-rule-works"></a>
@@ -433,6 +451,18 @@ without re-running the full sweep:</p>
 <span>    n_surrogates <span class="op">=</span> <span class="fl">100L</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Dropped 1 cell that repeats an earlier cell in samples.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The cap of `lag_max` at `floor(window_size / 2)`, the rounding of seconds to</span></span>
+<span><span class="co">#&gt;   samples, and repeated values in the arguments can give two cells the same</span></span>
+<span><span class="co">#&gt;   samples. The first cell in grid order is kept.</span></span>
+<span><span class="co">#&gt; Dropped 1 cell that repeats an earlier cell in samples.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The cap of `lag_max` at `floor(window_size / 2)`, the rounding of seconds to</span></span>
+<span><span class="co">#&gt;   samples, and repeated values in the arguments can give two cells the same</span></span>
+<span><span class="co">#&gt;   samples. The first cell in grid order is kept.</span></span>
+<span><span class="co">#&gt; Dropped 1 cell that repeats an earlier cell in samples.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The cap of `lag_max` at `floor(window_size / 2)`, the rounding of seconds to</span></span>
+<span><span class="co">#&gt;   samples, and repeated values in the arguments can give two cells the same</span></span>
+<span><span class="co">#&gt;   samples. The first cell in grid order is kept.</span></span>
 <span></span>
 <span><span class="co"># Apply the selection rule directly</span></span>
 <span><span class="va">best_adv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/select_specification.html">select_specification</a></span><span class="op">(</span></span>
@@ -443,25 +473,25 @@ without re-running the full sweep:</p>
 <span></span>
 <span><span class="va">best_adv</span></span>
 <span><span class="co">#&gt; $best_row</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 15</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 16</span></span></span>
 <span><span class="co">#&gt;   estimator window_sec lag_sec increment_pct surrogate_method statistic </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wcc                2       1           0.1 phase            mean_abs_z</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 9 more variables: window_size &lt;dbl&gt;, lag_max &lt;int&gt;, window_increment &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   n_windows &lt;dbl&gt;, observed &lt;dbl&gt;, null_mean &lt;dbl&gt;, null_sd &lt;dbl&gt;, es &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   p &lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wcc                1     0.5           0.1 phase            mean_abs_z</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 10 more variables: window_size &lt;int&gt;, lag_max &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   window_increment &lt;int&gt;, n_windows &lt;int&gt;, n_surrogates &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   observed &lt;dbl&gt;, null_mean &lt;dbl&gt;, null_sd &lt;dbl&gt;, es &lt;dbl&gt;, p &lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $sig_rate</span></span>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $median_es</span></span>
-<span><span class="co">#&gt; [1] 2.324929</span></span>
+<span><span class="co">#&gt; [1] 2.731198</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $iqr_es</span></span>
-<span><span class="co">#&gt; [1] 0.1011534</span></span>
+<span><span class="co">#&gt; [1] 0.2484781</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $score</span></span>
-<span><span class="co">#&gt; [1] 2.274353</span></span>
+<span><span class="co">#&gt; [1] 2.606959</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $n_gated</span></span>
 <span><span class="co">#&gt; [1] 4</span></span></code></pre></div>
@@ -506,8 +536,11 @@ representative dyad. A practical workflow:</p>
 <span>  lag_sec      <span class="op">=</span> <span class="va">grid_lags</span>,</span>
 <span>  n_surrogates <span class="op">=</span> <span class="fl">100L</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Running synchrony_multiverse() on 3 dyad(s) (3 window x 3 lag cells</span></span>
-<span><span class="co">#&gt; each)...</span></span>
+<span><span class="co">#&gt; Running synchrony_multiverse() on 3 dyads...</span></span>
+<span><span class="co">#&gt; Dropped 3 cells that repeat an earlier cell in samples.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The cap of `lag_max` at `floor(window_size / 2)`, the rounding of seconds to</span></span>
+<span><span class="co">#&gt;   samples, and repeated values in the arguments can give two cells the same</span></span>
+<span><span class="co">#&gt;   samples. The first cell in grid order is kept.</span></span>
 <span></span>
 <span><span class="va">best2</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -516,8 +549,10 @@ representative dyad. A practical workflow:</p>
 <span><span class="co">#&gt; Window size: 512 samples (6.4 s)</span></span>
 <span><span class="co">#&gt; Max lag: 256 samples (3.2 s)</span></span>
 <span><span class="co">#&gt; Increment: 51 samples</span></span>
+<span><span class="co">#&gt; Statistic: mean_abs_z</span></span>
+<span><span class="co">#&gt; Surrogate method: phase</span></span>
 <span><span class="co">#&gt; Sig. rate: 100% of dyads</span></span>
-<span><span class="co">#&gt; Median ES: 1.601 (IQR = 0.105)</span></span>
+<span><span class="co">#&gt; Median ES: 1.545 (IQR = 0.043)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Tuned over 3 dyads; 1 cell passed the detectability gate. Per-dyad multiverses in <span style="color: #00BB00;">$dyad_multiverses</span>.</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> These parameters were <span style="font-style: italic;">selected</span> to maximize effect size. Re-testing synchrony with them on the same dyads is circular; confirm on held-out dyads or report the multiverse robustness. See `?autotune_wcc()`.</span></span></code></pre></div>
 </div>

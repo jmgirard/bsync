@@ -72,7 +72,9 @@ autotune_wcc(
   segments uses `min(n_surrogates, k! - 1)` surrogates, so a cell with 4
   segments uses `min(n_surrogates, 23)`. The default `lag_sec` is
   crossed with every window, so a segment is not always twice the
-  window. See
+  window. A `"circular"` cell that fits its window but has no valid
+  circular shift (series length equal to `4 * lag_max`) is skipped, with
+  one warning per call. A shorter series is skipped as too short. See
   [`synchrony_multiverse`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
   and
   [`generate_surrogate_segment`](https://jmgirard.github.io/bsync/reference/generate_surrogate_segment.md).
@@ -127,6 +129,19 @@ An object of class \`bsync_autotune\` (a named list with a tidy
 - \`lag_sec\`:
 
   Selected max lag in seconds.
+
+- `increment_pct`:
+
+  Selected window increment as a fraction of the window; `NA` for a
+  segment cell, whose increment is one segment.
+
+- `statistic`:
+
+  Aggregate WCC statistic of the selected cell.
+
+- `surrogate_method`:
+
+  Surrogate method of the selected cell.
 
 - \`sig_rate\`:
 
@@ -227,7 +242,7 @@ tuned <- autotune_wcc(
   lag_sec = 1,
   n_surrogates = 30
 )
-#> Running synchrony_multiverse() on 3 dyad(s) (3 window x 1 lag cells each)...
+#> Running synchrony_multiverse() on 3 dyads...
 #> Warning: No specification passed the detectability gate (0.5 significance rate). Falling
 #> back to highest median ES.
 tuned
@@ -237,6 +252,8 @@ tuned
 #> Window size: 320 samples (4 s)
 #> Max lag: 80 samples (1 s)
 #> Increment: 32 samples
+#> Statistic: mean_abs_z
+#> Surrogate method: phase
 #> Sig. rate: 0% of dyads
 #> Median ES: 1.566 (IQR = 0.221)
 #> ℹ Tuned over 3 dyads; 3 cells passed the detectability gate. Per-dyad multiverses in $dyad_multiverses.
