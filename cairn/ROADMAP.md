@@ -1,13 +1,14 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M018)._
+_Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M019)._
 _Last hygiene check: 2026-10-11 (M017 merged and archived, M014 row pruned, 3 candidate rows and 2 lessons added, validate green)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M018 | Multiverse bookkeeping: repeated cells, surrogate counts, circular skips | planned | — | normal | milestones/M018-multiverse-bookkeeping.md |
 | M017 | Count every window that fits when window_increment > 1 | done | — | normal | milestones/archive/M017-window-count-fix.md |
 | M016 | wphase parity: selectable statistic and workflow article | done | — | normal | milestones/archive/M016-wphase-parity.md |
 | M015 | Segment-shuffling surrogate generator | done | M014 | normal | milestones/archive/M015-segment-shuffle-surrogates.md |
@@ -16,9 +17,7 @@ _Last hygiene check: 2026-10-11 (M017 merged and archived, M014 row pruned, 3 ca
 
 ## Candidates
 
-- Delivered surrogate count per multiverse cell: `print()` and `glance()` of a `bsync_multiverse` report the requested `n_surrogates`, but a segment cell with 4 to 8 segments uses at most k! - 1 (23, 119, 719, ...). Record the count each cell used, or print "up to" — added 2026-10-07 — M015 review (diff-bug #7, blame-history #2)
-- Duplicate multiverse cells from the lag cap: lags capped at floor(window / 2) can make crossed cells identical in samples (the default `lag_sec = window_sec / 2` crossed with every window does this), which inflates `n_valid` and `pct_significant`. Pre-existing for every surrogate method. Chosen fix (plan question set 2026-10-07): drop repeated cells before testing and announce the count via cli — added 2026-10-07 — M015 review (diff-bug #9)
-- `autotune_wcc()` result does not record the winning cell's `surrogate_method` or `increment_pct`; with segment cells the increment depends on the method — added 2026-10-07 — M015 review (diff-bug #12)
+- [high] Granger circular surrogates in the multiverse: for wgranger, `synchrony_multiverse()` passes `lag_max = round(n / 4)` to `generate_surrogate_circular()`, whose valid shifts run from 2 * lag_max to n - 2 * lag_max. On main, n = 200, 203, and 204 stopped with the "too short" error, and n = 201 and 202 ran with few shifts sampled with replacement (window 2 s at 10 Hz, 19 surrogates; observed 2026-10-11). A new bound changes Granger circular results, so choose it as a design decision — added 2026-10-11 — M018 plan investigation
 - mne_connectivity PLV pipeline pin: M008's frozen pin uses MNE's analytic signal + the Lachaux formula, not mne_connectivity's own PLV pipeline (different spectral estimation; unmatchable at 1e-6); a tolerance-banded comparison against the toolbox's shipped PLV would close the convention gap the pin leaves. Promote when a definitional question about the PLV convention actually arises — added 2026-08-29 — M008 review F3
 - pick_optima local search with lag_increment > 1: pick_optima_cpp hard-errors unless each window carries exactly 2*lag_max+1 lags, so `search_method = "local"` fails for any estimator surface built with lag_increment > 1 (pre-existing, all estimators; surfaced by M008's whitelist extension). Promote when a user hits it or the next optima-touching milestone — added 2026-08-29 — M008 review F13
 - Enable roxygen markdown package-wide: DESCRIPTION sets no roxygen markdown option, so `[fn()]` links, `**bold**`, and backticks in existing roxygen render as raw text in `man/*.Rd`. M009's two new functions use a per-block `@md` instead. Turning it on regenerates every Rd file, so check the output. M011 added `@md` to the four `*_surrogate()` wrappers. M013 added `@md` to the four `bsync_multiverse` methods, but the `synchrony_multiverse()` block still renders its new `$robustness_yx` text raw — added 2026-10-05 — M009 T6, M013 review (diff-bug #6)
@@ -38,6 +37,5 @@ _Last hygiene check: 2026-10-11 (M017 merged and archived, M014 row pruned, 3 ca
 - [low] Calibration tidy-up: record the size of phase randomization on a plain AR(1) pair (one 2000-pair row), and tighten the IAAFT bound from 0.08 at 400 pairs to 0.07 at 1000 pairs. Do it in the next milestone that edits the IAAFT test in `test-surrogate-calibration.R` — added 2026-10-07 — M015 RR01 B4, B5, M015 review (blame-history #6)
 - [low] IAAFT on long series: at 10000 samples most surrogates reach `max_iter = 1000` before the fixed point, and `synchrony_multiverse()` / `autotune_wcc()` do not expose `max_iter`. Options: pass `max_iter` through, or stop at a spectral-accuracy target (the paper's own stop). Promote when users hit routine non-convergence warnings or slow IAAFT runs on long recordings — added 2026-10-06 — M014 review (diff-bug #2)
 - [low] IAAFT rank-step tie test: the tie rule of the rank step has no test, and a test against the explicit-DFT reference is not well posed on tied input (FFT and DFT round near-ties differently). Test it through an extracted rank helper. Promote with the next change to the rank step — added 2026-10-06 — M014 review (diff-bug #8)
-- [low] Circular surrogates at the minimum length: `generate_surrogate_circular()` aborts when `n <= 4 * lag_max`. `synchrony_multiverse()` passes the grid's largest lag (or `round(n / 4)` for Granger), so a series of exactly `window_size + 2 * lag_max` samples with `lag_sec = window_sec / 2` (window 10, lag 5, n 20) stops the whole call instead of computing or skipping the cell. Pre-existing on main. Promote when a user runs the multiverse on short series — added 2026-10-10 — M017 review (diff-bug #3)
-- [low] Window counts are doubles: `build_surface_grid()` returns `n_r` as a double (`floor() + 1L`), so `n_windows` in `synchrony_multiverse()` results is double, though the helper's docs say integer. Pre-existing on main. Promote with the next grid or multiverse output change — added 2026-10-10 — M017 review (diff-bug #5)
+- [low] `select_specification()` grid check: it lines cells up across dyads by row index and does not check that the grids match, so a list that mixes multiverse results from different grids (or from before and after M018's repeated-cell drop) gives wrong rows without an error. Check the grid columns and stop on a mismatch. Promote when a user mixes saved results or with the next `select_specification()` edit — added 2026-10-11 — M018 plan criteria audit
 - [low] `suggest_wcc_params()` window bound text: its docs say `window_size <= floor(series_length / 2)` ensures two non-overlapping windows fit, but with `lag_max > 0` two windows need `2 * window_size + 2 * lag_max` samples. Pre-existing on main. Promote with the next `suggest_wcc_params()` edit — added 2026-10-10 — M017 review (diff-bug #7)
