@@ -119,7 +119,7 @@ test_that("wgranger cells without repeats match the ab7c509 output", {
 # for the same call and seed, read with sprintf("%a", m$grid[[col]]). They are
 # hexadecimal doubles because R parses a long decimal literal up to one unit
 # in the last place off (0.00076342284885224038 parses one below the null_sd
-# of cell 2), and this test compares with tolerance 0.
+# of cell 2), and this test compares with tolerance 0 where it can.
 test_that("a single-lag wcc grid matches the c13ffca output exactly", {
   set.seed(20261011)
   m <- suppressWarnings(suppressMessages(synchrony_multiverse(
@@ -182,5 +182,16 @@ test_that("a single-lag wcc grid matches the c13ffca output exactly", {
   expect_identical(m$grid$window_size, rep(c(80L, 160L), 3))
   expect_identical(m$grid$lag_max, rep(40L, 6))
   expect_identical(m$grid$n_surrogates, rep(19L, 6))
-  expect_equal(as.data.frame(m$grid[, pin_cols]), pins, tolerance = 0)
+  # Exact on the platform that made the pins (macOS, R release). Other
+  # platforms' math libraries can differ in the last bits (R oldrel on
+  # Ubuntu did in CI for PR 14), so CI and CRAN compare within 1e-10. That
+  # still fails if the random draws change, because other draws move these
+  # values far more.
+  on_ci <- identical(tolower(Sys.getenv("CI")), "true")
+  on_cran <- !identical(Sys.getenv("NOT_CRAN"), "true")
+  expect_equal(
+    as.data.frame(m$grid[, pin_cols]),
+    pins,
+    tolerance = if (on_ci || on_cran) 1e-10 else 0
+  )
 })

@@ -71,6 +71,7 @@ Give each circular cell of `synchrony_multiverse()` its own range of valid circu
 - 2026-10-11: claim audit: 14 claims read, 2 corrected — NEWS.md, tests/testthat/test-multiverse-circular.R (lines added since d37c5ed; one optional comment clarification in R/multiverse.R also taken; fixed in d4b0a88). On the one re-read, the NEWS sentence on main's old draws was still wrong (main drew for a fitting smaller-lag cell, and wgranger could stop with an error). With no second pass allowed, the sentence was narrowed to the verified part: a call in which every circular cell is skipped draws no circular surrogates, so its later draws can differ.
 - 2026-10-11: spelling clean, `document()` no change. Status set to review.
 - 2026-10-11: step-7 approval: m019-circular-shift-range approved for merge
+- 2026-10-11: red CI on PR 14: `ubuntu-latest (oldrel-1)` failed the single-lag pin (`test-multiverse-pins.R:185`), with `null_sd` and `es` differing in the last bits from the macOS values at tolerance 0. Fix: the test compares exactly where `NOT_CRAN` is true and `CI` is not set, and within 1e-10 on CI and CRAN, as the other pins in the file do. Package code is unchanged, so the fix is trivial and the approval stands. AC5's difference-0 evidence (same-machine runs on the branch and on c13ffca) is unchanged.
 
 ## Decisions
 
