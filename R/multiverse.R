@@ -68,9 +68,10 @@ inform_duplicate_cells <- function(n_dropped) {
     c(
       "Dropped {n_dropped} cell{?s} that repeat{?s/} an earlier cell in \\
       samples.",
-      "i" = "The cap of {.arg lag_max} at {.code floor(window_size / 2)} and \\
-      the rounding of seconds to samples can give two cells the same \\
-      samples. The first cell in grid order is kept."
+      "i" = "The cap of {.arg lag_max} at {.code floor(window_size / 2)}, \\
+      the rounding of seconds to samples, and repeated values in the \\
+      arguments can give two cells the same samples. The first cell in grid \\
+      order is kept."
     ),
     class = "bsync_duplicate_cells",
     n_dropped = n_dropped

@@ -52,8 +52,9 @@ than 4 segments is skipped with a warning. A cell with k segments uses
 \code{min(n_surrogates, k! - 1)} surrogates, so a cell with 4 segments
 uses \code{min(n_surrogates, 23)}. The default \code{lag_sec} is crossed
 with every window, so a segment is not always twice the window. A
-\code{"circular"} cell whose series is not longer than
-\code{4 * lag_max} samples is skipped with one warning per call. See
+\code{"circular"} cell that fits its window but has no valid circular
+shift (series length equal to \code{4 * lag_max}) is skipped, with one
+warning per call. A shorter series is skipped as too short. See
 \code{\link{synchrony_multiverse}} and
 \code{\link{generate_surrogate_segment}}.}
 

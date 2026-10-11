@@ -8,7 +8,7 @@ _Last hygiene check: 2026-10-11 (M017 merged and archived, M014 row pruned, 3 ca
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M018 | Multiverse bookkeeping: repeated cells, surrogate counts, circular skips | in-progress | — | normal | milestones/M018-multiverse-bookkeeping.md |
+| M018 | Multiverse bookkeeping: repeated cells, surrogate counts, circular skips | review | — | normal | milestones/M018-multiverse-bookkeeping.md |
 | M017 | Count every window that fits when window_increment > 1 | done | — | normal | milestones/archive/M017-window-count-fix.md |
 | M016 | wphase parity: selectable statistic and workflow article | done | — | normal | milestones/archive/M016-wphase-parity.md |
 | M015 | Segment-shuffling surrogate generator | done | M014 | normal | milestones/archive/M015-segment-shuffle-surrogates.md |
