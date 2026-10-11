@@ -7,7 +7,7 @@
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** user-facing — changes the results and warnings of the exported `synchrony_multiverse()` and `autotune_wcc()`
-- **Branch/PR:** m019-circular-shift-range
+- **Branch/PR:** m019-circular-shift-range, https://github.com/jmgirard/bsync/pull/14
 
 ## Goal
 
