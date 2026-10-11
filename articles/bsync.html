@@ -280,16 +280,16 @@ windowed surface, the aggregate Fisher’s Z, and all settings.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">wcc_res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Windowed Cross-Correlation Analysis</span> <span style="color: #00BBBB;">─────────────────────────────────────────</span></span></span>
-<span><span class="co">#&gt; Total Windows: 14</span></span>
+<span><span class="co">#&gt; Total Windows: 15</span></span>
 <span><span class="co">#&gt; Total Lags Tested: 641</span></span>
 <span><span class="co">#&gt; Window Size: 640</span></span>
 <span><span class="co">#&gt; Max Lag: 320</span></span>
-<span><span class="co">#&gt; Mean Abs. Fisher's Z: 0.9729</span></span>
+<span><span class="co">#&gt; Mean Abs. Fisher's Z: 0.9714</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Cross-Correlation Value Distribution</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;      0%     25%     50%     75%    100% </span></span>
-<span><span class="co">#&gt; -0.9755 -0.6768  0.0550  0.7400  0.9764</span></span></code></pre></div>
+<span><span class="co">#&gt; -0.9755 -0.6768  0.0549  0.7375  0.9764</span></span></code></pre></div>
 <p>Plot the surface to see the shifting correlation landscape:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">wcc_res</span>, time_step <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="fl">80</span><span class="op">)</span> <span class="co"># time_step converts frames → seconds</span></span></code></pre></div>

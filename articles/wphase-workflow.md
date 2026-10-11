@@ -178,11 +178,11 @@ wphase_results <- wphase(
 print(wphase_results)
 #> 
 #> ── Windowed Phase Synchrony Analysis ───────────────────────────────────────────
-#> Total Windows: 206
+#> Total Windows: 207
 #> Total Lags Tested: 21
 #> Window Size: 150
 #> Max Lag: 10
-#> Mean PLV: 0.9104
+#> Mean PLV: 0.9098
 ```
 
 The [`wphase()`](https://jmgirard.github.io/bsync/reference/wphase.md)
@@ -203,15 +203,15 @@ lag0$lead_A_sec <- lag0$rel_phase / (2 * pi * 0.5)
 rows <- round(seq(1, nrow(lag0), length.out = 5))
 round(lag0[rows, c("time_sec", "rel_phase", "lead_A_sec")], 2)
 #>      time_sec rel_phase lead_A_sec
-#> 2061      1.0      1.45       0.46
-#> 2112     26.5      0.62       0.20
-#> 2164     52.5     -0.05      -0.02
-#> 2215     78.0     -0.43      -0.14
-#> 2266    103.5     -1.33      -0.42
+#> 2071      1.0      1.45       0.46
+#> 2122     26.5      0.62       0.20
+#> 2174     52.5     -0.05      -0.02
+#> 2226     78.5     -0.44      -0.14
+#> 2277    104.0     -1.34      -0.43
 ```
 
 The estimated lead of Person A moves from 0.46 seconds in the first
-window to -0.42 seconds in the last. The simulated lead moved from 0.5
+window to -0.43 seconds in the last. The simulated lead moved from 0.5
 to -0.5 seconds.
 
 ## 5. Surrogate Testing for Significance
@@ -252,8 +252,8 @@ print(surr_mean)
 #> 
 #> ── Windowed Phase Synchrony Surrogate Analysis (Pseudo-Synchrony) ──────────────
 #> Permutations: 1000
-#> Observed Mean PLV: 0.9104
-#> Average Null Mean PLV: 0.4323
+#> Observed Mean PLV: 0.9098
+#> Average Null Mean PLV: 0.4322
 #> Empirical p-value: 0.001
 #> ✔ Observed phase synchrony is significantly greater than chance.
 ```
@@ -299,7 +299,7 @@ print(surr_peak)
 #> 
 #> ── Windowed Phase Synchrony Surrogate Analysis (Pseudo-Synchrony) ──────────────
 #> Permutations: 1000
-#> Observed Mean Peak PLV: 0.9511
+#> Observed Mean Peak PLV: 0.9505
 #> Average Null Mean Peak PLV: 0.4959
 #> Empirical p-value: 0.001
 #> ✔ Observed phase synchrony is significantly greater than chance.
@@ -324,14 +324,14 @@ wphase_optima <- pick_optima(wphase_results, search_method = "global")
 summary(wphase_optima)
 #> 
 #> ── Windowed Phase Synchrony Optima ─────────────────────────────────────────────
-#> Total Windows: 206
-#> Valid Optima: 206
+#> Total Windows: 207
+#> Valid Optima: 207
 #> Search Method: global
 #> 
 #> ── Optimum Lag Distribution ──
 #> 
-#>     0%    25%    50%    75%   100% 
-#> -10.00  -6.75   2.00   5.00  10.00
+#>    0%   25%   50%   75%  100% 
+#> -10.0  -6.5   2.0   5.0  10.0
 ```
 
 For narrowband signals, PLV changes only slowly across lags, because a
@@ -354,7 +354,7 @@ round(c(optimum_lag = cor_optima, rel_phase_lead = cor_rel_phase), 2)
 ```
 
 The PLV optima correlate 0.5 with the true lead, and the lead read from
-the relative phase at lag 0 correlates 0.98. Of the 206 optima, 44 sit
+the relative phase at lag 0 correlates 0.98. Of the 207 optima, 44 sit
 at the edge of the lag range (-10 or 10 samples), where the search has
 no room on one side. In this example, the relative phase is the better
 reading of the lead–lag.

@@ -81,12 +81,11 @@ one segment under these settings:
   [`wgranger()`](https://jmgirard.github.io/bsync/reference/wgranger.md):
   `segment_size = window_size = window_increment`.
 
-The window grid then has k - 1 windows, or k windows when the tail is at
-least `window_size + 2 * lag_max - 1` samples (`window_size - 1` for
-[`wgranger()`](https://jmgirard.github.io/bsync/reference/wgranger.md)).
-With `segment_size = window_size + 2 * lag_max`, that is a tail of
-`segment_size - 1` samples. With k - 1 windows, the last segment serves
-only as a source for the surrogates.
+The window grid then has k windows, one in each segment. If
+`segment_size > window_size + 2 * lag_max` and the tail holds at least
+`window_size + 2 * lag_max` samples, the grid also has one window in the
+tail. The tail stays in place, so that window gives the same value for
+the observed series and for every surrogate.
 [`wphase()`](https://jmgirard.github.io/bsync/reference/wphase.md) takes
 the Hilbert transform of the whole series, so a segment test of phase
 synchrony is approximate even with aligned windows.
@@ -149,9 +148,9 @@ wcc_surrogate(
 #> 
 #> ── WCC Surrogate Analysis (Pseudo-Synchrony) ───────────────────────────────────
 #> Permutations: 19
-#> Observed Mean Abs. Fisher's Z: 0.0868
-#> Average Null Mean Abs. Fisher's Z: 0.0842
-#> Empirical p-value: 0.4
+#> Observed Mean Abs. Fisher's Z: 0.087
+#> Average Null Mean Abs. Fisher's Z: 0.0845
+#> Empirical p-value: 0.35
 #> ! Observed synchrony is not significantly different from chance.
 #> ℹ Note: 19 permutations may be too few for stable p-values.
 #> Consider setting `n_surrogates >= 1000` for final reporting.

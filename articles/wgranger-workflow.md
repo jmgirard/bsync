@@ -133,14 +133,14 @@ wgc_results <- wgranger(
 summary(wgc_results)
 #> 
 #> ── Windowed Granger Causality Analysis ─────────────────────────────────────────
-#> Total Windows: 112
+#> Total Windows: 113
 #> Window Size: 120
 #> AR Order (Lags): 3
 #> 
 #> ── Significance Summary (p < 0.05) ──
 #> 
-#> • 'x' significantly predicts 'y' in 59 windows (52.7%)
-#> • 'y' significantly predicts 'x' in 66 windows (58.9%)
+#> • 'x' significantly predicts 'y' in 59 windows (52.2%)
+#> • 'y' significantly predicts 'x' in 67 windows (59.3%)
 ```
 
 The summary output provides an immediate, high-level view of the
@@ -193,15 +193,15 @@ print(surrogate_results)
 #> ── Direction: x -> y ──
 #> 
 #> Permutations: 1000
-#> Observed Mean F-statistic: 159.482
-#> Average Null F-statistic: 1.867
+#> Observed Mean F-statistic: 158.0724
+#> Average Null F-statistic: 1.8679
 #> Empirical p-value: 0.002
 #> ✔ Predictive power (x -> y) is significantly greater than chance.
 #> 
 #> ── Direction: y -> x ──
 #> 
-#> Observed Mean F-statistic: 133.1204
-#> Average Null F-statistic: 1.8685
+#> Observed Mean F-statistic: 134.5797
+#> Average Null F-statistic: 1.8664
 #> Empirical p-value: 0.004
 #> ✔ Predictive power (y -> x) is significantly greater than chance.
 ```

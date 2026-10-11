@@ -135,7 +135,7 @@ glance(results)
 #> # A tibble: 1 × 7
 #>   mean_abs_z n_windows window_size window_increment lag_max lag_increment
 #>        <dbl>     <int>       <dbl>            <dbl>   <int>         <int>
-#> 1       1.05        14         256              128     128             1
+#> 1       1.05        15         256              128     128             1
 #> # ℹ 1 more variable: statistic <chr>
 ```
 
@@ -181,7 +181,7 @@ mv
 #> Specifications: 12 (12 computable)
 #> Surrogates per cell: 100
 #> Significant (p <= .05): 6 of 12 (50%)
-#> Median ES: 1.881 [IQR: 1.345]
+#> Median ES: 1.905 [IQR: 1.412]
 #> Sign-consistent (sig. cells): 100%
 ```
 
@@ -191,7 +191,7 @@ glance(mv)
 #> # A tibble: 1 × 9
 #>   estimator n_cells n_valid n_significant pct_significant median_es iqr_es
 #>   <chr>       <int>   <int>         <int>           <dbl>     <dbl>  <dbl>
-#> 1 wcc            12      12             6             0.5      1.88   1.34
+#> 1 wcc            12      12             6             0.5      1.91   1.41
 #> # ℹ 2 more variables: sign_consistent <dbl>, n_surrogates <int>
 ```
 
@@ -258,7 +258,7 @@ glance(mv_g)
 #> # A tibble: 1 × 10
 #>   estimator direction n_cells n_valid n_significant pct_significant median_es
 #>   <chr>     <chr>       <int>   <int>         <int>           <dbl>     <dbl>
-#> 1 wgranger  xy              3       3             0               0     0.458
+#> 1 wgranger  xy              3       3             0               0     0.465
 #> # ℹ 3 more variables: iqr_es <dbl>, sign_consistent <dbl>, n_surrogates <int>
 glance(mv_g, direction = "yx")
 #> # A tibble: 1 × 10
@@ -304,8 +304,8 @@ best
 #> Max lag: 80 samples (1 s)
 #> Increment: 16 samples
 #> Sig. rate: 100% of dyads
-#> Median ES: 2.305 (IQR = 0.102)
-#> ℹ Tuned over 3 dyads; 2 cells passed the detectability gate. Per-dyad multiverses in $dyad_multiverses.
+#> Median ES: 2.325 (IQR = 0.101)
+#> ℹ Tuned over 3 dyads; 4 cells passed the detectability gate. Per-dyad multiverses in $dyad_multiverses.
 #> ! These parameters were selected to maximize effect size. Re-testing synchrony with them on the same dyads is circular; confirm on held-out dyads or report the multiverse robustness. See `?autotune_wcc()`.
 ```
 
@@ -326,7 +326,7 @@ glance(results_tuned)
 #> # A tibble: 1 × 7
 #>   mean_abs_z n_windows window_size window_increment lag_max lag_increment
 #>        <dbl>     <int>       <dbl>            <dbl>   <int>         <int>
-#> 1       1.12       130         160               16      80             1
+#> 1       1.12       131         160               16      80             1
 #> # ℹ 1 more variable: statistic <chr>
 ```
 
@@ -397,16 +397,16 @@ best_adv
 #> [1] 1
 #> 
 #> $median_es
-#> [1] 2.305021
+#> [1] 2.324929
 #> 
 #> $iqr_es
-#> [1] 0.1019227
+#> [1] 0.1011534
 #> 
 #> $score
-#> [1] 2.25406
+#> [1] 2.274353
 #> 
 #> $n_gated
-#> [1] 2
+#> [1] 4
 ```
 
 ### Choosing the grid to sweep

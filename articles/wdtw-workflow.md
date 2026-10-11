@@ -134,13 +134,13 @@ wdtw_results <- wdtw(
 print(wdtw_results)
 #> 
 #> ── Windowed Dynamic Time Warping Analysis ──────────────────────────────────────
-#> Total Windows: 54
+#> Total Windows: 55
 #> Total Lags Tested: 91
 #> Window Size: 90
 #> Max Lag: 45
 #> Scale Method: global
 #> Distance Metric: L2
-#> Overall Mean Distance: 27.043
+#> Overall Mean Distance: 27.0641
 ```
 
 The [`wdtw()`](https://jmgirard.github.io/bsync/reference/wdtw.md)
@@ -255,20 +255,20 @@ summary(wdtw_optima_df)
 #> 
 #> ── Completeness ──
 #> 
-#> • Total time windows: 54
-#> • Valid optima retained: 54 (100%)
+#> • Total time windows: 55
+#> • Valid optima retained: 55 (100%)
 #> • Optima dropped (NA): 0 (0%)
 #> 
 #> ── Lag Directionality (Leadership) ──
 #> 
-#> • Positive Lags (x leads y): 24 (44.4%)
-#> • Negative Lags (y leads x): 28 (51.9%)
-#> • Zero Lags (Simultaneous): 2 (3.7%)
+#> • Positive Lags (x leads y): 24 (43.6%)
+#> • Negative Lags (y leads x): 29 (52.7%)
+#> • Zero Lags (Simultaneous): 2 (3.6%)
 #> 
 #> ── Optimum Value Distribution ──
 #> 
 #>     0%    25%    50%    75%   100% 
-#> 4.1393 5.1405 5.4232 5.8031 6.8041
+#> 4.1393 5.1591 5.4306 5.7994 6.8041
 ```
 
 This returns a `wdtw_optima` data frame containing the elapsed time

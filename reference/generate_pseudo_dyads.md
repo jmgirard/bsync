@@ -135,5 +135,5 @@ pseudo_z <- vapply(pseudo, function(d) {
 }, numeric(1))
 summary(pseudo_z)
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#> 0.07296 0.07693 0.08187 0.08081 0.08520 0.08657 
+#> 0.07382 0.07794 0.08156 0.08083 0.08432 0.08609 
 ```

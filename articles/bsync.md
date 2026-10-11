@@ -203,16 +203,16 @@ wcc_res <- wcc(
 summary(wcc_res)
 #> 
 #> ── Windowed Cross-Correlation Analysis ─────────────────────────────────────────
-#> Total Windows: 14
+#> Total Windows: 15
 #> Total Lags Tested: 641
 #> Window Size: 640
 #> Max Lag: 320
-#> Mean Abs. Fisher's Z: 0.9729
+#> Mean Abs. Fisher's Z: 0.9714
 #> 
 #> ── Cross-Correlation Value Distribution ──
 #> 
 #>      0%     25%     50%     75%    100% 
-#> -0.9755 -0.6768  0.0550  0.7400  0.9764
+#> -0.9755 -0.6768  0.0549  0.7375  0.9764
 ```
 
 Plot the surface to see the shifting correlation landscape:

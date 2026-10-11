@@ -149,7 +149,7 @@ seg_test <- wcc_surrogate(
   window_size = 96, lag_max = 10, window_increment = 116
 )
 seg_test$p_value
-#> [1] 0.17
+#> [1] 0.16
 ```
 
 ### 1.5 Pseudo-Dyads (`generate_surrogate_pseudo`, `generate_pseudo_dyads`)
@@ -285,15 +285,15 @@ p_pseudo <- vapply(seq_len(n_dyads), function(i) {
 
 # Dyads called significant (p <= .05) by the circular-shift null, out of 10
 sum(p_circular <= 0.05)
-#> [1] 9
+#> [1] 8
 
 # Pseudo-dyad p-values, smallest first
 sort(p_pseudo)
-#>  [1] 0.1 0.1 0.3 0.4 0.5 0.6 0.7 0.7 0.9 1.0
+#>  [1] 0.1 0.2 0.4 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 ```
 
 The circular-shift null breaks the shared task timeline, so it reads
-task-driven co-movement as synchrony: it calls 9 of the 10 dyads
+task-driven co-movement as synchrony: it calls 8 of the 10 dyads
 significant. The pseudo-dyad null keeps that timeline. Each pseudo-dyad
 p-value is \\(b + 1) / (9 + 1)\\, where \\b\\ counts the strangers who
 score at least as high as the real partner. So the p-value is the real
@@ -342,10 +342,10 @@ pseudo_z <- vapply(pseudo, mean_abs_z, numeric(1))
 
 summary(real_z)
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#>  0.1835  0.1974  0.2011  0.2052  0.2097  0.2458
+#>  0.1827  0.1962  0.1999  0.2036  0.2081  0.2433
 summary(pseudo_z)
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#>  0.1430  0.1620  0.1681  0.1700  0.1774  0.1982
+#>  0.1419  0.1610  0.1673  0.1687  0.1758  0.1966
 ```
 
 The real dyads score higher than the pseudo-dyads, because only real

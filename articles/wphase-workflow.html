@@ -254,11 +254,11 @@ which is half a cycle. A window moves 0.5 seconds at a time
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">wphase_results</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Windowed Phase Synchrony Analysis</span> <span style="color: #00BBBB;">───────────────────────────────────────────</span></span></span>
-<span><span class="co">#&gt; Total Windows: 206</span></span>
+<span><span class="co">#&gt; Total Windows: 207</span></span>
 <span><span class="co">#&gt; Total Lags Tested: 21</span></span>
 <span><span class="co">#&gt; Window Size: 150</span></span>
 <span><span class="co">#&gt; Max Lag: 10</span></span>
-<span><span class="co">#&gt; Mean PLV: 0.9104</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean PLV: 0.9098</span></span></code></pre></div>
 <p>The <code><a href="../reference/wphase.html">wphase()</a></code> function returns a list object of class
 <code>wphase_res</code>. Its <code>results_df</code> has one row per
 window (<code>i</code>, in samples) and lag (<code>tau</code>, in
@@ -276,13 +276,13 @@ seconds:</p>
 <span><span class="va">rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">lag0</span><span class="op">)</span>, length.out <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">lag0</span><span class="op">[</span><span class="va">rows</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"time_sec"</span>, <span class="st">"rel_phase"</span>, <span class="st">"lead_A_sec"</span><span class="op">)</span><span class="op">]</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      time_sec rel_phase lead_A_sec</span></span>
-<span><span class="co">#&gt; 2061      1.0      1.45       0.46</span></span>
-<span><span class="co">#&gt; 2112     26.5      0.62       0.20</span></span>
-<span><span class="co">#&gt; 2164     52.5     -0.05      -0.02</span></span>
-<span><span class="co">#&gt; 2215     78.0     -0.43      -0.14</span></span>
-<span><span class="co">#&gt; 2266    103.5     -1.33      -0.42</span></span></code></pre></div>
+<span><span class="co">#&gt; 2071      1.0      1.45       0.46</span></span>
+<span><span class="co">#&gt; 2122     26.5      0.62       0.20</span></span>
+<span><span class="co">#&gt; 2174     52.5     -0.05      -0.02</span></span>
+<span><span class="co">#&gt; 2226     78.5     -0.44      -0.14</span></span>
+<span><span class="co">#&gt; 2277    104.0     -1.34      -0.43</span></span></code></pre></div>
 <p>The estimated lead of Person A moves from 0.46 seconds in the first
-window to -0.42 seconds in the last. The simulated lead moved from 0.5
+window to -0.43 seconds in the last. The simulated lead moved from 0.5
 to -0.5 seconds.</p>
 </div>
 <div class="section level2">
@@ -320,8 +320,8 @@ its power.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Windowed Phase Synchrony Surrogate Analysis (Pseudo-Synchrony)</span> <span style="color: #00BBBB;">──────────────</span></span></span>
 <span><span class="co">#&gt; Permutations: 1000</span></span>
-<span><span class="co">#&gt; Observed Mean PLV: 0.9104</span></span>
-<span><span class="co">#&gt; Average Null Mean PLV: 0.4323</span></span>
+<span><span class="co">#&gt; Observed Mean PLV: 0.9098</span></span>
+<span><span class="co">#&gt; Average Null Mean PLV: 0.4322</span></span>
 <span><span class="co">#&gt; Empirical p-value: 0.001</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Observed phase synchrony is significantly greater than chance.</span></span></code></pre></div>
 <p>The empirical p-value is (b + 1) / (n + 1), where n is the number of
@@ -361,7 +361,7 @@ surrogate matrix can be reused:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Windowed Phase Synchrony Surrogate Analysis (Pseudo-Synchrony)</span> <span style="color: #00BBBB;">──────────────</span></span></span>
 <span><span class="co">#&gt; Permutations: 1000</span></span>
-<span><span class="co">#&gt; Observed Mean Peak PLV: 0.9511</span></span>
+<span><span class="co">#&gt; Observed Mean Peak PLV: 0.9505</span></span>
 <span><span class="co">#&gt; Average Null Mean Peak PLV: 0.4959</span></span>
 <span><span class="co">#&gt; Empirical p-value: 0.001</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Observed phase synchrony is significantly greater than chance.</span></span></code></pre></div>
@@ -384,14 +384,14 @@ optimum per window.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">wphase_optima</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Windowed Phase Synchrony Optima</span> <span style="color: #00BBBB;">─────────────────────────────────────────────</span></span></span>
-<span><span class="co">#&gt; Total Windows: 206</span></span>
-<span><span class="co">#&gt; Valid Optima: 206</span></span>
+<span><span class="co">#&gt; Total Windows: 207</span></span>
+<span><span class="co">#&gt; Valid Optima: 207</span></span>
 <span><span class="co">#&gt; Search Method: global</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Optimum Lag Distribution</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     0%    25%    50%    75%   100% </span></span>
-<span><span class="co">#&gt; -10.00  -6.75   2.00   5.00  10.00</span></span></code></pre></div>
+<span><span class="co">#&gt;    0%   25%   50%   75%  100% </span></span>
+<span><span class="co">#&gt; -10.0  -6.5   2.0   5.0  10.0</span></span></code></pre></div>
 <p>For narrowband signals, PLV changes only slowly across lags, because
 a lag shift adds a nearly constant phase offset within a window. The
 best lag is then identified only through the tempo wander that the two
@@ -408,7 +408,7 @@ the center of each window:</p>
 <span><span class="co">#&gt;    optimum_lag rel_phase_lead </span></span>
 <span><span class="co">#&gt;           0.50           0.98</span></span></code></pre></div>
 <p>The PLV optima correlate 0.5 with the true lead, and the lead read
-from the relative phase at lag 0 correlates 0.98. Of the 206 optima, 44
+from the relative phase at lag 0 correlates 0.98. Of the 207 optima, 44
 sit at the edge of the lag range (-10 or 10 samples), where the search
 has no room on one side. In this example, the relative phase is the
 better reading of the lead–lag. <code><a href="../reference/leadership_asymmetry.html">leadership_asymmetry()</a></code>

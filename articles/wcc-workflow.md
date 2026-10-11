@@ -178,16 +178,16 @@ wcc_results <- wcc(
 summary(wcc_results)
 #> 
 #> ── Windowed Cross-Correlation Analysis ─────────────────────────────────────────
-#> Total Windows: 53
+#> Total Windows: 54
 #> Total Lags Tested: 91
 #> Window Size: 90
 #> Max Lag: 45
-#> Mean Abs. Fisher's Z: 0.452
+#> Mean Abs. Fisher's Z: 0.4512
 #> 
 #> ── Cross-Correlation Value Distribution ──
 #> 
 #>      0%     25%     50%     75%    100% 
-#> -0.8416 -0.2729  0.0133  0.3984  0.9982
+#> -0.8416 -0.2702  0.0183  0.3985  0.9982
 ```
 
 The [`wcc()`](https://jmgirard.github.io/bsync/reference/wcc.md)
@@ -259,9 +259,9 @@ wcc_peak <- wcc(
 )
 
 cat("mean_abs_z:", round(wcc_maz$aggregate[[1]], 4), "\n")
-#> mean_abs_z: 0.452
+#> mean_abs_z: 0.4512
 cat("peak:      ", round(wcc_peak$aggregate[[1]], 4), "\n")
-#> peak:       2.3383
+#> peak:       2.3445
 ```
 
 **Important:** Always pass the *same* `statistic` to
@@ -324,8 +324,8 @@ plan(sequential)
 print(surrogate_results)
 #> ── WCC Surrogate Analysis (Pseudo-Synchrony) ───────────────────────────────────
 #> Permutations: 1000
-#> Observed Mean Abs. Fisher's Z: 0.452
-#> Average Null Mean Abs. Fisher's Z: 0.3175
+#> Observed Mean Abs. Fisher's Z: 0.4512
+#> Average Null Mean Abs. Fisher's Z: 0.3177
 #> Empirical p-value: 0.001
 #> ✔ Observed synchrony is significantly greater than chance.
 ```
@@ -371,20 +371,20 @@ summary(wcc_optima_df)
 #> 
 #> ── Completeness ──
 #> 
-#> • Total time windows: 53
-#> • Valid optima retained: 44 (83%)
-#> • Optima dropped (NA): 9 (17%)
+#> • Total time windows: 54
+#> • Valid optima retained: 45 (83.3%)
+#> • Optima dropped (NA): 9 (16.7%)
 #> 
 #> ── Lag Directionality (Leadership) ──
 #> 
-#> • Positive Lags (x leads y): 24 (54.5%)
-#> • Negative Lags (y leads x): 19 (43.2%)
-#> • Zero Lags (Simultaneous): 1 (2.3%)
+#> • Positive Lags (x leads y): 25 (55.6%)
+#> • Negative Lags (y leads x): 19 (42.2%)
+#> • Zero Lags (Simultaneous): 1 (2.2%)
 #> 
 #> ── Optimum Value Distribution ──
 #> 
 #>     0%    25%    50%    75%   100% 
-#> 0.5837 0.9876 0.9932 0.9962 0.9982
+#> 0.5837 0.9878 0.9932 0.9962 0.9982
 ```
 
 ### 5.1 Interpreting the Optima Summary
@@ -529,7 +529,7 @@ glance(wcc_results)
 #> # A tibble: 1 × 7
 #>   mean_abs_z n_windows window_size window_increment lag_max lag_increment
 #>        <dbl>     <int>       <dbl>            <dbl>   <dbl>         <dbl>
-#> 1      0.452        53          90               30      45             1
+#> 1      0.451        54          90               30      45             1
 #> # ℹ 1 more variable: statistic <chr>
 ```
 
@@ -564,8 +564,8 @@ dplyr::bind_rows(
 #> # A tibble: 2 × 8
 #>   mean_abs_z n_windows window_size window_increment lag_max lag_increment
 #>        <dbl>     <int>       <dbl>            <dbl>   <dbl>         <dbl>
-#> 1      0.452        53          90               30      45             1
-#> 2     NA            53          90               30      45             1
+#> 1      0.451        54          90               30      45             1
+#> 2     NA            54          90               30      45             1
 #> # ℹ 2 more variables: statistic <chr>, peak <dbl>
 ```
 

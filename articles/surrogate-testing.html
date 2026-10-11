@@ -254,7 +254,7 @@ there are 23 orders, so the smallest p-value is 1/24.</li>
 <span>  window_size <span class="op">=</span> <span class="fl">96</span>, lag_max <span class="op">=</span> <span class="fl">10</span>, window_increment <span class="op">=</span> <span class="fl">116</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">seg_test</span><span class="op">$</span><span class="va">p_value</span></span>
-<span><span class="co">#&gt; [1] 0.17</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.16</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="pseudo-dyads-generate_surrogate_pseudo-generate_pseudo_dyads">1.5 Pseudo-Dyads (<code>generate_surrogate_pseudo</code>,
@@ -394,13 +394,13 @@ other nine dyads, ready for any surrogate wrapper.</p>
 <span></span>
 <span><span class="co"># Dyads called significant (p &lt;= .05) by the circular-shift null, out of 10</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">p_circular</span> <span class="op">&lt;=</span> <span class="fl">0.05</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 9</span></span>
+<span><span class="co">#&gt; [1] 8</span></span>
 <span></span>
 <span><span class="co"># Pseudo-dyad p-values, smallest first</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">p_pseudo</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] 0.1 0.1 0.3 0.4 0.5 0.6 0.7 0.7 0.9 1.0</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] 0.1 0.2 0.4 0.4 0.5 0.6 0.7 0.8 0.9 1.0</span></span></code></pre></div>
 <p>The circular-shift null breaks the shared task timeline, so it reads
-task-driven co-movement as synchrony: it calls 9 of the 10 dyads
+task-driven co-movement as synchrony: it calls 8 of the 10 dyads
 significant. The pseudo-dyad null keeps that timeline. Each pseudo-dyad
 p-value is <span class="math inline">\((b + 1) / (9 + 1)\)</span>, where
 <span class="math inline">\(b\)</span> counts the strangers who score at
@@ -446,10 +446,10 @@ B follows person A by 10 samples.</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">real_z</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
-<span><span class="co">#&gt;  0.1835  0.1974  0.2011  0.2052  0.2097  0.2458</span></span>
+<span><span class="co">#&gt;  0.1827  0.1962  0.1999  0.2036  0.2081  0.2433</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pseudo_z</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
-<span><span class="co">#&gt;  0.1430  0.1620  0.1681  0.1700  0.1774  0.1982</span></span></code></pre></div>
+<span><span class="co">#&gt;  0.1419  0.1610  0.1673  0.1687  0.1758  0.1966</span></span></code></pre></div>
 <p>The real dyads score higher than the pseudo-dyads, because only real
 partners share the 10-sample coupling. Both groups share the task
 timeline. How you compare the two distributions (a t-test, a permutation

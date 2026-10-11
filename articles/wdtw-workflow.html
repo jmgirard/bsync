@@ -219,13 +219,13 @@ consider using <code>"local"</code>.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">wdtw_results</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Windowed Dynamic Time Warping Analysis</span> <span style="color: #00BBBB;">──────────────────────────────────────</span></span></span>
-<span><span class="co">#&gt; Total Windows: 54</span></span>
+<span><span class="co">#&gt; Total Windows: 55</span></span>
 <span><span class="co">#&gt; Total Lags Tested: 91</span></span>
 <span><span class="co">#&gt; Window Size: 90</span></span>
 <span><span class="co">#&gt; Max Lag: 45</span></span>
 <span><span class="co">#&gt; Scale Method: global</span></span>
 <span><span class="co">#&gt; Distance Metric: L2</span></span>
-<span><span class="co">#&gt; Overall Mean Distance: 27.043</span></span></code></pre></div>
+<span><span class="co">#&gt; Overall Mean Distance: 27.0641</span></span></code></pre></div>
 <p>The <code><a href="../reference/wdtw.html">wdtw()</a></code> function returns a list object of class
 <code>wdtw_res</code> containing the results data frame, the overall
 mean distance, and the input settings.</p>
@@ -331,20 +331,20 @@ window to find the absolute minimum distance
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Completeness</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Total time windows: 54</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Valid optima retained: 54 (100%)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Total time windows: 55</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Valid optima retained: 55 (100%)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Optima dropped (NA): 0 (0%)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Lag Directionality (Leadership)</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Positive Lags (x leads y): 24 (44.4%)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Negative Lags (y leads x): 28 (51.9%)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Zero Lags (Simultaneous): 2 (3.7%)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Positive Lags (x leads y): 24 (43.6%)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Negative Lags (y leads x): 29 (52.7%)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Zero Lags (Simultaneous): 2 (3.6%)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Optimum Value Distribution</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     0%    25%    50%    75%   100% </span></span>
-<span><span class="co">#&gt; 4.1393 5.1405 5.4232 5.8031 6.8041</span></span></code></pre></div>
+<span><span class="co">#&gt; 4.1393 5.1591 5.4306 5.7994 6.8041</span></span></code></pre></div>
 <p>This returns a <code>wdtw_optima</code> data frame containing the
 elapsed time indices, the optimal lags, and the corresponding DTW
 distance values. The console output confirms that the search mode was

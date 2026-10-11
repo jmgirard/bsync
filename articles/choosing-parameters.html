@@ -217,7 +217,7 @@ override, which yields a longer 640-sample window:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 7</span></span></span>
 <span><span class="co">#&gt;   mean_abs_z n_windows window_size window_increment lag_max lag_increment</span></span>
 <span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       1.05        14         256              128     128             1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       1.05        15         256              128     128             1</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: statistic &lt;chr&gt;</span></span></span></code></pre></div>
 <div class="section level3">
 <h3 id="window-overlap-overlap_pct">Window overlap (<code>overlap_pct</code>)<a class="anchor" aria-label="anchor" href="#window-overlap-overlap_pct"></a>
@@ -268,14 +268,14 @@ autocorrelation inflates).</p>
 <span><span class="co">#&gt; Specifications: 12 (12 computable)</span></span>
 <span><span class="co">#&gt; Surrogates per cell: 100</span></span>
 <span><span class="co">#&gt; Significant (p &lt;= .05): 6 of 12 (50%)</span></span>
-<span><span class="co">#&gt; Median ES: 1.881 [IQR: 1.345]</span></span>
+<span><span class="co">#&gt; Median ES: 1.905 [IQR: 1.412]</span></span>
 <span><span class="co">#&gt; Sign-consistent (sig. cells): 100%</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mv</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 9</span></span></span>
 <span><span class="co">#&gt;   estimator n_cells n_valid n_significant pct_significant median_es iqr_es</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wcc            12      12             6             0.5      1.88   1.34</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wcc            12      12             6             0.5      1.91   1.41</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: sign_consistent &lt;dbl&gt;, n_surrogates &lt;int&gt;</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mv</span><span class="op">)</span></span></code></pre></div>
@@ -328,7 +328,7 @@ direction: <code>es</code> and <code>p</code> are x -&gt; y, and
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 10</span></span></span>
 <span><span class="co">#&gt;   estimator direction n_cells n_valid n_significant pct_significant median_es</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wgranger  xy              3       3             0               0     0.458</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> wgranger  xy              3       3             0               0     0.465</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: iqr_es &lt;dbl&gt;, sign_consistent &lt;dbl&gt;, n_surrogates &lt;int&gt;</span></span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mv_g</span>, direction <span class="op">=</span> <span class="st">"yx"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 10</span></span></span>
@@ -372,8 +372,8 @@ dyads with different signal characteristics).</p>
 <span><span class="co">#&gt; Max lag: 80 samples (1 s)</span></span>
 <span><span class="co">#&gt; Increment: 16 samples</span></span>
 <span><span class="co">#&gt; Sig. rate: 100% of dyads</span></span>
-<span><span class="co">#&gt; Median ES: 2.305 (IQR = 0.102)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Tuned over 3 dyads; 2 cells passed the detectability gate. Per-dyad multiverses in <span style="color: #00BB00;">$dyad_multiverses</span>.</span></span>
+<span><span class="co">#&gt; Median ES: 2.325 (IQR = 0.101)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Tuned over 3 dyads; 4 cells passed the detectability gate. Per-dyad multiverses in <span style="color: #00BB00;">$dyad_multiverses</span>.</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> These parameters were <span style="font-style: italic;">selected</span> to maximize effect size. Re-testing synchrony with them on the same dyads is circular; confirm on held-out dyads or report the multiverse robustness. See `?autotune_wcc()`.</span></span></code></pre></div>
 <p>Plug the result directly into <code><a href="../reference/wcc.html">wcc()</a></code>:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
@@ -389,7 +389,7 @@ dyads with different signal characteristics).</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 7</span></span></span>
 <span><span class="co">#&gt;   mean_abs_z n_windows window_size window_increment lag_max lag_increment</span></span>
 <span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       1.12       130         160               16      80             1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       1.12       131         160               16      80             1</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: statistic &lt;chr&gt;</span></span></span></code></pre></div>
 <div class="section level3">
 <h3 id="how-the-selection-rule-works">How the selection rule works<a class="anchor" aria-label="anchor" href="#how-the-selection-rule-works"></a>
@@ -455,16 +455,16 @@ without re-running the full sweep:</p>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $median_es</span></span>
-<span><span class="co">#&gt; [1] 2.305021</span></span>
+<span><span class="co">#&gt; [1] 2.324929</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $iqr_es</span></span>
-<span><span class="co">#&gt; [1] 0.1019227</span></span>
+<span><span class="co">#&gt; [1] 0.1011534</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $score</span></span>
-<span><span class="co">#&gt; [1] 2.25406</span></span>
+<span><span class="co">#&gt; [1] 2.274353</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $n_gated</span></span>
-<span><span class="co">#&gt; [1] 2</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 4</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="choosing-the-grid-to-sweep">Choosing the grid to sweep<a class="anchor" aria-label="anchor" href="#choosing-the-grid-to-sweep"></a>
