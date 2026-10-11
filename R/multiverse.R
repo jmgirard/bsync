@@ -644,7 +644,7 @@ synchrony_multiverse <- function(
   }
 
   # Warn about skipped cells (segment cells with too few segments and circular
-  # cells with no valid shift have their own warnings above)
+  # cells with fewer than 19 shifts have their own warnings above)
   n_skipped <- sum(skipped_vec & !seg_skip & !circ_skip)
   if (n_skipped > 0) {
     cli::cli_alert_warning(
