@@ -67,13 +67,16 @@ original: a cell with 4 segments uses \code{min(n_surrogates, 23)}
 surrogates, and 5 and 6 segments allow 119 and 719. The samples after
 the last whole segment stay in place (see
 \code{\link{generate_surrogate_segment}}).
-For \code{"wcc"} and \code{"wdtw"}, all circular cells share one
-surrogate matrix, made with \code{lag_max} equal to the largest
-\code{lag_max} in the grid. If the series is too short for that
-(\code{length(y) <= 4 * lag_max}), each circular cell that fits its
-window but has \code{length(y) <= 4 * lag_max} for its own
-\code{lag_max} is skipped with a warning, and the matrix is made with the
-largest \code{lag_max} of the circular cells that remain.}
+A \code{"circular"} cell shifts \code{y} by s samples with
+\code{m <= s <= n - m}, where n is \code{length(y)}. For \code{"wcc"}
+and \code{"wdtw"}, m is \code{2 * lag_max} for the cell's own
+\code{lag_max}. For \code{"wgranger"}, whose grid has no lags, m is the
+cell's \code{window_size}, so no window of the shifted series stays in
+its place. That gives k = n - 2 * m + 1 valid shifts. A cell uses
+\code{min(n_surrogates, k)} surrogates with distinct shifts, and cells
+with the same m share one surrogate matrix. A circular cell that fits
+its window but has k < 19 cannot reach p <= .05, so it is skipped with
+a warning, also when \code{n_surrogates} is below 19.}
 
 \item{n_surrogates}{Single positive integer; number of surrogates per cell.
 Default is `100`. Use >= 1000 for reporting. A cell is significant at

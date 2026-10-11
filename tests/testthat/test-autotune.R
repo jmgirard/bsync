@@ -470,11 +470,13 @@ test_that("autotune_wcc announces repeated cells once and gates kept cells only"
   expect_identical(res$n_cells_gated, 3L)
 })
 
-test_that("autotune_wcc warns once about circular cells with no valid shift", {
+test_that("autotune_wcc warns once about circular cells with too few shifts", {
+  # Window 10 on 30 samples: lag 2 has shifts 4 to 26 (23 shifts) and runs;
+  # lag 5 has shifts 10 to 20 (11 shifts), fewer than 19, so it is skipped.
   set.seed(43)
   dl <- replicate(
     3,
-    list(x = stats::rnorm(20), y = stats::rnorm(20)),
+    list(x = stats::rnorm(30), y = stats::rnorm(30)),
     simplify = FALSE
   )
   got <- list()

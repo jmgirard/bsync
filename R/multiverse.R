@@ -192,13 +192,16 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'   surrogates, and 5 and 6 segments allow 119 and 719. The samples after
 #'   the last whole segment stay in place (see
 #'   \code{\link{generate_surrogate_segment}}).
-#'   For \code{"wcc"} and \code{"wdtw"}, all circular cells share one
-#'   surrogate matrix, made with \code{lag_max} equal to the largest
-#'   \code{lag_max} in the grid. If the series is too short for that
-#'   (\code{length(y) <= 4 * lag_max}), each circular cell that fits its
-#'   window but has \code{length(y) <= 4 * lag_max} for its own
-#'   \code{lag_max} is skipped with a warning, and the matrix is made with the
-#'   largest \code{lag_max} of the circular cells that remain.
+#'   A \code{"circular"} cell shifts \code{y} by s samples with
+#'   \code{m <= s <= n - m}, where n is \code{length(y)}. For \code{"wcc"}
+#'   and \code{"wdtw"}, m is \code{2 * lag_max} for the cell's own
+#'   \code{lag_max}. For \code{"wgranger"}, whose grid has no lags, m is the
+#'   cell's \code{window_size}, so no window of the shifted series stays in
+#'   its place. That gives k = n - 2 * m + 1 valid shifts. A cell uses
+#'   \code{min(n_surrogates, k)} surrogates with distinct shifts, and cells
+#'   with the same m share one surrogate matrix. A circular cell that fits
+#'   its window but has k < 19 cannot reach p <= .05, so it is skipped with
+#'   a warning, also when \code{n_surrogates} is below 19.
 #' @param n_surrogates Single positive integer; number of surrogates per cell.
 #'   Default is `100`. Use >= 1000 for reporting. A cell is significant at
 #'   p <= .05. Below 19 the call warns, because the smallest possible
@@ -419,36 +422,23 @@ synchrony_multiverse <- function(
     inform_segment_aligned(is_granger)
   }
 
-  # --- Pre-generate one surrogate matrix per surrogate_method -----------
-  # For circular, we use the largest lag_max in the grid as the minimum shift
-  # (more conservative; valid for all cells), or, when the series is too short
-  # for it, the largest lag of the circular cells that can shift (below). For
-  # Granger with no lag_sec, use n/4 as a safe default.
+  # --- Pre-generate the surrogate matrices -------------------------------
+  # Phase and IAAFT: one matrix per method. Circular (D-005): a cell shifts y
+  # by at least 2 * lag_max of its own lag (wcc, wdtw) or by at least its
+  # window (wgranger, whose grid has no lags), and by at most n minus that
+  # minimum. That gives k = n - 2 * min_shift + 1 valid shifts. A cell uses
+  # min(n_surrogates, k) distinct shifts, so one matrix serves each distinct
+  # minimum shift. A cell that fits its window with k < 19 cannot reach
+  # p <= .05 and is skipped. A cell too short for its window is skipped below
+  # as too short.
   unique_methods <- setdiff(unique(grid_params$surrogate_method), "segment")
 
-  circ_skip <- rep(FALSE, n_cells)
-  if (!is_granger) {
-    # Largest lag_max across the grid (in samples, pre-capped at window/2)
-    circ_lag_max <- as.numeric(max(l_samp_all))
-    # generate_surrogate_circular() needs n > 4 * lag_max. If the grid's
-    # largest lag is too long, skip each circular cell that fits its window
-    # but has no valid shift at its own lag, and use the largest lag of the
-    # circular cells that remain. A cell too short for its window is skipped
-    # below as too short. When n > 4 * the largest lag, nothing changes.
-    if ("circular" %in% unique_methods && n <= 4 * circ_lag_max) {
-      is_circ <- grid_params$surrogate_method == "circular"
-      fits <- n >= grid_min_length(w_samp_all, l_samp_all, lagged = TRUE)
-      circ_skip <- is_circ & fits & n <= 4L * l_samp_all
-      circ_ok <- is_circ & fits & !circ_skip
-      if (any(circ_ok)) {
-        circ_lag_max <- as.numeric(max(l_samp_all[circ_ok]))
-      } else {
-        unique_methods <- setdiff(unique_methods, "circular")
-      }
-    }
-  } else {
-    circ_lag_max <- max(1L, round(n / 4L))
-  }
+  is_circ <- grid_params$surrogate_method == "circular"
+  circ_min_shift <- if (is_granger) w_samp_all else 2L * l_samp_all
+  circ_k <- pmax(0L, n - 2L * circ_min_shift + 1L)
+  fits <- n >= grid_min_length(w_samp_all, l_samp_all, lagged = !is_granger)
+  circ_skip <- is_circ & fits & circ_k < 19L
+  circ_min_shifts <- unique(circ_min_shift[is_circ & fits & !circ_skip])
 
   surr_matrices <- lapply(unique_methods, function(method) {
     if (method == "phase") {
@@ -477,10 +467,13 @@ synchrony_multiverse <- function(
         }
       )
     } else {
-      generate_surrogate_circular(y,
-        n_surrogates = n_surrogates,
-        lag_max = circ_lag_max
-      )
+      # Drawn here, in the slot of the circular method, so a grid with one
+      # minimum shift draws the same random numbers as one matrix did.
+      circ <- lapply(circ_min_shifts, function(m) {
+        circular_shift_matrix(y, draw_circular_shifts(n, n_surrogates, m))
+      })
+      names(circ) <- as.character(circ_min_shifts)
+      circ
     }
   })
   names(surr_matrices) <- unique_methods
@@ -558,15 +551,26 @@ synchrony_multiverse <- function(
     }
 
     if (circ_skip[ci]) {
+      k <- circ_k[ci]
+      m <- circ_min_shift[ci]
       cli::cli_warn(
         c(
-          "Skipped a circular cell with {.arg window_size} = {w_samp}, \\
-          {.arg lag_max} = {l_samp}, and {.arg window_increment} = \\
-          {inc_samp} samples.",
-          "i" = "Circular shifts need more than {.code 4 * lag_max} = \\
-          {4L * l_samp} samples, and the series has {n}."
+          if (is_granger) {
+            "Skipped a circular cell with {.arg window_size} = {w_samp} and \\
+            {.arg window_increment} = {inc_samp} samples."
+          } else {
+            "Skipped a circular cell with {.arg window_size} = {w_samp}, \\
+            {.arg lag_max} = {l_samp}, and {.arg window_increment} = \\
+            {inc_samp} samples."
+          },
+          "i" = "Its shifts must be {m} to {n - m} samples on a series of \\
+          {n}, which gives {k} distinct shift{?s}. A circular cell needs at \\
+          least 19 to reach p <= .05."
         ),
-        class = "bsync_circular_skipped"
+        class = "bsync_circular_skipped",
+        window_size = w_samp,
+        lag_max = l_samp,
+        n_shifts = k
       )
     }
 
@@ -592,6 +596,8 @@ synchrony_multiverse <- function(
 
     y_surr <- if (s_method == "segment") {
       seg_matrices[[as.character(seg_size_all[ci])]]
+    } else if (s_method == "circular") {
+      surr_matrices$circular[[as.character(circ_min_shift[ci])]]
     } else {
       surr_matrices[[s_method]]
     }

@@ -71,7 +71,8 @@ circular_shift_matrix <- function(y, shifts) {
 draw_circular_shifts <- function(n, n_surrogates, min_shift) {
   valid_shifts <- min_shift:(n - min_shift)
   valid_shifts[sample.int(
-    length(valid_shifts), min(n_surrogates, length(valid_shifts))
+    length(valid_shifts),
+    min(n_surrogates, length(valid_shifts))
   )]
 }
 
