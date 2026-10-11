@@ -2,16 +2,15 @@
 
 _The only authority on milestone status. Grouped by status, not ID._
 _Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M019)._
-_Last hygiene check: 2026-10-11 (M017 merged and archived, M014 row pruned, 3 candidate rows and 2 lessons added, validate green)_
+_Last hygiene check: 2026-10-11 (M018 merged and archived, M015 row pruned, 1 review candidate row and 1 lesson added, validate green)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M018 | Multiverse bookkeeping: repeated cells, surrogate counts, circular skips | review | — | normal | milestones/M018-multiverse-bookkeeping.md |
+| M018 | Multiverse bookkeeping: repeated cells, surrogate counts, circular skips | done | — | normal | milestones/archive/M018-multiverse-bookkeeping.md |
 | M017 | Count every window that fits when window_increment > 1 | done | — | normal | milestones/archive/M017-window-count-fix.md |
 | M016 | wphase parity: selectable statistic and workflow article | done | — | normal | milestones/archive/M016-wphase-parity.md |
-| M015 | Segment-shuffling surrogate generator | done | M014 | normal | milestones/archive/M015-segment-shuffle-surrogates.md |
 <!-- rows grouped by status, not sorted by ID; keep only the 3 most recent
      terminal (done or dropped) rows — older ones live in milestones/archive/ + git -->
 
