@@ -79,6 +79,7 @@ Make `synchrony_multiverse()` and `autotune_wcc()` report each specification onc
 - 2026-10-11: T6 done. The fields sit after `lag_sec` in the order `increment_pct`, `statistic`, `surrogate_method`. `print()` shows the "Statistic" and "Surrogates" lines only when the fields exist, so a result made before this change prints as before. The structure test's expected names gained the three fields. Suite: 2665 pass, 0 fail.
 - 2026-10-11: T7 done. NEWS.md has a "Multiverse results" section with five entries. `choosing-parameters.Rmd` explains why its 4 x 3 grid has 9 cells (checked by a run: 3 dropped). No vdiffr snapshot changed in any task. `air format` was run only on `test-multiverse-direction.R` (air-clean on main) and the new pin file. `spell_check_package()` found no errors. `devtools::check()` gave 0 errors, 0 warnings, and 0 notes.
 - 2026-10-11: claim audit: 76 claims read, 4 corrected — R/autotune.R (circular skip doc), R/multiverse.R (repeated-cell message causes), NEWS.md (repeat causes, "up to" condition, circular cells that fit)
+- 2026-10-11: step-7 approval: m018-multiverse-bookkeeping approved for merge
 - 2026-10-11: implementation complete. Status set to review. The multiverse, autotune, and tidy tests pass (356) after the claim fixes.
 
 ## Decisions
