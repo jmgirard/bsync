@@ -8,7 +8,7 @@ _Last hygiene check: 2026-10-07 (M016 merged and archived, M013 row pruned, 3 le
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M017 | Count every window that fits when window_increment > 1 | planned | — | normal | milestones/M017-window-count-fix.md |
+| M017 | Count every window that fits when window_increment > 1 | review | — | normal | milestones/M017-window-count-fix.md |
 | M016 | wphase parity: selectable statistic and workflow article | done | — | normal | milestones/archive/M016-wphase-parity.md |
 | M015 | Segment-shuffling surrogate generator | done | M014 | normal | milestones/archive/M015-segment-shuffle-surrogates.md |
 | M014 | IAAFT surrogate generator | done | — | normal | milestones/archive/M014-iaaft-surrogates.md |
@@ -39,3 +39,6 @@ _Last hygiene check: 2026-10-07 (M016 merged and archived, M013 row pruned, 3 le
 - [low] Calibration tidy-up: record the size of phase randomization on a plain AR(1) pair (one 2000-pair row), and tighten the IAAFT bound from 0.08 at 400 pairs to 0.07 at 1000 pairs. Do it in the next milestone that edits the IAAFT test in `test-surrogate-calibration.R` — added 2026-10-07 — M015 RR01 B4, B5, M015 review (blame-history #6)
 - [low] IAAFT on long series: at 10000 samples most surrogates reach `max_iter = 1000` before the fixed point, and `synchrony_multiverse()` / `autotune_wcc()` do not expose `max_iter`. Options: pass `max_iter` through, or stop at a spectral-accuracy target (the paper's own stop). Promote when users hit routine non-convergence warnings or slow IAAFT runs on long recordings — added 2026-10-06 — M014 review (diff-bug #2)
 - [low] IAAFT rank-step tie test: the tie rule of the rank step has no test, and a test against the explicit-DFT reference is not well posed on tied input (FFT and DFT round near-ties differently). Test it through an extracted rank helper. Promote with the next change to the rank step — added 2026-10-06 — M014 review (diff-bug #8)
+- [low] Circular surrogates at the minimum length: `generate_surrogate_circular()` aborts when `n <= 4 * lag_max`. `synchrony_multiverse()` passes the grid's largest lag (or `round(n / 4)` for Granger), so a series of exactly `window_size + 2 * lag_max` samples with `lag_sec = window_sec / 2` (window 10, lag 5, n 20) stops the whole call instead of computing or skipping the cell. Pre-existing on main. Promote when a user runs the multiverse on short series — added 2026-10-10 — M017 review (diff-bug #3)
+- [low] Window counts are doubles: `build_surface_grid()` returns `n_r` as a double (`floor() + 1L`), so `n_windows` in `synchrony_multiverse()` results is double, though the helper's docs say integer. Pre-existing on main. Promote with the next grid or multiverse output change — added 2026-10-10 — M017 review (diff-bug #5)
+- [low] `suggest_wcc_params()` window bound text: its docs say `window_size <= floor(series_length / 2)` ensures two non-overlapping windows fit, but with `lag_max > 0` two windows need `2 * window_size + 2 * lag_max` samples. Pre-existing on main. Promote with the next `suggest_wcc_params()` edit — added 2026-10-10 — M017 review (diff-bug #7)

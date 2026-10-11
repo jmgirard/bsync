@@ -472,11 +472,7 @@ synchrony_multiverse <- function(
     }
 
     # Guard against short series (build_surface_grid would abort)
-    min_n <- if (is_granger) {
-      (w_samp - 1L) + inc_samp # at least one window
-    } else {
-      (w_samp - 1L) + 2L * l_samp + inc_samp
-    }
+    min_n <- grid_min_length(w_samp, l_samp, lagged = !is_granger)
     if (seg_skip[ci] || n < min_n) {
       skipped_vec[ci] <- TRUE
       observed_vec[ci] <- NA_real_
