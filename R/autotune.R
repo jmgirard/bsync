@@ -86,7 +86,9 @@
 #'   than 4 segments is skipped with a warning. A cell with k segments uses
 #'   \code{min(n_surrogates, k! - 1)} surrogates, so a cell with 4 segments
 #'   uses \code{min(n_surrogates, 23)}. The default \code{lag_sec} is crossed
-#'   with every window, so a segment is not always twice the window. See
+#'   with every window, so a segment is not always twice the window. A
+#'   \code{"circular"} cell whose series is not longer than
+#'   \code{4 * lag_max} samples is skipped with one warning per call. See
 #'   \code{\link{synchrony_multiverse}} and
 #'   \code{\link{generate_surrogate_segment}}.
 #' @param n_surrogates Single positive integer; surrogates per cell per dyad.
@@ -245,6 +247,7 @@ autotune_wcc <- function(
   # The repeated-cell count depends only on the arguments, so it is the same
   # for every dyad.
   n_dropped <- 0L
+  circ_skip_dyads <- integer(0)
   mv_list <- lapply(seq_along(tune_list), function(i) {
     xy <- tune_list[[i]]
     unconverged <- FALSE
@@ -271,6 +274,10 @@ autotune_wcc <- function(
         seg_skip_dyads <<- union(seg_skip_dyads, tune_idx[i])
         invokeRestart("muffleWarning")
       },
+      bsync_circular_skipped = function(w) {
+        circ_skip_dyads <<- union(circ_skip_dyads, tune_idx[i])
+        invokeRestart("muffleWarning")
+      },
       bsync_iaaft_unconverged = function(w) {
         unconverged <<- TRUE
         invokeRestart("muffleWarning")
@@ -293,6 +300,18 @@ autotune_wcc <- function(
         give fewer than 4 segments, so those cells cannot reach p <= .05."
       ),
       class = "bsync_segment_skipped"
+    )
+  }
+  if (length(circ_skip_dyads) > 0) {
+    n_skip <- length(circ_skip_dyads)
+    cli::cli_warn(
+      c(
+        "Skipped circular cells in {cli::qty(n_skip)}dyad{?s} \\
+        {circ_skip_dyads} of {.arg dyad_list}.",
+        "i" = "Circular shifts need more than {.code 4 * lag_max} samples, \\
+        and those series are not longer than that."
+      ),
+      class = "bsync_circular_skipped"
     )
   }
   if (n_unconverged_dyads > 0) {

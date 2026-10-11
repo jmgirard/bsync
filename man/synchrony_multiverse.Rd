@@ -65,7 +65,14 @@ surrogates, because k segments have k! - 1 orders other than the
 original: a cell with 4 segments uses \code{min(n_surrogates, 23)}
 surrogates, and 5 and 6 segments allow 119 and 719. The samples after
 the last whole segment stay in place (see
-\code{\link{generate_surrogate_segment}}).}
+\code{\link{generate_surrogate_segment}}).
+For \code{"wcc"} and \code{"wdtw"}, all circular cells share one
+surrogate matrix, made with \code{lag_max} equal to the largest
+\code{lag_max} in the grid. If the series is too short for that
+(\code{length(y) <= 4 * lag_max}), each circular cell that fits its
+window but has \code{length(y) <= 4 * lag_max} for its own
+\code{lag_max} is skipped with a warning, and the matrix is made with the
+largest \code{lag_max} of the circular cells that remain.}
 
 \item{n_surrogates}{Single positive integer; number of surrogates per cell.
 Default is `100`. Use >= 1000 for reporting. A cell is significant at

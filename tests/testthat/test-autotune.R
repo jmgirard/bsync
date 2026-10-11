@@ -468,3 +468,32 @@ test_that("autotune_wcc announces repeated cells once and gates kept cells only"
   # With sig_pct = 0 every computed cell passes the gate: 3 kept cells, not 4.
   expect_identical(res$n_cells_gated, 3L)
 })
+
+test_that("autotune_wcc warns once about circular cells with no valid shift", {
+  set.seed(43)
+  dl <- replicate(
+    3,
+    list(x = stats::rnorm(20), y = stats::rnorm(20)),
+    simplify = FALSE
+  )
+  got <- list()
+  res <- withCallingHandlers(
+    autotune_wcc(
+      dl,
+      sample_rate = 1,
+      window_sec = 10,
+      lag_sec = c(2, 5),
+      surrogate_method = "circular",
+      n_surrogates = 9L
+    ),
+    bsync_circular_skipped = function(w) {
+      got[[length(got) + 1L]] <<- w
+      invokeRestart("muffleWarning")
+    },
+    warning = function(w) invokeRestart("muffleWarning"),
+    message = function(m) invokeRestart("muffleMessage")
+  )
+  expect_length(got, 1L)
+  expect_match(conditionMessage(got[[1]]), "dyads 1, 2, and 3")
+  expect_identical(res$lag_max, 2L)
+})

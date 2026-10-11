@@ -864,3 +864,72 @@ test_that("a result without the n_surrogates column prints the requested count",
   expect_identical(glance(m)$n_surrogates_min, NA_integer_)
   expect_identical(glance(m)$n_surrogates, 50L)
 })
+
+test_that("a circular cell with no valid shift is skipped, not an abort", {
+  # n = 20, window 10, lag 5: the window fits (10 + 2 * 5 = 20), but
+  # circular shifts need n > 4 * 5 = 20. On main the call stopped.
+  set.seed(40)
+  x <- rnorm(20)
+  y <- rnorm(20)
+  out <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 1,
+      window_sec = 10, lag_sec = 5,
+      surrogate_method = "circular", n_surrogates = 19L
+    ),
+    "bsync_circular_skipped"
+  )
+  expect_length(out$cnds, 1L)
+  expect_match(conditionMessage(out$cnds[[1]]), "lag_max` = 5 samples")
+  g <- out$res$grid
+  expect_identical(g$lag_max, 5L)
+  expect_identical(g$n_windows, 0L)
+  expect_identical(g$n_surrogates, 0L)
+  expect_true(is.na(g$es))
+  expect_true(is.na(g$p))
+})
+
+test_that("circular cells with a valid shift still compute on a short series", {
+  set.seed(41)
+  x <- rnorm(20)
+  y <- rnorm(20)
+  # Cells: (10, 2) and (12, 2) compute; (10, 5) fits its window but has no
+  # valid shift; (12, 5) needs 22 samples, so it is only too short.
+  out <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 1,
+      window_sec = c(10, 12), lag_sec = c(2, 5),
+      surrogate_method = c("circular", "phase"), n_surrogates = 9L
+    ),
+    "bsync_circular_skipped"
+  )
+  expect_length(out$cnds, 1L)
+  g <- out$res$grid
+  circ <- g[g$surrogate_method == "circular", ]
+  expect_identical(circ$window_size, c(10L, 12L, 10L, 12L))
+  expect_identical(circ$lag_max, c(2L, 2L, 5L, 5L))
+  expect_identical(!is.na(circ$es), c(TRUE, TRUE, FALSE, FALSE))
+  expect_identical(circ$n_surrogates, c(9L, 9L, 0L, 0L))
+  # The phase cell with lag 5 and window 10 still computes.
+  ph <- g[g$surrogate_method == "phase" & g$window_size == 10L & g$lag_max == 5L, ]
+  expect_false(is.na(ph$es))
+})
+
+test_that("a circular grid on a long series makes no skip", {
+  set.seed(42)
+  x <- rnorm(60)
+  y <- rnorm(60)
+  out <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 1,
+      window_sec = 10, lag_sec = 5,
+      surrogate_method = "circular", n_surrogates = 9L
+    ),
+    "bsync_circular_skipped"
+  )
+  expect_length(out$cnds, 0L)
+  expect_false(is.na(out$res$grid$es))
+})

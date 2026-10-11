@@ -187,6 +187,13 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'   surrogates, and 5 and 6 segments allow 119 and 719. The samples after
 #'   the last whole segment stay in place (see
 #'   \code{\link{generate_surrogate_segment}}).
+#'   For \code{"wcc"} and \code{"wdtw"}, all circular cells share one
+#'   surrogate matrix, made with \code{lag_max} equal to the largest
+#'   \code{lag_max} in the grid. If the series is too short for that
+#'   (\code{length(y) <= 4 * lag_max}), each circular cell that fits its
+#'   window but has \code{length(y) <= 4 * lag_max} for its own
+#'   \code{lag_max} is skipped with a warning, and the matrix is made with the
+#'   largest \code{lag_max} of the circular cells that remain.
 #' @param n_surrogates Single positive integer; number of surrogates per cell.
 #'   Default is `100`. Use >= 1000 for reporting. A cell is significant at
 #'   p <= .05. Below 19 the call warns, because the smallest possible
@@ -411,9 +418,26 @@ synchrony_multiverse <- function(
   # use n/4 as a safe default.
   unique_methods <- setdiff(unique(grid_params$surrogate_method), "segment")
 
+  circ_skip <- rep(FALSE, n_cells)
   if (!is_granger) {
     # Largest lag_max across the grid (in samples, pre-capped at window/2)
     circ_lag_max <- as.numeric(max(l_samp_all))
+    # generate_surrogate_circular() needs n > 4 * lag_max. If the grid's
+    # largest lag is too long, skip each circular cell that fits its window
+    # but has no valid shift at its own lag, and use the largest lag of the
+    # circular cells that remain. A cell too short for its window is skipped
+    # below as too short. When n > 4 * the largest lag, nothing changes.
+    if ("circular" %in% unique_methods && n <= 4 * circ_lag_max) {
+      is_circ <- grid_params$surrogate_method == "circular"
+      fits <- n >= grid_min_length(w_samp_all, l_samp_all, lagged = TRUE)
+      circ_skip <- is_circ & fits & n <= 4L * l_samp_all
+      circ_ok <- is_circ & fits & !circ_skip
+      if (any(circ_ok)) {
+        circ_lag_max <- as.numeric(max(l_samp_all[circ_ok]))
+      } else {
+        unique_methods <- setdiff(unique_methods, "circular")
+      }
+    }
   } else {
     circ_lag_max <- max(1L, round(n / 4L))
   }
@@ -525,9 +549,21 @@ synchrony_multiverse <- function(
       )
     }
 
+    if (circ_skip[ci]) {
+      cli::cli_warn(
+        c(
+          "Skipped a circular cell with {.arg window_size} = {w_samp} and \\
+          {.arg lag_max} = {l_samp} samples.",
+          "i" = "Circular shifts need more than {.code 4 * lag_max} = \\
+          {4L * l_samp} samples, and the series has {n}."
+        ),
+        class = "bsync_circular_skipped"
+      )
+    }
+
     # Guard against short series (build_surface_grid would abort)
     min_n <- grid_min_length(w_samp, l_samp, lagged = !is_granger)
-    if (seg_skip[ci] || n < min_n) {
+    if (seg_skip[ci] || circ_skip[ci] || n < min_n) {
       skipped_vec[ci] <- TRUE
       observed_vec[ci] <- NA_real_
       null_mean_vec[ci] <- NA_real_
@@ -592,9 +628,9 @@ synchrony_multiverse <- function(
     }
   }
 
-  # Warn about skipped cells (segment cells with too few segments have their
-  # own warning above)
-  n_skipped <- sum(skipped_vec & !seg_skip)
+  # Warn about skipped cells (segment cells with too few segments and circular
+  # cells with no valid shift have their own warnings above)
+  n_skipped <- sum(skipped_vec & !seg_skip & !circ_skip)
   if (n_skipped > 0) {
     cli::cli_alert_warning(
       "{n_skipped} cell{?s} skipped: series too short for the requested parameters."
