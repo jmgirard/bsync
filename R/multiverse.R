@@ -434,8 +434,9 @@ synchrony_multiverse <- function(
   unique_methods <- setdiff(unique(grid_params$surrogate_method), "segment")
 
   is_circ <- grid_params$surrogate_method == "circular"
-  # A 1-sample window caps its lag to 0. A shift of 0 or n leaves y in place,
-  # so the minimum shift is at least 1 sample.
+  # A 1-sample window caps its lag to 0. A shift of 0 or n would leave y in
+  # place (and circular_shift_matrix() cannot build it), so the minimum shift
+  # is at least 1 sample.
   circ_min_shift <- if (is_granger) w_samp_all else pmax(1L, 2L * l_samp_all)
   circ_k <- pmax(0L, n - 2L * circ_min_shift + 1L)
   fits <- n >= grid_min_length(w_samp_all, l_samp_all, lagged = !is_granger)

@@ -331,8 +331,9 @@ test_that("a circular cell too short for its window gives no circular warning", 
 
 test_that("a lag-0 circular cell (1-sample window) shifts by 1 to n - 1", {
   # The lag cap makes lag 0 for a 1-sample window. Its minimum shift is 1
-  # sample, so its shifts run from 1 to n - 1. Before the floor, the cell drew
-  # shift 0 or n and the whole call stopped.
+  # sample, so its shifts run from 1 to n - 1. Without the floor, the cell's
+  # shifts ran from 0 to n. This draw includes 0 or n, which stopped the whole
+  # call.
   set.seed(100)
   x <- rnorm(100)
   y <- rnorm(100)
