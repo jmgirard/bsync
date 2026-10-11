@@ -224,10 +224,9 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'       `es_yx`, and `p_yx` for y -> x). The integer column
 #'       \code{n_surrogates} is the number of surrogate series that the test of
 #'       the cell used. It is the requested \code{n_surrogates}, except for a
-#'       segment cell with k segments, which uses at most k! - 1, and it is 0
-#'       for a cell that was not computed (\code{n_windows} 0). Circular
-#'       surrogates are counted with repeated shifts, so with few valid
-#'       shifts a cell can hold fewer distinct surrogates.}
+#'       segment cell with k segments, which uses at most k! - 1, and a
+#'       circular cell with k valid shifts, which uses at most k. It is 0
+#'       for a cell that was not computed (\code{n_windows} 0).}
 #'     \item{`$settings`}{Named list of call-level inputs, plus
 #'       \code{n_cells} (cells kept) and \code{n_dropped} (repeated cells
 #'       dropped before testing).}
@@ -898,7 +897,7 @@ multiverse_surrogates_min <- function(x) {
 
 # "Surrogates per cell" text: the requested count when every computed cell
 # used it, else "up to <requested> (fewest <m>)". Segment cells with few
-# segments use fewer than requested.
+# segments and circular cells with few valid shifts use fewer than requested.
 multiverse_surrogate_text <- function(x) {
   requested <- x$settings$n_surrogates
   fewest <- multiverse_surrogates_min(x)
