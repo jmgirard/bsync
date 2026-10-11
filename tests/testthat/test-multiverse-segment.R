@@ -252,21 +252,29 @@ test_that("no aligned-design message when every segment cell is skipped", {
   )
 })
 
-test_that("repeated user inputs keep their segment rows", {
+test_that("repeated user inputs give one row per specification", {
   set.seed(611)
-  mv <- suppressMessages(synchrony_multiverse(
-    seg_pair$x,
-    seg_pair$y,
-    estimator = "wcc",
-    sample_rate = 1,
-    window_sec = c(16, 16),
-    lag_sec = 2,
-    increment_pct = c(0.1, 0.5),
-    surrogate_method = c("phase", "segment"),
-    n_surrogates = 19
-  ))
-  expect_identical(sum(mv$grid$surrogate_method == "phase"), 4L)
-  expect_identical(sum(mv$grid$surrogate_method == "segment"), 2L)
+  expect_message(
+    suppressMessages(
+      mv <- synchrony_multiverse(
+        seg_pair$x,
+        seg_pair$y,
+        estimator = "wcc",
+        sample_rate = 1,
+        window_sec = c(16, 16),
+        lag_sec = 2,
+        increment_pct = c(0.1, 0.5),
+        surrogate_method = c("phase", "segment"),
+        n_surrogates = 19
+      ),
+      classes = "bsync_segment_aligned"
+    ),
+    class = "bsync_duplicate_cells"
+  )
+  # The second window_sec copy repeats the first, so one phase row per
+  # increment and one segment row remain.
+  expect_identical(sum(mv$grid$surrogate_method == "phase"), 2L)
+  expect_identical(sum(mv$grid$surrogate_method == "segment"), 1L)
 })
 
 test_that("grid sample-count columns are integer", {

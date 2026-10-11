@@ -437,3 +437,34 @@ test_that("autotune_wcc rejects a single data frame as dyad_list", {
     "not a single data frame"
   )
 })
+
+test_that("autotune_wcc announces repeated cells once and gates kept cells only", {
+  set.seed(35)
+  dl <- replicate(
+    3,
+    list(x = stats::rnorm(400), y = stats::rnorm(400)),
+    simplify = FALSE
+  )
+  got <- list()
+  res <- withCallingHandlers(
+    suppressWarnings(autotune_wcc(
+      dl,
+      sample_rate = 80,
+      window_sec = c(1, 2),
+      n_surrogates = 5L,
+      sig_pct = 0
+    )),
+    bsync_duplicate_cells = function(m) {
+      got[[length(got) + 1L]] <<- m
+      invokeRestart("muffleMessage")
+    },
+    message = function(m) invokeRestart("muffleMessage")
+  )
+  # The default lag_sec = window_sec / 2 crossed with both windows gives
+  # window 1 s with lag 1 s, which the lag cap makes a repeat of lag 0.5 s.
+  expect_length(got, 1L)
+  expect_identical(got[[1]]$n_dropped, 1L)
+  expect_true(all(vapply(res$dyad_multiverses, function(m) nrow(m$grid), 1L) == 3L))
+  # With sig_pct = 0 every computed cell passes the gate: 3 kept cells, not 4.
+  expect_identical(res$n_cells_gated, 3L)
+})

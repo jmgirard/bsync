@@ -60,6 +60,23 @@ inform_segment_aligned <- function(is_granger) {
   )
 }
 
+# Cells that repeat an earlier cell in samples are dropped. The class lets
+# autotune_wcc() give this message once instead of once per dyad, and the
+# n_dropped field carries the count.
+inform_duplicate_cells <- function(n_dropped) {
+  cli::cli_inform(
+    c(
+      "Dropped {n_dropped} cell{?s} that repeat{?s/} an earlier cell in \\
+      samples.",
+      "i" = "The cap of {.arg lag_max} at {.code floor(window_size / 2)} and \\
+      the rounding of seconds to samples can give two cells the same \\
+      samples. The first cell in grid order is kept."
+    ),
+    class = "bsync_duplicate_cells",
+    n_dropped = n_dropped
+  )
+}
+
 # Robustness summary of a multiverse grid. Valid cells are the non-skipped
 # cells with a computable ES. Significance uses is_significant(), so an NA
 # p-value is never significant.
@@ -106,6 +123,13 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #' `increment_pct` (see `surrogate_method`). Seconds are converted to samples
 #' per cell; `lag_max` is
 #' hard-capped at `floor(window_size / 2)` to preserve statistical reliability.
+#' The cap and the rounding of seconds to samples can give two cells the same
+#' `window_size`, `lag_max`, and `window_increment` in samples, with the same
+#' `surrogate_method` and `statistic`. Such repeated cells are dropped, with a
+#' message, and the first cell in grid order is kept. Each specification is
+#' then tested once, and `settings$n_cells` and the robustness summary count
+#' it once. For example, `lag_sec = window_sec / 2` crossed with several
+#' windows gives repeats.
 #' Cells where the series is too short are skipped with a message and appear
 #' as `NA` rows in the output grid.
 #'
@@ -344,6 +368,29 @@ synchrony_multiverse <- function(
     seg_size_all,
     pmax(1L, round(w_samp_all * grid_params$increment_pct))
   ))
+
+  # Repeated cells: the lag cap and the rounding of seconds to samples can
+  # give two cells the same samples. Keep the first in grid order, so each
+  # specification is tested and counted once. The keys depend only on the
+  # arguments, not on the data, so every dyad of autotune_wcc() keeps the same
+  # cells and select_specification() can match cells by row. duplicated()
+  # treats NA keys (Granger lags, statistics) as equal.
+  keep <- !duplicated(data.frame(
+    w_samp_all, l_samp_all, inc_samp_all,
+    grid_params$surrogate_method, grid_params$statistic
+  ))
+  n_dropped <- sum(!keep)
+  if (n_dropped > 0) {
+    grid_params <- grid_params[keep, , drop = FALSE]
+    rownames(grid_params) <- NULL
+    w_samp_all <- w_samp_all[keep]
+    l_samp_all <- l_samp_all[keep]
+    inc_samp_all <- inc_samp_all[keep]
+    seg_size_all <- seg_size_all[keep]
+    is_seg <- is_seg[keep]
+    n_cells <- nrow(grid_params)
+    inform_duplicate_cells(n_dropped)
+  }
   # Below 4 segments, at most 5 orders exist, so no cell can reach p <= .05.
   # A segment needs at least 2 samples (a 1-sample window gives 1).
   seg_skip <- is_seg & (seg_size_all < 2L | (n %/% seg_size_all) < 4L)

@@ -654,3 +654,134 @@ test_that("grid sample counts are integer for every estimator", {
     }
   }
 })
+
+# Run a call, collect the conditions of one class, and muffle every message
+# and warning.
+collect_class <- function(expr, class) {
+  got <- list()
+  keep <- function(cnd) {
+    if (inherits(cnd, class)) got[[length(got) + 1L]] <<- cnd
+  }
+  res <- withCallingHandlers(
+    expr,
+    message = function(m) {
+      keep(m)
+      invokeRestart("muffleMessage")
+    },
+    warning = function(w) {
+      keep(w)
+      invokeRestart("muffleWarning")
+    }
+  )
+  list(res = res, cnds = got)
+}
+
+test_that("a lag-cap repeat is dropped and announced once", {
+  set.seed(30)
+  x <- rnorm(400)
+  y <- rnorm(400)
+  out <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 80,
+      window_sec = c(1, 2), lag_sec = c(0.5, 1), n_surrogates = 5L
+    ),
+    "bsync_duplicate_cells"
+  )
+  expect_length(out$cnds, 1L)
+  expect_identical(out$cnds[[1]]$n_dropped, 1L)
+  expect_match(conditionMessage(out$cnds[[1]]), "Dropped 1 cell that repeats")
+  g <- out$res$grid
+  expect_identical(nrow(g), 3L)
+  # The first of the two repeated cells (window 1 s, lag 0.5 s) is kept.
+  expect_equal(g$window_sec, c(1, 2, 2))
+  expect_equal(g$lag_sec, c(0.5, 0.5, 1))
+  expect_identical(out$res$settings$n_cells, 3L)
+  expect_identical(out$res$robustness$n_cells, 3L)
+  keys <- g[, c("window_size", "lag_max", "window_increment", "surrogate_method", "statistic")]
+  expect_false(anyDuplicated(keys) > 0)
+})
+
+test_that("rounding repeats in window and increment are dropped", {
+  set.seed(31)
+  x <- rnorm(300)
+  y <- rnorm(300)
+  # 1 s and 1.004 s are both 80 samples at 80 Hz.
+  win <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 80,
+      window_sec = c(1, 1.004), lag_sec = 0.25, n_surrogates = 5L
+    ),
+    "bsync_duplicate_cells"
+  )
+  expect_identical(win$cnds[[1]]$n_dropped, 1L)
+  expect_equal(win$res$grid$window_sec, 1)
+  # 0.1 and 0.104 of 80 samples both round to an increment of 8 samples.
+  inc <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 80,
+      window_sec = 1, lag_sec = 0.25, increment_pct = c(0.1, 0.104),
+      n_surrogates = 5L
+    ),
+    "bsync_duplicate_cells"
+  )
+  expect_identical(inc$cnds[[1]]$n_dropped, 1L)
+  expect_equal(inc$res$grid$increment_pct, 0.1)
+  expect_identical(inc$res$grid$window_increment, 8L)
+})
+
+test_that("a wgranger repeat with NA lag and statistic keys is dropped", {
+  set.seed(32)
+  x <- rnorm(300)
+  y <- rnorm(300)
+  out <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wgranger", sample_rate = 80,
+      window_sec = c(1, 1.004, 2), n_surrogates = 5L
+    ),
+    "bsync_duplicate_cells"
+  )
+  expect_identical(out$cnds[[1]]$n_dropped, 1L)
+  expect_equal(out$res$grid$window_sec, c(1, 2))
+  expect_true(all(is.na(out$res$grid$lag_max)))
+  expect_true(all(is.na(out$res$grid$statistic)))
+})
+
+test_that("a segment lag-cap repeat is dropped", {
+  set.seed(33)
+  x <- rnorm(800)
+  y <- rnorm(800)
+  # Lag 1 s is capped to 40 samples, so both cells have 160-sample segments.
+  out <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 80,
+      window_sec = 1, lag_sec = c(0.5, 1),
+      surrogate_method = "segment", n_surrogates = 5L
+    ),
+    "bsync_duplicate_cells"
+  )
+  expect_identical(out$cnds[[1]]$n_dropped, 1L)
+  expect_identical(nrow(out$res$grid), 1L)
+  expect_identical(out$res$grid$window_increment, 160L)
+})
+
+test_that("a grid without repeats gives no repeated-cell message", {
+  set.seed(34)
+  x <- rnorm(400)
+  y <- rnorm(400)
+  out <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 80,
+      window_sec = c(1, 2), lag_sec = 0.5,
+      surrogate_method = c("phase", "circular"), n_surrogates = 5L
+    ),
+    "bsync_duplicate_cells"
+  )
+  expect_length(out$cnds, 0L)
+  expect_identical(nrow(out$res$grid), 4L)
+})

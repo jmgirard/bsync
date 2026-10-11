@@ -242,6 +242,9 @@ autotune_wcc <- function(
   # cells are recorded per dyad and reported once after the loop.
   n_unconverged_dyads <- 0L
   seg_skip_dyads <- integer(0)
+  # The repeated-cell count depends only on the arguments, so it is the same
+  # for every dyad.
+  n_dropped <- 0L
   mv_list <- lapply(seq_along(tune_list), function(i) {
     xy <- tune_list[[i]]
     unconverged <- FALSE
@@ -260,6 +263,10 @@ autotune_wcc <- function(
       ),
       bsync_few_surrogates = function(w) invokeRestart("muffleWarning"),
       bsync_segment_aligned = function(m) invokeRestart("muffleMessage"),
+      bsync_duplicate_cells = function(m) {
+        n_dropped <<- m$n_dropped
+        invokeRestart("muffleMessage")
+      },
       bsync_segment_skipped = function(w) {
         seg_skip_dyads <<- union(seg_skip_dyads, tune_idx[i])
         invokeRestart("muffleWarning")
@@ -273,6 +280,9 @@ autotune_wcc <- function(
     res
   })
   names(mv_list) <- names(tune_list)
+  if (n_dropped > 0) {
+    inform_duplicate_cells(n_dropped)
+  }
   if (length(seg_skip_dyads) > 0) {
     n_skip <- length(seg_skip_dyads)
     cli::cli_warn(
