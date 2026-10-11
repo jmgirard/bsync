@@ -68,3 +68,19 @@ lose. Both made the test reject a true null too often. The measured rates
 are in RR01 (`cairn/reviews/archive/RR01-segment-surrogate-size.md`). This
 replaces the M015 plan choice of orders with no segment in place and of
 segment size equal to the window size.
+
+### D-005: Multiverse circular cells shift by their own lag, or by one window for Granger
+
+2026-10-11, M019 plan. In `synchrony_multiverse()`, a circular cell draws
+distinct shifts s with `2 * lag_max <= s <= n - 2 * lag_max` for its own
+lag (wcc, wdtw), or `window_size <= s <= n - window_size` for wgranger,
+whose grid has no lag. A cell uses `min(n_surrogates, k)` surrogates for
+its k valid shifts, and a cell that fits its window with k < 19 is
+skipped. Rationale: a shift must move `y` past the lags that the statistic
+reads. Granger reads only `ar_order` lags, but a shift of a few samples
+keeps much of the coupling in smooth signals, so one window is the
+minimum, as for Granger segment cells (D-004). With k < 19, no add-one
+p-value can reach p <= .05 (D-001, D-002). This replaces the shift
+minimum of `2 * round(n / 4)` for wgranger and the shared minimum of
+twice the largest grid lag for wcc and wdtw. The user chose these rules at
+the M019 plan gate.

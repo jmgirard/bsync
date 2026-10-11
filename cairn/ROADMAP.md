@@ -1,13 +1,14 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M019)._
+_Pre-migration history: see `cairn/legacy/` and git log. New IDs continue from legacy M7 (next: M020)._
 _Last hygiene check: 2026-10-11 (M018 merged and archived, M015 row pruned, 1 review candidate row and 1 lesson added, validate green)_
 
 ## Milestones
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M019 | Circular surrogates in the multiverse: a shift range per cell | planned | — | high | milestones/M019-circular-shift-range.md |
 | M018 | Multiverse bookkeeping: repeated cells, surrogate counts, circular skips | done | — | normal | milestones/archive/M018-multiverse-bookkeeping.md |
 | M017 | Count every window that fits when window_increment > 1 | done | — | normal | milestones/archive/M017-window-count-fix.md |
 | M016 | wphase parity: selectable statistic and workflow article | done | — | normal | milestones/archive/M016-wphase-parity.md |
@@ -16,8 +17,6 @@ _Last hygiene check: 2026-10-11 (M018 merged and archived, M015 row pruned, 1 re
 
 ## Candidates
 
-- [high] Granger circular surrogates in the multiverse: for wgranger, `synchrony_multiverse()` passes `lag_max = round(n / 4)` to `generate_surrogate_circular()`, whose valid shifts run from 2 * lag_max to n - 2 * lag_max. On main, n = 200, 203, and 204 stopped with the "too short" error, and n = 201 and 202 ran with few shifts sampled with replacement (window 2 s at 10 Hz, 19 surrogates; observed 2026-10-11). A new bound changes Granger circular results, so choose it as a design decision — added 2026-10-11 — M018 plan investigation
-- Shared circular matrix with few shifts: "Granger circular surrogates in the multiverse" covers wgranger. For wcc and wdtw, all circular cells share one matrix made with the largest lag of the grid, so a series just over 4 * that lag leaves almost no distinct shifts for every circular cell. In the M018 review, n = 401 with windows 10 and 200 and lags 5 and 100 gave 2 distinct shifts and es 23 and 181, against es 6.85 for cell (10, 5) at n = 400 with 381 shifts. `n_surrogates` counts the repeated shifts. Options: one matrix per distinct lag, or skip or warn on cells with few distinct shifts. Pre-existing on main — added 2026-10-11 — M018 review (diff-bug #1)
 - mne_connectivity PLV pipeline pin: M008's frozen pin uses MNE's analytic signal + the Lachaux formula, not mne_connectivity's own PLV pipeline (different spectral estimation; unmatchable at 1e-6); a tolerance-banded comparison against the toolbox's shipped PLV would close the convention gap the pin leaves. Promote when a definitional question about the PLV convention actually arises — added 2026-08-29 — M008 review F3
 - pick_optima local search with lag_increment > 1: pick_optima_cpp hard-errors unless each window carries exactly 2*lag_max+1 lags, so `search_method = "local"` fails for any estimator surface built with lag_increment > 1 (pre-existing, all estimators; surfaced by M008's whitelist extension). Promote when a user hits it or the next optima-touching milestone — added 2026-08-29 — M008 review F13
 - Enable roxygen markdown package-wide: DESCRIPTION sets no roxygen markdown option, so `[fn()]` links, `**bold**`, and backticks in existing roxygen render as raw text in `man/*.Rd`. M009's two new functions use a per-block `@md` instead. Turning it on regenerates every Rd file, so check the output. M011 added `@md` to the four `*_surrogate()` wrappers. M013 added `@md` to the four `bsync_multiverse` methods, but the `synchrony_multiverse()` block still renders its new `$robustness_yx` text raw — added 2026-10-05 — M009 T6, M013 review (diff-bug #6)
