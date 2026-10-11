@@ -57,7 +57,7 @@ Make `synchrony_multiverse()` and `autotune_wcc()` report each specification onc
 - [x] T4: Fill the `n_surrogates` column from `ncol()` of the surrogate matrix of each cell. Update `print.bsync_multiverse()` (`R/multiverse.R:792-798`) and `glance.bsync_multiverse()` (`R/tidy.R:157-174`), with the fallback for a grid without the column. Update the roxygen `@return`.
 - [x] T5: Circular fallback for wcc and wdtw (`R/multiverse.R:361-366`, `:395-398`). If n <= 4 * `max(l_samp_all)`, mark circular cells that fit their window and have n <= 4 * their lag as skipped with `bsync_circular_skipped`. Generate with the largest remaining circular lag, or make no matrix if none remain. Aggregate the warning in `autotune_wcc()` as for segment skips. Update the roxygen.
 - [x] T6: Add the `autotune_wcc()` result fields and print lines (`R/autotune.R:308-343`) and the `@return` items.
-- [ ] T7: Write NEWS.md entries. Check vignettes that print multiverse grids or counts (`vignettes/choosing-parameters.Rmd`). Review each changed vdiffr snapshot and log its cause. Run `devtools::document()`, `spelling::spell_check_package()`, and `devtools::check()`.
+- [x] T7: Write NEWS.md entries. Check vignettes that print multiverse grids or counts (`vignettes/choosing-parameters.Rmd`). Review each changed vdiffr snapshot and log its cause. Run `devtools::document()`, `spelling::spell_check_package()`, and `devtools::check()`.
 
 ## Work log
 
@@ -77,6 +77,7 @@ Make `synchrony_multiverse()` and `autotune_wcc()` report each specification onc
 - 2026-10-11: T4 done. The `n_surrogates` column sits after `n_windows`. Two internal helpers, `multiverse_surrogates_min()` and `multiverse_surrogate_text()`, serve `print()` and `glance()`, and both return the requested count or NA for a grid without the column. Two glance column-name tests in `test-multiverse-direction.R` gained `n_surrogates_min`. `document()` also wrote the T3 "Grid construction" text to `man/synchrony_multiverse.Rd`. Suite: 2638 pass, 0 fail.
 - 2026-10-11: T5 done. `circ_skip` is computed only when "circular" is in the grid and n <= 4 * the largest lag, so other calls take the old path. With no circular cell left, the circular matrix is not made. The too-short alert count leaves out `circ_skip` cells. Tests: the n = 20 case, a mixed grid with one no-shift cell and one too-short cell (one warning), a long-series control with no warning, and the autotune warning naming dyads 1, 2, and 3. Suite: 2656 pass, 0 fail.
 - 2026-10-11: T6 done. The fields sit after `lag_sec` in the order `increment_pct`, `statistic`, `surrogate_method`. `print()` shows the "Statistic" and "Surrogates" lines only when the fields exist, so a result made before this change prints as before. The structure test's expected names gained the three fields. Suite: 2665 pass, 0 fail.
+- 2026-10-11: T7 done. NEWS.md has a "Multiverse results" section with five entries. `choosing-parameters.Rmd` explains why its 4 x 3 grid has 9 cells (checked by a run: 3 dropped). No vdiffr snapshot changed in any task. `air format` was run only on `test-multiverse-direction.R` (air-clean on main) and the new pin file. `spell_check_package()` found no errors. `devtools::check()` gave 0 errors, 0 warnings, and 0 notes.
 
 ## Decisions
 

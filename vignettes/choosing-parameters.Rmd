@@ -128,6 +128,11 @@ mv <- synchrony_multiverse(
 mv
 ```
 
+The grid crosses 4 windows with 3 lags, but it has 9 cells, not 12. `lag_max` is capped at half
+the window, so at a 0.5 s window all three lags become 0.25 s, and at a 1 s window the 0.5 s
+and 1 s lags are both 0.5 s. Cells that repeat an earlier cell in samples are dropped, with a
+message, so each specification is tested and counted once.
+
 ```{r multiverse-glance}
 glance(mv)
 ```

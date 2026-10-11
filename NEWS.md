@@ -1,5 +1,39 @@
 # bsync (development version)
 
+## Multiverse results
+
+* `synchrony_multiverse()` now drops a cell that repeats an earlier cell in
+  samples: the same `window_size`, `lag_max`, and `window_increment`, with the
+  same `surrogate_method` and `statistic`. The cap of `lag_max` at
+  `floor(window_size / 2)` and the rounding of seconds to samples make such
+  repeats. For example, the default `lag_sec = window_sec / 2` of
+  `autotune_wcc()` crossed with several windows gives them. The first cell in
+  grid order is kept, and a message states how many cells were dropped.
+  Before, a repeated cell was tested and counted again. So `n_cells`,
+  `n_valid`, `pct_significant`, the other robustness summaries, and the
+  `n_cells_gated` of `autotune_wcc()` counted some specifications more than
+  once. The values of the cells that remain do not change.
+* The multiverse grid has a new integer column, `n_surrogates`, with the
+  number of surrogate series that each cell used. A segment cell with k
+  segments uses at most k! - 1, which can be fewer than requested. A cell
+  that was not computed has 0. `print()` shows "Surrogates per cell" as
+  "up to <requested> (fewest <m>)" when cells used different counts, and
+  `glance()` has a new `n_surrogates_min` column. `glance()`'s
+  `n_surrogates` is still the requested count.
+* For `"wcc"` and `"wdtw"`, a series too short for circular shifts at the
+  largest lag of the grid (`length(y) <= 4 * lag_max`) no longer stops
+  `synchrony_multiverse()`. Each circular cell that fits its window but has
+  no valid shift at its own lag is skipped with a warning, and the other
+  circular cells are computed. `autotune_wcc()` gives this warning once and
+  names the dyads.
+* The `autotune_wcc()` result has new `increment_pct`, `statistic`, and
+  `surrogate_method` fields for the selected cell, and `print()` shows the
+  statistic and the surrogate method. `increment_pct` is `NA` for a segment
+  cell.
+* The `window_size`, `window_increment`, and `n_windows` columns of the
+  multiverse grid are now integer, as `lag_max` was, so the `window_size`
+  and `window_increment` of `autotune_wcc()` are integer too.
+
 ## Window grid
 
 * The window grid of `wcc()`, `wdtw()`, `wgranger()`, `wphase()`, their

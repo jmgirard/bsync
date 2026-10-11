@@ -373,7 +373,13 @@ test_that("y -> x is computed from the grid when $robustness_yx is missing", {
   gl <- glance(old, direction = "yx")
   expect_named(
     gl,
-    c("estimator", "direction", summary_cols, "n_surrogates", "n_surrogates_min")
+    c(
+      "estimator",
+      "direction",
+      summary_cols,
+      "n_surrogates",
+      "n_surrogates_min"
+    )
   )
   expect_equal(as.list(gl[summary_cols]), expected)
   expect_line(function() print(old, direction = "yx"), sig_line(expected))
