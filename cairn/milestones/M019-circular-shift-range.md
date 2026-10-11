@@ -73,6 +73,8 @@ Give each circular cell of `synchrony_multiverse()` its own range of valid circu
 
 ## Decisions
 
+- 2026-10-11 (review return 1): the wcc and wdtw minimum circular shift is `max(1, 2 * lag_max)`. A 1-sample window caps its lag to 0, and shifts of 0 or n leave `y` in place. Shifts of at least 1 still meet D-005's bound `2 * lag_max <= s`, so D-005 stands unchanged.
+
 ## Review
 
 Review on 2026-10-11, branch m019-circular-shift-range at b6001ec, main e3d98b9 unmoved.
@@ -112,3 +114,29 @@ spawned: diff-bug, blame-history, prior-review
 - prior-review #2: the comment above `multiverse_surrogate_text()` names only segment cells — fix now, fixed f8bd33a.
 - prior-review #3: `m` and `n - m` in the warning print raw — reject, false: both are integer, so no scientific notation.
 - prior-review #4 to #7: checks of cli plural forms, braces, `\code{}`, the print label, and the crossing docs found no problem — reject, no defect reported.
+
+Review pass 2 on 2026-10-11, after review return 1 (T6), at 0623514, main e3d98b9 unmoved.
+
+- Evidence rerun: `test-multiverse-circular.R` 793 expectations, `test-multiverse-pins.R` 11, `test-surrogate.R` 167, all 0 failed. AC1 to AC5 hold on the fixed tree. AC2 holds with the floor, because a shift of at least 1 meets `2 * lag_max <= s` at lag 0. AC6 was re-read after the pass-2 doc fixes (753a620): both Rd files state the shift range with the floor, k, the count, and the skip, and both skip messages state the 19-shift rule.
+- Consistency gate (pass 2): `check()` gave 0 errors, 0 warnings, 0 notes. After 753a620, `document()` was current, the full suite gave 3481 expectations with 0 failed, and spelling was clean.
+
+spawned: diff-bug, blame-history, prior-review
+
+- diff-bug #1: the `autotune_wcc()` docs omit the floor of 1 — fix now, fixed 753a620.
+- diff-bug #2: the NEWS "same results as before" claim is not exact for a grid whose only lag is 0 — fix now, narrowed to a `lag_max` of at least 1, fixed 753a620.
+- diff-bug #3: a lag-0 circular cell draws surrogates but never gives a result — reject, false as a defect: the cell is NA through the estimator's own short-window path, as a phase cell of a 1-sample window is.
+- diff-bug #4: a wgranger cell with a 1-sample window shows `n_surrogates` 19 and p `NA` (also for phase) — follow-up, pre-existing, new candidate row "wgranger cells with no p-value report surrogates".
+- diff-bug #5: `window_sec = Inf`, or a window past the integer limit, stops the call with "missing value where TRUE/FALSE needed" — follow-up, pre-existing, new candidate row "Non-finite or huge window_sec in the multiverse".
+- diff-bug #6: lines past 80 columns in roxygen and NEWS — reject, style (rewrapped while fixing #1 and #2).
+- diff-bug #7: no test of the zero-shift message — fix now, test added, fixed 753a620.
+- diff-bug #8: no test of a wgranger 1-sample window on the circular path — reject, false as a gap: the AC1 test checks each wgranger shift range from the window, and m = window holds for every window.
+- blame-history #1: the floor departs from D-005's `2 * lag_max <= s` — reject, false: shifts of at least 1 meet that bound at lag 0. Recorded in Decisions below.
+- blame-history #2: the NEWS range bullet omits the floor — fix now, fixed 753a620.
+- blame-history #3: the M018 `n_surrogates` NEWS bullet now also names circular cells — reject, false as a defect: the development NEWS describes the next release as a whole, and the text is true of it.
+- blame-history #4 to #6: line length and ragged wraps — reject, style.
+- blame-history #7: the zero-shift message branch undoes nothing — reject, no defect reported.
+- blame-history #8: the lag-0 test guards a defect that only this branch had — reject, false as a defect: the comment says "Without the floor", which is accurate.
+- prior-review #1: the autotune docs keep the unfloored rule (M017 lesson on counts in prose) — fix now, fixed 753a620.
+- prior-review #2: the autotune skip message states no floor — fix now, fixed 753a620.
+- prior-review #3: the NEWS same-results claim and lag 0 — fix now, same fix as diff-bug #2, fixed 753a620.
+- prior-review #4 and #5: line length — reject, style.
