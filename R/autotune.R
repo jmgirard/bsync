@@ -111,6 +111,10 @@
 #'     \item{`lag_increment`}{`1L` (standard lag increment).}
 #'     \item{`window_sec`}{Selected window size in seconds.}
 #'     \item{`lag_sec`}{Selected max lag in seconds.}
+#'     \item{`increment_pct`}{Selected window increment as a fraction of the
+#'       window; \code{NA} for a segment cell, whose increment is one segment.}
+#'     \item{`statistic`}{Aggregate WCC statistic of the selected cell.}
+#'     \item{`surrogate_method`}{Surrogate method of the selected cell.}
 #'     \item{`sig_rate`}{Proportion of dyads where selected cell was significant.}
 #'     \item{`median_es`}{Median ES across dyads for the selected cell.}
 #'     \item{`iqr_es`}{IQR of ES across dyads for the selected cell.}
@@ -341,7 +345,10 @@ autotune_wcc <- function(
     lag_increment    = 1L,
     window_sec       = best$window_sec,
     lag_sec          = best$lag_sec,
-    sig_rate         = sel$sig_rate,
+    increment_pct    = best$increment_pct,
+    statistic        = best$statistic,
+    surrogate_method = best$surrogate_method,
+    sig_rate        = sel$sig_rate,
     median_es        = sel$median_es,
     iqr_es           = sel$iqr_es,
     score            = sel$score,
@@ -363,11 +370,17 @@ autotune_wcc <- function(
 #' @export
 print.bsync_autotune <- function(x, ...) {
   cli::cli_h2("Auto-Tune Result")
+  # A result made before the statistic and surrogate_method fields existed
+  # prints without those lines.
   cli::cli_dl(c(
     "Window size" = "{x$window_size} samples ({round(x$window_sec, 2)} s)",
     "Max lag"     = "{x$lag_max} samples ({round(x$lag_sec, 2)} s)",
     "Increment"   = "{x$window_increment} samples",
-    "Sig. rate"   = "{round(x$sig_rate * 100, 1)}% of dyads",
+    if (!is.null(x$statistic)) c("Statistic" = "{x$statistic}"),
+    if (!is.null(x$surrogate_method)) {
+      c("Surrogates" = "{x$surrogate_method}")
+    },
+    "Sig. rate"  = "{round(x$sig_rate * 100, 1)}% of dyads",
     "Median ES"   = "{round(x$median_es, 3)} (IQR = {round(x$iqr_es, 3)})"
   ))
   cli::cli_alert_info(

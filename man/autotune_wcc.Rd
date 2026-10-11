@@ -82,6 +82,10 @@ An object of class `bsync_autotune` (a named list with a tidy
     \item{`lag_increment`}{`1L` (standard lag increment).}
     \item{`window_sec`}{Selected window size in seconds.}
     \item{`lag_sec`}{Selected max lag in seconds.}
+    \item{`increment_pct`}{Selected window increment as a fraction of the
+      window; \code{NA} for a segment cell, whose increment is one segment.}
+    \item{`statistic`}{Aggregate WCC statistic of the selected cell.}
+    \item{`surrogate_method`}{Surrogate method of the selected cell.}
     \item{`sig_rate`}{Proportion of dyads where selected cell was significant.}
     \item{`median_es`}{Median ES across dyads for the selected cell.}
     \item{`iqr_es`}{IQR of ES across dyads for the selected cell.}
