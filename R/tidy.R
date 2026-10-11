@@ -151,7 +151,12 @@ tidy.bsync_multiverse <- function(x, ...) {
 #'   Other estimators have one direction only, so `"yx"` is an error for them.
 #' @param ... Additional arguments (not used).
 #' @return A one-row [tibble::tibble()]. For a Granger result, a `direction`
-#'   column after `estimator` names the direction summarized.
+#'   column after `estimator` names the direction summarized. `n_surrogates`
+#'   is the requested number of surrogates per cell. `n_surrogates_min` is the
+#'   fewest surrogates that a computed cell used (the `n_surrogates` grid
+#'   column), which is below the requested number when a segment cell has few
+#'   segments. It is `NA` when no cell was computed or the grid has no
+#'   `n_surrogates` column.
 #' @seealso [tidy.bsync_multiverse()], [as_tibble.bsync_multiverse()],
 #'   [synchrony_multiverse()]
 #' @md
@@ -168,7 +173,8 @@ glance.bsync_multiverse <- function(x, direction = c("xy", "yx"), ...) {
     median_es       = rb$median_es,
     iqr_es          = rb$iqr_es,
     sign_consistent = rb$sign_consistent,
-    n_surrogates    = x$settings$n_surrogates
+    n_surrogates    = x$settings$n_surrogates, # requested per cell
+    n_surrogates_min = multiverse_surrogates_min(x)
   )
   if (!is.null(dir$label)) {
     out <- tibble::add_column(out, direction = dir$direction, .after = "estimator")

@@ -91,7 +91,13 @@ A `bsync_multiverse` object with:
       specification columns, `window_size`/`lag_max`/`window_increment`
       (samples), `n_windows`, `observed`, `null_mean`, `null_sd`, `es`, `p`
       (x -> y for Granger, plus `observed_yx`, `null_mean_yx`, `null_sd_yx`,
-      `es_yx`, and `p_yx` for y -> x).}
+      `es_yx`, and `p_yx` for y -> x). The integer column
+      \code{n_surrogates} is the number of surrogate series that the test of
+      the cell used. It is the requested \code{n_surrogates}, except for a
+      segment cell with k segments, which uses at most k! - 1, and it is 0
+      for a cell that was not computed (\code{n_windows} 0). Circular
+      surrogates are counted with repeated shifts, so with few valid
+      shifts a cell can hold fewer distinct surrogates.}
     \item{`$settings`}{Named list of call-level inputs.}
     \item{`$robustness`}{Named list: `n_cells` (total specifications in the
       grid), `n_valid` (cells with a computable ES in that direction; the
@@ -115,6 +121,13 @@ parameter grid, except that \code{"segment"} cells are not crossed with
 `increment_pct` (see `surrogate_method`). Seconds are converted to samples
 per cell; `lag_max` is
 hard-capped at `floor(window_size / 2)` to preserve statistical reliability.
+The cap and the rounding of seconds to samples can give two cells the same
+`window_size`, `lag_max`, and `window_increment` in samples, with the same
+`surrogate_method` and `statistic`. Such repeated cells are dropped, with a
+message, and the first cell in grid order is kept. Each specification is
+then tested once, and `settings$n_cells` and the robustness summary count
+it once. For example, `lag_sec = window_sec / 2` crossed with several
+windows gives repeats.
 Cells where the series is too short are skipped with a message and appear
 as `NA` rows in the output grid.
 

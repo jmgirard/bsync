@@ -205,7 +205,13 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'       specification columns, `window_size`/`lag_max`/`window_increment`
 #'       (samples), `n_windows`, `observed`, `null_mean`, `null_sd`, `es`, `p`
 #'       (x -> y for Granger, plus `observed_yx`, `null_mean_yx`, `null_sd_yx`,
-#'       `es_yx`, and `p_yx` for y -> x).}
+#'       `es_yx`, and `p_yx` for y -> x). The integer column
+#'       \code{n_surrogates} is the number of surrogate series that the test of
+#'       the cell used. It is the requested \code{n_surrogates}, except for a
+#'       segment cell with k segments, which uses at most k! - 1, and it is 0
+#'       for a cell that was not computed (\code{n_windows} 0). Circular
+#'       surrogates are counted with repeated shifts, so with few valid
+#'       shifts a cell can hold fewer distinct surrogates.}
 #'     \item{`$settings`}{Named list of call-level inputs.}
 #'     \item{`$robustness`}{Named list: `n_cells` (total specifications in the
 #'       grid), `n_valid` (cells with a computable ES in that direction; the
@@ -470,6 +476,8 @@ synchrony_multiverse <- function(
   lag_max_samp <- integer(n_cells)
   window_inc_samp <- integer(n_cells)
   n_windows_vec <- integer(n_cells)
+  # Surrogates each cell used: 0 for a cell that was not computed.
+  n_surr_vec <- integer(n_cells)
   observed_vec <- numeric(n_cells)
   null_mean_vec <- numeric(n_cells)
   null_sd_vec <- numeric(n_cells)
@@ -567,6 +575,8 @@ synchrony_multiverse <- function(
     )
 
     n_windows_vec[ci] <- cell$n_windows
+    # A cell whose test failed has n_windows 0 and used no surrogates.
+    n_surr_vec[ci] <- if (cell$n_windows > 0L) ncol(y_surr) else 0L
     observed_vec[ci] <- cell$observed
     null_mean_vec[ci] <- cell$null_mean
     null_sd_vec[ci] <- cell$null_sd
@@ -603,6 +613,7 @@ synchrony_multiverse <- function(
     lag_max          = lag_max_samp,
     window_increment = window_inc_samp,
     n_windows        = n_windows_vec,
+    n_surrogates     = n_surr_vec,
     observed         = observed_vec,
     null_mean        = null_mean_vec,
     null_sd          = null_sd_vec,
@@ -816,6 +827,33 @@ multiverse_direction <- function(x, direction = c("xy", "yx"),
 
 # S3 methods for bsync_multiverse ----------------------------------------------
 
+# Fewest surrogates that a computed cell used (n_surrogates > 0), or NA when
+# no cell was computed or the grid has no n_surrogates column (a result made
+# before the column existed).
+multiverse_surrogates_min <- function(x) {
+  if (!"n_surrogates" %in% names(x$grid)) {
+    return(NA_integer_)
+  }
+  used <- x$grid$n_surrogates
+  used <- used[!is.na(used) & used > 0L]
+  if (length(used) == 0L) {
+    return(NA_integer_)
+  }
+  as.integer(min(used))
+}
+
+# "Surrogates per cell" text: the requested count when every computed cell
+# used it, else "up to <requested> (fewest <m>)". Segment cells with few
+# segments use fewer than requested.
+multiverse_surrogate_text <- function(x) {
+  requested <- x$settings$n_surrogates
+  fewest <- multiverse_surrogates_min(x)
+  if (is.na(fewest) || fewest >= requested) {
+    return(format(requested))
+  }
+  paste0("up to ", requested, " (fewest ", fewest, ")")
+}
+
 #' Print method for bsync_multiverse objects
 #'
 #' @param x A `bsync_multiverse` object.
@@ -837,7 +875,7 @@ print.bsync_multiverse <- function(x, direction = c("xy", "yx"), ...) {
   }
   cli::cli_dl(c(
     "Specifications" = "{rb$n_cells} ({rb$n_valid} computable)",
-    "Surrogates per cell" = "{s$n_surrogates}",
+    "Surrogates per cell" = "{multiverse_surrogate_text(x)}",
     "Significant (p <= .05)" = "{rb$n_significant} of {rb$n_valid} ({round(rb$pct_significant * 100, 1)}%)",
     "Median ES" = "{round(rb$median_es, 3)} [IQR: {round(rb$iqr_es, 3)}]",
     "Sign-consistent (sig. cells)" = "{round(rb$sign_consistent * 100, 1)}%"

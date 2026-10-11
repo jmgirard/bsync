@@ -649,7 +649,7 @@ test_that("grid sample counts are integer for every estimator", {
       lag_sec = if (est == "wgranger") NULL else 0.5,
       n_surrogates = 3L
     )))
-    for (col in c("window_size", "window_increment", "n_windows")) {
+    for (col in c("window_size", "window_increment", "n_windows", "n_surrogates")) {
       expect_type(res$grid[[col]], "integer")
     }
   }
@@ -784,4 +784,83 @@ test_that("a grid without repeats gives no repeated-cell message", {
   )
   expect_length(out$cnds, 0L)
   expect_identical(nrow(out$res$grid), 4L)
+})
+
+# Window 20 and lag 2 give 24-sample segments, so a 100-sample series has 4
+# segments and at most 4! - 1 = 23 segment orders.
+seg_count_mv <- function() {
+  set.seed(36)
+  x <- rnorm(100)
+  y <- rnorm(100)
+  suppressWarnings(suppressMessages(synchrony_multiverse(
+    x, y,
+    estimator = "wcc", sample_rate = 1,
+    window_sec = 20, lag_sec = 2,
+    surrogate_method = c("phase", "segment"), n_surrogates = 50L
+  )))
+}
+
+test_that("n_surrogates holds the surrogates each cell used", {
+  m <- seg_count_mv()
+  expect_identical(m$grid$surrogate_method, c("phase", "segment"))
+  expect_identical(m$grid$n_surrogates, c(50L, 23L))
+})
+
+test_that("n_surrogates is 0 for a cell that was not computed", {
+  set.seed(37)
+  x <- rnorm(30)
+  y <- rnorm(30)
+  # Window 10 (lag capped at 5, increment 1) fits with 30 - 20 + 1 = 11
+  # windows. Window 20 with lag 6 needs 32 samples and is skipped.
+  m <- suppressWarnings(suppressMessages(synchrony_multiverse(
+    x, y,
+    estimator = "wcc", sample_rate = 1,
+    window_sec = c(10, 20), lag_sec = 6, n_surrogates = 19L
+  )))
+  expect_identical(m$grid$n_windows, c(11L, 0L))
+  expect_identical(m$grid$n_surrogates, c(19L, 0L))
+})
+
+test_that("print and glance report the surrogate counts", {
+  m <- seg_count_mv()
+  msgs <- paste(testthat::capture_messages(print(m)), collapse = "")
+  expect_match(msgs, "Surrogates per cell: up to 50 (fewest 23)", fixed = TRUE)
+  g <- glance(m)
+  expect_identical(g$n_surrogates, 50L)
+  expect_identical(g$n_surrogates_min, 23L)
+
+  set.seed(38)
+  x <- rnorm(100)
+  y <- rnorm(100)
+  p <- suppressWarnings(suppressMessages(synchrony_multiverse(
+    x, y,
+    estimator = "wcc", sample_rate = 1,
+    window_sec = 20, lag_sec = 2, n_surrogates = 50L
+  )))
+  msgs <- paste(testthat::capture_messages(print(p)), collapse = "")
+  expect_match(msgs, "Surrogates per cell: 50\n", fixed = TRUE)
+  expect_identical(glance(p)$n_surrogates_min, 50L)
+})
+
+test_that("glance gives NA n_surrogates_min when no cell was computed", {
+  set.seed(39)
+  x <- rnorm(30)
+  y <- rnorm(30)
+  m <- suppressWarnings(suppressMessages(synchrony_multiverse(
+    x, y,
+    estimator = "wcc", sample_rate = 1,
+    window_sec = 20, lag_sec = 6, n_surrogates = 19L
+  )))
+  expect_identical(glance(m)$n_surrogates_min, NA_integer_)
+  msgs <- paste(testthat::capture_messages(print(m)), collapse = "")
+  expect_match(msgs, "Surrogates per cell: 19\n", fixed = TRUE)
+})
+
+test_that("a result without the n_surrogates column prints the requested count", {
+  m <- seg_count_mv()
+  m$grid$n_surrogates <- NULL
+  msgs <- paste(testthat::capture_messages(print(m)), collapse = "")
+  expect_match(msgs, "Surrogates per cell: 50\n", fixed = TRUE)
+  expect_identical(glance(m)$n_surrogates_min, NA_integer_)
+  expect_identical(glance(m)$n_surrogates, 50L)
 })

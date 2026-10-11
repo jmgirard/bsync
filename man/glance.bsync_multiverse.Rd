@@ -17,7 +17,12 @@ Other estimators have one direction only, so \code{"yx"} is an error for them.}
 }
 \value{
 A one-row \code{\link[tibble:tibble]{tibble::tibble()}}. For a Granger result, a \code{direction}
-column after \code{estimator} names the direction summarized.
+column after \code{estimator} names the direction summarized. \code{n_surrogates}
+is the requested number of surrogates per cell. \code{n_surrogates_min} is the
+fewest surrogates that a computed cell used (the \code{n_surrogates} grid
+column), which is below the requested number when a segment cell has few
+segments. It is \code{NA} when no cell was computed or the grid has no
+\code{n_surrogates} column.
 }
 \description{
 Returns a single-row tibble summarising robustness across the specification
