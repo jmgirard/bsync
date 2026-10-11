@@ -43,11 +43,9 @@
   `"wcc"` and `"wdtw"` grids with more than one `lag_max`, and for cells
   with fewer valid shifts than `n_surrogates`. In such a call, cells of other
   surrogate methods drawn after the circular cells can also change, because
-  the random draws shift. The draws also shift when every circular cell of
-  a call is skipped (too short for its window, or fewer than 19 valid
-  shifts), because such a call no longer draws circular surrogates. Before,
-  a `"wgranger"` call drew them, and a `"wcc"` or `"wdtw"` call drew them
-  unless the series was at most 4 times the grid's largest `lag_max`. In
+  the random draws shift. A call in which every circular cell is skipped
+  (too short for its window, or fewer than 19 valid shifts) draws no
+  circular surrogates, so its later draws can also differ from before. In
   `autotune_wcc()`, this can change the results of later dyads. A `"wcc"` or `"wdtw"` call whose circular cells
   all share one `lag_max`, each with at least `max(n_surrogates, 19)` valid
   shifts, gives the same results as before.

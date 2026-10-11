@@ -1,6 +1,6 @@
 # M019: Circular surrogates in the multiverse: a shift range per cell
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -68,6 +68,8 @@ Give each circular cell of `synchrony_multiverse()` its own range of valid circu
 - 2026-10-11: review fix-now items committed before the return: `n_surrogates` docs and comment (f8bd33a); `glance()` docs, the M018 NEWS bullet, the zero-shift skip message, and the NEWS note on shifted draws (review-fix commit). Status set to in-progress.
 - 2026-10-11: implement resumed for review return 1 and added T6 (minor amendment).
 - 2026-10-11: T6 done. The wcc and wdtw minimum shift is now `pmax(1L, 2L * l_samp_all)`, and the roxygen says "and at least 1". A new test in `test-multiverse-circular.R` (n = 100, `window_sec = c(1, 10)`, `lag_sec = 2`, wcc and wdtw) failed before the fix with "number of items to replace is not a multiple of replacement length". After the fix it passes: the lag-0 cell uses shifts 1 to 99, and the lag-2 cell computes with 93 shifts. AC2 still holds as written, because shifts of at least 1 meet `2 * lag_max <= s` at lag 0. Full suite: 3476 expectations, 0 failed.
+- 2026-10-11: claim audit: 14 claims read, 2 corrected — NEWS.md, tests/testthat/test-multiverse-circular.R (lines added since d37c5ed; one optional comment clarification in R/multiverse.R also taken; fixed in d4b0a88). On the one re-read, the NEWS sentence on main's old draws was still wrong (main drew for a fitting smaller-lag cell, and wgranger could stop with an error). With no second pass allowed, the sentence was narrowed to the verified part: a call in which every circular cell is skipped draws no circular surrogates, so its later draws can differ.
+- 2026-10-11: spelling clean, `document()` no change. Status set to review.
 
 ## Decisions
 
