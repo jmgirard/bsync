@@ -72,7 +72,8 @@ A \code{"circular"} cell shifts \code{y} by s samples with
 and \code{"wdtw"}, m is \code{2 * lag_max} for the cell's own
 \code{lag_max}. For \code{"wgranger"}, whose grid has no lags, m is the
 cell's \code{window_size}, so no window of the shifted series stays in
-its place. That gives k = n - 2 * m + 1 valid shifts. A cell uses
+its place. That gives k = n - 2 * m + 1 valid shifts (0 if negative).
+A cell uses
 \code{min(n_surrogates, k)} surrogates with distinct shifts, and cells
 with the same m share one surrogate matrix. A circular cell that fits
 its window but has k < 19 cannot reach p <= .05, so it is skipped with

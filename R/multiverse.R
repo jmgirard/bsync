@@ -197,7 +197,8 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'   and \code{"wdtw"}, m is \code{2 * lag_max} for the cell's own
 #'   \code{lag_max}. For \code{"wgranger"}, whose grid has no lags, m is the
 #'   cell's \code{window_size}, so no window of the shifted series stays in
-#'   its place. That gives k = n - 2 * m + 1 valid shifts. A cell uses
+#'   its place. That gives k = n - 2 * m + 1 valid shifts (0 if negative).
+#'   A cell uses
 #'   \code{min(n_surrogates, k)} surrogates with distinct shifts, and cells
 #'   with the same m share one surrogate matrix. A circular cell that fits
 #'   its window but has k < 19 cannot reach p <= .05, so it is skipped with
@@ -467,8 +468,9 @@ synchrony_multiverse <- function(
         }
       )
     } else {
-      # Drawn here, in the slot of the circular method, so a grid with one
-      # minimum shift draws the same random numbers as one matrix did.
+      # Drawn here, in the slot of the circular method, so a wcc or wdtw grid
+      # with one minimum shift and k >= n_surrogates draws the same random
+      # numbers as its one matrix did before.
       circ <- lapply(circ_min_shifts, function(m) {
         circular_shift_matrix(y, draw_circular_shifts(n, n_surrogates, m))
       })
@@ -563,9 +565,9 @@ synchrony_multiverse <- function(
             {.arg lag_max} = {l_samp}, and {.arg window_increment} = \\
             {inc_samp} samples."
           },
-          "i" = "Its shifts must be {m} to {n - m} samples on a series of \\
-          {n}, which gives {k} distinct shift{?s}. A circular cell needs at \\
-          least 19 to reach p <= .05."
+          "i" = "Its shifts must be at least {m} and at most {n - m} \\
+          samples on a series of {n}, which gives {k} distinct shift{?s}. A \\
+          circular cell needs at least 19 to reach p <= .05."
         ),
         class = "bsync_circular_skipped",
         window_size = w_samp,
