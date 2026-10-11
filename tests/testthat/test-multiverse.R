@@ -636,3 +636,333 @@ test_that("a series with room for one window computes its cell (wgranger)", {
   expect_false(is.na(res$grid$observed))
   expect_false(is.na(res$grid$p))
 })
+
+test_that("grid sample counts are integer for every estimator", {
+  set.seed(29)
+  x <- rnorm(200)
+  y <- rnorm(200)
+  for (est in c("wcc", "wdtw", "wgranger")) {
+    res <- suppressWarnings(suppressMessages(synchrony_multiverse(
+      x, y,
+      estimator = est, sample_rate = 10,
+      window_sec = 2,
+      lag_sec = if (est == "wgranger") NULL else 0.5,
+      n_surrogates = 3L
+    )))
+    for (col in c("window_size", "window_increment", "n_windows", "n_surrogates")) {
+      expect_type(res$grid[[col]], "integer")
+    }
+  }
+})
+
+# Run a call, collect the conditions of one class, and muffle every message
+# and warning.
+collect_class <- function(expr, class) {
+  got <- list()
+  keep <- function(cnd) {
+    if (inherits(cnd, class)) got[[length(got) + 1L]] <<- cnd
+  }
+  res <- withCallingHandlers(
+    expr,
+    message = function(m) {
+      keep(m)
+      invokeRestart("muffleMessage")
+    },
+    warning = function(w) {
+      keep(w)
+      invokeRestart("muffleWarning")
+    }
+  )
+  list(res = res, cnds = got)
+}
+
+test_that("a lag-cap repeat is dropped and announced once", {
+  set.seed(30)
+  x <- rnorm(400)
+  y <- rnorm(400)
+  out <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 80,
+      window_sec = c(1, 2), lag_sec = c(0.5, 1), n_surrogates = 5L
+    ),
+    "bsync_duplicate_cells"
+  )
+  expect_length(out$cnds, 1L)
+  expect_identical(out$cnds[[1]]$n_dropped, 1L)
+  expect_match(conditionMessage(out$cnds[[1]]), "Dropped 1 cell that repeats")
+  g <- out$res$grid
+  expect_identical(nrow(g), 3L)
+  # The first of the two repeated cells (window 1 s, lag 0.5 s) is kept.
+  expect_equal(g$window_sec, c(1, 2, 2))
+  expect_equal(g$lag_sec, c(0.5, 0.5, 1))
+  expect_identical(out$res$settings$n_cells, 3L)
+  expect_identical(out$res$settings$n_dropped, 1L)
+  expect_identical(out$res$robustness$n_cells, 3L)
+  keys <- g[, c("window_size", "lag_max", "window_increment", "surrogate_method", "statistic")]
+  expect_false(anyDuplicated(keys) > 0)
+})
+
+test_that("rounding repeats in window and increment are dropped", {
+  set.seed(31)
+  x <- rnorm(300)
+  y <- rnorm(300)
+  # 1 s and 1.004 s are both 80 samples at 80 Hz.
+  win <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 80,
+      window_sec = c(1, 1.004), lag_sec = 0.25, n_surrogates = 5L
+    ),
+    "bsync_duplicate_cells"
+  )
+  expect_identical(win$cnds[[1]]$n_dropped, 1L)
+  expect_equal(win$res$grid$window_sec, 1)
+  # 0.1 and 0.104 of 80 samples both round to an increment of 8 samples.
+  inc <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 80,
+      window_sec = 1, lag_sec = 0.25, increment_pct = c(0.1, 0.104),
+      n_surrogates = 5L
+    ),
+    "bsync_duplicate_cells"
+  )
+  expect_identical(inc$cnds[[1]]$n_dropped, 1L)
+  expect_equal(inc$res$grid$increment_pct, 0.1)
+  expect_identical(inc$res$grid$window_increment, 8L)
+})
+
+test_that("a wgranger repeat with NA lag and statistic keys is dropped", {
+  set.seed(32)
+  x <- rnorm(300)
+  y <- rnorm(300)
+  out <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wgranger", sample_rate = 80,
+      window_sec = c(1, 1.004, 2), n_surrogates = 5L
+    ),
+    "bsync_duplicate_cells"
+  )
+  expect_identical(out$cnds[[1]]$n_dropped, 1L)
+  expect_equal(out$res$grid$window_sec, c(1, 2))
+  expect_true(all(is.na(out$res$grid$lag_max)))
+  expect_true(all(is.na(out$res$grid$statistic)))
+})
+
+test_that("a segment lag-cap repeat is dropped", {
+  set.seed(33)
+  x <- rnorm(800)
+  y <- rnorm(800)
+  # Lag 1 s is capped to 40 samples, so both cells have 160-sample segments.
+  out <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 80,
+      window_sec = 1, lag_sec = c(0.5, 1),
+      surrogate_method = "segment", n_surrogates = 5L
+    ),
+    "bsync_duplicate_cells"
+  )
+  expect_identical(out$cnds[[1]]$n_dropped, 1L)
+  expect_identical(nrow(out$res$grid), 1L)
+  expect_identical(out$res$grid$window_increment, 160L)
+})
+
+test_that("a grid without repeats gives no repeated-cell message", {
+  set.seed(34)
+  x <- rnorm(400)
+  y <- rnorm(400)
+  out <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 80,
+      window_sec = c(1, 2), lag_sec = 0.5,
+      surrogate_method = c("phase", "circular"), n_surrogates = 5L
+    ),
+    "bsync_duplicate_cells"
+  )
+  expect_length(out$cnds, 0L)
+  expect_identical(nrow(out$res$grid), 4L)
+  expect_identical(out$res$settings$n_dropped, 0L)
+})
+
+test_that("circular-skip warnings name the increment of each cell", {
+  set.seed(46)
+  x <- rnorm(40)
+  y <- rnorm(40)
+  # Window 20 and lag 10: the window fits (20 + 2 * 10 = 40), but circular
+  # shifts need n > 40. The two increments give two skipped cells.
+  out <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 1,
+      window_sec = 20, lag_sec = 10, increment_pct = c(0.5, 1),
+      surrogate_method = "circular", n_surrogates = 9L
+    ),
+    "bsync_circular_skipped"
+  )
+  msgs <- vapply(out$cnds, conditionMessage, character(1))
+  expect_length(msgs, 2L)
+  expect_match(msgs[1], "`window_increment` = 10 samples")
+  expect_match(msgs[2], "`window_increment` = 20 samples")
+})
+
+test_that("the surrogate count prints without scientific notation", {
+  x <- list(
+    settings = list(n_surrogates = 1e5),
+    grid = tibble::tibble(n_surrogates = c(100000L, 23L))
+  )
+  expect_identical(multiverse_surrogate_text(x), "up to 100000 (fewest 23)")
+  x$grid$n_surrogates <- 100000L
+  expect_identical(multiverse_surrogate_text(x), "100000")
+})
+
+# Window 20 and lag 2 give 24-sample segments, so a 100-sample series has 4
+# segments and at most 4! - 1 = 23 segment orders.
+seg_count_mv <- function() {
+  set.seed(36)
+  x <- rnorm(100)
+  y <- rnorm(100)
+  suppressWarnings(suppressMessages(synchrony_multiverse(
+    x, y,
+    estimator = "wcc", sample_rate = 1,
+    window_sec = 20, lag_sec = 2,
+    surrogate_method = c("phase", "segment"), n_surrogates = 50L
+  )))
+}
+
+test_that("n_surrogates holds the surrogates each cell used", {
+  m <- seg_count_mv()
+  expect_identical(m$grid$surrogate_method, c("phase", "segment"))
+  expect_identical(m$grid$n_surrogates, c(50L, 23L))
+})
+
+test_that("n_surrogates is 0 for a cell that was not computed", {
+  set.seed(37)
+  x <- rnorm(30)
+  y <- rnorm(30)
+  # Window 10 (lag capped at 5, increment 1) fits with 30 - 20 + 1 = 11
+  # windows. Window 20 with lag 6 needs 32 samples and is skipped.
+  m <- suppressWarnings(suppressMessages(synchrony_multiverse(
+    x, y,
+    estimator = "wcc", sample_rate = 1,
+    window_sec = c(10, 20), lag_sec = 6, n_surrogates = 19L
+  )))
+  expect_identical(m$grid$n_windows, c(11L, 0L))
+  expect_identical(m$grid$n_surrogates, c(19L, 0L))
+})
+
+test_that("print and glance report the surrogate counts", {
+  m <- seg_count_mv()
+  msgs <- paste(testthat::capture_messages(print(m)), collapse = "")
+  expect_match(msgs, "Surrogates per cell: up to 50 (fewest 23)", fixed = TRUE)
+  g <- glance(m)
+  expect_identical(g$n_surrogates, 50L)
+  expect_identical(g$n_surrogates_min, 23L)
+
+  set.seed(38)
+  x <- rnorm(100)
+  y <- rnorm(100)
+  p <- suppressWarnings(suppressMessages(synchrony_multiverse(
+    x, y,
+    estimator = "wcc", sample_rate = 1,
+    window_sec = 20, lag_sec = 2, n_surrogates = 50L
+  )))
+  msgs <- paste(testthat::capture_messages(print(p)), collapse = "")
+  expect_match(msgs, "Surrogates per cell: 50\n", fixed = TRUE)
+  expect_identical(glance(p)$n_surrogates_min, 50L)
+})
+
+test_that("glance gives NA n_surrogates_min when no cell was computed", {
+  set.seed(39)
+  x <- rnorm(30)
+  y <- rnorm(30)
+  m <- suppressWarnings(suppressMessages(synchrony_multiverse(
+    x, y,
+    estimator = "wcc", sample_rate = 1,
+    window_sec = 20, lag_sec = 6, n_surrogates = 19L
+  )))
+  expect_identical(glance(m)$n_surrogates_min, NA_integer_)
+  msgs <- paste(testthat::capture_messages(print(m)), collapse = "")
+  expect_match(msgs, "Surrogates per cell: 19\n", fixed = TRUE)
+})
+
+test_that("a result without the n_surrogates column prints the requested count", {
+  m <- seg_count_mv()
+  m$grid$n_surrogates <- NULL
+  msgs <- paste(testthat::capture_messages(print(m)), collapse = "")
+  expect_match(msgs, "Surrogates per cell: 50\n", fixed = TRUE)
+  expect_identical(glance(m)$n_surrogates_min, NA_integer_)
+  expect_identical(glance(m)$n_surrogates, 50L)
+})
+
+test_that("a circular cell with no valid shift is skipped, not an abort", {
+  # n = 20, window 10, lag 5: the window fits (10 + 2 * 5 = 20), but
+  # circular shifts need n > 4 * 5 = 20. On main the call stopped.
+  set.seed(40)
+  x <- rnorm(20)
+  y <- rnorm(20)
+  out <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 1,
+      window_sec = 10, lag_sec = 5,
+      surrogate_method = "circular", n_surrogates = 19L
+    ),
+    "bsync_circular_skipped"
+  )
+  expect_length(out$cnds, 1L)
+  expect_match(conditionMessage(out$cnds[[1]]), "lag_max` = 5,")
+  g <- out$res$grid
+  expect_identical(g$lag_max, 5L)
+  expect_identical(g$n_windows, 0L)
+  expect_identical(g$n_surrogates, 0L)
+  expect_true(is.na(g$es))
+  expect_true(is.na(g$p))
+})
+
+test_that("circular cells with a valid shift still compute on a short series", {
+  set.seed(41)
+  x <- rnorm(20)
+  y <- rnorm(20)
+  # Cells: (10, 2) and (12, 2) compute; (10, 5) fits its window but has no
+  # valid shift; (12, 5) needs 22 samples, so it is only too short.
+  out <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 1,
+      window_sec = c(10, 12), lag_sec = c(2, 5),
+      surrogate_method = c("circular", "phase"), n_surrogates = 9L
+    ),
+    "bsync_circular_skipped"
+  )
+  expect_length(out$cnds, 1L)
+  g <- out$res$grid
+  circ <- g[g$surrogate_method == "circular", ]
+  expect_identical(circ$window_size, c(10L, 12L, 10L, 12L))
+  expect_identical(circ$lag_max, c(2L, 2L, 5L, 5L))
+  expect_identical(!is.na(circ$es), c(TRUE, TRUE, FALSE, FALSE))
+  expect_identical(circ$n_surrogates, c(9L, 9L, 0L, 0L))
+  # The phase cell with lag 5 and window 10 still computes.
+  ph <- g[g$surrogate_method == "phase" & g$window_size == 10L & g$lag_max == 5L, ]
+  expect_false(is.na(ph$es))
+})
+
+test_that("a circular grid on a long series makes no skip", {
+  set.seed(42)
+  x <- rnorm(60)
+  y <- rnorm(60)
+  out <- collect_class(
+    synchrony_multiverse(
+      x, y,
+      estimator = "wcc", sample_rate = 1,
+      window_sec = 10, lag_sec = 5,
+      surrogate_method = "circular", n_surrogates = 9L
+    ),
+    "bsync_circular_skipped"
+  )
+  expect_length(out$cnds, 0L)
+  expect_false(is.na(out$res$grid$es))
+})

@@ -51,7 +51,10 @@ samples and steps its windows one segment at a time, so
 than 4 segments is skipped with a warning. A cell with k segments uses
 \code{min(n_surrogates, k! - 1)} surrogates, so a cell with 4 segments
 uses \code{min(n_surrogates, 23)}. The default \code{lag_sec} is crossed
-with every window, so a segment is not always twice the window. See
+with every window, so a segment is not always twice the window. A
+\code{"circular"} cell that fits its window but has no valid circular
+shift (series length equal to \code{4 * lag_max}) is skipped, with one
+warning per call. A shorter series is skipped as too short. See
 \code{\link{synchrony_multiverse}} and
 \code{\link{generate_surrogate_segment}}.}
 
@@ -80,6 +83,11 @@ An object of class `bsync_autotune` (a named list with a tidy
     \item{`lag_increment`}{`1L` (standard lag increment).}
     \item{`window_sec`}{Selected window size in seconds.}
     \item{`lag_sec`}{Selected max lag in seconds.}
+    \item{\code{increment_pct}}{Selected window increment as a fraction of
+      the window; \code{NA} for a segment cell, whose increment is one
+      segment.}
+    \item{\code{statistic}}{Aggregate WCC statistic of the selected cell.}
+    \item{\code{surrogate_method}}{Surrogate method of the selected cell.}
     \item{`sig_rate`}{Proportion of dyads where selected cell was significant.}
     \item{`median_es`}{Median ES across dyads for the selected cell.}
     \item{`iqr_es`}{IQR of ES across dyads for the selected cell.}

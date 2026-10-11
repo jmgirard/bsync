@@ -159,7 +159,7 @@ test_that("glance() reports the chosen Granger direction", {
   expect_false(gl_xy$n_significant == gl_yx$n_significant)
 })
 
-test_that("glance() columns of WCC and WDTW results do not change", {
+test_that("glance() columns of WCC and WDTW results have no direction column", {
   cols <- c(
     "estimator",
     "n_cells",
@@ -169,7 +169,8 @@ test_that("glance() columns of WCC and WDTW results do not change", {
     "median_es",
     "iqr_es",
     "sign_consistent",
-    "n_surrogates"
+    "n_surrogates",
+    "n_surrogates_min"
   )
   expect_named(glance(small_multiverse("wcc")), cols)
   expect_named(glance(small_multiverse("wdtw")), cols)
@@ -370,7 +371,16 @@ test_that("y -> x is computed from the grid when $robustness_yx is missing", {
 
   expect_equal(multiverse_direction(old, "yx")$robustness, expected)
   gl <- glance(old, direction = "yx")
-  expect_named(gl, c("estimator", "direction", summary_cols, "n_surrogates"))
+  expect_named(
+    gl,
+    c(
+      "estimator",
+      "direction",
+      summary_cols,
+      "n_surrogates",
+      "n_surrogates_min"
+    )
+  )
   expect_equal(as.list(gl[summary_cols]), expected)
   expect_line(function() print(old, direction = "yx"), sig_line(expected))
   expect_identical(

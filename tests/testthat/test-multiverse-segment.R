@@ -55,8 +55,8 @@ test_that("a one-cell wcc segment multiverse matches wcc_surrogate()", {
   )
   expect_identical(nrow(mv$grid), 1L)
   expect_equal(mv$grid$p, ref$p_value)
-  # Doubles, the grid column type of every method on main.
-  expect_identical(mv$grid$window_increment, as.double(s))
+  # Integer, the grid column type of every method.
+  expect_identical(mv$grid$window_increment, as.integer(s))
   expect_true(is.na(mv$grid$increment_pct))
 })
 
@@ -88,7 +88,7 @@ test_that("a one-cell wdtw segment multiverse matches wdtw_surrogate()", {
     window_increment = s
   )
   expect_equal(mv$grid$p, ref$p_value)
-  expect_identical(mv$grid$window_increment, as.double(s))
+  expect_identical(mv$grid$window_increment, as.integer(s))
 })
 
 test_that("a one-cell wgranger segment multiverse matches wgranger_surrogate()", {
@@ -118,7 +118,7 @@ test_that("a one-cell wgranger segment multiverse matches wgranger_surrogate()",
   )
   expect_equal(mv$grid$p, ref$p_value_xy)
   expect_equal(mv$grid$p_yx, ref$p_value_yx)
-  expect_identical(mv$grid$window_increment, as.double(w))
+  expect_identical(mv$grid$window_increment, as.integer(w))
 })
 
 test_that("segment rows are not crossed with increment_pct", {
@@ -141,7 +141,7 @@ test_that("segment rows are not crossed with increment_pct", {
     expect_identical(sum(rows$surrogate_method == "segment"), 1L)
     seg <- rows[rows$surrogate_method == "segment", ]
     expect_true(is.na(seg$increment_pct))
-    expect_identical(seg$window_increment, 20)
+    expect_identical(seg$window_increment, 20L)
     phase <- rows[rows$surrogate_method == "phase", ]
     expect_setequal(phase$increment_pct, c(0.1, 0.5))
   }
@@ -212,7 +212,7 @@ test_that("segment cells with fewer than 4 segments are skipped", {
   expect_identical(nrow(mv$grid), 2L)
   expect_true(all(is.na(mv$grid$p)))
   expect_true(all(is.na(mv$grid$es)))
-  expect_identical(mv$grid$window_increment, c(32, 54))
+  expect_identical(mv$grid$window_increment, c(32L, 54L))
 })
 
 test_that("a segment of a single sample is skipped, not an error", {
@@ -252,24 +252,32 @@ test_that("no aligned-design message when every segment cell is skipped", {
   )
 })
 
-test_that("repeated user inputs keep their segment rows", {
+test_that("repeated user inputs give one row per specification", {
   set.seed(611)
-  mv <- suppressMessages(synchrony_multiverse(
-    seg_pair$x,
-    seg_pair$y,
-    estimator = "wcc",
-    sample_rate = 1,
-    window_sec = c(16, 16),
-    lag_sec = 2,
-    increment_pct = c(0.1, 0.5),
-    surrogate_method = c("phase", "segment"),
-    n_surrogates = 19
-  ))
-  expect_identical(sum(mv$grid$surrogate_method == "phase"), 4L)
-  expect_identical(sum(mv$grid$surrogate_method == "segment"), 2L)
+  expect_message(
+    suppressMessages(
+      mv <- synchrony_multiverse(
+        seg_pair$x,
+        seg_pair$y,
+        estimator = "wcc",
+        sample_rate = 1,
+        window_sec = c(16, 16),
+        lag_sec = 2,
+        increment_pct = c(0.1, 0.5),
+        surrogate_method = c("phase", "segment"),
+        n_surrogates = 19
+      ),
+      classes = "bsync_segment_aligned"
+    ),
+    class = "bsync_duplicate_cells"
+  )
+  # The second window_sec copy repeats the first, so one phase row per
+  # increment and one segment row remain.
+  expect_identical(sum(mv$grid$surrogate_method == "phase"), 2L)
+  expect_identical(sum(mv$grid$surrogate_method == "segment"), 1L)
 })
 
-test_that("non-segment grid columns keep their types", {
+test_that("grid sample-count columns are integer", {
   set.seed(612)
   mv <- synchrony_multiverse(
     seg_pair$x,
@@ -281,8 +289,8 @@ test_that("non-segment grid columns keep their types", {
     surrogate_method = "phase",
     n_surrogates = 19
   )
-  expect_type(mv$grid$window_size, "double")
-  expect_type(mv$grid$window_increment, "double")
+  expect_type(mv$grid$window_size, "integer")
+  expect_type(mv$grid$window_increment, "integer")
   expect_type(mv$grid$lag_max, "integer")
 })
 

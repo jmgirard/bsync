@@ -60,6 +60,24 @@ inform_segment_aligned <- function(is_granger) {
   )
 }
 
+# Cells that repeat an earlier cell in samples are dropped. The class lets
+# autotune_wcc() give this message once instead of once per dyad, and the
+# n_dropped field carries the count.
+inform_duplicate_cells <- function(n_dropped) {
+  cli::cli_inform(
+    c(
+      "Dropped {n_dropped} cell{?s} that repeat{?s/} an earlier cell in \\
+      samples.",
+      "i" = "The cap of {.arg lag_max} at {.code floor(window_size / 2)}, \\
+      the rounding of seconds to samples, and repeated values in the \\
+      arguments can give two cells the same samples. The first cell in grid \\
+      order is kept."
+    ),
+    class = "bsync_duplicate_cells",
+    n_dropped = n_dropped
+  )
+}
+
 # Robustness summary of a multiverse grid. Valid cells are the non-skipped
 # cells with a computable ES. Significance uses is_significant(), so an NA
 # p-value is never significant.
@@ -103,9 +121,19 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #' **Grid construction.** Each vector argument (`window_sec`, `lag_sec`,
 #' `increment_pct`, `statistic`, `surrogate_method`) is crossed into a full
 #' parameter grid, except that \code{"segment"} cells are not crossed with
-#' `increment_pct` (see `surrogate_method`). Seconds are converted to samples
+#' `increment_pct` (see `surrogate_method`), and repeated cells are then
+#' dropped (below). Seconds are converted to samples
 #' per cell; `lag_max` is
 #' hard-capped at `floor(window_size / 2)` to preserve statistical reliability.
+#' The cap, the rounding of seconds to samples, and repeated values in the
+#' arguments can give two cells the same \code{window_size},
+#' \code{lag_max}, and \code{window_increment} in samples, with the same
+#' \code{surrogate_method} and \code{statistic}. Such repeated cells are
+#' dropped, with a message, and the first cell in grid order is kept. Each
+#' specification is then tested once, and \code{settings$n_cells} and the
+#' robustness summary count it once. \code{settings$n_dropped} is the number
+#' of cells dropped. For example, \code{lag_sec = window_sec / 2} crossed with
+#' several windows gives repeats.
 #' Cells where the series is too short are skipped with a message and appear
 #' as `NA` rows in the output grid.
 #'
@@ -153,8 +181,9 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'   \code{window_size + 2 * lag_max} samples (\code{window_size} for
 #'   \code{"wgranger"}) and steps its windows one segment at a time, so that
 #'   every lagged window lies inside one segment. \code{increment_pct} does
-#'   not apply to segment cells: the grid has one segment row per window,
-#'   lag, and statistic, with \code{increment_pct} \code{NA}. A segment cell
+#'   not apply to segment cells: the grid has at most one segment row per
+#'   window, lag, and statistic (repeated cells are dropped), with
+#'   \code{increment_pct} \code{NA}. A segment cell
 #'   with fewer than 4 segments cannot reach p <= .05, so it is skipped with
 #'   a warning, as is a cell whose segment is a single sample. A cell with
 #'   k segments uses \code{min(n_surrogates, k! - 1)}
@@ -163,6 +192,13 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'   surrogates, and 5 and 6 segments allow 119 and 719. The samples after
 #'   the last whole segment stay in place (see
 #'   \code{\link{generate_surrogate_segment}}).
+#'   For \code{"wcc"} and \code{"wdtw"}, all circular cells share one
+#'   surrogate matrix, made with \code{lag_max} equal to the largest
+#'   \code{lag_max} in the grid. If the series is too short for that
+#'   (\code{length(y) <= 4 * lag_max}), each circular cell that fits its
+#'   window but has \code{length(y) <= 4 * lag_max} for its own
+#'   \code{lag_max} is skipped with a warning, and the matrix is made with the
+#'   largest \code{lag_max} of the circular cells that remain.
 #' @param n_surrogates Single positive integer; number of surrogates per cell.
 #'   Default is `100`. Use >= 1000 for reporting. A cell is significant at
 #'   p <= .05. Below 19 the call warns, because the smallest possible
@@ -181,8 +217,16 @@ multiverse_robustness <- function(n_cells, es_vec, p_vec, skipped_vec) {
 #'       specification columns, `window_size`/`lag_max`/`window_increment`
 #'       (samples), `n_windows`, `observed`, `null_mean`, `null_sd`, `es`, `p`
 #'       (x -> y for Granger, plus `observed_yx`, `null_mean_yx`, `null_sd_yx`,
-#'       `es_yx`, and `p_yx` for y -> x).}
-#'     \item{`$settings`}{Named list of call-level inputs.}
+#'       `es_yx`, and `p_yx` for y -> x). The integer column
+#'       \code{n_surrogates} is the number of surrogate series that the test of
+#'       the cell used. It is the requested \code{n_surrogates}, except for a
+#'       segment cell with k segments, which uses at most k! - 1, and it is 0
+#'       for a cell that was not computed (\code{n_windows} 0). Circular
+#'       surrogates are counted with repeated shifts, so with few valid
+#'       shifts a cell can hold fewer distinct surrogates.}
+#'     \item{`$settings`}{Named list of call-level inputs, plus
+#'       \code{n_cells} (cells kept) and \code{n_dropped} (repeated cells
+#'       dropped before testing).}
 #'     \item{`$robustness`}{Named list: `n_cells` (total specifications in the
 #'       grid), `n_valid` (cells with a computable ES in that direction; the
 #'       rest were skipped as too short or gave an NA ES), `n_significant`, `pct_significant` (over
@@ -326,7 +370,7 @@ synchrony_multiverse <- function(
   n_cells <- nrow(grid_params)
 
   # --- Convert seconds -> samples per cell ------------------------------
-  w_samp_all <- pmax(1L, round(grid_params$window_sec * sample_rate))
+  w_samp_all <- as.integer(pmax(1L, round(grid_params$window_sec * sample_rate)))
   l_samp_all <- if (is_granger) {
     rep(NA_integer_, n_cells)
   } else {
@@ -339,11 +383,34 @@ synchrony_multiverse <- function(
   # the segment is window + 2 * lag samples (the window for Granger, whose
   # grid has no lags) and the windows step one segment at a time.
   seg_size_all <- if (is_granger) w_samp_all else w_samp_all + 2L * l_samp_all
-  inc_samp_all <- ifelse(
+  inc_samp_all <- as.integer(ifelse(
     is_seg,
     seg_size_all,
     pmax(1L, round(w_samp_all * grid_params$increment_pct))
-  )
+  ))
+
+  # Repeated cells: the lag cap and the rounding of seconds to samples can
+  # give two cells the same samples. Keep the first in grid order, so each
+  # specification is tested and counted once. The keys depend only on the
+  # arguments, not on the data, so every dyad of autotune_wcc() keeps the same
+  # cells and select_specification() can match cells by row. duplicated()
+  # treats NA keys (Granger lags, statistics) as equal.
+  keep <- !duplicated(data.frame(
+    w_samp_all, l_samp_all, inc_samp_all,
+    grid_params$surrogate_method, grid_params$statistic
+  ))
+  n_dropped <- sum(!keep)
+  if (n_dropped > 0) {
+    grid_params <- grid_params[keep, , drop = FALSE]
+    rownames(grid_params) <- NULL
+    w_samp_all <- w_samp_all[keep]
+    l_samp_all <- l_samp_all[keep]
+    inc_samp_all <- inc_samp_all[keep]
+    seg_size_all <- seg_size_all[keep]
+    is_seg <- is_seg[keep]
+    n_cells <- nrow(grid_params)
+    inform_duplicate_cells(n_dropped)
+  }
   # Below 4 segments, at most 5 orders exist, so no cell can reach p <= .05.
   # A segment needs at least 2 samples (a 1-sample window gives 1).
   seg_skip <- is_seg & (seg_size_all < 2L | (n %/% seg_size_all) < 4L)
@@ -354,13 +421,31 @@ synchrony_multiverse <- function(
 
   # --- Pre-generate one surrogate matrix per surrogate_method -----------
   # For circular, we use the largest lag_max in the grid as the minimum shift
-  # (more conservative; valid for all cells). For Granger with no lag_sec,
-  # use n/4 as a safe default.
+  # (more conservative; valid for all cells), or, when the series is too short
+  # for it, the largest lag of the circular cells that can shift (below). For
+  # Granger with no lag_sec, use n/4 as a safe default.
   unique_methods <- setdiff(unique(grid_params$surrogate_method), "segment")
 
+  circ_skip <- rep(FALSE, n_cells)
   if (!is_granger) {
     # Largest lag_max across the grid (in samples, pre-capped at window/2)
     circ_lag_max <- as.numeric(max(l_samp_all))
+    # generate_surrogate_circular() needs n > 4 * lag_max. If the grid's
+    # largest lag is too long, skip each circular cell that fits its window
+    # but has no valid shift at its own lag, and use the largest lag of the
+    # circular cells that remain. A cell too short for its window is skipped
+    # below as too short. When n > 4 * the largest lag, nothing changes.
+    if ("circular" %in% unique_methods && n <= 4 * circ_lag_max) {
+      is_circ <- grid_params$surrogate_method == "circular"
+      fits <- n >= grid_min_length(w_samp_all, l_samp_all, lagged = TRUE)
+      circ_skip <- is_circ & fits & n <= 4L * l_samp_all
+      circ_ok <- is_circ & fits & !circ_skip
+      if (any(circ_ok)) {
+        circ_lag_max <- as.numeric(max(l_samp_all[circ_ok]))
+      } else {
+        unique_methods <- setdiff(unique_methods, "circular")
+      }
+    }
   } else {
     circ_lag_max <- max(1L, round(n / 4L))
   }
@@ -423,6 +508,8 @@ synchrony_multiverse <- function(
   lag_max_samp <- integer(n_cells)
   window_inc_samp <- integer(n_cells)
   n_windows_vec <- integer(n_cells)
+  # Surrogates each cell used: 0 for a cell that was not computed.
+  n_surr_vec <- integer(n_cells)
   observed_vec <- numeric(n_cells)
   null_mean_vec <- numeric(n_cells)
   null_sd_vec <- numeric(n_cells)
@@ -441,7 +528,6 @@ synchrony_multiverse <- function(
   for (ci in seq_len(n_cells)) {
     s_method <- grid_params$surrogate_method[ci]
     stat <- grid_params$statistic[ci]
-    # Doubles, as on main before the vectorized conversion (grid types kept)
     w_samp <- w_samp_all[ci]
     l_samp <- l_samp_all[ci]
     inc_samp <- inc_samp_all[ci]
@@ -471,9 +557,22 @@ synchrony_multiverse <- function(
       )
     }
 
+    if (circ_skip[ci]) {
+      cli::cli_warn(
+        c(
+          "Skipped a circular cell with {.arg window_size} = {w_samp}, \\
+          {.arg lag_max} = {l_samp}, and {.arg window_increment} = \\
+          {inc_samp} samples.",
+          "i" = "Circular shifts need more than {.code 4 * lag_max} = \\
+          {4L * l_samp} samples, and the series has {n}."
+        ),
+        class = "bsync_circular_skipped"
+      )
+    }
+
     # Guard against short series (build_surface_grid would abort)
     min_n <- grid_min_length(w_samp, l_samp, lagged = !is_granger)
-    if (seg_skip[ci] || n < min_n) {
+    if (seg_skip[ci] || circ_skip[ci] || n < min_n) {
       skipped_vec[ci] <- TRUE
       observed_vec[ci] <- NA_real_
       null_mean_vec[ci] <- NA_real_
@@ -521,6 +620,8 @@ synchrony_multiverse <- function(
     )
 
     n_windows_vec[ci] <- cell$n_windows
+    # A cell whose test failed has n_windows 0 and used no surrogates.
+    n_surr_vec[ci] <- if (cell$n_windows > 0L) ncol(y_surr) else 0L
     observed_vec[ci] <- cell$observed
     null_mean_vec[ci] <- cell$null_mean
     null_sd_vec[ci] <- cell$null_sd
@@ -536,9 +637,9 @@ synchrony_multiverse <- function(
     }
   }
 
-  # Warn about skipped cells (segment cells with too few segments have their
-  # own warning above)
-  n_skipped <- sum(skipped_vec & !seg_skip)
+  # Warn about skipped cells (segment cells with too few segments and circular
+  # cells with no valid shift have their own warnings above)
+  n_skipped <- sum(skipped_vec & !seg_skip & !circ_skip)
   if (n_skipped > 0) {
     cli::cli_alert_warning(
       "{n_skipped} cell{?s} skipped: series too short for the requested parameters."
@@ -557,6 +658,7 @@ synchrony_multiverse <- function(
     lag_max          = lag_max_samp,
     window_increment = window_inc_samp,
     n_windows        = n_windows_vec,
+    n_surrogates     = n_surr_vec,
     observed         = observed_vec,
     null_mean        = null_mean_vec,
     null_sd          = null_sd_vec,
@@ -579,7 +681,8 @@ synchrony_multiverse <- function(
     estimator    = estimator,
     sample_rate  = sample_rate,
     n_surrogates = n_surrogates,
-    n_cells      = n_cells
+    n_cells      = n_cells,
+    n_dropped    = n_dropped # repeated cells dropped before testing
   )
 
   out <- list(grid = grid_tbl, settings = settings, robustness = robustness)
@@ -770,6 +873,36 @@ multiverse_direction <- function(x, direction = c("xy", "yx"),
 
 # S3 methods for bsync_multiverse ----------------------------------------------
 
+# Fewest surrogates that a computed cell used (n_surrogates > 0), or NA when
+# no cell was computed or the grid has no n_surrogates column (a result made
+# before the column existed).
+multiverse_surrogates_min <- function(x) {
+  if (!"n_surrogates" %in% names(x$grid)) {
+    return(NA_integer_)
+  }
+  used <- x$grid$n_surrogates
+  used <- used[!is.na(used) & used > 0L]
+  if (length(used) == 0L) {
+    return(NA_integer_)
+  }
+  as.integer(min(used))
+}
+
+# "Surrogates per cell" text: the requested count when every computed cell
+# used it, else "up to <requested> (fewest <m>)". Segment cells with few
+# segments use fewer than requested.
+multiverse_surrogate_text <- function(x) {
+  requested <- x$settings$n_surrogates
+  fewest <- multiverse_surrogates_min(x)
+  if (is.na(fewest) || fewest >= requested) {
+    return(format(requested, scientific = FALSE))
+  }
+  paste0(
+    "up to ", format(requested, scientific = FALSE),
+    " (fewest ", fewest, ")"
+  )
+}
+
 #' Print method for bsync_multiverse objects
 #'
 #' @param x A `bsync_multiverse` object.
@@ -791,7 +924,7 @@ print.bsync_multiverse <- function(x, direction = c("xy", "yx"), ...) {
   }
   cli::cli_dl(c(
     "Specifications" = "{rb$n_cells} ({rb$n_valid} computable)",
-    "Surrogates per cell" = "{s$n_surrogates}",
+    "Surrogates per cell" = "{multiverse_surrogate_text(x)}",
     "Significant (p <= .05)" = "{rb$n_significant} of {rb$n_valid} ({round(rb$pct_significant * 100, 1)}%)",
     "Median ES" = "{round(rb$median_es, 3)} [IQR: {round(rb$iqr_es, 3)}]",
     "Sign-consistent (sig. cells)" = "{round(rb$sign_consistent * 100, 1)}%"

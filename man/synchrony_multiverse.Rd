@@ -56,8 +56,9 @@ reorders segments of \code{y}. A segment cell uses segments of
 \code{window_size + 2 * lag_max} samples (\code{window_size} for
 \code{"wgranger"}) and steps its windows one segment at a time, so that
 every lagged window lies inside one segment. \code{increment_pct} does
-not apply to segment cells: the grid has one segment row per window,
-lag, and statistic, with \code{increment_pct} \code{NA}. A segment cell
+not apply to segment cells: the grid has at most one segment row per
+window, lag, and statistic (repeated cells are dropped), with
+\code{increment_pct} \code{NA}. A segment cell
 with fewer than 4 segments cannot reach p <= .05, so it is skipped with
 a warning, as is a cell whose segment is a single sample. A cell with
 k segments uses \code{min(n_surrogates, k! - 1)}
@@ -65,7 +66,14 @@ surrogates, because k segments have k! - 1 orders other than the
 original: a cell with 4 segments uses \code{min(n_surrogates, 23)}
 surrogates, and 5 and 6 segments allow 119 and 719. The samples after
 the last whole segment stay in place (see
-\code{\link{generate_surrogate_segment}}).}
+\code{\link{generate_surrogate_segment}}).
+For \code{"wcc"} and \code{"wdtw"}, all circular cells share one
+surrogate matrix, made with \code{lag_max} equal to the largest
+\code{lag_max} in the grid. If the series is too short for that
+(\code{length(y) <= 4 * lag_max}), each circular cell that fits its
+window but has \code{length(y) <= 4 * lag_max} for its own
+\code{lag_max} is skipped with a warning, and the matrix is made with the
+largest \code{lag_max} of the circular cells that remain.}
 
 \item{n_surrogates}{Single positive integer; number of surrogates per cell.
 Default is `100`. Use >= 1000 for reporting. A cell is significant at
@@ -91,8 +99,16 @@ A `bsync_multiverse` object with:
       specification columns, `window_size`/`lag_max`/`window_increment`
       (samples), `n_windows`, `observed`, `null_mean`, `null_sd`, `es`, `p`
       (x -> y for Granger, plus `observed_yx`, `null_mean_yx`, `null_sd_yx`,
-      `es_yx`, and `p_yx` for y -> x).}
-    \item{`$settings`}{Named list of call-level inputs.}
+      `es_yx`, and `p_yx` for y -> x). The integer column
+      \code{n_surrogates} is the number of surrogate series that the test of
+      the cell used. It is the requested \code{n_surrogates}, except for a
+      segment cell with k segments, which uses at most k! - 1, and it is 0
+      for a cell that was not computed (\code{n_windows} 0). Circular
+      surrogates are counted with repeated shifts, so with few valid
+      shifts a cell can hold fewer distinct surrogates.}
+    \item{`$settings`}{Named list of call-level inputs, plus
+      \code{n_cells} (cells kept) and \code{n_dropped} (repeated cells
+      dropped before testing).}
     \item{`$robustness`}{Named list: `n_cells` (total specifications in the
       grid), `n_valid` (cells with a computable ES in that direction; the
       rest were skipped as too short or gave an NA ES), `n_significant`, `pct_significant` (over
@@ -112,9 +128,19 @@ autocorrelation inflates.
 **Grid construction.** Each vector argument (`window_sec`, `lag_sec`,
 `increment_pct`, `statistic`, `surrogate_method`) is crossed into a full
 parameter grid, except that \code{"segment"} cells are not crossed with
-`increment_pct` (see `surrogate_method`). Seconds are converted to samples
+`increment_pct` (see `surrogate_method`), and repeated cells are then
+dropped (below). Seconds are converted to samples
 per cell; `lag_max` is
 hard-capped at `floor(window_size / 2)` to preserve statistical reliability.
+The cap, the rounding of seconds to samples, and repeated values in the
+arguments can give two cells the same \code{window_size},
+\code{lag_max}, and \code{window_increment} in samples, with the same
+\code{surrogate_method} and \code{statistic}. Such repeated cells are
+dropped, with a message, and the first cell in grid order is kept. Each
+specification is then tested once, and \code{settings$n_cells} and the
+robustness summary count it once. \code{settings$n_dropped} is the number
+of cells dropped. For example, \code{lag_sec = window_sec / 2} crossed with
+several windows gives repeats.
 Cells where the series is too short are skipped with a message and appear
 as `NA` rows in the output grid.
 

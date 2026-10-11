@@ -86,7 +86,10 @@
 #'   than 4 segments is skipped with a warning. A cell with k segments uses
 #'   \code{min(n_surrogates, k! - 1)} surrogates, so a cell with 4 segments
 #'   uses \code{min(n_surrogates, 23)}. The default \code{lag_sec} is crossed
-#'   with every window, so a segment is not always twice the window. See
+#'   with every window, so a segment is not always twice the window. A
+#'   \code{"circular"} cell that fits its window but has no valid circular
+#'   shift (series length equal to \code{4 * lag_max}) is skipped, with one
+#'   warning per call. A shorter series is skipped as too short. See
 #'   \code{\link{synchrony_multiverse}} and
 #'   \code{\link{generate_surrogate_segment}}.
 #' @param n_surrogates Single positive integer; surrogates per cell per dyad.
@@ -109,6 +112,11 @@
 #'     \item{`lag_increment`}{`1L` (standard lag increment).}
 #'     \item{`window_sec`}{Selected window size in seconds.}
 #'     \item{`lag_sec`}{Selected max lag in seconds.}
+#'     \item{\code{increment_pct}}{Selected window increment as a fraction of
+#'       the window; \code{NA} for a segment cell, whose increment is one
+#'       segment.}
+#'     \item{\code{statistic}}{Aggregate WCC statistic of the selected cell.}
+#'     \item{\code{surrogate_method}}{Surrogate method of the selected cell.}
 #'     \item{`sig_rate`}{Proportion of dyads where selected cell was significant.}
 #'     \item{`median_es`}{Median ES across dyads for the selected cell.}
 #'     \item{`iqr_es`}{IQR of ES across dyads for the selected cell.}
@@ -228,8 +236,7 @@ autotune_wcc <- function(
     }
   }
 
-  cli::cli_inform("Running synchrony_multiverse() on {n_use} dyad(s) \\
-    ({length(window_sec)} window x {length(lag_sec_use)} lag cells each)...")
+  cli::cli_inform("Running synchrony_multiverse() on {n_use} dyad{?s}...")
 
   # Give the few-surrogates warning once here, and muffle the copy that
   # each per-dyad synchrony_multiverse() call would give.
@@ -242,6 +249,10 @@ autotune_wcc <- function(
   # cells are recorded per dyad and reported once after the loop.
   n_unconverged_dyads <- 0L
   seg_skip_dyads <- integer(0)
+  # The repeated-cell count depends only on the arguments, so it is the same
+  # for every dyad.
+  n_dropped <- 0L
+  circ_skip_dyads <- integer(0)
   mv_list <- lapply(seq_along(tune_list), function(i) {
     xy <- tune_list[[i]]
     unconverged <- FALSE
@@ -260,8 +271,16 @@ autotune_wcc <- function(
       ),
       bsync_few_surrogates = function(w) invokeRestart("muffleWarning"),
       bsync_segment_aligned = function(m) invokeRestart("muffleMessage"),
+      bsync_duplicate_cells = function(m) {
+        n_dropped <<- m$n_dropped
+        invokeRestart("muffleMessage")
+      },
       bsync_segment_skipped = function(w) {
         seg_skip_dyads <<- union(seg_skip_dyads, tune_idx[i])
+        invokeRestart("muffleWarning")
+      },
+      bsync_circular_skipped = function(w) {
+        circ_skip_dyads <<- union(circ_skip_dyads, tune_idx[i])
         invokeRestart("muffleWarning")
       },
       bsync_iaaft_unconverged = function(w) {
@@ -273,6 +292,9 @@ autotune_wcc <- function(
     res
   })
   names(mv_list) <- names(tune_list)
+  if (n_dropped > 0) {
+    inform_duplicate_cells(n_dropped)
+  }
   if (length(seg_skip_dyads) > 0) {
     n_skip <- length(seg_skip_dyads)
     cli::cli_warn(
@@ -283,6 +305,18 @@ autotune_wcc <- function(
         give fewer than 4 segments, so those cells cannot reach p <= .05."
       ),
       class = "bsync_segment_skipped"
+    )
+  }
+  if (length(circ_skip_dyads) > 0) {
+    n_skip <- length(circ_skip_dyads)
+    cli::cli_warn(
+      c(
+        "Skipped circular cells in {cli::qty(n_skip)}dyad{?s} \\
+        {circ_skip_dyads} of {.arg dyad_list}.",
+        "i" = "Circular shifts need more than {.code 4 * lag_max} samples, \\
+        and those series are not longer than that."
+      ),
+      class = "bsync_circular_skipped"
     )
   }
   if (n_unconverged_dyads > 0) {
@@ -312,7 +346,10 @@ autotune_wcc <- function(
     lag_increment    = 1L,
     window_sec       = best$window_sec,
     lag_sec          = best$lag_sec,
-    sig_rate         = sel$sig_rate,
+    increment_pct    = best$increment_pct,
+    statistic        = best$statistic,
+    surrogate_method = best$surrogate_method,
+    sig_rate        = sel$sig_rate,
     median_es        = sel$median_es,
     iqr_es           = sel$iqr_es,
     score            = sel$score,
@@ -334,11 +371,17 @@ autotune_wcc <- function(
 #' @export
 print.bsync_autotune <- function(x, ...) {
   cli::cli_h2("Auto-Tune Result")
+  # A result made before the statistic and surrogate_method fields existed
+  # prints without those lines.
   cli::cli_dl(c(
     "Window size" = "{x$window_size} samples ({round(x$window_sec, 2)} s)",
     "Max lag"     = "{x$lag_max} samples ({round(x$lag_sec, 2)} s)",
     "Increment"   = "{x$window_increment} samples",
-    "Sig. rate"   = "{round(x$sig_rate * 100, 1)}% of dyads",
+    if (!is.null(x$statistic)) c("Statistic" = "{x$statistic}"),
+    if (!is.null(x$surrogate_method)) {
+      c("Surrogate method" = "{x$surrogate_method}")
+    },
+    "Sig. rate"  = "{round(x$sig_rate * 100, 1)}% of dyads",
     "Median ES"   = "{round(x$median_es, 3)} (IQR = {round(x$iqr_es, 3)})"
   ))
   cli::cli_alert_info(

@@ -23,6 +23,7 @@ test_that("autotune_wcc: structure and sanity on sim_dyad (regression)", {
   expect_named(result, c(
     "window_size", "lag_max", "window_increment", "lag_increment",
     "window_sec", "lag_sec",
+    "increment_pct", "statistic", "surrogate_method",
     "sig_rate", "median_es", "iqr_es", "score",
     "n_dyads", "n_cells_gated", "dyad_multiverses"
   ))
@@ -436,4 +437,116 @@ test_that("autotune_wcc rejects a single data frame as dyad_list", {
     ),
     "not a single data frame"
   )
+})
+
+test_that("autotune_wcc announces repeated cells once and gates kept cells only", {
+  set.seed(35)
+  dl <- replicate(
+    3,
+    list(x = stats::rnorm(400), y = stats::rnorm(400)),
+    simplify = FALSE
+  )
+  got <- list()
+  res <- withCallingHandlers(
+    suppressWarnings(autotune_wcc(
+      dl,
+      sample_rate = 80,
+      window_sec = c(1, 2),
+      n_surrogates = 5L,
+      sig_pct = 0
+    )),
+    bsync_duplicate_cells = function(m) {
+      got[[length(got) + 1L]] <<- m
+      invokeRestart("muffleMessage")
+    },
+    message = function(m) invokeRestart("muffleMessage")
+  )
+  # The default lag_sec = window_sec / 2 crossed with both windows gives
+  # window 1 s with lag 1 s, which the lag cap makes a repeat of lag 0.5 s.
+  expect_length(got, 1L)
+  expect_identical(got[[1]]$n_dropped, 1L)
+  expect_true(all(vapply(res$dyad_multiverses, function(m) nrow(m$grid), 1L) == 3L))
+  # With sig_pct = 0 every computed cell passes the gate: 3 kept cells, not 4.
+  expect_identical(res$n_cells_gated, 3L)
+})
+
+test_that("autotune_wcc warns once about circular cells with no valid shift", {
+  set.seed(43)
+  dl <- replicate(
+    3,
+    list(x = stats::rnorm(20), y = stats::rnorm(20)),
+    simplify = FALSE
+  )
+  got <- list()
+  res <- withCallingHandlers(
+    autotune_wcc(
+      dl,
+      sample_rate = 1,
+      window_sec = 10,
+      lag_sec = c(2, 5),
+      surrogate_method = "circular",
+      n_surrogates = 9L
+    ),
+    bsync_circular_skipped = function(w) {
+      got[[length(got) + 1L]] <<- w
+      invokeRestart("muffleWarning")
+    },
+    warning = function(w) invokeRestart("muffleWarning"),
+    message = function(m) invokeRestart("muffleMessage")
+  )
+  expect_length(got, 1L)
+  expect_match(conditionMessage(got[[1]]), "dyads 1, 2, and 3")
+  expect_identical(res$lag_max, 2L)
+})
+
+test_that("autotune_wcc records the statistic, method, and increment of the winner", {
+  set.seed(44)
+  dl <- replicate(
+    3,
+    list(x = stats::rnorm(300), y = stats::rnorm(300)),
+    simplify = FALSE
+  )
+  res <- suppressWarnings(suppressMessages(autotune_wcc(
+    dl,
+    sample_rate = 10,
+    window_sec = c(2, 4),
+    lag_sec = 1,
+    increment_pct = c(0.1, 0.25),
+    statistic = c("mean_abs_z", "peak"),
+    surrogate_method = c("phase", "circular"),
+    n_surrogates = 9L,
+    sig_pct = 0
+  )))
+  best <- select_specification(res$dyad_multiverses, sig_pct = 0)$best_row
+  expect_identical(res$statistic, best$statistic)
+  expect_identical(res$surrogate_method, best$surrogate_method)
+  expect_identical(res$increment_pct, best$increment_pct)
+  expect_identical(res$window_increment, best$window_increment)
+  msgs <- paste(testthat::capture_messages(print(res)), collapse = "")
+  expect_match(msgs, paste0("Statistic: ", best$statistic), fixed = TRUE)
+  expect_match(
+    msgs,
+    paste0("Surrogate method: ", best$surrogate_method),
+    fixed = TRUE
+  )
+})
+
+test_that("autotune_wcc gives NA increment_pct for a segment winner", {
+  set.seed(45)
+  dl <- replicate(
+    2,
+    list(x = stats::rnorm(400), y = stats::rnorm(400)),
+    simplify = FALSE
+  )
+  res <- suppressWarnings(suppressMessages(autotune_wcc(
+    dl,
+    sample_rate = 10,
+    window_sec = c(2, 4),
+    lag_sec = 1,
+    surrogate_method = "segment",
+    n_surrogates = 9L
+  )))
+  expect_identical(res$surrogate_method, "segment")
+  expect_identical(res$increment_pct, NA_real_)
+  expect_identical(res$statistic, "mean_abs_z")
 })
