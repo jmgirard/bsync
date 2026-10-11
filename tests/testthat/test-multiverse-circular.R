@@ -329,6 +329,20 @@ test_that("a circular cell too short for its window gives no circular warning", 
   }
 })
 
+test_that("a wgranger circular cell with no valid shift says so", {
+  # Window 20 on 30 samples fits, but shifts of at least 20 from both ends
+  # leave none (k = 30 - 40 + 1 < 0, so 0).
+  r <- run_circular(30, "wgranger", window_sec = 20)
+  expect_length(r$warns, 1L)
+  expect_identical(r$warns[[1]]$n_shifts, 0L)
+  expect_match(
+    conditionMessage(r$warns[[1]]),
+    "at least 20 samples from both ends"
+  )
+  expect_match(conditionMessage(r$warns[[1]]), "no valid\\s+shift")
+  expect_identical(r$res$grid$n_surrogates, 0L)
+})
+
 test_that("a lag-0 circular cell (1-sample window) shifts by 1 to n - 1", {
   # The lag cap makes lag 0 for a 1-sample window. Its minimum shift is 1
   # sample, so its shifts run from 1 to n - 1. Without the floor, the cell's

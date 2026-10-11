@@ -52,8 +52,8 @@ than 4 segments is skipped with a warning. A cell with k segments uses
 \code{min(n_surrogates, k! - 1)} surrogates, so a cell with 4 segments
 uses \code{min(n_surrogates, 23)}. The default \code{lag_sec} is crossed
 with every window, so a segment is not always twice the window. A
-\code{"circular"} cell shifts \code{y} by \code{2 * lag_max} to
-\code{n - 2 * lag_max} samples, so it has k = n - 4 * lag_max + 1
+\code{"circular"} cell shifts \code{y} by m to n - m samples, where m
+is \code{2 * lag_max} and at least 1, so it has k = n - 2 * m + 1
 valid shifts, and uses \code{min(n_surrogates, k)} distinct shifts. A
 circular cell that fits its window but has k < 19 is skipped, with one
 warning per call, also when \code{n_surrogates} is below 19. A shorter

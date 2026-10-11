@@ -24,7 +24,8 @@
   `glance()`'s `n_surrogates` is still the requested count.
 * Each circular cell of `synchrony_multiverse()` now has its own range of
   shifts. For `"wcc"` and `"wdtw"`, a cell shifts `y` by `2 * lag_max` to
-  `n - 2 * lag_max` samples for its own `lag_max`. Before, every circular
+  `n - 2 * lag_max` samples for its own `lag_max`, and by at least 1 sample
+  (a 1-sample window has `lag_max` 0). Before, every circular
   cell used the range of the largest `lag_max` in the grid (or of the
   largest one with a valid shift), so a cell with a short lag sometimes got
   very few shifts. For `"wgranger"`, a cell shifts `y`
@@ -46,9 +47,10 @@
   the random draws shift. A call in which every circular cell is skipped
   (too short for its window, or fewer than 19 valid shifts) draws no
   circular surrogates, so its later draws can also differ from before. In
-  `autotune_wcc()`, this can change the results of later dyads. A `"wcc"` or `"wdtw"` call whose circular cells
-  all share one `lag_max`, each with at least `max(n_surrogates, 19)` valid
-  shifts, gives the same results as before.
+  `autotune_wcc()`, this can change the results of later dyads. A `"wcc"`
+  or `"wdtw"` call whose circular cells all share one `lag_max` of at least
+  1, each with at least `max(n_surrogates, 19)` valid shifts, gives the same
+  results as before.
 * The `autotune_wcc()` result has new `increment_pct`, `statistic`, and
   `surrogate_method` fields for the selected cell, and `print()` shows the
   statistic and the surrogate method. `increment_pct` is `NA` for a segment
