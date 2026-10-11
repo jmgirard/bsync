@@ -72,9 +72,12 @@ autotune_wcc(
   segments uses `min(n_surrogates, k! - 1)` surrogates, so a cell with 4
   segments uses `min(n_surrogates, 23)`. The default `lag_sec` is
   crossed with every window, so a segment is not always twice the
-  window. A `"circular"` cell that fits its window but has no valid
-  circular shift (series length equal to `4 * lag_max`) is skipped, with
-  one warning per call. A shorter series is skipped as too short. See
+  window. A `"circular"` cell shifts `y` by m to n - m samples, where m
+  is `2 * lag_max` and at least 1, so it has k = n - 2 \* m + 1 valid
+  shifts, and uses `min(n_surrogates, k)` distinct shifts. A circular
+  cell that fits its window but has k \< 19 is skipped, with one warning
+  per call, also when `n_surrogates` is below 19. A shorter series is
+  skipped as too short. See
   [`synchrony_multiverse`](https://jmgirard.github.io/bsync/reference/synchrony_multiverse.md)
   and
   [`generate_surrogate_segment`](https://jmgirard.github.io/bsync/reference/generate_surrogate_segment.md).

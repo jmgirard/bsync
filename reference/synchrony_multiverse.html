@@ -154,13 +154,17 @@ original: a cell with 4 segments uses <code>min(n_surrogates, 23)</code>
 surrogates, and 5 and 6 segments allow 119 and 719. The samples after
 the last whole segment stay in place (see
 <code><a href="generate_surrogate_segment.html">generate_surrogate_segment</a></code>).
-For <code>"wcc"</code> and <code>"wdtw"</code>, all circular cells share one
-surrogate matrix, made with <code>lag_max</code> equal to the largest
-<code>lag_max</code> in the grid. If the series is too short for that
-(<code>length(y) &lt;= 4 * lag_max</code>), each circular cell that fits its
-window but has <code>length(y) &lt;= 4 * lag_max</code> for its own
-<code>lag_max</code> is skipped with a warning, and the matrix is made with the
-largest <code>lag_max</code> of the circular cells that remain.</p></dd>
+A <code>"circular"</code> cell shifts <code>y</code> by s samples with
+<code>m &lt;= s &lt;= n - m</code>, where n is <code>length(y)</code>. For <code>"wcc"</code>
+and <code>"wdtw"</code>, m is <code>2 * lag_max</code> for the cell's own
+<code>lag_max</code>, and at least 1. For <code>"wgranger"</code>, whose grid has
+no lags, m is the cell's <code>window_size</code>, so no window of the
+shifted series stays in its place. That gives k = n - 2 * m + 1 valid
+shifts (0 if negative). A cell uses
+<code>min(n_surrogates, k)</code> surrogates with distinct shifts, and cells
+with the same m share one surrogate matrix. A circular cell that fits
+its window but has k &lt; 19 cannot reach p &lt;= .05, so it is skipped with
+a warning, also when <code>n_surrogates</code> is below 19.</p></dd>
 
 
 <dt id="arg-n-surrogates">n_surrogates<a class="anchor" aria-label="anchor" href="#arg-n-surrogates"></a></dt>
@@ -200,10 +204,9 @@ Default is `"L2"`.</p></dd>
       `es_yx`, and `p_yx` for y -&gt; x). The integer column
       <code>n_surrogates</code> is the number of surrogate series that the test of
       the cell used. It is the requested <code>n_surrogates</code>, except for a
-      segment cell with k segments, which uses at most k! - 1, and it is 0
-      for a cell that was not computed (<code>n_windows</code> 0). Circular
-      surrogates are counted with repeated shifts, so with few valid
-      shifts a cell can hold fewer distinct surrogates.</p></dd>
+      segment cell with k segments, which uses at most k! - 1, and a
+      circular cell with k valid shifts, which uses at most k. It is 0
+      for a cell that was not computed (<code>n_windows</code> 0).</p></dd>
 
     <dt>`$settings`</dt>
 <dd><p>Named list of call-level inputs, plus

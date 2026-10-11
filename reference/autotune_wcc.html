@@ -135,9 +135,12 @@ than 4 segments is skipped with a warning. A cell with k segments uses
 <code>min(n_surrogates, k! - 1)</code> surrogates, so a cell with 4 segments
 uses <code>min(n_surrogates, 23)</code>. The default <code>lag_sec</code> is crossed
 with every window, so a segment is not always twice the window. A
-<code>"circular"</code> cell that fits its window but has no valid circular
-shift (series length equal to <code>4 * lag_max</code>) is skipped, with one
-warning per call. A shorter series is skipped as too short. See
+<code>"circular"</code> cell shifts <code>y</code> by m to n - m samples, where m
+is <code>2 * lag_max</code> and at least 1, so it has k = n - 2 * m + 1
+valid shifts, and uses <code>min(n_surrogates, k)</code> distinct shifts. A
+circular cell that fits its window but has k &lt; 19 is skipped, with one
+warning per call, also when <code>n_surrogates</code> is below 19. A shorter
+series is skipped as too short. See
 <code><a href="synchrony_multiverse.html">synchrony_multiverse</a></code> and
 <code><a href="generate_surrogate_segment.html">generate_surrogate_segment</a></code>.</p></dd>
 

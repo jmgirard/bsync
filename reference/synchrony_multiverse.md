@@ -91,13 +91,16 @@ synchrony_multiverse(
   surrogates, and 5 and 6 segments allow 119 and 719. The samples after
   the last whole segment stay in place (see
   [`generate_surrogate_segment`](https://jmgirard.github.io/bsync/reference/generate_surrogate_segment.md)).
-  For `"wcc"` and `"wdtw"`, all circular cells share one surrogate
-  matrix, made with `lag_max` equal to the largest `lag_max` in the
-  grid. If the series is too short for that
-  (`length(y) <= 4 * lag_max`), each circular cell that fits its window
-  but has `length(y) <= 4 * lag_max` for its own `lag_max` is skipped
-  with a warning, and the matrix is made with the largest `lag_max` of
-  the circular cells that remain.
+  A `"circular"` cell shifts `y` by s samples with `m <= s <= n - m`,
+  where n is `length(y)`. For `"wcc"` and `"wdtw"`, m is `2 * lag_max`
+  for the cell's own `lag_max`, and at least 1. For `"wgranger"`, whose
+  grid has no lags, m is the cell's `window_size`, so no window of the
+  shifted series stays in its place. That gives k = n - 2 \* m + 1 valid
+  shifts (0 if negative). A cell uses `min(n_surrogates, k)` surrogates
+  with distinct shifts, and cells with the same m share one surrogate
+  matrix. A circular cell that fits its window but has k \< 19 cannot
+  reach p \<= .05, so it is skipped with a warning, also when
+  `n_surrogates` is below 19.
 
 - n_surrogates:
 
@@ -137,10 +140,9 @@ A \`bsync_multiverse\` object with:
   \`null_sd_yx\`, \`es_yx\`, and \`p_yx\` for y -\> x). The integer
   column `n_surrogates` is the number of surrogate series that the test
   of the cell used. It is the requested `n_surrogates`, except for a
-  segment cell with k segments, which uses at most k! - 1, and it is 0
-  for a cell that was not computed (`n_windows` 0). Circular surrogates
-  are counted with repeated shifts, so with few valid shifts a cell can
-  hold fewer distinct surrogates.
+  segment cell with k segments, which uses at most k! - 1, and a
+  circular cell with k valid shifts, which uses at most k. It is 0 for a
+  cell that was not computed (`n_windows` 0).
 
 - \`\$settings\`:
 
