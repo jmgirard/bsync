@@ -328,3 +328,36 @@ test_that("a circular cell too short for its window gives no circular warning", 
     expect_true(is.na(r$res$grid$es))
   }
 })
+
+test_that("a lag-0 circular cell (1-sample window) shifts by 1 to n - 1", {
+  # The lag cap makes lag 0 for a 1-sample window. Its minimum shift is 1
+  # sample, so its shifts run from 1 to n - 1. Before the floor, the cell drew
+  # shift 0 or n and the whole call stopped.
+  set.seed(100)
+  x <- rnorm(100)
+  y <- rnorm(100)
+  for (est in c("wcc", "wdtw")) {
+    out <- NULL
+    expect_no_error(
+      out <- capture_cells(function() {
+        suppressWarnings(suppressMessages(synchrony_multiverse(
+          x,
+          y,
+          estimator = est,
+          sample_rate = 1,
+          window_sec = c(1, 10),
+          lag_sec = 2,
+          surrogate_method = "circular",
+          n_surrogates = 99L
+        )))
+      })
+    )
+    g <- out$res$grid
+    expect_identical(g$lag_max, c(0L, 2L))
+    s0 <- cell_shifts(out, y, 1L, 0L)[[1]]
+    expect_identical(sort(s0), 1:99)
+    # Lag 2: shifts 4 to 96, k = 93, below the 99 requested.
+    expect_identical(g$n_surrogates[g$lag_max == 2L], 93L)
+    expect_false(is.na(g$p[g$lag_max == 2L]))
+  }
+})

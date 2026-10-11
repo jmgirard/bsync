@@ -70,7 +70,7 @@ the last whole segment stay in place (see
 A \code{"circular"} cell shifts \code{y} by s samples with
 \code{m <= s <= n - m}, where n is \code{length(y)}. For \code{"wcc"}
 and \code{"wdtw"}, m is \code{2 * lag_max} for the cell's own
-\code{lag_max}. For \code{"wgranger"}, whose grid has no lags, m is the
+\code{lag_max}, and at least 1. For \code{"wgranger"}, whose grid has no lags, m is the
 cell's \code{window_size}, so no window of the shifted series stays in
 its place. That gives k = n - 2 * m + 1 valid shifts (0 if negative).
 A cell uses

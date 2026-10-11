@@ -44,6 +44,7 @@ Give each circular cell of `synchrony_multiverse()` its own range of valid circu
 - [x] T3: Add the tests of AC1 to AC4. Mock `.mv_wcc_cell`, `.mv_wdtw_cell`, and `.mv_granger_cell` to capture `y_surr`, and recover each shift by matching the columns to rotations of `y`.
 - [x] T4: Update the tests that relied on circular cells with few shifts. These include `test-multiverse.R` near lines 255, 605, 623, 791, 901, 926, and 953, and `test-autotune.R` near line 473. That autotune test needs a series where the lag-2 cell has k >= 19, so it still selects lag 2. Add the AC5 multiverse pin. Re-derive every pin in `test-multiverse-pins.R` from a call with circular cells, segment pins included, and record the reason in the file header. Make sure that the vdiffr snapshots do not change (their fixtures use phase).
 - [x] T5: Update the roxygen and cli messages in `R/multiverse.R` and `R/autotune.R` (about lines 85-95 and 305-320), and add the NEWS entry. Run the AC6 sweep. Run `devtools::document()`, `spelling::spell_check_package()`, `air format` on air-clean files, and `devtools::check()`.
+- [x] T6: Review return 1. A cell with lag 0 (a 1-sample window) gets minimum shift 0 and stops the call. Floor the wcc and wdtw minimum shift at 1 sample, state it in the roxygen, and add a regression test that fails before the fix.
 
 ## Work log
 
@@ -65,6 +66,8 @@ Give each circular cell of `synchrony_multiverse()` its own range of valid circu
 - 2026-10-11: after the corrections, `document()` rewrote one Rd, the full suite gave 3266 expectations with 0 failed, and spelling found no errors. Status set to review.
 - 2026-10-11: review return 1: diff-bug #1. A window that rounds to 1 sample caps its lag to 0, so its circular cell gets minimum shift 0 and draws shift 0 or n. `circular_shift_matrix()` then stops the whole `synchrony_multiverse()` call ("number of items to replace is not a multiple of replacement length"; n = 100, `window_sec = c(1, 10)`, `lag_sec = 2`, wcc and wdtw). Main returned results for the same call. The k formula also counts n + 1 shifts for m = 0. Fix the minimum shift for lag 0, and add a regression test that fails before the fix.
 - 2026-10-11: review fix-now items committed before the return: `n_surrogates` docs and comment (f8bd33a); `glance()` docs, the M018 NEWS bullet, the zero-shift skip message, and the NEWS note on shifted draws (review-fix commit). Status set to in-progress.
+- 2026-10-11: implement resumed for review return 1 and added T6 (minor amendment).
+- 2026-10-11: T6 done. The wcc and wdtw minimum shift is now `pmax(1L, 2L * l_samp_all)`, and the roxygen says "and at least 1". A new test in `test-multiverse-circular.R` (n = 100, `window_sec = c(1, 10)`, `lag_sec = 2`, wcc and wdtw) failed before the fix with "number of items to replace is not a multiple of replacement length". After the fix it passes: the lag-0 cell uses shifts 1 to 99, and the lag-2 cell computes with 93 shifts. AC2 still holds as written, because shifts of at least 1 meet `2 * lag_max <= s` at lag 0. Full suite: 3476 expectations, 0 failed.
 
 ## Decisions
 
