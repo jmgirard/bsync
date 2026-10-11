@@ -1,6 +1,6 @@
 # M019: Circular surrogates in the multiverse: a shift range per cell
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -61,6 +61,8 @@ Give each circular cell of `synchrony_multiverse()` its own range of valid circu
 - 2026-10-11: T3 done. New `test-multiverse-circular.R` (7 tests) recovers each shift from the captured `y_surr`. Against c13ffca, tests 1 to 6 fail and test 7 (too-short cells give no circular warning) passes, as it guards unchanged behavior.
 - 2026-10-11: T4 done. Moved the two one-window tests in `test-multiverse.R` to phase surrogates, since their point is the window count. Rebuilt the short-series circular test on 30 samples. Mocked `circular_shift_matrix()` in the two-matrices test. The autotune circular test uses 30 samples, so lag 2 (23 shifts) runs and lag 5 (11 shifts) is skipped. Re-derived cells 4 to 9 of the two-lag pin (circular and segment changed, phase did not). The single-lag pin uses hexadecimal doubles, because R parsed the decimal literal 0.00076342284885224038 one ulp below the value that main and the branch both compute. It passes on the branch and on c13ffca. No vdiffr snapshot changed. Full suite: 3266 expectations, 0 failed.
 - 2026-10-11: T5 done. Rewrote the circular text of the `surrogate_method` roxygen of `synchrony_multiverse()` and `autotune_wcc()`, and the autotune skip message. Replaced the M018 NEWS bullet on circular skips with four bullets (shift range, distinct shifts, skip below 19, which results change). The AC6 sweep read every hit with context in `R/*.R` and `vignettes/*.Rmd`. One stale code comment (`R/multiverse.R` near line 647) was fixed. No vignette states an old rule. `document()` rewrote two Rd files, spelling found no errors, air ran on the three air-clean files, and `check()` gave 0 errors, 0 warnings, 0 notes.
+- 2026-10-11: claim audit: 41 claims read, 4 corrected — NEWS.md, R/multiverse.R (fixed in d37c5ed; the same reader re-read all 4 as correct). Reader note left as is: when every circular cell of a dyad is too short for its window, main still drew a circular matrix and the branch does not, so a later dyad of `autotune_wcc()` can draw different numbers.
+- 2026-10-11: after the corrections, `document()` rewrote one Rd, the full suite gave 3266 expectations with 0 failed, and spelling found no errors. Status set to review.
 
 ## Decisions
 
