@@ -1,13 +1,13 @@
 # M019: Circular surrogates in the multiverse: a shift range per cell
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
 - **Resolves:** —
 - **Surface tier:** user-facing — changes the results and warnings of the exported `synchrony_multiverse()` and `autotune_wcc()`
-- **Branch/PR:** —
+- **Branch/PR:** m019-circular-shift-range
 
 ## Goal
 
@@ -39,7 +39,7 @@ Give each circular cell of `synchrony_multiverse()` its own range of valid circu
 
 ## Tasks
 
-- [ ] T1: In `R/surrogate_generation.R`, add an internal helper that builds circular surrogates from a minimum shift and a number of draws. Make `generate_surrogate_circular()` call it with `2 * lag_max` and keep its sampling with replacement and its warning. First, derive the three AC5 generator pins from c13ffca with `git archive` into the scratchpad (LESSONS, M018). Then add the pin tests.
+- [x] T1: In `R/surrogate_generation.R`, add an internal helper that builds circular surrogates from a minimum shift and a number of draws. Make `generate_surrogate_circular()` call it with `2 * lag_max` and keep its sampling with replacement and its warning. First, derive the three AC5 generator pins from c13ffca with `git archive` into the scratchpad (LESSONS, M018). Then add the pin tests.
 - [ ] T2: In `R/multiverse.R` (about lines 423-485), give each circular cell its own shift range. Build one matrix per distinct lag (wcc, wdtw) or per distinct window (wgranger), each with `min(n_surrogates, k)` distinct shifts. Keep these draws in the circular slot of the generation order, so a single-lag call draws its random numbers as main does (AC5). Skip cells that fit and have k < 19, and state k in the warning. Remove the M018 shared-lag logic. Set `n_surrogates` per cell.
 - [ ] T3: Add the tests of AC1 to AC4. Mock `.mv_wcc_cell`, `.mv_wdtw_cell`, and `.mv_granger_cell` to capture `y_surr`, and recover each shift by matching the columns to rotations of `y`.
 - [ ] T4: Update the tests that relied on circular cells with few shifts. These include `test-multiverse.R` near lines 255, 605, 623, 791, 901, 926, and 953, and `test-autotune.R` near line 473. That autotune test needs a series where the lag-2 cell has k >= 19, so it still selects lag 2. Add the AC5 multiverse pin. Re-derive every pin in `test-multiverse-pins.R` from a call with circular cells, segment pins included, and record the reason in the file header. Make sure that the vdiffr snapshots do not change (their fixtures use phase).
@@ -54,6 +54,8 @@ Give each circular cell of `synchrony_multiverse()` its own range of valid circu
 - 2026-10-11: plan gate chose to skip cells with k < 19 over computing them with a warning, because it matches the segment rule (D-002, D-004). Falsified by users who need such cells counted in the robustness summaries.
 - 2026-10-11: criteria audit (full mode, fresh Opus reader) returned 9 findings, all fixed. The AC2 test now separates new code from main. Tests read shifts by capturing `y_surr`. AC1 probes two windows. D-005 records the Granger rule. AC5 is narrowed to the pinned call and three generator cases. NEWS covers changed non-circular cells. The AC6 sweep reads hits with context and covers autotune messages. AC4 keeps too-short cells apart and states the skip below 19 requested surrogates. T4 names the autotune test outcome. AC3 probes wdtw.
 - 2026-10-11: lessons applied: M018 `git archive` pin derivation (T1, T4), M017 snapshots (T4), M010 air on clean files only (T5), M011 spelling (T5).
+- 2026-10-11: implement started on branch m019-circular-shift-range.
+- 2026-10-11: T1 done. Added internal `circular_shift_matrix()` and `draw_circular_shifts()` in `R/surrogate_generation.R`. `generate_surrogate_circular()` builds its matrix with the first. Three pins from c13ffca (seeds 101-103) pass in `test-surrogate.R`. `draw_circular_shifts()` uses `x[sample.int()]`, which is what `sample()` does for length > 1, so it draws as main does when k >= n_surrogates.
 
 ## Decisions
 

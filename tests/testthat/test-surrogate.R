@@ -94,6 +94,46 @@ test_that("generate_surrogate_circular warns and errors correctly", {
   )
 })
 
+# The shifts below are the output of main at c13ffca for the same seeds, read
+# as the first row of each surrogate of 1:n, minus 1. The expected matrices
+# are rebuilt here from the shifts with modular indexing.
+rotate_by <- function(y, shifts) {
+  n <- length(y)
+  vapply(shifts, function(s) y[((seq_len(n) + s - 1L) %% n) + 1L], numeric(n))
+}
+
+test_that("generate_surrogate_circular matches c13ffca without lag_max", {
+  y <- sin(seq_len(50) / 3) + seq_len(50) / 10
+  set.seed(101)
+  out <- generate_surrogate_circular(y, n_surrogates = 10)
+  expect_identical(out, rotate_by(y, c(9, 46, 31, 17, 47, 35, 3, 32, 49, 42)))
+})
+
+test_that("generate_surrogate_circular matches c13ffca with lag_max = 5", {
+  y <- sin(seq_len(100) / 3) + seq_len(100) / 10
+  set.seed(102)
+  out <- generate_surrogate_circular(y, n_surrogates = 20, lag_max = 5)
+  expect_identical(out, rotate_by(y, c(
+    55, 42, 17, 56, 25, 28, 52, 40, 78, 44, 87, 62, 77, 13, 73,
+    34, 89, 47, 16, 80
+  )))
+})
+
+test_that("generate_surrogate_circular matches c13ffca with few valid shifts", {
+  # lag_max = 5 on 30 samples leaves shifts 10 to 20 (11 shifts) for 25
+  # surrogates, so the generator samples with replacement and warns.
+  y <- sin(seq_len(30) / 3) + seq_len(30) / 10
+  set.seed(103)
+  expect_warning(
+    out <- generate_surrogate_circular(y, n_surrogates = 25, lag_max = 5),
+    "Limited unique shifts available. Sampling with replacement."
+  )
+  expect_identical(out, rotate_by(y, c(
+    17, 16, 18, 17, 15, 18, 20, 15, 15, 11, 14, 20, 14, 10, 17,
+    18, 11, 14, 11, 12, 11, 11, 20, 14, 16
+  )))
+})
+
 # =========================================================================
 # --- 2. INTEGRATION TESTS (REAL PIPELINE) --------------------------------
 # =========================================================================

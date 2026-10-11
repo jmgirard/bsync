@@ -8,7 +8,7 @@ _Last hygiene check: 2026-10-11 (M018 merged and archived, M015 row pruned, 1 re
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M019 | Circular surrogates in the multiverse: a shift range per cell | planned | — | high | milestones/M019-circular-shift-range.md |
+| M019 | Circular surrogates in the multiverse: a shift range per cell | in-progress | — | high | milestones/M019-circular-shift-range.md |
 | M018 | Multiverse bookkeeping: repeated cells, surrogate counts, circular skips | done | — | normal | milestones/archive/M018-multiverse-bookkeeping.md |
 | M017 | Count every window that fits when window_increment > 1 | done | — | normal | milestones/archive/M017-window-count-fix.md |
 | M016 | wphase parity: selectable statistic and workflow article | done | — | normal | milestones/archive/M016-wphase-parity.md |
